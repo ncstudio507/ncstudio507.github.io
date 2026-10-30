@@ -761,8 +761,7 @@ var INFO = {
   ],
   carrera: [
     { label: "Forma de pago", text: "Abono del 50 % al confirmar la cobertura y 50 % el día de la carrera." },
-    { label: "Entrega de fotos editadas", text: "Se publican por remesas y la cobertura completa queda lista dentro de los 5 días posteriores a la carrera." },
-    { label: "Cobertura", text: "Aplica en Herrera y Los Santos; los traslados fuera de estas provincias se cotizan aparte." }
+    { label: "Entrega de fotos editadas", text: "Se publican por remesas y la cobertura completa queda lista dentro de los 5 días posteriores a la carrera." }
   ]
 };
 
@@ -838,7 +837,7 @@ class Component extends DCLogic {
       hasExtras: cur.extras.length > 0,
       extras: cur.extras.map(function (e) { return { name: e[0], price: e[1] }; }),
       info: INFO[cur.info],
-      showTras: cur.info !== "carrera",
+      showTras: true,
       tras: TRAS.map(function (t, i) { return { place: t[0], price: t[1], first: i === 0, rest: i > 0 }; }),
       hasTesti: !!(TESTI[cur.id] && TESTI[cur.id].length),
       testi: TESTI[cur.id] || [],
