@@ -414,49 +414,10 @@ Crea tu paquete aquí
 </div>
 </div>
 
-<div style="display: flex; flex-direction: column; gap: 10px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">2. ¿Cuántas fotos editadas quieres?</span>
-<div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 16px; border-radius: 8px; border: 1.5px solid #222020">
-<div style="display: flex; flex-direction: column; min-width: 0; gap: 2px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.fotosLabel}}</span>
-<span style="font-size: 12px; color: #3D3B3E">Cada foto suma 10 minutos de sesión y 5 fotos de prueba</span>
-</div>
-<div style="flex: none; display: flex; align-items: center; gap: 6px">
-<button type="button" onClick="{{cot.fotosDec}}" aria-label="Una foto menos" style="width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 22px; cursor: pointer; opacity: {{cot.fotosDecOp}}">−</button>
-<span aria-live="polite" style="min-width: 34px; text-align: center; font-family: 'EB Garamond', Georgia, serif; font-size: 30px; line-height: 1">{{cot.fotos}}</span>
-<button type="button" onClick="{{cot.fotosInc}}" aria-label="Una foto más" style="width: 44px; height: 44px; border-radius: 6px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 22px; cursor: pointer">+</button>
-</div>
-</div>
-<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px">
-<sc-for list="{{cot.tiers}}" as="t" hint-placeholder-count="3">
-<div style="display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border-radius: 6px; background: {{t.bg}}; color: {{t.fg}}">
-<span style="font-family: Montserrat, sans-serif; font-size: 12px; font-weight: 600">{{t.range}}</span>
-<span style="font-family: Montserrat, sans-serif; font-size: 15px; font-weight: 700">{{t.price}}</span>
-</div>
-</sc-for>
-</div>
-</div>
-
+<sc-if value="{{cot.hasExp}}" hint-placeholder-val="{{true}}">
 <div style="display: flex; flex-direction: column; gap: 4px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">3. ¿Dónde será la sesión?</span>
-<span style="font-size: 13px; color: #3D3B3E">Marca el lugar o los lugares. El traslado se suma al total.</span>
-<sc-for list="{{cot.locs}}" as="l" hint-placeholder-count="7">
-<button type="button" role="checkbox" aria-checked="{{l.checked}}" onClick="{{l.toggle}}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border: 0; border-bottom: 1px solid #EFE6DA; background: transparent; color: #222020; text-align: left; cursor: pointer; width: 100%">
-<span style="display: flex; align-items: center; gap: 12px; min-width: 0">
-<span aria-hidden="true" style="flex: none; width: 24px; height: 24px; border-radius: 5px; border: 2px solid #222020; background: {{l.boxBg}}; color: #222020; display: flex; align-items: center; justify-content: center">
-<sc-if value="{{l.on}}" hint-placeholder-val="{{false}}">
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
-</sc-if>
-</span>
-<span style="font-family: 'Tenor Sans', Georgia, serif; font-size: 15px">{{l.name}}</span>
-</span>
-<span style="flex: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 14px">{{l.price}}</span>
-</button>
-</sc-for>
-</div>
-
-<div style="display: flex; flex-direction: column; gap: 4px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">4. Agrega lo que necesites</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">2. Personaliza tu sesión</span>
+<span style="font-size: 13px; color: #3D3B3E">Extras pensados para {{cot.expName}}.</span>
 <sc-for list="{{cot.qtys}}" as="q" hint-placeholder-count="4">
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #EFE6DA">
 <div style="display: flex; flex-direction: column; min-width: 0">
@@ -481,6 +442,51 @@ Crea tu paquete aquí
 <span style="font-family: 'Tenor Sans', Georgia, serif; font-size: 15px">{{c.name}}</span>
 </span>
 <span style="flex: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 14px">{{c.price}}</span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{cot.noExp}}" hint-placeholder-val="{{false}}">
+<div style="padding: 14px 16px; border-radius: 8px; border: 1.5px dashed #D9CDBE; font-size: 14px; color: #3D3B3E">Elige el tipo de sesión para ver los extras que puedes agregar.</div>
+</sc-if>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">3. ¿Cuántas fotos editadas quieres?</span>
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 16px; border-radius: 8px; border: 1.5px solid #222020">
+<div style="display: flex; flex-direction: column; min-width: 0; gap: 2px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.fotosLabel}}</span>
+<span style="font-size: 12px; color: #3D3B3E">Cada foto suma 10 minutos de sesión y 5 fotos de prueba</span>
+</div>
+<div style="flex: none; display: flex; align-items: center; gap: 6px">
+<button type="button" onClick="{{cot.fotosDec}}" aria-label="Una foto menos" style="width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 22px; cursor: pointer; opacity: {{cot.fotosDecOp}}">−</button>
+<span aria-live="polite" style="min-width: 34px; text-align: center; font-family: 'EB Garamond', Georgia, serif; font-size: 30px; line-height: 1">{{cot.fotos}}</span>
+<button type="button" onClick="{{cot.fotosInc}}" aria-label="Una foto más" style="width: 44px; height: 44px; border-radius: 6px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 22px; cursor: pointer">+</button>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px">
+<sc-for list="{{cot.tiers}}" as="t" hint-placeholder-count="3">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border-radius: 6px; background: {{t.bg}}; color: {{t.fg}}">
+<span style="font-family: Montserrat, sans-serif; font-size: 12px; font-weight: 600">{{t.range}}</span>
+<span style="font-family: Montserrat, sans-serif; font-size: 15px; font-weight: 700">{{t.price}}</span>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">4. ¿Dónde será la sesión?</span>
+<span style="font-size: 13px; color: #3D3B3E">Marca el lugar o los lugares. El traslado se suma al total.</span>
+<sc-for list="{{cot.locs}}" as="l" hint-placeholder-count="7">
+<button type="button" role="checkbox" aria-checked="{{l.checked}}" onClick="{{l.toggle}}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border: 0; border-bottom: 1px solid #EFE6DA; background: transparent; color: #222020; text-align: left; cursor: pointer; width: 100%">
+<span style="display: flex; align-items: center; gap: 12px; min-width: 0">
+<span aria-hidden="true" style="flex: none; width: 24px; height: 24px; border-radius: 5px; border: 2px solid #222020; background: {{l.boxBg}}; color: #222020; display: flex; align-items: center; justify-content: center">
+<sc-if value="{{l.on}}" hint-placeholder-val="{{false}}">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+</sc-if>
+</span>
+<span style="font-family: 'Tenor Sans', Georgia, serif; font-size: 15px">{{l.name}}</span>
+</span>
+<span style="flex: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 14px">{{l.price}}</span>
 </button>
 </sc-for>
 </div>
@@ -950,15 +956,27 @@ var BUSY_UPDATED = "30 de octubre de 2026, 6:58 p. m.";
 var COT_SERV = 25;
 var COT_TIERS = [[1, 3, 10], [4, 9, 8], [10, 999, 7]];
 function cotFotosPrice(n) { var t = 0; for (var i = 1; i <= n; i++) { for (var k = 0; k < COT_TIERS.length; k++) { if (i >= COT_TIERS[k][0] && i <= COT_TIERS[k][1]) { t += COT_TIERS[k][2]; break; } } } return t; }
+var COT_SES = ["levelup", "suenos", "dulce", "estudio", "folklore", "primer", "gran", "granext", "gameon"];
 var COT_QTY = [
-  { id: "vest", name: "Cambios de vestuario extra", price: 10, note: "$10 c/u · suma 10 minutos de sesión", min: 10 },
-  { id: "pers", name: "Personas extra", price: 15, note: "$15 c/u · suma 10 minutos de sesión y 1 foto editada", min: 10, fotos: 1 },
-  { id: "imp", name: "Impresiones fotográficas", price: 3.5, note: "$3.50 c/u", min: 0 }
+  { id: "vest", name: "Cambios de vestuario extra", note: "$10 c/u · suma 10 minutos de sesión", min: 10, cost: function (n) { return n * 10; }, only: COT_SES },
+  { id: "pers", name: "Personas extra (foto grupal o familiar)", note: "1.ª $15 · 2.ª a 4.ª $12 c/u · 5 o más $10 c/u · cada una suma 10 minutos y 1 foto editada", min: 10, fotos: 1,
+    cost: function (n) { var t = 0; for (var i = 1; i <= n; i++) t += i === 1 ? 15 : (i <= 4 ? 12 : 10); return t; } },
+  { id: "loc", name: "Locaciones adicionales", note: "$10 c/u", min: 0, cost: function (n) { return n * 10; }, only: COT_SES },
+  { id: "cart", name: "Juegos de 6 fotos tamaño cartera", note: "$5 por cada juego de 6", min: 0, cost: function (n) { return n * 5; } },
+  { id: "imp", name: "Impresiones fotográficas", note: "$3.50 c/u", min: 0, cost: function (n) { return n * 3.5; } }
 ];
 var COT_CHK = [
-  ["maq", "Maquillaje profesional", 35], ["pei", "Peinado profesional", 35], ["bts", "Video detrás de cámaras", 30],
+  ["rcv", "Reunión creativa virtual", 10, COT_SES, "rcp"], ["rcp", "Reunión creativa presencial (incluye café)", 45, COT_SES, "rcv"],
+  ["mood", "Moodboard personalizado", 15, COT_SES],
+  ["maq", "Maquillaje profesional", 35, COT_SES], ["pei", "Peinado profesional", 35, COT_SES],
+  ["ves15", "Vestido de 15 de estreno", 200, ["suenos"]],
+  ["bts", "Video detrás de cámaras", 30, COT_SES],
+  ["vvert", "Video vertical de 1 min para redes (Full HD 1080p)", 75, ["infantil", "otra"]],
+  ["vhor", "Video resumen horizontal de 10 min (Full HD 1080p)", 150, ["infantil", "otra"]],
+  ["pb50", "Photo booth: 50 fotos impresas al instante", 85, ["infantil", "otra"], "pb75 pb100"], ["pb75", "Photo booth: 75 fotos impresas al instante", 100, ["infantil", "otra"], "pb50 pb100"], ["pb100", "Photo booth: 100 fotos impresas al instante", 125, ["infantil", "otra"], "pb50 pb75"],
   ["lib", "Liberación de galería", 60], ["enm", "Fotografía enmarcada 16×20", 70], ["alb", "Álbum fotográfico (20 páginas)", 90], ["usb", "USB con fotografías", 25]
 ];
+function cotFits(only, exp) { return !only || only.indexOf(exp) >= 0 || (exp === "otra" && only === COT_SES); }
 function money(x) { return "$" + (Math.round(x * 100) % 100 ? x.toFixed(2) : String(Math.round(x))); }
 var MONTHS = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
 var WDAYS = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
@@ -1119,12 +1137,16 @@ class Component extends DCLogic {
         locs.push({ id: "otro", place: "Otro lugar", v: 0, price: "Se cotiza", other: true });
         var fotosCost = cotFotosPrice(nF);
         var total = COT_SERV + fotosCost, mins = nF * 10, fotos = nF, pruebas = nF * 5, lines = [];
-        COT_QTY.forEach(function (it) {
+        var exp = st.cotExp;
+        var qList = COT_QTY.filter(function (it) { return cotFits(it.only, exp); });
+        var cList = COT_CHK.filter(function (it) { return cotFits(it[3], exp); });
+        qList.forEach(function (it) {
           var n = q[it.id] || 0; if (!n) return;
-          total += n * it.price; mins += n * it.min; fotos += n * (it.fotos || 0); pruebas += n * 5 * (it.fotos || 0);
-          lines.push("• " + n + " × " + it.name.toLowerCase() + ": " + money(n * it.price));
+          var v = it.cost(n);
+          total += v; mins += n * it.min; fotos += n * (it.fotos || 0); pruebas += n * 5 * (it.fotos || 0);
+          lines.push("• " + n + " × " + it.name.toLowerCase() + ": " + money(v));
         });
-        COT_CHK.forEach(function (it) { if (c[it[0]]) { total += it[2]; lines.push("• " + it[1] + ": " + money(it[2])); } });
+        cList.forEach(function (it) { if (c[it[0]]) { total += it[2]; lines.push("• " + it[1] + ": " + money(it[2])); } });
         var picked = locs.filter(function (l) { return !!L[l.id]; }), other = false;
         picked.forEach(function (l) { if (l.other) other = true; if (l.v) { total += l.v; lines.push("• Traslado a " + l.place + ": " + money(l.v)); } });
         var lugares = picked.length ? picked.map(function (l) { return l.place; }).join(", ") : "Por definir";
@@ -1172,16 +1194,17 @@ class Component extends DCLogic {
             return { name: l.place, price: l.price, on: on, checked: on ? "true" : "false", boxBg: on ? accent : "#FEFEFE",
               toggle: function () { var nl = Object.assign({}, L); nl[l.id] = !on; self.setState({ cotL: nl }); } };
           }),
-          qtys: COT_QTY.map(function (it) {
+          hasExp: !!exp, noExp: !exp, expName: exp === "otra" ? "tu sesión" : (expObj ? expObj.title : ""),
+          qtys: qList.map(function (it) {
             var n = q[it.id] || 0;
             return { name: it.name, note: it.note, n: n, decOp: n ? 1 : 0.35,
               dec: function () { if (n > 0) { var nq = Object.assign({}, q); nq[it.id] = n - 1; self.setState({ cotQ: nq }); } },
               inc: function () { if (n < 99) { var nq = Object.assign({}, q); nq[it.id] = n + 1; self.setState({ cotQ: nq }); } } };
           }),
-          chks: COT_CHK.map(function (it) {
+          chks: cList.map(function (it) {
             var on = !!c[it[0]];
             return { name: it[1], price: money(it[2]), on: on, checked: on ? "true" : "false", boxBg: on ? accent : "#FEFEFE",
-              toggle: function () { var nc = Object.assign({}, c); nc[it[0]] = !on; self.setState({ cotC: nc }); } };
+              toggle: function () { var nc = Object.assign({}, c); nc[it[0]] = !on; if (!on && it[4]) it[4].split(" ").forEach(function (k) { nc[k] = false; }); self.setState({ cotC: nc }); } };
           }),
           name: st.cotName, date: st.cotDate, idea: st.cotIdea,
           setName: function (e) { st.cotName = e && e.target ? e.target.value : ""; },
