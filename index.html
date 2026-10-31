@@ -987,8 +987,8 @@ var BUSY = ["2026-10-30","2026-10-31","2026-11-01","2026-11-05","2026-11-07","20
 var BUSY_UPDATED = "30 de octubre de 2026, 6:58 p. m.";
 var COT_SERV = 55;
 var COT_INCL_FOTOS = 3;
-var COT_TIERS = [[1, 3, 10], [4, 9, 8], [10, 999, 7]];
-function cotFotosPrice(n) { var t = 0; for (var i = 1; i <= n; i++) { for (var k = 0; k < COT_TIERS.length; k++) { if (i >= COT_TIERS[k][0] && i <= COT_TIERS[k][1]) { t += COT_TIERS[k][2]; break; } } } return t; }
+var COT_FOTO_TOTAL = { 3: 55, 4: 65, 5: 75, 6: 85, 7: 95, 8: 100, 9: 110, 10: 120, 11: 125, 12: 135 };
+function cotFotosPrice(extra) { var n = extra + 3; var t = n <= 12 ? COT_FOTO_TOTAL[n] : 135 + (n - 12) * 7.5; return t - 55; }
 var COT_SES = ["levelup", "suenos", "dulce", "estudio", "folklore", "primer", "gran", "granext", "gameon"];
 var COT_EVT = ["infantil", "otra"];
 function cq(id, name, unit, o) { o = o || {}; o.id = id; o.kind = "q"; o.name = name; o.cost = o.cost || function (n) { return n * unit; }; return o; }
