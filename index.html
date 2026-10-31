@@ -30,6 +30,8 @@ a { color: #222020; } a:hover { color: #000000; }
 button:focus-visible, a:focus-visible { outline: 3px solid #F99824; outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
 html { scroll-behavior: smooth; }
+summary::-webkit-details-marker { display: none; }
+details[open] .faq-ico { transform: rotate(45deg); }
 </style>
 <div id="nc-root"></div>
 <template id="nc-tpl">
@@ -42,12 +44,13 @@ html { scroll-behavior: smooth; }
 <a href="#quienes-somos" aria-label="NC Studio, inicio" style="display: flex; align-items: center; padding: 6px 0">
 <img src="img/9829ea1d0acede8e44636a5e99bd7b84.png" alt="NC Studio" style="height: 40px; width: auto; display: block">
 </a>
-<p style="margin: 0; background: {{accent}}; color: #222020; padding: 6px 14px; font-family: 'EB Garamond', Georgia, serif; font-size: 13px; letter-spacing: 0.3em; white-space: nowrap">PROFESIONAL · CERCANO · CREATIVO</p>
+<p style="margin: 0; background: {{accent}}; color: #222020; padding: 6px 12px; font-family: 'EB Garamond', Georgia, serif; font-size: clamp(10px, 2.9vw, 13px); letter-spacing: clamp(0.1em, 0.85vw, 0.3em); white-space: nowrap; max-width: 100%; box-sizing: border-box">PROFESIONAL · CERCANO · CREATIVO</p>
 </div>
 <nav aria-label="Secciones" style="display: flex; flex-wrap: wrap; align-items: center; gap: 2px 22px; font-family: Montserrat, sans-serif; font-size: 15px; font-weight: 600">
 <a href="#quienes-somos" style="color: #F2E4D2; text-decoration: none; padding: 12px 0">Quiénes somos</a>
 <a href="#portafolio" style="color: #F2E4D2; text-decoration: none; padding: 12px 0">Portafolio</a>
 <a href="#paquetes" style="color: #F2E4D2; text-decoration: none; padding: 12px 0">Paquetes</a>
+<a href="#preguntas" style="color: #F2E4D2; text-decoration: none; padding: 12px 0">Preguntas frecuentes</a>
 <a href="#reservar" style="background: {{accent}}; color: #222020; text-decoration: none; padding: 11px 22px; border-radius: 999px">Reservar</a>
 </nav>
 </div>
@@ -291,6 +294,7 @@ WhatsApp
 Crea tu paquete aquí
 </button>
 </div>
+<p style="margin: -14px 0 0; text-align: center; font-size: 15px; color: #3D3B3E">¿Tienes dudas? <a href="#preguntas" style="font-family: Montserrat, sans-serif; font-weight: 700; color: #222020">Mira las preguntas frecuentes</a></p>
 
 </div>
 </sc-if>
@@ -312,6 +316,33 @@ Crea tu paquete aquí
 </li>
 </sc-for>
 </ol>
+</div>
+</section>
+
+<section id="preguntas" style="background: #F2E4D2; padding: 88px 20px">
+<div style="max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<p style="margin: 0; font-family: Montserrat, sans-serif; font-size: 16px; font-weight: 600; color: #3D3B3E">Preguntas frecuentes</p>
+<h2 style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(34px, 4.5vw, 52px); line-height: 1.1">Resolvemos tus dudas</h2>
+<p style="margin: 0; color: #3D3B3E">Toca una pregunta para ver la respuesta. Si no encuentras la tuya, escríbenos por WhatsApp.</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{faq}}" as="f" hint-placeholder-count="6">
+<details style="border-radius: 8px; background: #FEFEFE; border: 1.5px solid #E4D6C3">
+<summary style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 16px 18px; cursor: pointer; list-style: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px; line-height: 1.35">
+<span>{{f.q}}</span>
+<span class="faq-ico" aria-hidden="true" style="flex: none; width: 30px; height: 30px; border-radius: 999px; transition: transform .2s; background: {{accent}}; color: #222020; display: flex; align-items: center; justify-content: center; font-size: 20px; line-height: 1">+</span>
+</summary>
+<p style="margin: 0; padding: 0 18px 18px; font-size: 16px; color: #3D3B3E; white-space: pre-line">{{f.a}}</p>
+</details>
+</sc-for>
+</div>
+<div>
+<a href="{{waGeneral}}" style="display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 24px; border-radius: 999px; background: #222020; color: #FEFEFE; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 15px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.6-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg>
+¿Otra pregunta? Escríbenos
+</a>
+</div>
 </div>
 </section>
 
@@ -1010,6 +1041,22 @@ var INFO = {
   ]
 };
 
+var FAQ = [
+  { q: "¿Cómo reservo mi fecha?", a: "Entra a la experiencia que te gusta, toca «Ver disponibilidad y reservar», elige el día y la hora libres y envíanos el mensaje por WhatsApp. Tu fecha queda separada con el 50 % de abono y la firma del contrato." },
+  { q: "¿Cómo puedo pagar?", a: "Por Yappy (6631-3762) o en efectivo. En las sesiones se abona el 50 % al firmar el contrato y el otro 50 % el día previo a la sesión. En graduaciones, eventos y carreras, el segundo 50 % se paga el mismo día." },
+  { q: "¿Qué horarios tienen?", a: "Entre semana: 7:00 p. m. en estudio.\nFines de semana: 10:00 a. m. en estudio y 4:30 p. m. en exteriores.\nEn el calendario de cada propuesta ves al instante qué días están libres." },
+  { q: "¿Dónde queda el estudio?", a: "En el barrio Nuevo México, Las Tablas. Al confirmar tu reserva te enviamos la ubicación exacta por WhatsApp." },
+  { q: "¿Hacen sesiones fuera de Las Tablas?", a: "¡Claro! Viajamos a donde estés. El traslado tiene un recargo según el lugar: Guararé y Pocrí +$5; Pedasí, Chitré y Tonosí +$10; Aguadulce y Santiago +$15; Penonomé +$20; Boquete y Panamá +$60. Si la sesión requiere hospedaje en la localidad, este tiene un costo adicional." },
+  { q: "¿Necesito saber posar?", a: "Para nada. Te guiamos en todo momento, sin poses forzadas, para que te sientas cómodo y todo fluya natural." },
+  { q: "¿Cómo elijo mis fotos?", a: "Después de la sesión te enviamos tus fotos de prueba en una galería online privada. Tú escoges tus favoritas y nosotros las editamos." },
+  { q: "¿Cuándo recibo mis fotos?", a: "Sesiones: las fotos de prueba llegan de 48 a 72 horas hábiles después de la sesión, y las editadas dos semanas después de que nos envías tu selección.\nEventos: las fotos editadas llegan 10 días después del evento.\nCarreras: la cobertura completa queda lista dentro de los 5 días posteriores." },
+  { q: "¿Puedo tener todas las fotos sin editar?", a: "Sí. Puedes agregar la liberación de galería en «Mejora tu experiencia» y te entregamos todas las fotos de la sesión." },
+  { q: "¿Puedo llevar a más personas a mi sesión?", a: "Sí. Puedes agregar personas extra para fotos grupales o familiares; cada persona suma 10 minutos de sesión y 1 foto editada." },
+  { q: "¿Puedo agregar maquillaje, peinado o más cambios de vestuario?", a: "Sí. Lo encuentras en «Mejora tu experiencia» dentro de cada experiencia. Cada cambio de vestuario extra suma 10 minutos a tu sesión." },
+  { q: "¿Hacen impresiones, álbumes o cuadros?", a: "Sí. Tenemos impresiones desde $3.50, fotografía enmarcada 16×20 y álbum fotográfico de 20 páginas. Pídelos al reservar o agrégalos en tu paquete." },
+  { q: "¿Y si ningún paquete es exactamente lo que busco?", a: "Al final de cada experiencia encuentras «Crea tu paquete aquí». Eliges tus fotos, lugares y extras, ves el total al instante y nos envías tu cotización por WhatsApp." }
+];
+
 var B = "img/";
 var GAL = {
   suenos: ["d7fad5dcad4a7733da416cb6b8f0ff91","98d33f17cf0dafb2d3515d5b19c4052b","0b1f3623a90483655cf334a50e213bb7","e743d1bd7fcf1c2eed720b9893c39298","7537eab5efea1c6bb3bf73d79310032a","7851eb02c64e1f9c4f0f7c68da21f2f7","4e476dae4110e6bfc3892ace944b73c0","9bd2b673510b7b3f6da07f2801a57af4","97faed7308b6a996f28917e57f6412cc","64680dc4c1dd76ef874716833b5bc371","d19fe40eba6c0734a559ec86826d219b","d62994537ca728b9e720af5789979162","f9dde4afa176e8e22d74f843a2cfcf21","11470e799bff226472e9f8af58763734","6ca8d98514821d87d2e0fd10aa99729b","21559e82bab41158b58bafa70f382617","8152dbf2ae46490dd0677c2c4edafa6f"],
@@ -1381,6 +1428,7 @@ class Component extends DCLogic {
       current: current,
       waGeneral: WA + encodeURIComponent("Hola, NC Studio. Quiero reservar o cotizar una sesión."),
       portfolio: portfolio,
+      faq: FAQ,
       lb: lb,
       steps: [
         { n: "01", title: "Reserva y contrato", text: "Confirmamos tu fecha con el abono del 50 % y la firma del contrato." },
