@@ -537,10 +537,57 @@ Crea tu paquete aquí
 </div>
 
 <div style="display: flex; flex-direction: column; gap: 12px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">7. Cuéntanos un poco más</span>
-<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Fecha tentativa
-<input type="date" value="{{cot.date}}" onInput="{{cot.setDate}}" onChange="{{cot.setDate}}" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
-</label>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">7. Fecha y detalles</span>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<span style="font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Elige tu fecha y hora</span>
+<p style="margin: 0; font-size: 14px; color: #3D3B3E">Entre semana: 7:00 p. m. en estudio. Fines de semana: 10:00 a. m. en estudio y 4:30 p. m. en exteriores.</p>
+<div style="display: flex; justify-content: center">
+<div style="display: flex; align-items: center; gap: 8px">
+<button type="button" onClick="{{cot.cal.prev}}" aria-label="Mes anterior" disabled="{{cot.cal.noPrev}}" style="width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: {{cot.cal.prevOp}}">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+</button>
+<span style="min-width: 150px; text-align: center; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">{{cot.cal.monthLabel}}</span>
+<button type="button" onClick="{{cot.cal.next}}" aria-label="Mes siguiente" disabled="{{cot.cal.noNext}}" style="width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: {{cot.cal.nextOp}}">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+</button>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{cot.cal.dows}}" as="d" hint-placeholder-count="7">
+<span style="text-align: center; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 12px; color: #3D3B3E; padding: 4px 0">{{d}}</span>
+</sc-for>
+<sc-for list="{{cot.cal.cells}}" as="c" hint-placeholder-count="35">
+<sc-if value="{{c.blank}}" hint-placeholder-val="{{false}}">
+<span aria-hidden="true"></span>
+</sc-if>
+<sc-if value="{{c.real}}" hint-placeholder-val="{{true}}">
+<button type="button" onClick="{{c.pick}}" disabled="{{c.disabled}}" aria-label="{{c.aria}}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 56px; padding: 4px 2px; border-radius: 6px; border: 1.5px solid {{c.border}}; background: {{c.bg}}; color: {{c.fg}}; cursor: {{c.cursor}}; box-sizing: border-box">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px; line-height: 1">{{c.n}}</span>
+<span style="font-size: 10px; line-height: 1.1; color: {{c.subFg}}">{{c.sub}}</span>
+</button>
+</sc-if>
+</sc-for>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: #3D3B3E">
+<span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid #F99824; background: #FEFEFE"></span>Disponible</span>
+<span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 14px; height: 14px; border-radius: 3px; background: #3D3B3E"></span>Ocupado</span>
+<span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 14px; height: 14px; border-radius: 3px; background: #EFEAE4"></span>Fecha pasada</span>
+<span>Actualizado: {{cot.cal.updated}}</span>
+</div>
+<sc-if value="{{cot.cal.hasSel}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 10px; padding-top: 14px; border-top: 1px solid #D9CDBE">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">{{cot.cal.selLabel}}: elige la hora</span>
+<div role="group" aria-label="Horarios" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px">
+<sc-for list="{{cot.cal.selSlots}}" as="sl" hint-placeholder-count="2">
+<button type="button" onClick="{{sl.pick}}" aria-pressed="{{sl.pressed}}" style="min-height: 48px; padding: 0 14px; border-radius: 6px; border: 1.5px solid #222020; border-left: 5px solid {{sl.bar}}; background: {{sl.bg}}; color: {{sl.fg}}; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px; cursor: pointer; text-align: left">{{sl.label}}</button>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{cot.cal.ready}}" hint-placeholder-val="{{false}}">
+<span style="padding: 10px 12px; border-radius: 6px; background: #F2E4D2; font-size: 14px">Fecha elegida: {{cot.cal.text}}</span>
+</sc-if>
+</div>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tu idea o temática
 <textarea rows="3" onInput="{{cot.setIdea}}" placeholder="Estilo, colores, cuántas personas, lo que imaginas…" style="padding: 10px 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px; resize: vertical">{{cot.idea}}</textarea>
 </label>
@@ -1055,10 +1102,52 @@ var WDAYS = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado
 function iso(d) { var m = d.getMonth() + 1, x = d.getDate(); return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m + "-" + (x < 10 ? "0" : "") + x; }
 function slotsFor(d) { var w = d.getDay(); return (w === 0 || w === 6) ? ["10:00 a. m. · Estudio", "4:30 p. m. · Exteriores"] : ["7:00 p. m. · Estudio"]; }
 
+function calModel(self, K, accent) {
+  var st = self.state, now = new Date(), todayIso = iso(now), off = st[K.off] || 0;
+  var first = new Date(now.getFullYear(), now.getMonth() + off, 1);
+  var daysIn = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+  var lead = (first.getDay() + 6) % 7, cells = [];
+  function set(o) { var x = {}; Object.keys(o).forEach(function (k) { x[K[k]] = o[k]; }); self.setState(x); }
+  for (var b = 0; b < lead; b++) cells.push({ blank: true, real: false });
+  for (var dn = 1; dn <= daysIn; dn++) {
+    (function (dn) {
+      var d = new Date(first.getFullYear(), first.getMonth(), dn), k = iso(d);
+      var past = k < todayIso, busy = BUSY.indexOf(k) >= 0, nS = slotsFor(d).length, on = st[K.sel] === k, free = !past && !busy;
+      cells.push({ blank: false, real: true, n: dn, disabled: !free,
+        sub: past ? "" : (busy ? "Ocupado" : (nS === 1 ? "1 cupo" : nS + " cupos")),
+        aria: dn + " de " + MONTHS[d.getMonth()] + (past ? ", fecha pasada" : (busy ? ", ocupado" : ", disponible")),
+        bg: past ? "#EFEAE4" : (busy ? "#3D3B3E" : (on ? "#222020" : "#FEFEFE")),
+        fg: past ? "#8A8580" : (busy ? "#F2E4D2" : (on ? "#FEFEFE" : "#222020")),
+        subFg: past ? "#8A8580" : (busy ? "#F2E4D2" : (on ? "#F2E4D2" : "#3D3B3E")),
+        border: free ? (on ? "#222020" : "#F99824") : "transparent", cursor: free ? "pointer" : "default",
+        pick: function () { if (free) set({ sel: k, slot: nS === 1 ? slotsFor(d)[0] : null }); } });
+    })(dn);
+  }
+  var slot = st[K.slot], selLabel = "", selSlots = [];
+  if (st[K.sel]) {
+    var p2 = st[K.sel].split("-"), sd = new Date(+p2[0], +p2[1] - 1, +p2[2]);
+    selLabel = WDAYS[sd.getDay()].charAt(0).toUpperCase() + WDAYS[sd.getDay()].slice(1) + " " + sd.getDate() + " de " + MONTHS[sd.getMonth()];
+    selSlots = slotsFor(sd).map(function (sl) {
+      var on = sl === slot;
+      return { label: sl, pressed: on ? "true" : "false", bg: on ? "#222020" : "#FEFEFE", fg: on ? "#FEFEFE" : "#222020", bar: on ? accent : "#222020", pick: function () { set({ slot: sl }); } };
+    });
+  }
+  var ready = !!(st[K.sel] && slot);
+  return {
+    dows: ["L", "M", "M", "J", "V", "S", "D"], cells: cells,
+    monthLabel: MONTHS[first.getMonth()].charAt(0).toUpperCase() + MONTHS[first.getMonth()].slice(1) + " " + first.getFullYear(),
+    noPrev: off <= 0, noNext: off >= 3, prevOp: off <= 0 ? 0.35 : 1, nextOp: off >= 3 ? 0.35 : 1,
+    prev: function () { if (off > 0) set({ off: off - 1, sel: null, slot: null }); },
+    next: function () { if (off < 3) set({ off: off + 1, sel: null, slot: null }); },
+    updated: BUSY_UPDATED, hasSel: !!st[K.sel], selLabel: selLabel, selSlots: selSlots, ready: ready,
+    text: ready ? selLabel.toLowerCase() + " a las " + slot.split(" · ")[0] + " (" + slot.split(" · ")[1].toLowerCase() + ")" : ""
+  };
+}
+
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0, cotOpen: false, cotExp: null, cotN: 3, cotL: {}, cotQ: {}, cotC: {}, cotName: "", cotPhone: "", cotEmail: "", cotDate: "", cotIdea: "" };
+    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0, cotOpen: false, cotExp: null, cotN: 3, cotL: {}, cotQ: {}, cotC: {}, cotName: "", cotPhone: "", cotEmail: "", cotDate: "", cotIdea: "", cotOff: 0, cotSel: null, cotSlot: null };
   }
   componentDidMount() {
     var self = this;
@@ -1239,6 +1328,7 @@ class Component extends DCLogic {
           return { isQty: false, isChk: true, name: it.name, on: on, checked: on ? "true" : "false", boxBg: on ? accent : "#FEFEFE",
             toggle: function () { var nc = Object.assign({}, c); nc[it.id] = !on; if (!on && it.excl) it.excl.forEach(function (k) { nc[k] = false; }); self.setState({ cotC: nc }); } };
         }
+        var ccal = calModel(self, { off: "cotOff", sel: "cotSel", slot: "cotSlot" }, accent);
         function build() {
           var m = ["Hola, NC Studio. Armé mi paquete personalizado en la página:", ""];
           m.push("*Nombre:* " + (st.cotName.trim() || "—"));
@@ -1246,7 +1336,7 @@ class Component extends DCLogic {
           m.push("*Correo:* " + (st.cotEmail.trim() || "—"));
           m.push("*Sesión:* " + expName);
           m.push("*Lugar:* " + lugares);
-          m.push("*Fecha tentativa:* " + fmtDate(st.cotDate));
+          m.push("*Fecha y hora:* " + (ccal.ready ? ccal.text : "Por definir"));
           m.push("", "*Propuesta inicial (" + money(COT_SERV) + "):* 30 min de sesión, 3 fotos editadas, asesoría previa, 1 cambio de vestuario, dirección de poses y galería online privada.");
           if (extraF) m.push("*Fotos editadas extra:* " + extraF + " (" + money(fotosCost) + ")");
           if (lines.length) { m.push("", "*Extras:*"); m.push.apply(m, lines); }
@@ -1260,6 +1350,7 @@ class Component extends DCLogic {
         }
         return {
           open: !!st.cotOpen,
+          cal: ccal,
           openAny: function () { self.setState({ cotOpen: true }); },
           openHere: function () { self.setState({ cotOpen: true, cotExp: sel || st.cotExp }); },
           close: function () { self.setState({ cotOpen: false }); },
