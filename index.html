@@ -1193,7 +1193,7 @@ class Component extends DCLogic {
           name: nm, desc: pr.desc, price: pr.price, priceNote: pr.priceNote, items: pr.items,
           small: pr.small, hasSmall: pr.small.length > 0, badge: f && cur.proposals.length > 1,
           bg: f ? "#222020" : "#FEFEFE", fg: f ? "#FEFEFE" : "#222020", sub: f ? "#F2E4D2" : "#3D3B3E",
-          btnBg: f ? accent : "#222020", btnFg: f ? "#222020" : "#FEFEFE", outline: f ? "#F2E4D2" : "#222020",
+          btnBg: accent, btnFg: "#222020", outline: f ? "#F2E4D2" : "#222020",
           openCal: function () { self.setState({ calOpen: true, calCtx: { exp: cur.title, prop: nm, price: pr.price }, calOff: 0, calSel: null, calSlot: null }); },
           wa: WA + encodeURIComponent("Hola, NC Studio. Me interesa " + cur.title + ", " + nm.toLowerCase() + " (" + pr.price + "). ¿Tienen fecha disponible?")
         };
@@ -1227,7 +1227,7 @@ class Component extends DCLogic {
     var cmp = COMPARE[cur.id];
     current.hasCompare = !!cmp;
     if (cmp) {
-      current.cmpHead = sortedP.map(function (pp, i) { return { name: pp.name, price: pp.price, open: pp.openCal, wa: pp.wa, btnBg: i === 0 ? accent : "#222020", btnFg: i === 0 ? "#222020" : "#FEFEFE", bg: i === 0 ? "#222020" : "#F2E4D2", fg: i === 0 ? "#FEFEFE" : "#222020" }; });
+      current.cmpHead = sortedP.map(function (pp, i) { return { name: pp.name, price: pp.price, open: pp.openCal, wa: pp.wa, btnBg: accent, btnFg: "#222020", bg: i === 0 ? "#222020" : "#F2E4D2", fg: i === 0 ? "#FEFEFE" : "#222020" }; });
       current.cmpCols = "minmax(120px, 170px) repeat(" + sortedP.length + ", minmax(124px, 1fr))";
       current.cmpRows = cmp.map(function (r, ri) { var z = ri % 2 ? "#FBF7F1" : "#FEFEFE"; return { label: r[0], zebra: z, cells: r.slice(1).map(function (v, i) { return { v: v, weight: i === 0 ? "700" : "500", bg: i === 0 ? "#FDF1E2" : z }; }) }; });
     }
