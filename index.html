@@ -462,7 +462,7 @@ Crea tu paquete aquí
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 16px; border-radius: 8px; border: 1.5px solid #222020">
 <div style="display: flex; flex-direction: column; min-width: 0; gap: 2px">
 <span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.fotosLabel}}</span>
-<span style="font-size: 12px; color: #3D3B3E">Cada foto suma 10 minutos de sesión y 5 fotos de prueba</span>
+<span style="font-size: 12px; color: #3D3B3E">Incluye 3. Cada foto suma 10 minutos de sesión y 5 fotos de prueba</span>
 </div>
 <div style="flex: none; display: flex; align-items: center; gap: 6px">
 <button type="button" onClick="{{cot.fotosDec}}" aria-label="Una foto menos" style="width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 22px; cursor: pointer; opacity: {{cot.fotosDecOp}}">−</button>
@@ -985,7 +985,8 @@ var TABNAME = {
 
 var BUSY = ["2026-10-30","2026-10-31","2026-11-01","2026-11-05","2026-11-07","2026-11-20","2026-11-22","2026-11-27","2026-11-28","2026-11-29","2026-12-13","2026-12-17","2026-12-19"];
 var BUSY_UPDATED = "30 de octubre de 2026, 6:58 p. m.";
-var COT_SERV = 25;
+var COT_SERV = 55;
+var COT_INCL_FOTOS = 3;
 var COT_TIERS = [[1, 3, 10], [4, 9, 8], [10, 999, 7]];
 function cotFotosPrice(n) { var t = 0; for (var i = 1; i <= n; i++) { for (var k = 0; k < COT_TIERS.length; k++) { if (i >= COT_TIERS[k][0] && i <= COT_TIERS[k][1]) { t += COT_TIERS[k][2]; break; } } } return t; }
 var COT_SES = ["levelup", "suenos", "dulce", "estudio", "folklore", "primer", "gran", "granext", "gameon"];
@@ -1186,7 +1187,8 @@ class Component extends DCLogic {
         var q = st.cotQ, c = st.cotC, L = st.cotL, nF = st.cotN, exp = st.cotExp;
         var locs = TRAS.map(function (t, i) { var v = parseFloat(String(t[1]).replace(/[^0-9.]/g, "")) || 0; return { id: "t" + i, place: i === 0 ? "Estudio o Las Tablas" : t[0], v: v }; });
         locs.push({ id: "otro", place: "Otro lugar", v: 0, other: true });
-        var fotosCost = cotFotosPrice(nF);
+        var extraF = Math.max(0, nF - COT_INCL_FOTOS);
+        var fotosCost = cotFotosPrice(extraF);
         var total = COT_SERV + fotosCost, mins = nF * 10, fotos = nF, pruebas = nF * 5, lines = [], printLines = [];
         var groups = COT_GROUPS.map(function (g) { return { title: g.title, list: g.items.filter(function (it) { return cotFits(it.only, exp); }) }; }).filter(function (g) { return g.list.length; });
         function tally(it, out) {
@@ -1223,8 +1225,8 @@ class Component extends DCLogic {
           m.push("*Sesión:* " + expName);
           m.push("*Lugar:* " + lugares);
           m.push("*Fecha tentativa:* " + fmtDate(st.cotDate));
-          m.push("", "*Fotos editadas:* " + nF + " (" + money(fotosCost) + ")");
-          m.push("*Servicios básicos (" + money(COT_SERV) + "):* asesoría previa, 1 cambio de vestuario, dirección de poses y galería online privada.");
+          m.push("", "*Paquete base (" + money(COT_SERV) + "):* 3 fotos editadas, asesoría previa, 1 cambio de vestuario, dirección de poses y galería online privada.");
+          if (extraF) m.push("*Fotos editadas extra:* " + extraF + " (" + money(fotosCost) + ")");
           if (lines.length) { m.push("", "*Extras:*"); m.push.apply(m, lines); }
           if (printLines.length) { m.push("", "*Impresiones:*"); m.push.apply(m, printLines); }
           m.push("", "*Duración estimada:* " + mins + " minutos", "*Fotos de prueba:* mínimo " + pruebas, "*Total de fotos editadas:* " + fotos);
@@ -1247,8 +1249,8 @@ class Component extends DCLogic {
           prints: COT_PRINTS.map(view),
           fotos: nF,
           fotosLabel: nF === 1 ? "1 foto editada" : nF + " fotos editadas",
-          fotosDecOp: nF > 1 ? 1 : 0.35,
-          fotosDec: function () { if (nF > 1) self.setState({ cotN: nF - 1 }); },
+          fotosDecOp: nF > COT_INCL_FOTOS ? 1 : 0.35,
+          fotosDec: function () { if (nF > COT_INCL_FOTOS) self.setState({ cotN: nF - 1 }); },
           fotosInc: function () { if (nF < 200) self.setState({ cotN: nF + 1 }); },
           locs: locs.map(function (l) {
             var on = !!L[l.id];
