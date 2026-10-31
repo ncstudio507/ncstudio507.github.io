@@ -1241,7 +1241,7 @@ class Component extends DCLogic {
           if (printLines.length) { m.push("", "*Impresiones:*"); m.push.apply(m, printLines); }
           m.push("", "*Duración estimada:* " + mins + " minutos", "*Fotos de prueba:* mínimo " + pruebas, "*Total de fotos editadas:* " + fotos);
           if (other) m.push("*Traslado a otro lugar:* por cotizar");
-          m.push("*Total estimado:* " + money(up5(total)) + (other ? " + traslado" : ""));
+          m.push("*Total estimado:* " + money(total) + (other ? " + traslado" : ""));
           if (st.cotIdea.trim()) m.push("", "*Mi idea:* " + st.cotIdea.trim());
           m.push("", "¿Me confirman disponibilidad y la cotización final?");
           return m.join("\n");
@@ -1271,7 +1271,7 @@ class Component extends DCLogic {
           setName: function (e) { st.cotName = e && e.target ? e.target.value : ""; },
           setDate: function (e) { st.cotDate = e && e.target ? e.target.value : ""; },
           setIdea: function (e) { st.cotIdea = e && e.target ? e.target.value : ""; },
-          total: money(up5(total)) + (other ? " + traslado" : ""),
+          total: money(total) + (other ? " + traslado" : ""),
           meta: mins + " min de sesión · " + fotos + (fotos === 1 ? " foto editada" : " fotos editadas"),
           wa: WA + encodeURIComponent(build()),
           send: function (e) { var a = e && e.currentTarget; if (a && a.setAttribute) a.setAttribute("href", WA + encodeURIComponent(build())); }
