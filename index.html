@@ -65,6 +65,10 @@ html { scroll-behavior: smooth; }
 <p style="margin: 6px 0 0; font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 28px; line-height: 1.2">No vendemos fotos, vendemos experiencias.</p>
 <div style="display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px">
 <a href="#paquetes" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 26px; border-radius: 999px; background: {{accent}}; color: #222020; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">Ver paquetes y precios</a>
+<button type="button" onClick="{{cot.openAny}}" style="display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 26px; border-radius: 999px; border: 1.5px solid {{accent}}; background: transparent; color: #FEFEFE; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 15px; cursor: pointer">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+Arma tu paquete personalizado
+</button>
 <a href="{{waGeneral}}" style="display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 26px; border-radius: 999px; border: 1.5px solid #F2E4D2; color: #FEFEFE; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 15px">
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.6-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg>
 Escríbenos
@@ -283,6 +287,17 @@ WhatsApp
 </sc-if>
 </div>
 
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; padding: 26px 24px; border-radius: 10px; background: #222020; color: #FEFEFE">
+<div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 6px">
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 28px; line-height: 1.15">¿Ningún paquete llena tus expectativas al 100 %?</span>
+<span style="font-size: 15px; color: #F2E4D2">Arma tu propio paquete desde $55, elige solo lo que necesitas y recibe tu cotización al instante.</span>
+</div>
+<button type="button" onClick="{{cot.openHere}}" style="display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 24px; border-radius: 999px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px; cursor: pointer">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+Arma tu paquete
+</button>
+</div>
+
 </div>
 </sc-if>
 </div>
@@ -360,6 +375,126 @@ WhatsApp
 <span>NC Studio · Fotografía y audiovisual · Las Tablas, Los Santos, Panamá · Desde 2019</span>
 </div>
 </footer>
+
+<sc-if value="{{cot.open}}" hint-placeholder-val="{{false}}">
+<div style="position: fixed; inset: 0; z-index: 70; background: rgba(34, 32, 32, 0.75); display: flex; align-items: center; justify-content: center; padding: 10px; box-sizing: border-box">
+<div role="dialog" aria-modal="true" aria-label="Arma tu paquete" style="width: 100%; max-width: 600px; max-height: 96vh; background: #FEFEFE; color: #222020; border-radius: 10px; display: flex; flex-direction: column; overflow: hidden">
+<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 18px 18px 12px; border-bottom: 1px solid #EFE6DA">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 30px; line-height: 1.05">Arma tu paquete</span>
+<span style="font-size: 14px; color: #3D3B3E">Elige lo que quieres y te enviamos la cotización por WhatsApp.</span>
+</div>
+<button type="button" onClick="{{cot.close}}" aria-label="Cerrar" style="flex: none; width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; cursor: pointer; display: flex; align-items: center; justify-content: center">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+</button>
+</div>
+<div data-keep-scroll="cot" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 22px">
+
+<div style="display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 8px; background: #F2E4D2">
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">Paquete base</span>
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 30px; line-height: 1">$55</span>
+</div>
+<ul style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px 14px">
+<sc-for list="{{cot.incl}}" as="it" hint-placeholder-count="8">
+<li style="display: flex; gap: 8px; align-items: flex-start; font-size: 14px; line-height: 1.4">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 2px"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+<span>{{it}}</span>
+</li>
+</sc-for>
+</ul>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">1. ¿Qué tipo de sesión quieres?</span>
+<div role="group" aria-label="Tipo de sesión" style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{cot.exps}}" as="o" hint-placeholder-count="8">
+<button type="button" onClick="{{o.pick}}" aria-pressed="{{o.pressed}}" style="min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1.5px solid {{o.border}}; background: {{o.bg}}; color: {{o.fg}}; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 13px; cursor: pointer">{{o.label}}</button>
+</sc-for>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">2. ¿Dónde te gustaría la sesión?</span>
+<div role="group" aria-label="Lugar" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+<sc-for list="{{cot.wheres}}" as="o" hint-placeholder-count="2">
+<button type="button" onClick="{{o.pick}}" aria-pressed="{{o.pressed}}" style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-height: 56px; padding: 8px 14px; border-radius: 6px; border: 1.5px solid {{o.border}}; border-left: 5px solid {{o.bar}}; background: {{o.bg}}; color: {{o.fg}}; text-align: left; cursor: pointer">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{o.label}}</span>
+<span style="font-size: 12px; color: {{o.sub}}">{{o.note}}</span>
+</button>
+</sc-for>
+</div>
+<sc-if value="{{cot.isExt}}" hint-placeholder-val="{{false}}">
+<span style="font-size: 14px; color: #3D3B3E">¿En qué zona?</span>
+<div role="group" aria-label="Zona" style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{cot.locs}}" as="o" hint-placeholder-count="6">
+<button type="button" onClick="{{o.pick}}" aria-pressed="{{o.pressed}}" style="min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1.5px solid {{o.border}}; background: {{o.bg}}; color: {{o.fg}}; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 13px; cursor: pointer">{{o.label}}</button>
+</sc-for>
+</div>
+</sc-if>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">3. Agrega lo que necesites</span>
+<sc-for list="{{cot.qtys}}" as="q" hint-placeholder-count="4">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #EFE6DA">
+<div style="display: flex; flex-direction: column; min-width: 0">
+<span style="font-size: 15px">{{q.name}}</span>
+<span style="font-size: 12px; color: #3D3B3E">{{q.note}}</span>
+</div>
+<div style="flex: none; display: flex; align-items: center; gap: 6px">
+<button type="button" onClick="{{q.dec}}" aria-label="Quitar uno: {{q.name}}" style="width: 40px; height: 40px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 20px; cursor: pointer; opacity: {{q.decOp}}">−</button>
+<span aria-live="polite" style="min-width: 28px; text-align: center; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">{{q.n}}</span>
+<button type="button" onClick="{{q.inc}}" aria-label="Agregar uno: {{q.name}}" style="width: 40px; height: 40px; border-radius: 6px; border: 0; background: #222020; color: #FEFEFE; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 20px; cursor: pointer">+</button>
+</div>
+</div>
+</sc-for>
+<sc-for list="{{cot.chks}}" as="c" hint-placeholder-count="7">
+<button type="button" role="checkbox" aria-checked="{{c.checked}}" onClick="{{c.toggle}}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border: 0; border-bottom: 1px solid #EFE6DA; background: transparent; color: #222020; text-align: left; cursor: pointer; width: 100%">
+<span style="display: flex; align-items: center; gap: 12px; min-width: 0">
+<span aria-hidden="true" style="flex: none; width: 24px; height: 24px; border-radius: 5px; border: 2px solid #222020; background: {{c.boxBg}}; color: #222020; display: flex; align-items: center; justify-content: center">
+<sc-if value="{{c.on}}" hint-placeholder-val="{{false}}">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+</sc-if>
+</span>
+<span style="font-family: 'Tenor Sans', Georgia, serif; font-size: 15px">{{c.name}}</span>
+</span>
+<span style="flex: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 14px">{{c.price}}</span>
+</button>
+</sc-for>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">4. Cuéntanos un poco más</span>
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tu nombre
+<input type="text" value="{{cot.name}}" onInput="{{cot.setName}}" placeholder="Nombre y apellido" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Fecha tentativa
+<input type="date" value="{{cot.date}}" onInput="{{cot.setDate}}" onChange="{{cot.setDate}}" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tu idea o temática
+<textarea rows="3" onInput="{{cot.setIdea}}" placeholder="Estilo, colores, cuántas personas, lo que imaginas…" style="padding: 10px 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px; resize: vertical">{{cot.idea}}</textarea>
+</label>
+</div>
+</div>
+
+<div style="flex: none; display: flex; flex-direction: column; gap: 10px; padding: 14px 18px 16px; background: #222020; color: #FEFEFE">
+<div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 12px">
+<div style="display: flex; flex-direction: column; min-width: 0">
+<span style="font-family: Montserrat, sans-serif; font-size: 12px; font-weight: 600; color: #F2E4D2">Total estimado</span>
+<span style="font-size: 13px; color: #F2E4D2">{{cot.meta}}</span>
+</div>
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 40px; line-height: 1; color: {{accent}}">{{cot.total}}</span>
+</div>
+<a href="{{cot.wa}}" onClick="{{cot.send}}" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; border-radius: 6px; background: {{accent}}; color: #222020; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.6-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg>
+Enviar cotización por WhatsApp
+</a>
+<span style="font-size: 12px; color: #F2E4D2">Precio estimado. Te confirmamos la cotización final y la disponibilidad por WhatsApp.</span>
+</div>
+</div>
+</div>
+</sc-if>
 
 <sc-if value="{{cal.open}}" hint-placeholder-val="{{false}}">
 <div style="position: fixed; inset: 0; z-index: 60; background: rgba(34, 32, 32, 0.75); display: flex; align-items: center; justify-content: center; padding: 12px; box-sizing: border-box">
@@ -791,6 +926,21 @@ var TABNAME = {
 
 var BUSY = ["2026-10-30","2026-10-31","2026-11-01","2026-11-05","2026-11-07","2026-11-20","2026-11-22","2026-11-27","2026-11-28","2026-11-29","2026-12-13","2026-12-17","2026-12-19"];
 var BUSY_UPDATED = "30 de octubre de 2026, 6:58 p. m.";
+var COT_BASE = 55;
+var COT_MIN = 30;
+var COT_FOTOS = 3;
+var COT_INCL = ["Asesoría previa personalizada", "30 minutos de sesión", "1 locación", "1 cambio de vestuario", "Dirección de poses", "Mínimo 15 fotos de prueba", "3 fotos editadas en alta resolución", "Galería online privada"];
+var COT_QTY = [
+  { id: "fotos", name: "Fotos editadas extra", price: 7, note: "$7 c/u", min: 0, fotos: 1 },
+  { id: "vest", name: "Cambios de vestuario extra", price: 10, note: "$10 c/u · suma 10 minutos de sesión", min: 10 },
+  { id: "pers", name: "Personas extra", price: 15, note: "$15 c/u · suma 10 minutos de sesión y 1 foto editada", min: 10, fotos: 1 },
+  { id: "imp", name: "Impresiones fotográficas", price: 3.5, note: "$3.50 c/u", min: 0 }
+];
+var COT_CHK = [
+  ["maq", "Maquillaje profesional", 35], ["pei", "Peinado profesional", 35], ["bts", "Video detrás de cámaras", 30],
+  ["lib", "Liberación de galería", 60], ["enm", "Fotografía enmarcada 16×20", 70], ["alb", "Álbum fotográfico (20 páginas)", 90], ["usb", "USB con fotografías", 25]
+];
+function money(x) { return "$" + (Math.round(x * 100) % 100 ? x.toFixed(2) : String(Math.round(x))); }
 var MONTHS = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
 var WDAYS = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
 function iso(d) { var m = d.getMonth() + 1, x = d.getDate(); return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m + "-" + (x < 10 ? "0" : "") + x; }
@@ -799,7 +949,7 @@ function slotsFor(d) { var w = d.getDay(); return (w === 0 || w === 6) ? ["10:00
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0 };
+    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0, cotOpen: false, cotExp: null, cotWhere: "Estudio", cotLoc: 0, cotQ: {}, cotC: {}, cotName: "", cotDate: "", cotIdea: "" };
   }
   componentDidMount() {
     var self = this;
@@ -943,6 +1093,76 @@ class Component extends DCLogic {
           ready: ready, summary: summary, wa: WA + encodeURIComponent(waMsg)
         };
       })(),
+      cot: (function () {
+        var st = self.state;
+        var q = st.cotQ, c = st.cotC;
+        var isExt = st.cotWhere === "Exteriores";
+        var locs = TRAS.map(function (t) { var v = parseFloat(String(t[1]).replace(/[^0-9.]/g, "")) || 0; return { label: t[0] + (v ? " (+" + money(v) + ")" : " (sin costo)"), place: t[0], v: v }; });
+        locs.push({ label: "Otro lugar (se cotiza)", place: "Otro lugar", v: 0, other: true });
+        var loc = locs[st.cotLoc] || locs[0];
+        var total = COT_BASE, mins = COT_MIN, fotos = COT_FOTOS, lines = [];
+        COT_QTY.forEach(function (it) {
+          var n = q[it.id] || 0; if (!n) return;
+          total += n * it.price; mins += n * it.min; fotos += n * (it.fotos || 0);
+          lines.push("• " + n + " × " + it.name.toLowerCase() + ": " + money(n * it.price));
+        });
+        COT_CHK.forEach(function (it) { if (c[it[0]]) { total += it[2]; lines.push("• " + it[1] + ": " + money(it[2])); } });
+        if (isExt && loc.v) { total += loc.v; lines.push("• Traslado a " + loc.place + ": " + money(loc.v)); }
+        var expObj = PACKAGES.filter(function (p) { return p.id === st.cotExp; })[0];
+        var expName = expObj ? TABNAME[expObj.id][0] : (st.cotExp === "otra" ? "Otra" : "Por definir");
+        function fmtDate(v) { if (!v) return "Por definir"; var a = v.split("-"); var d = new Date(+a[0], +a[1] - 1, +a[2]); return WDAYS[d.getDay()] + " " + d.getDate() + " de " + MONTHS[d.getMonth()] + " de " + d.getFullYear(); }
+        function chip(on) { return { pressed: on ? "true" : "false", bg: on ? "#222020" : "#FEFEFE", fg: on ? "#FEFEFE" : "#222020", border: on ? "#222020" : "#D9CDBE" }; }
+        function build() {
+          var m = ["Hola, NC Studio. Armé mi paquete personalizado en la página:", ""];
+          m.push("*Nombre:* " + (st.cotName.trim() || "—"));
+          m.push("*Sesión:* " + expName);
+          m.push("*Lugar:* " + (isExt ? "Exteriores · " + loc.place : "Estudio en Las Tablas"));
+          m.push("*Fecha tentativa:* " + fmtDate(st.cotDate));
+          m.push("", "*Paquete base (" + money(COT_BASE) + "):* 30 min de sesión, 1 locación, 1 cambio de vestuario, dirección de poses, mínimo 15 fotos de prueba, 3 fotos editadas y galería online privada.");
+          if (lines.length) { m.push("", "*Extras:*"); m.push.apply(m, lines); }
+          m.push("", "*Duración estimada:* " + mins + " minutos", "*Fotos editadas:* " + fotos);
+          if (isExt && loc.other) m.push("*Traslado:* por cotizar");
+          m.push("*Total estimado:* " + money(total));
+          if (st.cotIdea.trim()) m.push("", "*Mi idea:* " + st.cotIdea.trim());
+          m.push("", "¿Me confirman disponibilidad y la cotización final?");
+          return m.join("\n");
+        }
+        return {
+          open: !!st.cotOpen,
+          openAny: function () { self.setState({ cotOpen: true }); },
+          openHere: function () { self.setState({ cotOpen: true, cotExp: sel || st.cotExp }); },
+          close: function () { self.setState({ cotOpen: false }); },
+          incl: COT_INCL,
+          exps: PACKAGES.map(function (p) { var o = chip(st.cotExp === p.id); o.label = TABNAME[p.id][0]; o.pick = function () { self.setState({ cotExp: p.id }); }; return o; })
+            .concat([(function () { var o = chip(st.cotExp === "otra"); o.label = "Otra"; o.pick = function () { self.setState({ cotExp: "otra" }); }; return o; })()]),
+          wheres: [["Estudio", "En Las Tablas, sin traslado"], ["Exteriores", "Recargo según la zona"]].map(function (w) {
+            var on = st.cotWhere === w[0];
+            return { label: w[0], note: w[1], pressed: on ? "true" : "false", bg: on ? "#222020" : "#FEFEFE", fg: on ? "#FEFEFE" : "#222020", sub: on ? "#F2E4D2" : "#3D3B3E", border: on ? "#222020" : "#D9CDBE", bar: on ? accent : "#222020",
+              pick: function () { self.setState({ cotWhere: w[0] }); } };
+          }),
+          isExt: isExt,
+          locs: locs.map(function (l, i) { var o = chip(st.cotLoc === i); o.label = l.label; o.pick = function () { self.setState({ cotLoc: i }); }; return o; }),
+          qtys: COT_QTY.map(function (it) {
+            var n = q[it.id] || 0;
+            return { name: it.name, note: it.note, n: n, decOp: n ? 1 : 0.35,
+              dec: function () { if (n > 0) { var nq = Object.assign({}, q); nq[it.id] = n - 1; self.setState({ cotQ: nq }); } },
+              inc: function () { if (n < 99) { var nq = Object.assign({}, q); nq[it.id] = n + 1; self.setState({ cotQ: nq }); } } };
+          }),
+          chks: COT_CHK.map(function (it) {
+            var on = !!c[it[0]];
+            return { name: it[1], price: money(it[2]), on: on, checked: on ? "true" : "false", boxBg: on ? accent : "#FEFEFE",
+              toggle: function () { var nc = Object.assign({}, c); nc[it[0]] = !on; self.setState({ cotC: nc }); } };
+          }),
+          name: st.cotName, date: st.cotDate, idea: st.cotIdea,
+          setName: function (e) { st.cotName = e && e.target ? e.target.value : ""; },
+          setDate: function (e) { st.cotDate = e && e.target ? e.target.value : ""; },
+          setIdea: function (e) { st.cotIdea = e && e.target ? e.target.value : ""; },
+          total: money(total) + (isExt && loc.other ? " + traslado" : ""),
+          meta: mins + " min de sesión · " + fotos + " fotos editadas",
+          wa: WA + encodeURIComponent(build()),
+          send: function (e) { var a = e && e.currentTarget; if (a && a.setAttribute) a.setAttribute("href", WA + encodeURIComponent(build())); }
+        };
+      })(),
       showGrid: !sel, showPkg: !!sel,
       back: function () { self.setState({ sel: null }); },
       current: current,
@@ -969,7 +1189,10 @@ class Component extends DCLogic {
     queued = false;
     var frag = document.createDocumentFragment();
     window.__ncRender(tpl, comp.renderVals(), frag);
+    var keep = {};
+    root.querySelectorAll("[data-keep-scroll]").forEach(function (el) { keep[el.getAttribute("data-keep-scroll")] = el.scrollTop; });
     root.replaceChildren(frag);
+    root.querySelectorAll("[data-keep-scroll]").forEach(function (el) { var k = el.getAttribute("data-keep-scroll"); if (k in keep) el.scrollTop = keep[k]; });
   }
   window.__ncSchedule = function () { if (!queued) { queued = true; requestAnimationFrame(draw); } };
   draw();
