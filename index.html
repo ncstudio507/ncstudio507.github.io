@@ -393,7 +393,6 @@ Crea tu paquete aquí
 <div style="display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 8px; background: #F2E4D2">
 <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px">
 <span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">Tu paquete incluye</span>
-<span style="font-size: 13px; color: #3D3B3E">desde $55 con 3 fotos</span>
 </div>
 <ul style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px 14px">
 <sc-for list="{{cot.incl}}" as="it" hint-placeholder-count="8">
@@ -418,31 +417,39 @@ Crea tu paquete aquí
 <div style="display: flex; flex-direction: column; gap: 4px">
 <span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">2. Personaliza tu sesión</span>
 <span style="font-size: 13px; color: #3D3B3E">Extras pensados para {{cot.expName}}.</span>
-<sc-for list="{{cot.qtys}}" as="q" hint-placeholder-count="4">
+<sc-for list="{{cot.groups}}" as="g" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; margin-top: 10px">
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 21px; line-height: 1.2; padding-bottom: 2px; border-bottom: 2px solid {{accent}}; align-self: flex-start">{{g.title}}</span>
+<sc-for list="{{g.items}}" as="x" hint-placeholder-count="4">
+<sc-if value="{{x.isQty}}" hint-placeholder-val="{{false}}">
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #EFE6DA">
 <div style="display: flex; flex-direction: column; min-width: 0">
-<span style="font-size: 15px">{{q.name}}</span>
-<span style="font-size: 12px; color: #3D3B3E">{{q.note}}</span>
+<span style="font-size: 15px">{{x.name}}</span>
+<sc-if value="{{x.hasNote}}" hint-placeholder-val="{{false}}">
+<span style="font-size: 12px; color: #3D3B3E">{{x.note}}</span>
+</sc-if>
 </div>
 <div style="flex: none; display: flex; align-items: center; gap: 6px">
-<button type="button" onClick="{{q.dec}}" aria-label="Quitar uno: {{q.name}}" style="width: 40px; height: 40px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 20px; cursor: pointer; opacity: {{q.decOp}}">−</button>
-<span aria-live="polite" style="min-width: 28px; text-align: center; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">{{q.n}}</span>
-<button type="button" onClick="{{q.inc}}" aria-label="Agregar uno: {{q.name}}" style="width: 40px; height: 40px; border-radius: 6px; border: 0; background: #222020; color: #FEFEFE; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 20px; cursor: pointer">+</button>
+<button type="button" onClick="{{x.dec}}" aria-label="Quitar uno: {{x.name}}" style="width: 40px; height: 40px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 20px; cursor: pointer; opacity: {{x.decOp}}">−</button>
+<span aria-live="polite" style="min-width: 28px; text-align: center; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">{{x.n}}</span>
+<button type="button" onClick="{{x.inc}}" aria-label="Agregar uno: {{x.name}}" style="width: 40px; height: 40px; border-radius: 6px; border: 0; background: #222020; color: #FEFEFE; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 20px; cursor: pointer">+</button>
 </div>
 </div>
-</sc-for>
-<sc-for list="{{cot.chks}}" as="c" hint-placeholder-count="7">
-<button type="button" role="checkbox" aria-checked="{{c.checked}}" onClick="{{c.toggle}}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border: 0; border-bottom: 1px solid #EFE6DA; background: transparent; color: #222020; text-align: left; cursor: pointer; width: 100%">
+</sc-if>
+<sc-if value="{{x.isChk}}" hint-placeholder-val="{{true}}">
+<button type="button" role="checkbox" aria-checked="{{x.checked}}" onClick="{{x.toggle}}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border: 0; border-bottom: 1px solid #EFE6DA; background: transparent; color: #222020; text-align: left; cursor: pointer; width: 100%">
 <span style="display: flex; align-items: center; gap: 12px; min-width: 0">
-<span aria-hidden="true" style="flex: none; width: 24px; height: 24px; border-radius: 5px; border: 2px solid #222020; background: {{c.boxBg}}; color: #222020; display: flex; align-items: center; justify-content: center">
-<sc-if value="{{c.on}}" hint-placeholder-val="{{false}}">
+<span aria-hidden="true" style="flex: none; width: 24px; height: 24px; border-radius: 5px; border: 2px solid #222020; background: {{x.boxBg}}; color: #222020; display: flex; align-items: center; justify-content: center">
+<sc-if value="{{x.on}}" hint-placeholder-val="{{false}}">
 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
 </sc-if>
 </span>
-<span style="font-family: 'Tenor Sans', Georgia, serif; font-size: 15px">{{c.name}}</span>
+<span style="font-family: 'Tenor Sans', Georgia, serif; font-size: 15px">{{x.name}}</span>
 </span>
-<span style="flex: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 14px">{{c.price}}</span>
 </button>
+</sc-if>
+</sc-for>
+</div>
 </sc-for>
 </div>
 </sc-if>
@@ -463,19 +470,11 @@ Crea tu paquete aquí
 <button type="button" onClick="{{cot.fotosInc}}" aria-label="Una foto más" style="width: 44px; height: 44px; border-radius: 6px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 22px; cursor: pointer">+</button>
 </div>
 </div>
-<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px">
-<sc-for list="{{cot.tiers}}" as="t" hint-placeholder-count="3">
-<div style="display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border-radius: 6px; background: {{t.bg}}; color: {{t.fg}}">
-<span style="font-family: Montserrat, sans-serif; font-size: 12px; font-weight: 600">{{t.range}}</span>
-<span style="font-family: Montserrat, sans-serif; font-size: 15px; font-weight: 700">{{t.price}}</span>
-</div>
-</sc-for>
-</div>
 </div>
 
 <div style="display: flex; flex-direction: column; gap: 4px">
 <span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">4. ¿Dónde será la sesión?</span>
-<span style="font-size: 13px; color: #3D3B3E">Marca el lugar o los lugares. El traslado se suma al total.</span>
+<span style="font-size: 13px; color: #3D3B3E">Marca el lugar o los lugares donde te gustaría la sesión.</span>
 <sc-for list="{{cot.locs}}" as="l" hint-placeholder-count="7">
 <button type="button" role="checkbox" aria-checked="{{l.checked}}" onClick="{{l.toggle}}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border: 0; border-bottom: 1px solid #EFE6DA; background: transparent; color: #222020; text-align: left; cursor: pointer; width: 100%">
 <span style="display: flex; align-items: center; gap: 12px; min-width: 0">
@@ -486,13 +485,46 @@ Crea tu paquete aquí
 </span>
 <span style="font-family: 'Tenor Sans', Georgia, serif; font-size: 15px">{{l.name}}</span>
 </span>
-<span style="flex: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 14px">{{l.price}}</span>
 </button>
 </sc-for>
 </div>
 
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">5. ¿Quieres fotos impresas?</span>
+<span style="font-size: 13px; color: #3D3B3E">Elige cuántas quieres de cada tamaño.</span>
+<sc-for list="{{cot.prints}}" as="x" hint-placeholder-count="4">
+<sc-if value="{{x.isQty}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #EFE6DA">
+<div style="display: flex; flex-direction: column; min-width: 0">
+<span style="font-size: 15px">{{x.name}}</span>
+<sc-if value="{{x.hasNote}}" hint-placeholder-val="{{false}}">
+<span style="font-size: 12px; color: #3D3B3E">{{x.note}}</span>
+</sc-if>
+</div>
+<div style="flex: none; display: flex; align-items: center; gap: 6px">
+<button type="button" onClick="{{x.dec}}" aria-label="Quitar uno: {{x.name}}" style="width: 40px; height: 40px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 20px; cursor: pointer; opacity: {{x.decOp}}">−</button>
+<span aria-live="polite" style="min-width: 28px; text-align: center; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">{{x.n}}</span>
+<button type="button" onClick="{{x.inc}}" aria-label="Agregar uno: {{x.name}}" style="width: 40px; height: 40px; border-radius: 6px; border: 0; background: #222020; color: #FEFEFE; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 20px; cursor: pointer">+</button>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{x.isChk}}" hint-placeholder-val="{{true}}">
+<button type="button" role="checkbox" aria-checked="{{x.checked}}" onClick="{{x.toggle}}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border: 0; border-bottom: 1px solid #EFE6DA; background: transparent; color: #222020; text-align: left; cursor: pointer; width: 100%">
+<span style="display: flex; align-items: center; gap: 12px; min-width: 0">
+<span aria-hidden="true" style="flex: none; width: 24px; height: 24px; border-radius: 5px; border: 2px solid #222020; background: {{x.boxBg}}; color: #222020; display: flex; align-items: center; justify-content: center">
+<sc-if value="{{x.on}}" hint-placeholder-val="{{false}}">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+</sc-if>
+</span>
+<span style="font-family: 'Tenor Sans', Georgia, serif; font-size: 15px">{{x.name}}</span>
+</span>
+</button>
+</sc-if>
+</sc-for>
+</div>
+
 <div style="display: flex; flex-direction: column; gap: 12px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">5. Cuéntanos un poco más</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">6. Cuéntanos un poco más</span>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tu nombre
 <input type="text" value="{{cot.name}}" onInput="{{cot.setName}}" placeholder="Nombre y apellido" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
 </label>
@@ -957,24 +989,43 @@ var COT_SERV = 25;
 var COT_TIERS = [[1, 3, 10], [4, 9, 8], [10, 999, 7]];
 function cotFotosPrice(n) { var t = 0; for (var i = 1; i <= n; i++) { for (var k = 0; k < COT_TIERS.length; k++) { if (i >= COT_TIERS[k][0] && i <= COT_TIERS[k][1]) { t += COT_TIERS[k][2]; break; } } } return t; }
 var COT_SES = ["levelup", "suenos", "dulce", "estudio", "folklore", "primer", "gran", "granext", "gameon"];
-var COT_QTY = [
-  { id: "vest", name: "Cambios de vestuario extra", note: "$10 c/u · suma 10 minutos de sesión", min: 10, cost: function (n) { return n * 10; }, only: COT_SES },
-  { id: "pers", name: "Personas extra (foto grupal o familiar)", note: "1.ª $15 · 2.ª a 4.ª $12 c/u · 5 o más $10 c/u · cada una suma 10 minutos y 1 foto editada", min: 10, fotos: 1,
-    cost: function (n) { var t = 0; for (var i = 1; i <= n; i++) t += i === 1 ? 15 : (i <= 4 ? 12 : 10); return t; } },
-  { id: "loc", name: "Locaciones adicionales", note: "$10 c/u", min: 0, cost: function (n) { return n * 10; }, only: COT_SES },
-  { id: "cart", name: "Juegos de 6 fotos tamaño cartera", note: "$5 por cada juego de 6", min: 0, cost: function (n) { return n * 5; } },
-  { id: "imp", name: "Impresiones fotográficas", note: "$3.50 c/u", min: 0, cost: function (n) { return n * 3.5; } }
+var COT_EVT = ["infantil", "otra"];
+function cq(id, name, unit, o) { o = o || {}; o.id = id; o.kind = "q"; o.name = name; o.cost = o.cost || function (n) { return n * unit; }; return o; }
+function cc(id, name, price, o) { o = o || {}; o.id = id; o.kind = "c"; o.name = name; o.price = price; return o; }
+var COT_GROUPS = [
+  { title: "Planificación creativa", items: [
+    cc("rcv", "Reunión creativa virtual", 10, { only: COT_SES, excl: ["rcp"] }),
+    cc("rcp", "Reunión creativa presencial (incluye café)", 45, { only: COT_SES, excl: ["rcv"] }),
+    cc("mood", "Moodboard personalizado", 15, { only: COT_SES })
+  ] },
+  { title: "Imagen y vestuario", items: [
+    cc("maq", "Maquillaje profesional", 35, { only: COT_SES }),
+    cc("pei", "Peinado profesional", 35, { only: COT_SES }),
+    cc("ves15", "Vestido de 15 de estreno", 200, { only: ["suenos"] }),
+    cq("vest", "Cambios de vestuario extra", 10, { only: COT_SES, min: 10, note: "Cada cambio suma 10 minutos de sesión" })
+  ] },
+  { title: "Personas y locaciones", items: [
+    cq("pers", "Personas extra (foto grupal o familiar)", 0, { min: 10, fotos: 1, note: "Cada persona suma 10 minutos y 1 foto editada",
+      cost: function (n) { var t = 0; for (var i = 1; i <= n; i++) t += i === 1 ? 15 : (i <= 4 ? 12 : 10); return t; } }),
+    cq("loc", "Locaciones adicionales", 10, { only: COT_SES })
+  ] },
+  { title: "Video y entretenimiento", items: [
+    cc("bts", "Video detrás de cámaras", 30, { only: COT_SES }),
+    cc("vvert", "Video vertical de 1 min para redes (Full HD 1080p)", 75, { only: COT_EVT }),
+    cc("vhor", "Video resumen horizontal de 10 min (Full HD 1080p)", 150, { only: COT_EVT }),
+    cc("pb50", "Photo booth: 50 fotos impresas al instante", 85, { only: COT_EVT, excl: ["pb75", "pb100"] }),
+    cc("pb75", "Photo booth: 75 fotos impresas al instante", 100, { only: COT_EVT, excl: ["pb50", "pb100"] }),
+    cc("pb100", "Photo booth: 100 fotos impresas al instante", 125, { only: COT_EVT, excl: ["pb50", "pb75"] })
+  ] },
+  { title: "Entrega y recuerdos", items: [
+    cc("lib", "Liberación de galería"), cc("usb", "USB con fotografías"),
+    cc("alb", "Álbum fotográfico (20 páginas)"), cc("enm", "Fotografía enmarcada 16×20")
+  ] }
 ];
-var COT_CHK = [
-  ["rcv", "Reunión creativa virtual", 10, COT_SES, "rcp"], ["rcp", "Reunión creativa presencial (incluye café)", 45, COT_SES, "rcv"],
-  ["mood", "Moodboard personalizado", 15, COT_SES],
-  ["maq", "Maquillaje profesional", 35, COT_SES], ["pei", "Peinado profesional", 35, COT_SES],
-  ["ves15", "Vestido de 15 de estreno", 200, ["suenos"]],
-  ["bts", "Video detrás de cámaras", 30, COT_SES],
-  ["vvert", "Video vertical de 1 min para redes (Full HD 1080p)", 75, ["infantil", "otra"]],
-  ["vhor", "Video resumen horizontal de 10 min (Full HD 1080p)", 150, ["infantil", "otra"]],
-  ["pb50", "Photo booth: 50 fotos impresas al instante", 85, ["infantil", "otra"], "pb75 pb100"], ["pb75", "Photo booth: 75 fotos impresas al instante", 100, ["infantil", "otra"], "pb50 pb100"], ["pb100", "Photo booth: 100 fotos impresas al instante", 125, ["infantil", "otra"], "pb50 pb75"],
-  ["lib", "Liberación de galería", 60], ["enm", "Fotografía enmarcada 16×20", 70], ["alb", "Álbum fotográfico (20 páginas)", 90], ["usb", "USB con fotografías", 25]
+COT_GROUPS[4].items[0].price = 60; COT_GROUPS[4].items[1].price = 25; COT_GROUPS[4].items[2].price = 90; COT_GROUPS[4].items[3].price = 70;
+var COT_PRINTS = [
+  cq("p46", "Fotos 4×6", 3.5), cq("p57", "Fotos 5×7", 5), cq("p810", "Fotos 8×10", 8), cq("p1117", "Fotos 11×17", 12),
+  cq("cart", "Juegos de 6 fotos tamaño cartera", 5)
 ];
 function cotFits(only, exp) { return !only || only.indexOf(exp) >= 0 || (exp === "otra" && only === COT_SES); }
 function money(x) { return "$" + (Math.round(x * 100) % 100 ? x.toFixed(2) : String(Math.round(x))); }
@@ -1132,29 +1183,40 @@ class Component extends DCLogic {
       })(),
       cot: (function () {
         var st = self.state;
-        var q = st.cotQ, c = st.cotC, L = st.cotL, nF = st.cotN;
-        var locs = TRAS.map(function (t, i) { var v = parseFloat(String(t[1]).replace(/[^0-9.]/g, "")) || 0; return { id: "t" + i, place: i === 0 ? "Estudio o Las Tablas" : t[0], v: v, price: v ? "+" + money(v) : "Sin costo" }; });
-        locs.push({ id: "otro", place: "Otro lugar", v: 0, price: "Se cotiza", other: true });
+        var q = st.cotQ, c = st.cotC, L = st.cotL, nF = st.cotN, exp = st.cotExp;
+        var locs = TRAS.map(function (t, i) { var v = parseFloat(String(t[1]).replace(/[^0-9.]/g, "")) || 0; return { id: "t" + i, place: i === 0 ? "Estudio o Las Tablas" : t[0], v: v }; });
+        locs.push({ id: "otro", place: "Otro lugar", v: 0, other: true });
         var fotosCost = cotFotosPrice(nF);
-        var total = COT_SERV + fotosCost, mins = nF * 10, fotos = nF, pruebas = nF * 5, lines = [];
-        var exp = st.cotExp;
-        var qList = COT_QTY.filter(function (it) { return cotFits(it.only, exp); });
-        var cList = COT_CHK.filter(function (it) { return cotFits(it[3], exp); });
-        qList.forEach(function (it) {
-          var n = q[it.id] || 0; if (!n) return;
-          var v = it.cost(n);
-          total += v; mins += n * it.min; fotos += n * (it.fotos || 0); pruebas += n * 5 * (it.fotos || 0);
-          lines.push("• " + n + " × " + it.name.toLowerCase() + ": " + money(v));
-        });
-        cList.forEach(function (it) { if (c[it[0]]) { total += it[2]; lines.push("• " + it[1] + ": " + money(it[2])); } });
+        var total = COT_SERV + fotosCost, mins = nF * 10, fotos = nF, pruebas = nF * 5, lines = [], printLines = [];
+        var groups = COT_GROUPS.map(function (g) { return { title: g.title, list: g.items.filter(function (it) { return cotFits(it.only, exp); }) }; }).filter(function (g) { return g.list.length; });
+        function tally(it, out) {
+          if (it.kind === "q") {
+            var n = q[it.id] || 0; if (!n) return; var v = it.cost(n);
+            total += v; mins += n * (it.min || 0); fotos += n * (it.fotos || 0); pruebas += n * 5 * (it.fotos || 0);
+            out.push("• " + n + " × " + it.name.toLowerCase() + ": " + money(v));
+          } else if (c[it.id]) { total += it.price; out.push("• " + it.name + ": " + money(it.price)); }
+        }
+        if (exp) groups.forEach(function (g) { g.list.forEach(function (it) { tally(it, lines); }); });
+        COT_PRINTS.forEach(function (it) { tally(it, printLines); });
         var picked = locs.filter(function (l) { return !!L[l.id]; }), other = false;
         picked.forEach(function (l) { if (l.other) other = true; if (l.v) { total += l.v; lines.push("• Traslado a " + l.place + ": " + money(l.v)); } });
         var lugares = picked.length ? picked.map(function (l) { return l.place; }).join(", ") : "Por definir";
-        var expObj = PACKAGES.filter(function (p) { return p.id === st.cotExp; })[0];
-        var expName = expObj ? TABNAME[expObj.id][0] : (st.cotExp === "otra" ? "Otra" : "Por definir");
+        var expObj = PACKAGES.filter(function (p) { return p.id === exp; })[0];
+        var expName = expObj ? TABNAME[expObj.id][0] : (exp === "otra" ? "Otra" : "Por definir");
         var incl = [mins + " minutos de sesión", "Mínimo " + pruebas + " fotos de prueba", fotos + (fotos === 1 ? " foto editada" : " fotos editadas") + " en alta resolución", "Asesoría previa personalizada", "1 cambio de vestuario", "Dirección de poses", "Galería online privada"];
         function fmtDate(v) { if (!v) return "Por definir"; var a = v.split("-"); var d = new Date(+a[0], +a[1] - 1, +a[2]); return WDAYS[d.getDay()] + " " + d.getDate() + " de " + MONTHS[d.getMonth()] + " de " + d.getFullYear(); }
         function chip(on) { return { pressed: on ? "true" : "false", bg: on ? "#222020" : "#FEFEFE", fg: on ? "#FEFEFE" : "#222020", border: on ? "#222020" : "#D9CDBE" }; }
+        function view(it) {
+          if (it.kind === "q") {
+            var n = q[it.id] || 0;
+            return { isQty: true, isChk: false, name: it.name, note: it.note || "", hasNote: !!it.note, n: n, decOp: n ? 1 : 0.35,
+              dec: function () { if (n > 0) { var nq = Object.assign({}, q); nq[it.id] = n - 1; self.setState({ cotQ: nq }); } },
+              inc: function () { if (n < 99) { var nq = Object.assign({}, q); nq[it.id] = n + 1; self.setState({ cotQ: nq }); } } };
+          }
+          var on = !!c[it.id];
+          return { isQty: false, isChk: true, name: it.name, on: on, checked: on ? "true" : "false", boxBg: on ? accent : "#FEFEFE",
+            toggle: function () { var nc = Object.assign({}, c); nc[it.id] = !on; if (!on && it.excl) it.excl.forEach(function (k) { nc[k] = false; }); self.setState({ cotC: nc }); } };
+        }
         function build() {
           var m = ["Hola, NC Studio. Armé mi paquete personalizado en la página:", ""];
           m.push("*Nombre:* " + (st.cotName.trim() || "—"));
@@ -1164,6 +1226,7 @@ class Component extends DCLogic {
           m.push("", "*Fotos editadas:* " + nF + " (" + money(fotosCost) + ")");
           m.push("*Servicios básicos (" + money(COT_SERV) + "):* asesoría previa, 1 cambio de vestuario, dirección de poses y galería online privada.");
           if (lines.length) { m.push("", "*Extras:*"); m.push.apply(m, lines); }
+          if (printLines.length) { m.push("", "*Impresiones:*"); m.push.apply(m, printLines); }
           m.push("", "*Duración estimada:* " + mins + " minutos", "*Fotos de prueba:* mínimo " + pruebas, "*Total de fotos editadas:* " + fotos);
           if (other) m.push("*Traslado a otro lugar:* por cotizar");
           m.push("*Total estimado:* " + money(total) + (other ? " + traslado" : ""));
@@ -1171,40 +1234,26 @@ class Component extends DCLogic {
           m.push("", "¿Me confirman disponibilidad y la cotización final?");
           return m.join("\n");
         }
-        var curTier = COT_TIERS.filter(function (t) { return nF >= t[0] && nF <= t[1]; })[0];
         return {
           open: !!st.cotOpen,
           openAny: function () { self.setState({ cotOpen: true }); },
           openHere: function () { self.setState({ cotOpen: true, cotExp: sel || st.cotExp }); },
           close: function () { self.setState({ cotOpen: false }); },
           incl: incl,
-          exps: PACKAGES.map(function (p) { var o = chip(st.cotExp === p.id); o.label = TABNAME[p.id][0]; o.pick = function () { self.setState({ cotExp: p.id }); }; return o; })
-            .concat([(function () { var o = chip(st.cotExp === "otra"); o.label = "Otra"; o.pick = function () { self.setState({ cotExp: "otra" }); }; return o; })()]),
+          exps: PACKAGES.map(function (p) { var o = chip(exp === p.id); o.label = TABNAME[p.id][0]; o.pick = function () { self.setState({ cotExp: p.id }); }; return o; })
+            .concat([(function () { var o = chip(exp === "otra"); o.label = "Otra"; o.pick = function () { self.setState({ cotExp: "otra" }); }; return o; })()]),
+          hasExp: !!exp, noExp: !exp, expName: exp === "otra" ? "tu sesión" : (expObj ? expObj.title : ""),
+          groups: groups.map(function (g) { return { title: g.title, items: g.list.map(view) }; }),
+          prints: COT_PRINTS.map(view),
           fotos: nF,
-          fotosLabel: (nF === 1 ? "1 foto editada" : nF + " fotos editadas") + " · " + money(fotosCost),
+          fotosLabel: nF === 1 ? "1 foto editada" : nF + " fotos editadas",
           fotosDecOp: nF > 1 ? 1 : 0.35,
           fotosDec: function () { if (nF > 1) self.setState({ cotN: nF - 1 }); },
           fotosInc: function () { if (nF < 200) self.setState({ cotN: nF + 1 }); },
-          tiers: COT_TIERS.map(function (t) {
-            var on = t === curTier;
-            return { range: t[1] > 900 ? t[0] + " o más" : t[0] + " a " + t[1], price: money(t[2]) + " c/u", bg: on ? "#222020" : "#F2E4D2", fg: on ? "#FEFEFE" : "#222020" };
-          }),
           locs: locs.map(function (l) {
             var on = !!L[l.id];
-            return { name: l.place, price: l.price, on: on, checked: on ? "true" : "false", boxBg: on ? accent : "#FEFEFE",
+            return { name: l.place, on: on, checked: on ? "true" : "false", boxBg: on ? accent : "#FEFEFE",
               toggle: function () { var nl = Object.assign({}, L); nl[l.id] = !on; self.setState({ cotL: nl }); } };
-          }),
-          hasExp: !!exp, noExp: !exp, expName: exp === "otra" ? "tu sesión" : (expObj ? expObj.title : ""),
-          qtys: qList.map(function (it) {
-            var n = q[it.id] || 0;
-            return { name: it.name, note: it.note, n: n, decOp: n ? 1 : 0.35,
-              dec: function () { if (n > 0) { var nq = Object.assign({}, q); nq[it.id] = n - 1; self.setState({ cotQ: nq }); } },
-              inc: function () { if (n < 99) { var nq = Object.assign({}, q); nq[it.id] = n + 1; self.setState({ cotQ: nq }); } } };
-          }),
-          chks: cList.map(function (it) {
-            var on = !!c[it[0]];
-            return { name: it[1], price: money(it[2]), on: on, checked: on ? "true" : "false", boxBg: on ? accent : "#FEFEFE",
-              toggle: function () { var nc = Object.assign({}, c); nc[it[0]] = !on; if (!on && it[4]) it[4].split(" ").forEach(function (k) { nc[k] = false; }); self.setState({ cotC: nc }); } };
           }),
           name: st.cotName, date: st.cotDate, idea: st.cotIdea,
           setName: function (e) { st.cotName = e && e.target ? e.target.value : ""; },
