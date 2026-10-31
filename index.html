@@ -334,6 +334,43 @@ Crea tu paquete aquí
 <span class="faq-ico" aria-hidden="true" style="flex: none; width: 30px; height: 30px; border-radius: 999px; transition: transform .2s; background: {{accent}}; color: #222020; display: flex; align-items: center; justify-content: center; font-size: 20px; line-height: 1">+</span>
 </summary>
 <p style="margin: 0; padding: 0 18px 18px; font-size: 16px; color: #3D3B3E; white-space: pre-line">{{f.a}}</p>
+<sc-if value="{{f.tras}}" hint-placeholder-val="{{false}}">
+<div style="padding: 0 18px 18px">
+<div style="width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 14px; padding: 20px; border-radius: 10px; background: #222020; color: #FEFEFE; box-sizing: border-box">
+<div style="display: flex; align-items: center; gap: 12px">
+<span aria-hidden="true" style="flex: none; width: 40px; height: 40px; border-radius: 999px; background: {{accent}}; color: #222020; display: flex; align-items: center; justify-content: center">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg>
+</span>
+<div style="display: flex; flex-direction: column">
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 25px; line-height: 1.1">Traslados</span>
+<span style="font-size: 13px; color: #F2E4D2">Recargo según el lugar de la sesión</span>
+</div>
+</div>
+<ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column">
+<sc-for list="{{trasList}}" as="t" hint-placeholder-count="6">
+<li style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px dashed #3D3B3E">
+<span style="font-size: 15px">{{t.place}}</span>
+<sc-if value="{{t.first}}" hint-placeholder-val="{{false}}">
+<span style="flex: none; padding: 4px 12px; border-radius: 999px; border: 1.5px solid {{accent}}; color: {{accent}}; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 13px">{{t.price}}</span>
+</sc-if>
+<sc-if value="{{t.rest}}" hint-placeholder-val="{{true}}">
+<span style="flex: none; min-width: 52px; text-align: center; padding: 4px 12px; border-radius: 999px; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 13px">{{t.price}}</span>
+</sc-if>
+</li>
+</sc-for>
+</ul>
+<span style="font-size: 13px; color: #F2E4D2">Si la sesión requiere hospedaje en la localidad, este tiene un costo adicional.</span>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{f.cot}}" hint-placeholder-val="{{false}}">
+<div style="padding: 0 18px 18px">
+<button type="button" onClick="{{cot.openAny}}" style="display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 22px; border-radius: 999px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px; white-space: nowrap; cursor: pointer">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+Calcula tu paquete aquí
+</button>
+</div>
+</sc-if>
 </details>
 </sc-for>
 </div>
@@ -1046,7 +1083,7 @@ var FAQ = [
   { q: "¿Cómo puedo pagar?", a: "Por Yappy (6631-3762) o en efectivo. En las sesiones se abona el 50 % al firmar el contrato y el otro 50 % el día previo a la sesión. En graduaciones, eventos y carreras, el segundo 50 % se paga el mismo día." },
   { q: "¿Qué horarios tienen?", a: "Entre semana: 7:00 p. m. en estudio.\nFines de semana: 10:00 a. m. en estudio y 4:30 p. m. en exteriores.\nEn el calendario de cada propuesta ves al instante qué días están libres." },
   { q: "¿Dónde queda el estudio?", a: "En el barrio Nuevo México, Las Tablas. Al confirmar tu reserva te enviamos la ubicación exacta por WhatsApp." },
-  { q: "¿Hacen sesiones fuera de Las Tablas?", a: "¡Claro! Viajamos a donde estés. El traslado tiene un recargo según el lugar: Guararé y Pocrí +$5; Pedasí, Chitré y Tonosí +$10; Aguadulce y Santiago +$15; Penonomé +$20; Boquete y Panamá +$60. Si la sesión requiere hospedaje en la localidad, este tiene un costo adicional." },
+  { q: "¿Hacen sesiones fuera de Las Tablas?", a: "¡Claro! Viajamos a donde estés. El traslado tiene un recargo según el lugar:", tras: true },
   { q: "¿Necesito saber posar?", a: "Para nada. Te guiamos en todo momento, sin poses forzadas, para que te sientas cómodo y todo fluya natural." },
   { q: "¿Cómo elijo mis fotos?", a: "Después de la sesión te enviamos tus fotos de prueba en una galería online privada. Tú escoges tus favoritas y nosotros las editamos." },
   { q: "¿Cuándo recibo mis fotos?", a: "Sesiones: las fotos de prueba llegan de 48 a 72 horas hábiles después de la sesión, y las editadas dos semanas después de que nos envías tu selección.\nEventos: las fotos editadas llegan 10 días después del evento.\nCarreras: la cobertura completa queda lista dentro de los 5 días posteriores." },
@@ -1054,7 +1091,7 @@ var FAQ = [
   { q: "¿Puedo llevar a más personas a mi sesión?", a: "Sí. Puedes agregar personas extra para fotos grupales o familiares; cada persona suma 10 minutos de sesión y 1 foto editada." },
   { q: "¿Puedo agregar maquillaje, peinado o más cambios de vestuario?", a: "Sí. Lo encuentras en «Mejora tu experiencia» dentro de cada experiencia. Cada cambio de vestuario extra suma 10 minutos a tu sesión." },
   { q: "¿Hacen impresiones, álbumes o cuadros?", a: "Sí. Tenemos impresiones desde $3.50, fotografía enmarcada 16×20 y álbum fotográfico de 20 páginas. Pídelos al reservar o agrégalos en tu paquete." },
-  { q: "¿Y si ningún paquete es exactamente lo que busco?", a: "Al final de cada experiencia encuentras «Crea tu paquete aquí». Eliges tus fotos, lugares y extras, ves el total al instante y nos envías tu cotización por WhatsApp." }
+  { q: "¿Y si ningún paquete es exactamente lo que busco?", a: "Arma tu propio paquete: eliges tus fotos, lugares y extras, ves el total al instante y nos envías tu cotización por WhatsApp.", cot: true }
 ];
 
 var B = "img/";
@@ -1429,6 +1466,7 @@ class Component extends DCLogic {
       waGeneral: WA + encodeURIComponent("Hola, NC Studio. Quiero reservar o cotizar una sesión."),
       portfolio: portfolio,
       faq: FAQ,
+      trasList: TRAS.map(function (t, i) { return { place: t[0], price: t[1], first: i === 0, rest: i > 0 }; }),
       lb: lb,
       steps: [
         { n: "01", title: "Reserva y contrato", text: "Confirmamos tu fecha con el abono del 50 % y la firma del contrato." },
