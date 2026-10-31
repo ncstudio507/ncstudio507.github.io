@@ -289,12 +289,12 @@ WhatsApp
 
 <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; padding: 26px 24px; border-radius: 10px; background: #222020; color: #FEFEFE">
 <div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 6px">
-<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 28px; line-height: 1.15">¿Ningún paquete llena tus expectativas al 100 %?</span>
-<span style="font-size: 15px; color: #F2E4D2">Arma tu propio paquete desde $55, elige solo lo que necesitas y recibe tu cotización al instante.</span>
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 28px; line-height: 1.15">¿Quieres un paquete creado exclusivamente para ti?</span>
+<span style="font-size: 15px; color: #F2E4D2">Elige tus fotos, lugares y extras, y recibe tu cotización al instante. Desde $55.</span>
 </div>
 <button type="button" onClick="{{cot.openHere}}" style="display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 24px; border-radius: 999px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px; cursor: pointer">
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
-Arma tu paquete
+Crea tu paquete aquí
 </button>
 </div>
 
@@ -419,7 +419,7 @@ Arma tu paquete
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 16px; border-radius: 8px; border: 1.5px solid #222020">
 <div style="display: flex; flex-direction: column; min-width: 0; gap: 2px">
 <span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.fotosLabel}}</span>
-<span style="font-size: 12px; color: #3D3B3E">Cada foto suma 8 minutos de sesión y 5 fotos de prueba</span>
+<span style="font-size: 12px; color: #3D3B3E">Cada foto suma 10 minutos de sesión y 5 fotos de prueba</span>
 </div>
 <div style="flex: none; display: flex; align-items: center; gap: 6px">
 <button type="button" onClick="{{cot.fotosDec}}" aria-label="Una foto menos" style="width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 22px; cursor: pointer; opacity: {{cot.fotosDecOp}}">−</button>
@@ -1118,7 +1118,7 @@ class Component extends DCLogic {
         var locs = TRAS.map(function (t, i) { var v = parseFloat(String(t[1]).replace(/[^0-9.]/g, "")) || 0; return { id: "t" + i, place: i === 0 ? "Estudio o Las Tablas" : t[0], v: v, price: v ? "+" + money(v) : "Sin costo" }; });
         locs.push({ id: "otro", place: "Otro lugar", v: 0, price: "Se cotiza", other: true });
         var fotosCost = cotFotosPrice(nF);
-        var total = COT_SERV + fotosCost, mins = nF * 8, fotos = nF, pruebas = nF * 5, lines = [];
+        var total = COT_SERV + fotosCost, mins = nF * 10, fotos = nF, pruebas = nF * 5, lines = [];
         COT_QTY.forEach(function (it) {
           var n = q[it.id] || 0; if (!n) return;
           total += n * it.price; mins += n * it.min; fotos += n * (it.fotos || 0); pruebas += n * 5 * (it.fotos || 0);
