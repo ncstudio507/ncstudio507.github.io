@@ -405,7 +405,7 @@ Crea tu paquete aquí
 
 <div style="display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 8px; background: #F2E4D2">
 <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">Tu paquete incluye</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">La propuesta inicial incluye</span>
 </div>
 <ul style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px 14px">
 <sc-for list="{{cot.incl}}" as="it" hint-placeholder-count="8">
@@ -1225,7 +1225,7 @@ class Component extends DCLogic {
         var lugares = picked.length ? picked.map(function (l) { return l.place; }).join(", ") : "Por definir";
         var expObj = PACKAGES.filter(function (p) { return p.id === exp; })[0];
         var expName = expObj ? TABNAME[expObj.id][0] : (exp === "otra" ? "Otra" : "Por definir");
-        var incl = [mins + " minutos de sesión", "Mínimo " + pruebas + " fotos de prueba", fotos + (fotos === 1 ? " foto editada" : " fotos editadas") + " en alta resolución", "Asesoría previa personalizada", "1 cambio de vestuario", "Dirección de poses", "Galería online privada"];
+        var incl = ["30 minutos de sesión", "Mínimo 15 fotos de prueba", "3 fotos editadas en alta resolución", "Asesoría previa personalizada", "1 cambio de vestuario", "Dirección de poses", "Galería online privada"];
         function fmtDate(v) { if (!v) return "Por definir"; var a = v.split("-"); var d = new Date(+a[0], +a[1] - 1, +a[2]); return WDAYS[d.getDay()] + " " + d.getDate() + " de " + MONTHS[d.getMonth()] + " de " + d.getFullYear(); }
         function chip(on) { return { pressed: on ? "true" : "false", bg: on ? "#222020" : "#FEFEFE", fg: on ? "#FEFEFE" : "#222020", border: on ? "#222020" : "#D9CDBE" }; }
         function view(it) {
@@ -1247,7 +1247,7 @@ class Component extends DCLogic {
           m.push("*Sesión:* " + expName);
           m.push("*Lugar:* " + lugares);
           m.push("*Fecha tentativa:* " + fmtDate(st.cotDate));
-          m.push("", "*Paquete base (" + money(COT_SERV) + "):* 3 fotos editadas, asesoría previa, 1 cambio de vestuario, dirección de poses y galería online privada.");
+          m.push("", "*Propuesta inicial (" + money(COT_SERV) + "):* 30 min de sesión, 3 fotos editadas, asesoría previa, 1 cambio de vestuario, dirección de poses y galería online privada.");
           if (extraF) m.push("*Fotos editadas extra:* " + extraF + " (" + money(fotosCost) + ")");
           if (lines.length) { m.push("", "*Extras:*"); m.push.apply(m, lines); }
           if (printLines.length) { m.push("", "*Impresiones:*"); m.push.apply(m, printLines); }
