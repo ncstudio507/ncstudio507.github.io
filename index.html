@@ -987,15 +987,18 @@ var BUSY = ["2026-10-30","2026-10-31","2026-11-01","2026-11-05","2026-11-07","20
 var BUSY_UPDATED = "30 de octubre de 2026, 6:58 p. m.";
 var COT_SERV = 55;
 var COT_INCL_FOTOS = 3;
-// Total por cantidad de fotos: 3 = $55; fotos 4 a 6 a $10 c/u (6 = $85); de 6 a 12 el precio sube parejo hasta $110 (9) y $135 (12), o sea (110 - 85) / 3 = $8.33 por foto; de 13 en adelante $7.50 c/u.
+// Total por cantidad de fotos: 3 = $55; fotos 4 a 6 a $10 c/u (6 = $85); de 6 a 12 sube $8.33 por foto (9 = $110, 12 = $135);
+// fotos 13 a 24 a $7.50 c/u; de la 25 en adelante a $3.50 c/u. Cada total se redondea hacia arriba a un múltiplo de $5.
+function up5(x) { return Math.ceil(Math.round(x * 100) / 500) * 5; }
 function cotTotalFotos(n) {
   var t;
   if (n <= 6) t = 55 + (n - 3) * 10;
   else if (n <= 12) t = 85 + (n - 6) * 25 / 3;
-  else t = 135 + (n - 12) * 7.5;
-  return Math.round(t * 100) / 100;
+  else if (n <= 24) t = 135 + (n - 12) * 7.5;
+  else t = 135 + 12 * 7.5 + (n - 24) * 3.5;
+  return up5(t);
 }
-function cotFotosPrice(extra) { return Math.round((cotTotalFotos(extra + 3) - 55) * 100) / 100; }
+function cotFotosPrice(extra) { return cotTotalFotos(extra + 3) - 55; }
 var COT_SES = ["levelup", "suenos", "dulce", "estudio", "folklore", "primer", "gran", "granext", "gameon"];
 var COT_EVT = ["infantil", "otra"];
 function cq(id, name, unit, o) { o = o || {}; o.id = id; o.kind = "q"; o.name = name; o.cost = o.cost || function (n) { return n * unit; }; return o; }
@@ -1238,7 +1241,7 @@ class Component extends DCLogic {
           if (printLines.length) { m.push("", "*Impresiones:*"); m.push.apply(m, printLines); }
           m.push("", "*Duración estimada:* " + mins + " minutos", "*Fotos de prueba:* mínimo " + pruebas, "*Total de fotos editadas:* " + fotos);
           if (other) m.push("*Traslado a otro lugar:* por cotizar");
-          m.push("*Total estimado:* " + money(total) + (other ? " + traslado" : ""));
+          m.push("*Total estimado:* " + money(up5(total)) + (other ? " + traslado" : ""));
           if (st.cotIdea.trim()) m.push("", "*Mi idea:* " + st.cotIdea.trim());
           m.push("", "¿Me confirman disponibilidad y la cotización final?");
           return m.join("\n");
@@ -1268,7 +1271,7 @@ class Component extends DCLogic {
           setName: function (e) { st.cotName = e && e.target ? e.target.value : ""; },
           setDate: function (e) { st.cotDate = e && e.target ? e.target.value : ""; },
           setIdea: function (e) { st.cotIdea = e && e.target ? e.target.value : ""; },
-          total: money(total) + (other ? " + traslado" : ""),
+          total: money(up5(total)) + (other ? " + traslado" : ""),
           meta: mins + " min de sesión · " + fotos + (fotos === 1 ? " foto editada" : " fotos editadas"),
           wa: WA + encodeURIComponent(build()),
           send: function (e) { var a = e && e.currentTarget; if (a && a.setAttribute) a.setAttribute("href", WA + encodeURIComponent(build())); }
