@@ -390,6 +390,19 @@ Crea tu paquete aquí
 </div>
 <div data-keep-scroll="cot" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 22px">
 
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">1. Tus datos</span>
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tu nombre
+<input type="text" autocomplete="name" value="{{cot.name}}" onInput="{{cot.setName}}" placeholder="Nombre y apellido" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Número de teléfono
+<input type="tel" inputmode="tel" autocomplete="tel" value="{{cot.phone}}" onInput="{{cot.setPhone}}" placeholder="6000-0000" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Correo electrónico
+<input type="email" inputmode="email" autocomplete="email" value="{{cot.email}}" onInput="{{cot.setEmail}}" placeholder="tucorreo@ejemplo.com" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+</label>
+</div>
+
 <div style="display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 8px; background: #F2E4D2">
 <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px">
 <span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">Tu paquete incluye</span>
@@ -405,7 +418,7 @@ Crea tu paquete aquí
 </div>
 
 <div style="display: flex; flex-direction: column; gap: 10px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">1. ¿Qué tipo de sesión quieres?</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">2. ¿Qué tipo de sesión quieres?</span>
 <div role="group" aria-label="Tipo de sesión" style="display: flex; flex-wrap: wrap; gap: 8px">
 <sc-for list="{{cot.exps}}" as="o" hint-placeholder-count="8">
 <button type="button" onClick="{{o.pick}}" aria-pressed="{{o.pressed}}" style="min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1.5px solid {{o.border}}; background: {{o.bg}}; color: {{o.fg}}; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 13px; cursor: pointer">{{o.label}}</button>
@@ -415,7 +428,7 @@ Crea tu paquete aquí
 
 <sc-if value="{{cot.hasExp}}" hint-placeholder-val="{{true}}">
 <div style="display: flex; flex-direction: column; gap: 4px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">2. Personaliza tu sesión</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">3. Personaliza tu sesión</span>
 <span style="font-size: 13px; color: #3D3B3E">Extras pensados para {{cot.expName}}.</span>
 <sc-for list="{{cot.groups}}" as="g" hint-placeholder-count="4">
 <div style="display: flex; flex-direction: column; margin-top: 10px">
@@ -458,7 +471,7 @@ Crea tu paquete aquí
 </sc-if>
 
 <div style="display: flex; flex-direction: column; gap: 10px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">3. ¿Cuántas fotos editadas quieres?</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">4. ¿Cuántas fotos editadas quieres?</span>
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 16px; border-radius: 8px; border: 1.5px solid #222020">
 <div style="display: flex; flex-direction: column; min-width: 0; gap: 2px">
 <span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.fotosLabel}}</span>
@@ -473,7 +486,7 @@ Crea tu paquete aquí
 </div>
 
 <div style="display: flex; flex-direction: column; gap: 4px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">4. ¿Dónde será la sesión?</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">5. ¿Dónde será la sesión?</span>
 <span style="font-size: 13px; color: #3D3B3E">Marca el lugar o los lugares donde te gustaría la sesión.</span>
 <sc-for list="{{cot.locs}}" as="l" hint-placeholder-count="7">
 <button type="button" role="checkbox" aria-checked="{{l.checked}}" onClick="{{l.toggle}}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border: 0; border-bottom: 1px solid #EFE6DA; background: transparent; color: #222020; text-align: left; cursor: pointer; width: 100%">
@@ -490,7 +503,7 @@ Crea tu paquete aquí
 </div>
 
 <div style="display: flex; flex-direction: column; gap: 4px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">5. ¿Quieres fotos impresas?</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">6. ¿Quieres fotos impresas?</span>
 <span style="font-size: 13px; color: #3D3B3E">Elige cuántas quieres de cada tamaño.</span>
 <sc-for list="{{cot.prints}}" as="x" hint-placeholder-count="4">
 <sc-if value="{{x.isQty}}" hint-placeholder-val="{{false}}">
@@ -524,10 +537,7 @@ Crea tu paquete aquí
 </div>
 
 <div style="display: flex; flex-direction: column; gap: 12px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">6. Cuéntanos un poco más</span>
-<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tu nombre
-<input type="text" value="{{cot.name}}" onInput="{{cot.setName}}" placeholder="Nombre y apellido" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
-</label>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">7. Cuéntanos un poco más</span>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Fecha tentativa
 <input type="date" value="{{cot.date}}" onInput="{{cot.setDate}}" onChange="{{cot.setDate}}" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
 </label>
@@ -1048,7 +1058,7 @@ function slotsFor(d) { var w = d.getDay(); return (w === 0 || w === 6) ? ["10:00
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0, cotOpen: false, cotExp: null, cotN: 3, cotL: {}, cotQ: {}, cotC: {}, cotName: "", cotDate: "", cotIdea: "" };
+    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0, cotOpen: false, cotExp: null, cotN: 3, cotL: {}, cotQ: {}, cotC: {}, cotName: "", cotPhone: "", cotEmail: "", cotDate: "", cotIdea: "" };
   }
   componentDidMount() {
     var self = this;
@@ -1232,6 +1242,8 @@ class Component extends DCLogic {
         function build() {
           var m = ["Hola, NC Studio. Armé mi paquete personalizado en la página:", ""];
           m.push("*Nombre:* " + (st.cotName.trim() || "—"));
+          m.push("*Teléfono:* " + (st.cotPhone.trim() || "—"));
+          m.push("*Correo:* " + (st.cotEmail.trim() || "—"));
           m.push("*Sesión:* " + expName);
           m.push("*Lugar:* " + lugares);
           m.push("*Fecha tentativa:* " + fmtDate(st.cotDate));
@@ -1267,7 +1279,9 @@ class Component extends DCLogic {
             return { name: l.place, on: on, checked: on ? "true" : "false", boxBg: on ? accent : "#FEFEFE",
               toggle: function () { var nl = Object.assign({}, L); nl[l.id] = !on; self.setState({ cotL: nl }); } };
           }),
-          name: st.cotName, date: st.cotDate, idea: st.cotIdea,
+          name: st.cotName, phone: st.cotPhone, email: st.cotEmail, date: st.cotDate, idea: st.cotIdea,
+          setPhone: function (e) { st.cotPhone = e && e.target ? e.target.value : ""; },
+          setEmail: function (e) { st.cotEmail = e && e.target ? e.target.value : ""; },
           setName: function (e) { st.cotName = e && e.target ? e.target.value : ""; },
           setDate: function (e) { st.cotDate = e && e.target ? e.target.value : ""; },
           setIdea: function (e) { st.cotIdea = e && e.target ? e.target.value : ""; },
