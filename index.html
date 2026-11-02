@@ -482,7 +482,16 @@ Calcula tu paquete aquí
 </div>
 
 <div style="display: flex; flex-direction: column; gap: 10px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">2. ¿Quieres fotos editadas adicionales?</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">2. ¿Qué tipo de sesión quieres?</span>
+<div role="group" aria-label="Tipo de sesión" style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{cot.exps}}" as="o" hint-placeholder-count="8">
+<button type="button" onClick="{{o.pick}}" aria-pressed="{{o.pressed}}" style="min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1.5px solid {{o.border}}; background: {{o.bg}}; color: {{o.fg}}; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 13px; cursor: pointer">{{o.label}}</button>
+</sc-for>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">3. ¿Quieres fotos editadas adicionales?</span>
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 16px; border-radius: 8px; border: 1.5px solid #222020">
 <div style="display: flex; flex-direction: column; min-width: 0; gap: 2px">
 <span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.fotosLabel}}</span>
@@ -494,15 +503,6 @@ Calcula tu paquete aquí
 <span aria-live="polite" style="min-width: 34px; text-align: center; font-family: 'EB Garamond', Georgia, serif; font-size: 30px; line-height: 1">{{cot.extraFotos}}</span>
 <button type="button" onClick="{{cot.fotosInc}}" aria-label="Una foto adicional más" style="width: 44px; height: 44px; border-radius: 6px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 22px; cursor: pointer">+</button>
 </div>
-</div>
-</div>
-
-<div style="display: flex; flex-direction: column; gap: 10px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">3. ¿Qué tipo de sesión quieres?</span>
-<div role="group" aria-label="Tipo de sesión" style="display: flex; flex-wrap: wrap; gap: 8px">
-<sc-for list="{{cot.exps}}" as="o" hint-placeholder-count="8">
-<button type="button" onClick="{{o.pick}}" aria-pressed="{{o.pressed}}" style="min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1.5px solid {{o.border}}; background: {{o.bg}}; color: {{o.fg}}; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 13px; cursor: pointer">{{o.label}}</button>
-</sc-for>
 </div>
 </div>
 
