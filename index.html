@@ -190,22 +190,6 @@ Ver disponibilidad y reservar
 </div>
 </sc-if>
 
-<sc-if value="{{current.hasTesti}}" hint-placeholder-val="{{true}}">
-<div style="display: flex; flex-direction: column; gap: 14px">
-<h4 style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 30px">Lo que dicen de {{current.title}}</h4>
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px">
-<sc-for list="{{current.testi}}" as="q" hint-placeholder-count="2">
-<blockquote style="margin: 0; display: flex; flex-direction: column; gap: 12px; padding: 22px 20px; border-radius: 10px; background: #FEFEFE">
-<div style="display: flex; align-items: center; gap: 14px">
-<img src="{{q.src}}" alt="" style="flex: none; width: 64px; height: 64px; border-radius: 999px; object-fit: cover; object-position: 50% 22%; display: block; border: 2px solid {{accent}}">
-<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 23px; line-height: 1.15">{{q.title}}</span>
-</div>
-<span style="font-size: 15px; color: #3D3B3E">{{q.text}}</span>
-</blockquote>
-</sc-for>
-</div>
-</div>
-</sc-if>
 
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px">
 <sc-for list="{{current.info}}" as="inf" hint-placeholder-count="3">
@@ -295,6 +279,23 @@ Crea tu paquete aquí
 </button>
 </div>
 <p style="margin: -14px 0 0; text-align: center; font-size: 15px; color: #3D3B3E">¿Tienes dudas? <a href="#preguntas" style="font-family: Montserrat, sans-serif; font-weight: 700; color: #222020">Mira las preguntas frecuentes</a></p>
+
+<sc-if value="{{current.hasTesti}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; gap: 14px">
+<h4 style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 30px">Lo que dicen de {{current.title}}</h4>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px">
+<sc-for list="{{current.testi}}" as="q" hint-placeholder-count="2">
+<blockquote style="margin: 0; display: flex; flex-direction: column; gap: 12px; padding: 22px 20px; border-radius: 10px; background: #FEFEFE">
+<div style="display: flex; align-items: center; gap: 14px">
+<img src="{{q.src}}" alt="" style="flex: none; width: 64px; height: 64px; border-radius: 999px; object-fit: cover; object-position: 50% 22%; display: block; border: 2px solid {{accent}}">
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 23px; line-height: 1.15">{{q.title}}</span>
+</div>
+<span style="font-size: 15px; color: #3D3B3E">{{q.text}}</span>
+</blockquote>
+</sc-for>
+</div>
+</div>
+</sc-if>
 
 </div>
 </sc-if>
