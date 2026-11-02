@@ -674,6 +674,47 @@ Enviar cotización por WhatsApp
 </div>
 </sc-if>
 
+<sc-if value="{{cot.hasSug}}" hint-placeholder-val="{{false}}">
+<div style="position: fixed; inset: 0; z-index: 80; background: rgba(34, 32, 32, 0.8); display: flex; align-items: center; justify-content: center; padding: 14px; box-sizing: border-box">
+<div role="alertdialog" aria-modal="true" aria-label="Tenemos un paquete parecido" style="width: 100%; max-width: 460px; max-height: 92vh; overflow-y: auto; background: #FEFEFE; color: #222020; border-radius: 10px; padding: 22px 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px">
+<span style="font-family: Allura, cursive; font-size: 36px; line-height: 1; color: {{accent}}">¡Espera!</span>
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 28px; line-height: 1.1">Tenemos un paquete muy parecido que te sale mejor</span>
+<div style="display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 8px; background: #222020; color: #FEFEFE">
+<div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">{{cot.sug.exp}} · {{cot.sug.name}}</span>
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 32px; line-height: 1; color: {{accent}}">{{cot.sug.price}}</span>
+</div>
+<ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 5px">
+<sc-for list="{{cot.sug.items}}" as="it" hint-placeholder-count="6">
+<li style="display: flex; gap: 8px; align-items: flex-start; font-size: 14px; line-height: 1.35; color: #F2E4D2">
+<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex: none; margin-top: 2px"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+<span>{{it}}</span>
+</li>
+</sc-for>
+</ul>
+</div>
+<sc-if value="{{cot.sug.hasExtra}}" hint-placeholder-val="{{false}}">
+<span style="font-size: 14px; color: #3D3B3E">{{cot.sug.extraText}}</span>
+</sc-if>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: center">
+<div style="display: flex; flex-direction: column; gap: 2px; padding: 10px 6px; border-radius: 6px; background: #F2E4D2">
+<span style="font-family: Montserrat, sans-serif; font-size: 12px; font-weight: 600; color: #3D3B3E">Lo que armaste</span>
+<span style="font-family: Montserrat, sans-serif; font-size: 18px; font-weight: 700; text-decoration: line-through">{{cot.sug.mine}}</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px; padding: 10px 6px; border-radius: 6px; background: #FDF1E2; border: 1.5px solid {{accent}}">
+<span style="font-family: Montserrat, sans-serif; font-size: 12px; font-weight: 600; color: #3D3B3E">Con este paquete</span>
+<span style="font-family: Montserrat, sans-serif; font-size: 18px; font-weight: 700">{{cot.sug.theirs}}</span>
+</div>
+</div>
+<span style="font-size: 15px; text-align: center">Te ahorras <strong style="font-family: Montserrat, sans-serif">{{cot.sug.save}}</strong>. ¿Lo quieres?</span>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<button type="button" onClick="{{cot.sugYes}}" style="min-height: 50px; padding: 0 18px; border-radius: 6px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px; cursor: pointer">Sí, quiero ese paquete</button>
+<button type="button" onClick="{{cot.sugNo}}" style="min-height: 46px; padding: 0 18px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 15px; cursor: pointer">No, sigo con el mío</button>
+</div>
+</div>
+</div>
+</sc-if>
+
 <sc-if value="{{cal.open}}" hint-placeholder-val="{{false}}">
 <div style="position: fixed; inset: 0; z-index: 60; background: rgba(34, 32, 32, 0.75); display: flex; align-items: center; justify-content: center; padding: 12px; box-sizing: border-box">
 <div role="dialog" aria-modal="true" aria-label="Disponibilidad" style="width: 100%; max-width: 540px; max-height: 94vh; overflow-y: auto; background: #FEFEFE; color: #222020; border-radius: 10px; padding: 22px 18px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px">
@@ -1183,6 +1224,27 @@ var WDAYS = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado
 function iso(d) { var m = d.getMonth() + 1, x = d.getDate(); return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m + "-" + (x < 10 ? "0" : "") + x; }
 function slotsFor(d) { var w = d.getDay(); return (w === 0 || w === 6) ? ["10:00 a. m. · Estudio", "4:30 p. m. · Exteriores"] : ["7:00 p. m. · Estudio"]; }
 
+function num(s) { return parseFloat(String(s).replace(/[^0-9.]/g, "")) || 0; }
+function sortedProps(pkg) {
+  return pkg.proposals.slice().sort(function (a, b) { return num(b.price) - num(a.price); }).map(function (pr, idx) {
+    return { name: /^Propuesta \d+$/.test(pr.name) ? "Propuesta " + (idx + 1) : pr.name, price: pr.price, items: pr.items, small: pr.small || "" };
+  });
+}
+// Lo que una propuesta ya incluye, en términos de los extras de la calculadora.
+function propCovers(pr) {
+  var t = pr.items.join(" | "), cv = { q: {}, c: {} }, m;
+  if ((m = t.match(/más (\d+) cambios? de vestuario/i))) cv.q.vest = +m[1];
+  else if ((m = t.match(/(\d+) cambios? de vestuario/i))) cv.q.vest = +m[1] - 1;
+  if ((m = t.match(/(\d+) locaciones/i))) cv.q.loc = +m[1] - 1;
+  if ((m = t.match(/Hasta (\d+) persona/i))) cv.q.pers = +m[1];
+  if (/Maquillaje y peinado/i.test(t)) { cv.c.maq = true; cv.c.pei = true; }
+  if (/Moodboard/i.test(t)) cv.c.mood = true;
+  if (/Reunión creativa/i.test(t)) { cv.c.rcv = true; cv.c.rcp = true; }
+  if (/Vestido de 15/i.test(t)) cv.c.ves15 = true;
+  if (/detrás de cámaras: gratis/i.test(pr.small)) cv.c.bts = true;
+  return cv;
+}
+function propFotos(pr) { var m = pr.items.join(" ").match(/(\d+) fotos editadas/); return m ? +m[1] : 0; }
 function calModel(self, K, accent) {
   var st = self.state, now = new Date(), todayIso = iso(now), off = st[K.off] || 0;
   var first = new Date(now.getFullYear(), now.getMonth() + off, 1);
@@ -1228,7 +1290,7 @@ function calModel(self, K, accent) {
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0, cotOpen: false, cotExp: null, cotN: 3, cotL: {}, cotQ: {}, cotC: {}, cotName: "", cotPhone: "", cotEmail: "", cotDate: "", cotIdea: "", cotOff: 0, cotSel: null, cotSlot: null };
+    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0, cotOpen: false, cotExp: null, cotN: 3, cotL: {}, cotQ: {}, cotC: {}, cotName: "", cotPhone: "", cotEmail: "", cotDate: "", cotIdea: "", cotOff: 0, cotSel: null, cotSlot: null, cotDeclined: "" };
   }
   componentDidMount() {
     var self = this;
@@ -1409,6 +1471,29 @@ class Component extends DCLogic {
           return { isQty: false, isChk: true, name: it.name, on: on, checked: on ? "true" : "false", boxBg: on ? accent : "#FEFEFE",
             toggle: function () { var nc = Object.assign({}, c); nc[it.id] = !on; if (!on && it.excl) it.excl.forEach(function (k) { nc[k] = false; }); self.setState({ cotC: nc }); } };
         }
+        // ¿Hay una propuesta ya armada parecida y más barata?
+        var sug = null;
+        if (expObj && expObj.proposals && st.cotOpen) {
+          var core = COT_SERV + fotosCost, items = [];
+          groups.forEach(function (g) { g.list.forEach(function (it) { items.push(it); }); });
+          items.forEach(function (it) { if (it.kind === "q") { var n = q[it.id] || 0; if (n) core += it.cost(n); } else if (c[it.id]) core += it.price; });
+          sortedProps(expObj).forEach(function (pr) {
+            if (sug || propFotos(pr) !== nF) return;
+            var cv = propCovers(pr), extra = 0, extraNames = [];
+            items.forEach(function (it) {
+              if (it.kind === "q") {
+                var n = q[it.id] || 0, inc = cv.q[it.id] || 0;
+                if (n > inc) { extra += it.cost(n) - it.cost(inc); extraNames.push((n - inc) + " × " + it.name.toLowerCase()); }
+              } else if (c[it.id] && !cv.c[it.id]) { extra += it.price; extraNames.push(it.name.toLowerCase()); }
+            });
+            var equiv = num(pr.price) + extra, key = expObj.id + "|" + pr.name;
+            if (core > equiv && st.cotDeclined !== key) {
+              sug = { key: key, exp: expObj.title, name: pr.name, price: pr.price, items: pr.items,
+                mine: money(core), theirs: money(equiv), save: money(core - equiv),
+                hasExtra: extra > 0, extraText: "Más lo que elegiste aparte: " + extraNames.join(", ") + " (" + money(extra) + ")." };
+            }
+          });
+        }
         var ccal = calModel(self, { off: "cotOff", sel: "cotSel", slot: "cotSlot" }, accent);
         function build() {
           var m = ["Hola, NC Studio. Armé mi paquete personalizado en la página:", ""];
@@ -1432,6 +1517,9 @@ class Component extends DCLogic {
         return {
           open: !!st.cotOpen,
           cal: ccal,
+          sug: sug || { key: "" }, hasSug: !!sug,
+          sugYes: function () { if (!sug) return; self.setState({ cotOpen: false, cotDeclined: sug.key, sel: expObj.id, calOpen: true, calCtx: { exp: sug.exp, prop: sug.name, price: sug.price }, calOff: 0, calSel: null, calSlot: null }); },
+          sugNo: function () { if (sug) self.setState({ cotDeclined: sug.key }); },
           openAny: function () { self.setState({ cotOpen: true }); },
           openHere: function () { self.setState({ cotOpen: true, cotExp: sel || st.cotExp }); },
           close: function () { self.setState({ cotOpen: false }); },
