@@ -482,7 +482,23 @@ Calcula tu paquete aquí
 </div>
 
 <div style="display: flex; flex-direction: column; gap: 10px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">2. ¿Qué tipo de sesión quieres?</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">2. ¿Quieres fotos editadas adicionales?</span>
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 16px; border-radius: 8px; border: 1.5px solid #222020">
+<div style="display: flex; flex-direction: column; min-width: 0; gap: 2px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.fotosLabel}}</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 600; font-size: 13px; color: #222020">{{cot.fotosTotal}}</span>
+<span style="font-size: 12px; color: #3D3B3E">Recuerda: la propuesta inicial ya incluye 3 fotos editadas. Cada foto adicional suma 10 minutos de sesión y 5 fotos de prueba.</span>
+</div>
+<div style="flex: none; display: flex; align-items: center; gap: 6px">
+<button type="button" onClick="{{cot.fotosDec}}" aria-label="Una foto adicional menos" style="width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 22px; cursor: pointer; opacity: {{cot.fotosDecOp}}">−</button>
+<span aria-live="polite" style="min-width: 34px; text-align: center; font-family: 'EB Garamond', Georgia, serif; font-size: 30px; line-height: 1">{{cot.extraFotos}}</span>
+<button type="button" onClick="{{cot.fotosInc}}" aria-label="Una foto adicional más" style="width: 44px; height: 44px; border-radius: 6px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 22px; cursor: pointer">+</button>
+</div>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">3. ¿Qué tipo de sesión quieres?</span>
 <div role="group" aria-label="Tipo de sesión" style="display: flex; flex-wrap: wrap; gap: 8px">
 <sc-for list="{{cot.exps}}" as="o" hint-placeholder-count="8">
 <button type="button" onClick="{{o.pick}}" aria-pressed="{{o.pressed}}" style="min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1.5px solid {{o.border}}; background: {{o.bg}}; color: {{o.fg}}; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 13px; cursor: pointer">{{o.label}}</button>
@@ -492,7 +508,7 @@ Calcula tu paquete aquí
 
 <sc-if value="{{cot.hasExp}}" hint-placeholder-val="{{true}}">
 <div style="display: flex; flex-direction: column; gap: 4px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">3. Personaliza tu sesión</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">4. Personaliza tu sesión</span>
 <span style="font-size: 13px; color: #3D3B3E">Extras pensados para {{cot.expName}}.</span>
 <sc-for list="{{cot.groups}}" as="g" hint-placeholder-count="4">
 <div style="display: flex; flex-direction: column; margin-top: 10px">
@@ -533,21 +549,6 @@ Calcula tu paquete aquí
 <sc-if value="{{cot.noExp}}" hint-placeholder-val="{{false}}">
 <div style="padding: 14px 16px; border-radius: 8px; border: 1.5px dashed #D9CDBE; font-size: 14px; color: #3D3B3E">Elige el tipo de sesión para ver los extras que puedes agregar.</div>
 </sc-if>
-
-<div style="display: flex; flex-direction: column; gap: 10px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">4. ¿Cuántas fotos editadas quieres?</span>
-<div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 16px; border-radius: 8px; border: 1.5px solid #222020">
-<div style="display: flex; flex-direction: column; min-width: 0; gap: 2px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.fotosLabel}}</span>
-<span style="font-size: 12px; color: #3D3B3E">Incluye 3. Cada foto suma 10 minutos de sesión y 5 fotos de prueba</span>
-</div>
-<div style="flex: none; display: flex; align-items: center; gap: 6px">
-<button type="button" onClick="{{cot.fotosDec}}" aria-label="Una foto menos" style="width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 22px; cursor: pointer; opacity: {{cot.fotosDecOp}}">−</button>
-<span aria-live="polite" style="min-width: 34px; text-align: center; font-family: 'EB Garamond', Georgia, serif; font-size: 30px; line-height: 1">{{cot.fotos}}</span>
-<button type="button" onClick="{{cot.fotosInc}}" aria-label="Una foto más" style="width: 44px; height: 44px; border-radius: 6px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 22px; cursor: pointer">+</button>
-</div>
-</div>
-</div>
 
 <div style="display: flex; flex-direction: column; gap: 4px">
 <span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">5. ¿Dónde será la sesión?</span>
@@ -1561,7 +1562,9 @@ class Component extends DCLogic {
           groups: groups.map(function (g) { return { title: g.title, items: g.list.map(view) }; }),
           prints: COT_PRINTS.map(view),
           fotos: nF,
-          fotosLabel: nF === 1 ? "1 foto editada" : nF + " fotos editadas",
+          extraFotos: nF - COT_INCL_FOTOS,
+          fotosLabel: (nF - COT_INCL_FOTOS === 1 ? "1 foto adicional" : (nF - COT_INCL_FOTOS) + " fotos adicionales"),
+          fotosTotal: "Total: " + nF + " fotos editadas (3 incluidas + " + (nF - COT_INCL_FOTOS) + ")",
           fotosDecOp: nF > COT_INCL_FOTOS ? 1 : 0.35,
           fotosDec: function () { if (nF > COT_INCL_FOTOS) self.setState({ cotN: nF - 1 }); },
           fotosInc: function () { if (nF < 200) self.setState({ cotN: nF + 1 }); },
