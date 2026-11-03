@@ -438,7 +438,7 @@ Calcula tu paquete aquí
 <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
 <span style="font-family: 'EB Garamond', Georgia, serif; font-size: 30px; line-height: 1.05">{{cot.title}}</span>
 <span style="font-size: 14px; color: #3D3B3E">{{cot.subtitle}}</span>
-<span style="margin-top: 4px; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.06em; color: #3D3B3E">PASO {{cot.step}} DE 2</span>
+<span style="margin-top: 4px; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.06em; color: #3D3B3E">PASO {{cot.step}} DE 4</span>
 </div>
 <button type="button" onClick="{{cot.close}}" aria-label="Cerrar" style="flex: none; width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; cursor: pointer; display: flex; align-items: center; justify-content: center">
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
@@ -448,18 +448,25 @@ Calcula tu paquete aquí
 
 <div style="display: {{cot.vD}}; flex-direction: column; gap: 22px">
 <div style="display: flex; flex-direction: column; gap: 12px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.sn.t}}. Tus datos</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">Tus datos</span>
+<span style="font-size: 13px; color: #3D3B3E">Los necesitamos para confirmar tu reserva. Todos son obligatorios.</span>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tu nombre
-<input type="text" autocomplete="name" value="{{cot.name}}" onInput="{{cot.setName}}" placeholder="Nombre y apellido" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+<input type="text" autocomplete="name" value="{{cot.name}}" onInput="{{cot.setName}}" placeholder="Nombre y apellido" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{cot.bName}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
 </label>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Número de teléfono
-<input type="tel" inputmode="tel" autocomplete="tel" value="{{cot.phone}}" onInput="{{cot.setPhone}}" placeholder="6000-0000" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+<input type="tel" inputmode="tel" autocomplete="tel" value="{{cot.phone}}" onInput="{{cot.setPhone}}" placeholder="6000-0000" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{cot.bPhone}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
 </label>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Correo electrónico
-<input type="email" inputmode="email" autocomplete="email" value="{{cot.email}}" onInput="{{cot.setEmail}}" placeholder="tucorreo@ejemplo.com" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+<input type="email" inputmode="email" autocomplete="email" value="{{cot.email}}" onInput="{{cot.setEmail}}" placeholder="tucorreo@ejemplo.com" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{cot.bEmail}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
 </label>
 </div>
 
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tu idea o temática
+<textarea rows="3" onInput="{{cot.setIdea}}" placeholder="Estilo, colores, cuántas personas, lo que imaginas…" style="padding: 10px 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px; resize: vertical">{{cot.idea}}</textarea>
+</label>
+<sc-if value="{{cot.showErr}}" hint-placeholder-val="{{false}}">
+<div role="alert" style="padding: 12px 14px; border-radius: 6px; border: 1.5px solid #B42318; background: #FEF3F2; color: #7A271A; font-size: 14px; line-height: 1.45">{{cot.errText}}</div>
+</sc-if>
 </div>
 
 <div style="display: {{cot.vB}}; flex-direction: column; gap: 22px">
@@ -602,7 +609,7 @@ Calcula tu paquete aquí
 
 <div style="display: {{cot.vL}}; flex-direction: column; gap: 22px">
 <div style="display: flex; flex-direction: column; gap: 4px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.sn.d}}. ¿Dónde será la sesión?</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">¿Dónde será la sesión?</span>
 <span style="font-size: 13px; color: #3D3B3E">Marca el lugar o los lugares donde te gustaría la sesión.</span>
 <sc-for list="{{cot.locs}}" as="l" hint-placeholder-count="7">
 <button type="button" role="checkbox" aria-checked="{{l.checked}}" onClick="{{l.toggle}}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border: 0; border-bottom: 1px solid #EFE6DA; background: transparent; color: #222020; text-align: left; cursor: pointer; width: 100%">
@@ -621,10 +628,9 @@ Calcula tu paquete aquí
 
 <div style="display: {{cot.vC}}; flex-direction: column; gap: 22px">
 <div style="display: flex; flex-direction: column; gap: 12px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.sn.c}}. {{cot.dateTitle}}</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.dateTitle}}</span>
 <div style="display: flex; flex-direction: column; gap: 10px">
-<span style="font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Elige tu fecha y hora</span>
-<p style="margin: 0; font-size: 14px; color: #3D3B3E">Entre semana: 7:00 p. m. en estudio. Fines de semana: 10:00 a. m. en estudio y 4:30 p. m. en exteriores.</p>
+<p style="margin: 0; font-size: 13px; line-height: 1.45; color: #3D3B3E">Lunes a viernes: 7:00 p. m. en estudio. Sábado y domingo: 10:00 a. m. en estudio o 4:30 p. m. en exteriores.</p>
 <div style="display: flex; justify-content: center">
 <div style="display: flex; align-items: center; gap: 8px">
 <button type="button" onClick="{{cot.cal.prev}}" aria-label="Mes anterior" disabled="{{cot.cal.noPrev}}" style="width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: {{cot.cal.prevOp}}">
@@ -659,7 +665,7 @@ Calcula tu paquete aquí
 <span>Actualizado: {{cot.cal.updated}}</span>
 </div>
 <sc-if value="{{cot.cal.hasSel}}" hint-placeholder-val="{{false}}">
-<div style="display: flex; flex-direction: column; gap: 10px; padding-top: 14px; border-top: 1px solid #D9CDBE">
+<div data-slots="1" style="display: flex; flex-direction: column; gap: 10px; padding-top: 14px; border-top: 1px solid #D9CDBE">
 <span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">{{cot.cal.selLabel}}: elige la hora</span>
 <div role="group" aria-label="Horarios" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px">
 <sc-for list="{{cot.cal.selSlots}}" as="sl" hint-placeholder-count="2">
@@ -672,9 +678,6 @@ Calcula tu paquete aquí
 <span style="padding: 10px 12px; border-radius: 6px; background: #F2E4D2; font-size: 14px">Fecha elegida: {{cot.cal.text}}</span>
 </sc-if>
 </div>
-<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tu idea o temática
-<textarea rows="3" onInput="{{cot.setIdea}}" placeholder="Estilo, colores, cuántas personas, lo que imaginas…" style="padding: 10px 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px; resize: vertical">{{cot.idea}}</textarea>
-</label>
 </div>
 </div>
 </div>
@@ -687,25 +690,29 @@ Calcula tu paquete aquí
 </div>
 <span style="font-family: 'EB Garamond', Georgia, serif; font-size: 40px; line-height: 1; color: {{accent}}">{{cot.total}}</span>
 </div>
+<div style="display: flex; gap: 8px">
+<sc-if value="{{cot.showBack}}" hint-placeholder-val="{{false}}">
+<button type="button" onClick="{{cot.goBack}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex: none; min-height: 52px; padding: 0 16px; border-radius: 6px; border: 1.5px solid #F2E4D2; background: transparent; color: #FEFEFE; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 14px; cursor: pointer">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+{{cot.backLabel}}
+</button>
+</sc-if>
 <sc-if value="{{cot.showNext}}" hint-placeholder-val="{{false}}">
-<button type="button" onClick="{{cot.goNext}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; border-radius: 6px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px; cursor: pointer">
-Siguiente: datos, lugar y fecha
+<button type="button" onClick="{{cot.goNext}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex: 1 1 auto; min-width: 0; padding: 0 12px; min-height: 52px; border-radius: 6px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px; cursor: pointer">
+{{cot.nextLabel}}
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
 </button>
 </sc-if>
 <sc-if value="{{cot.showSend}}" hint-placeholder-val="{{true}}">
-<a href="{{cot.wa}}" onClick="{{cot.send}}" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; border-radius: 6px; background: {{accent}}; color: #222020; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">
+<a href="{{cot.wa}}" onClick="{{cot.send}}" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex: 1 1 auto; min-width: 0; padding: 0 12px; min-height: 52px; border-radius: 6px; background: {{accent}}; color: #222020; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.6-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg>
 {{cot.sendLabel}}
 </a>
 </sc-if>
-<sc-if value="{{cot.showBack}}" hint-placeholder-val="{{false}}">
-<button type="button" onClick="{{cot.goBack}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; border-radius: 6px; border: 1.5px solid #F2E4D2; background: transparent; color: #FEFEFE; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 14px; cursor: pointer">
-<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
-Volver a los extras
-</button>
-</sc-if>
+</div>
+<sc-if value="{{cot.showSend}}" hint-placeholder-val="{{true}}">
 <span style="font-size: 12px; color: #F2E4D2">Precio estimado. Te confirmamos la cotización final y la disponibilidad por WhatsApp.</span>
+</sc-if>
 </div>
 </div>
 </div>
@@ -718,7 +725,7 @@ Volver a los extras
 <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
 <span style="font-family: 'EB Garamond', Georgia, serif; font-size: 30px; line-height: 1.05">{{xc.title}}</span>
 <span style="font-size: 14px; color: #3D3B3E">{{xc.subtitle}}</span>
-<span style="margin-top: 4px; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.06em; color: #3D3B3E">PASO {{xc.step}} DE 2</span>
+<span style="margin-top: 4px; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.06em; color: #3D3B3E">PASO {{xc.step}} DE 4</span>
 </div>
 <button type="button" onClick="{{xc.close}}" aria-label="Cerrar" style="flex: none; width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; cursor: pointer; display: flex; align-items: center; justify-content: center">
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
@@ -828,30 +835,9 @@ Volver a los extras
 </div>
 </div>
 
-<div style="display: {{xc.v2}}; flex-direction: column; gap: 22px">
-<div style="display: flex; flex-direction: column; gap: 12px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">1. Tus datos</span>
-<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tu nombre
-<input type="text" autocomplete="name" value="{{xc.name}}" onInput="{{xc.setName}}" placeholder="Nombre y apellido" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
-</label>
-<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Número de teléfono
-<input type="tel" inputmode="tel" autocomplete="tel" value="{{xc.phone}}" onInput="{{xc.setPhone}}" placeholder="6000-0000" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
-</label>
-<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Correo electrónico
-<input type="email" inputmode="email" autocomplete="email" value="{{xc.email}}" onInput="{{xc.setEmail}}" placeholder="tucorreo@ejemplo.com" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
-</label>
-</div>
-<div style="display: flex; flex-direction: column; gap: 12px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">2. Tu evento</span>
-<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tipo de evento
-<input type="text" value="{{xc.type}}" onInput="{{xc.setType}}" placeholder="Cumpleaños, bautizo, boda, aniversario, empresa…" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
-</label>
-<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Hora de inicio
-<input type="time" value="{{xc.time}}" onInput="{{xc.setTime}}" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
-</label>
-</div>
-<div style="display: flex; flex-direction: column; gap: 4px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">3. ¿Dónde será el evento?</span>
+<div style="display: {{xc.vL}}; flex-direction: column; gap: 4px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">¿Dónde será el evento?</span>
+<span style="font-size: 13px; color: #3D3B3E">Marca el lugar. Fuera de Las Tablas se suma el traslado.</span>
 <sc-for list="{{xc.locs}}" as="l" hint-placeholder-count="7">
 <button type="button" role="checkbox" aria-checked="{{l.checked}}" onClick="{{l.toggle}}" style="display: flex; align-items: center; gap: 12px; padding: 10px 0; border: 0; border-bottom: 1px solid #EFE6DA; background: transparent; color: #222020; text-align: left; cursor: pointer; width: 100%">
 <span aria-hidden="true" style="flex: none; width: 24px; height: 24px; border-radius: 5px; border: 2px solid #222020; background: {{l.boxBg}}; color: #222020; display: flex; align-items: center; justify-content: center">
@@ -863,8 +849,9 @@ Volver a los extras
 </button>
 </sc-for>
 </div>
-<div style="display: flex; flex-direction: column; gap: 12px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">4. Elige la fecha</span>
+
+<div style="display: {{xc.vF}}; flex-direction: column; gap: 12px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">Elige la fecha de tu evento</span>
 <div style="display: flex; justify-content: center">
 <div style="display: flex; align-items: center; gap: 8px">
 <button type="button" onClick="{{xc.cal.prev}}" aria-label="Mes anterior" disabled="{{xc.cal.noPrev}}" style="width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: {{xc.cal.prevOp}}">
@@ -885,8 +872,8 @@ Volver a los extras
 <span aria-hidden="true"></span>
 </sc-if>
 <sc-if value="{{c.real}}" hint-placeholder-val="{{true}}">
-<button type="button" onClick="{{c.pick}}" disabled="{{c.disabled}}" aria-label="{{c.aria}}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 66px; padding: 4px 0; border-radius: 6px; border: 1.5px solid {{c.border}}; background: {{c.bg}}; color: {{c.fg}}; cursor: {{c.cursor}}; box-sizing: border-box">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 19px; line-height: 1">{{c.n}}</span>
+<button type="button" onClick="{{c.pick}}" disabled="{{c.disabled}}" aria-label="{{c.aria}}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 58px; padding: 4px 0; border-radius: 6px; border: 1.5px solid {{c.border}}; background: {{c.bg}}; color: {{c.fg}}; cursor: {{c.cursor}}; box-sizing: border-box">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 18px; line-height: 1">{{c.n}}</span>
 <span style="font-size: 10px; line-height: 1.1; white-space: nowrap; color: {{c.subFg}}">{{c.sub}}</span>
 </button>
 </sc-if>
@@ -900,10 +887,32 @@ Volver a los extras
 <sc-if value="{{xc.hasDate}}" hint-placeholder-val="{{false}}">
 <span style="padding: 10px 12px; border-radius: 6px; background: #F2E4D2; font-size: 14px">Fecha elegida: {{xc.fecha}}</span>
 </sc-if>
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Hora de inicio del evento
+<input type="time" value="{{xc.time}}" onInput="{{xc.setTime}}" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+</label>
+</div>
+
+<div style="display: {{xc.vD}}; flex-direction: column; gap: 12px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">Tus datos</span>
+<span style="font-size: 13px; color: #3D3B3E">Los necesitamos para confirmar tu reserva. Nombre, teléfono y correo son obligatorios.</span>
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tu nombre
+<input type="text" autocomplete="name" value="{{xc.name}}" onInput="{{xc.setName}}" placeholder="Nombre y apellido" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{xc.bName}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Número de teléfono
+<input type="tel" inputmode="tel" autocomplete="tel" value="{{xc.phone}}" onInput="{{xc.setPhone}}" placeholder="6000-0000" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{xc.bPhone}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Correo electrónico
+<input type="email" inputmode="email" autocomplete="email" value="{{xc.email}}" onInput="{{xc.setEmail}}" placeholder="tucorreo@ejemplo.com" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{xc.bEmail}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tipo de evento
+<input type="text" value="{{xc.type}}" onInput="{{xc.setType}}" placeholder="Cumpleaños, bautizo, boda, aniversario, empresa…" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+</label>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Detalles de tu evento
 <textarea rows="3" onInput="{{xc.setIdea}}" placeholder="Cantidad de invitados, momentos importantes, temática…" style="padding: 10px 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px; resize: vertical">{{xc.idea}}</textarea>
 </label>
-</div>
+<sc-if value="{{xc.showErr}}" hint-placeholder-val="{{false}}">
+<div role="alert" style="padding: 12px 14px; border-radius: 6px; border: 1.5px solid #B42318; background: #FEF3F2; color: #7A271A; font-size: 14px; line-height: 1.45">{{xc.errText}}</div>
+</sc-if>
 </div>
 </div>
 
@@ -915,25 +924,29 @@ Volver a los extras
 </div>
 <span style="font-family: 'EB Garamond', Georgia, serif; font-size: 40px; line-height: 1; color: {{accent}}">{{xc.total}}</span>
 </div>
+<div style="display: flex; gap: 8px">
+<sc-if value="{{xc.showBack}}" hint-placeholder-val="{{false}}">
+<button type="button" onClick="{{xc.goBack}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex: none; min-height: 52px; padding: 0 16px; border-radius: 6px; border: 1.5px solid #F2E4D2; background: transparent; color: #FEFEFE; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 14px; cursor: pointer">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+{{xc.backLabel}}
+</button>
+</sc-if>
 <sc-if value="{{xc.showNext}}" hint-placeholder-val="{{false}}">
-<button type="button" onClick="{{xc.goNext}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; border-radius: 6px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px; cursor: pointer">
-Siguiente: datos, lugar y fecha
+<button type="button" onClick="{{xc.goNext}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex: 1 1 auto; min-width: 0; padding: 0 12px; min-height: 52px; border-radius: 6px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px; cursor: pointer">
+{{xc.nextLabel}}
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
 </button>
 </sc-if>
 <sc-if value="{{xc.showSend}}" hint-placeholder-val="{{true}}">
-<a href="{{xc.wa}}" onClick="{{xc.send}}" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; border-radius: 6px; background: {{accent}}; color: #222020; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">
+<a href="{{xc.wa}}" onClick="{{xc.send}}" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex: 1 1 auto; min-width: 0; padding: 0 12px; min-height: 52px; border-radius: 6px; background: {{accent}}; color: #222020; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.6-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg>
 Enviar reserva por WhatsApp
 </a>
 </sc-if>
-<sc-if value="{{xc.showBack}}" hint-placeholder-val="{{false}}">
-<button type="button" onClick="{{xc.goBack}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; border-radius: 6px; border: 1.5px solid #F2E4D2; background: transparent; color: #FEFEFE; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 14px; cursor: pointer">
-<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
-Volver a los extras
-</button>
-</sc-if>
+</div>
+<sc-if value="{{xc.showSend}}" hint-placeholder-val="{{true}}">
 <span style="font-size: 12px; color: #F2E4D2">Precio estimado. Te confirmamos la cotización final y la disponibilidad por WhatsApp.</span>
+</sc-if>
 </div>
 </div>
 </div>
@@ -1563,6 +1576,15 @@ XC_GROUPS.infantil = [
   ] }
 ];
 function cotFits(only, exp) { return !only || only.indexOf(exp) >= 0 || (exp === "otra" && only === COT_SES); }
+function okPhone(v) { return String(v || "").replace(/\D/g, "").length >= 7; }
+function okEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || "").trim()); }
+function missing(n, ph, em) {
+  var m = [];
+  if (!String(n || "").trim()) m.push("tu nombre");
+  if (!okPhone(ph)) m.push("un número de teléfono válido");
+  if (!okEmail(em)) m.push("un correo válido");
+  return m.length ? (m.length > 1 ? m.slice(0, -1).join(", ") + " y " + m[m.length - 1] : m[0]) : "";
+}
 function money(x) { return "$" + (Math.round(x * 100) % 100 ? x.toFixed(2) : String(Math.round(x))); }
 var MONTHS = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
 var WDAYS = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
@@ -1608,7 +1630,7 @@ function calModel(self, K, accent) {
         fg: past ? "#8A8580" : (busy ? "#F2E4D2" : (on ? "#FEFEFE" : "#222020")),
         subFg: past ? "#8A8580" : (busy ? "#F2E4D2" : (on ? "#F2E4D2" : "#3D3B3E")),
         border: free ? (on ? "#222020" : "#F99824") : "transparent", cursor: free ? "pointer" : "default",
-        pick: function () { if (free) set({ sel: k, slot: nS === 1 ? slotsFor(d)[0] : null }); } });
+        pick: function () { if (free) { set({ sel: k, slot: nS === 1 ? slotsFor(d)[0] : null }); setTimeout(function () { var e = document.querySelector("[data-slots]"); if (e && e.scrollIntoView) e.scrollIntoView({ behavior: "smooth", block: "nearest" }); }, 90); } } });
     })(dn);
   }
   var slot = st[K.slot], selLabel = "", selSlots = [];
@@ -1635,7 +1657,7 @@ function calModel(self, K, accent) {
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0, cotOpen: false, cotExp: null, cotN: 3, cotL: {}, cotQ: {}, cotC: {}, cotName: "", cotPhone: "", cotEmail: "", cotDate: "", cotIdea: "", cotOff: 0, cotSel: null, cotSlot: null, cotDeclined: "", cotPkg: null, cotStep: 1, upOpen: false, upCtx: null, menuOpen: false, xcId: null, xcStep: 1, xcBase: null, xcQ: {}, xcC: {}, xcL: {}, xcOff: 0, xcSel: null, xcSlot: null, xcType: "", xcTime: "", xcIdea: "" };
+    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0, cotOpen: false, cotExp: null, cotN: 3, cotL: {}, cotQ: {}, cotC: {}, cotName: "", cotPhone: "", cotEmail: "", cotDate: "", cotIdea: "", cotOff: 0, cotSel: null, cotSlot: null, cotDeclined: "", cotPkg: null, cotStep: 1, cotErr: false, xcErr: false, upOpen: false, upCtx: null, menuOpen: false, xcId: null, xcStep: 1, xcBase: null, xcQ: {}, xcC: {}, xcL: {}, xcOff: 0, xcSel: null, xcSlot: null, xcType: "", xcTime: "", xcIdea: "" };
   }
   componentDidMount() {
     var self = this;
@@ -1806,7 +1828,9 @@ class Component extends DCLogic {
       xc: (function () {
         var st = self.state, id = st.xcId, cfg = id && XC[id];
         if (!cfg) return { open: false, v1: "none", v2: "none" };
-        var q = st.xcQ, c = st.xcC, L = st.xcL, step = st.xcStep === 2 ? 2 : 1;
+        var q = st.xcQ, c = st.xcC, L = st.xcL, step = st.xcStep >= 1 && st.xcStep <= 4 ? st.xcStep : 1;
+        var xn = st.xcName != null ? st.xcName : st.cotName, xp = st.xcPhone != null ? st.xcPhone : st.cotPhone, xe = st.xcEmail != null ? st.xcEmail : st.cotEmail;
+        var xmiss = missing(xn, xp, xe);
         var base = cfg.bases.filter(function (b) { return b.id === st.xcBase; })[0] || cfg.bases[0];
         var total = base.price, hours = base.h, fAdd = 0, lines = [], printLines = [];
         var groups = XC_GROUPS[id] || [];
@@ -1860,11 +1884,17 @@ class Component extends DCLogic {
         }
         return {
           open: true, step: step, title: cfg.title, kind: cfg.kind,
-          subtitle: step === 2 ? "Último paso: tus datos, tu evento, el lugar y la fecha." : "Elige tu cobertura y los extras que quieras.",
-          v1: step === 1 ? "flex" : "none", v2: step === 2 ? "flex" : "none",
-          showNext: step === 1, showSend: step === 2, showBack: step === 2,
-          goNext: function () { self.setState({ xcStep: 2 }); },
-          goBack: function () { self.setState({ xcStep: 1 }); },
+          subtitle: ["", "Elige tu cobertura y los extras que quieras.", "¿Dónde será tu evento?", "Elige la fecha y la hora de inicio.", "Último paso: tus datos para confirmar."][step],
+          v1: step === 1 ? "flex" : "none", vL: step === 2 ? "flex" : "none", vF: step === 3 ? "flex" : "none", vD: step === 4 ? "flex" : "none",
+          showNext: step < 4, showSend: step === 4, showBack: step > 1,
+          nextLabel: ["", "Siguiente: lugar", "Siguiente: fecha", "Siguiente: tus datos"][step] || "",
+          backLabel: "Atrás",
+          goNext: function () { if (step < 4) self.setState({ xcStep: step + 1 }); },
+          goBack: function () { if (step > 1) self.setState({ xcStep: step - 1 }); },
+          showErr: !!st.xcErr && !!xmiss, errText: xmiss ? "Para enviar tu reserva completa: " + xmiss + "." : "",
+          bName: st.xcErr && !String(xn || "").trim() ? "#B42318" : "#D9CDBE",
+          bPhone: st.xcErr && !okPhone(xp) ? "#B42318" : "#D9CDBE",
+          bEmail: st.xcErr && !okEmail(xe) ? "#B42318" : "#D9CDBE",
           close: function () { self.setState({ xcId: null }); },
           baseTitle: cfg.baseTitle,
           bases: cfg.bases.map(function (b) {
@@ -1891,7 +1921,12 @@ class Component extends DCLogic {
           total: money(total) + (other ? " + traslado" : ""),
           meta: hours + (hours === 1 ? " hora" : " horas") + " de cobertura · aprox. " + fMin + " a " + fMax + " fotos editadas",
           wa: WA + encodeURIComponent(build()),
-          send: function (e) { var a = e && e.currentTarget; if (a && a.setAttribute) a.setAttribute("href", WA + encodeURIComponent(build())); }
+          send: function (e) {
+            var a = e && e.currentTarget;
+            var nn = st.xcName != null ? st.xcName : st.cotName, pp = st.xcPhone != null ? st.xcPhone : st.cotPhone, ee = st.xcEmail != null ? st.xcEmail : st.cotEmail;
+            if (missing(nn, pp, ee)) { if (e && e.preventDefault) e.preventDefault(); self.setState({ xcErr: true }); return; }
+            if (a && a.setAttribute) a.setAttribute("href", WA + encodeURIComponent(build()));
+          }
         };
       })(),
       up: (function () {
@@ -1920,6 +1955,7 @@ class Component extends DCLogic {
         var locs = TRAS.map(function (t, i) { var v = parseFloat(String(t[1]).replace(/[^0-9.]/g, "")) || 0; return { id: "t" + i, place: i === 0 ? "Estudio o Las Tablas" : t[0], v: v }; });
         locs.push({ id: "otro", place: "Otro lugar", v: 0, other: true });
         var pk = st.cotPkg, baseF = pk ? pk.fotos : COT_INCL_FOTOS;
+        var cstep = st.cotStep >= 1 && st.cotStep <= 4 ? st.cotStep : 1, cmiss = missing(st.cotName, st.cotPhone, st.cotEmail);
         var extraF = Math.max(0, nF - baseF);
         var fotosCost = pk ? extraF * COT_FOTO_EXTRA : cotFotosPrice(extraF);
         var total = (pk ? pk.price : COT_SERV) + fotosCost, mins = pk ? pk.mins + extraF * 10 : nF * 10, fotos = nF, pruebas = pk ? pk.pruebas + extraF * 5 : nF * 5, lines = [], printLines = [];
@@ -2016,21 +2052,27 @@ class Component extends DCLogic {
           openHere: function () { self.setState(Object.assign({ cotOpen: true, cotStep: 1, cotExp: sel || st.cotExp }, pk ? { cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} } : {})); },
           fromScratch: function () { self.setState({ cotStep: 1, cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} }); },
           isPkg: !!pk, noPkg: !pk,
-          title: pk ? (st.cotStep === 2 ? "Reserva tu sesión" : "Mejora tu experiencia") : "Arma tu paquete",
-          subtitle: st.cotStep === 2 ? "Último paso: tus datos, el lugar y la fecha de tu sesión." : (pk ? "Elige los extras que quieras agregar a tu paquete." : "Elige lo que quieres en tu sesión y te enviamos la cotización por WhatsApp."),
+          title: pk ? (cstep > 1 ? "Reserva tu sesión" : "Mejora tu experiencia") : "Arma tu paquete",
+          subtitle: cstep === 2 ? "¿Dónde quieres tu sesión?" : (cstep === 3 ? "Elige el día y la hora de tu sesión." : (cstep === 4 ? "Último paso: tus datos para confirmar." : (pk ? "Elige los extras que quieras agregar a tu paquete." : "Elige lo que quieres en tu sesión y te enviamos la cotización por WhatsApp."))),
           inclTitle: pk ? "Tu paquete incluye" : "La propuesta inicial incluye",
           pkgLabel: pk ? pk.title + " · " + pk.nm + " (" + money(pk.price) + ")" : "",
           sn: pk ? { t: "1", f: "1", p: "2", i: "3", d: "2", c: "3" } : { t: "1", s: "1", f: "2", p: "3", i: "4", d: "2", c: "3" },
-          vL: st.cotStep === 2 ? "flex" : "none",
-          step: st.cotStep === 2 ? 2 : 1,
-          vD: st.cotStep === 2 ? "flex" : "none",
-          vB: st.cotStep !== 2 ? "flex" : "none",
-          vC: st.cotStep === 2 ? "flex" : "none",
-          showNext: st.cotStep !== 2, showSend: st.cotStep === 2, showBack: st.cotStep === 2,
-          goNext: function () { self.setState({ cotStep: 2 }); },
-          goBack: function () { self.setState({ cotStep: 1 }); },
-          dateTitle: "Elige la fecha y cuéntanos tu idea",
-          cellH: "66px", numFs: "19px", subFs: "10px",
+          vL: cstep === 2 ? "flex" : "none",
+          step: cstep,
+          vD: cstep === 4 ? "flex" : "none",
+          vB: cstep === 1 ? "flex" : "none",
+          vC: cstep === 3 ? "flex" : "none",
+          showNext: cstep < 4, showSend: cstep === 4, showBack: cstep > 1,
+          nextLabel: ["", "Siguiente: lugar", "Siguiente: fecha", "Siguiente: tus datos"][cstep] || "",
+          backLabel: "Atrás",
+          goNext: function () { if (cstep < 4) self.setState({ cotStep: cstep + 1 }); },
+          goBack: function () { if (cstep > 1) self.setState({ cotStep: cstep - 1 }); },
+          showErr: !!st.cotErr && !!cmiss, errText: cmiss ? "Para enviar tu reserva completa: " + cmiss + "." : "",
+          bName: st.cotErr && !st.cotName.trim() ? "#B42318" : "#D9CDBE",
+          bPhone: st.cotErr && !okPhone(st.cotPhone) ? "#B42318" : "#D9CDBE",
+          bEmail: st.cotErr && !okEmail(st.cotEmail) ? "#B42318" : "#D9CDBE",
+          dateTitle: "Elige el día y la hora",
+          cellH: "58px", numFs: "18px", subFs: "10px",
           fotosNote: pk ? "Tu paquete ya incluye " + baseF + " fotos editadas. Cada foto adicional suma 10 minutos de sesión y 5 fotos de prueba." : "Recuerda: la propuesta inicial ya incluye 3 fotos editadas. Cada foto adicional suma 10 minutos de sesión y 5 fotos de prueba.",
           sendLabel: pk ? "Enviar reserva por WhatsApp" : "Enviar cotización por WhatsApp",
           close: function () { self.setState({ cotOpen: false }); },
@@ -2061,7 +2103,11 @@ class Component extends DCLogic {
           total: money(total) + (other ? " + traslado" : ""),
           meta: mins + " min de sesión · " + fotos + (fotos === 1 ? " foto editada" : " fotos editadas"),
           wa: WA + encodeURIComponent(build()),
-          send: function (e) { var a = e && e.currentTarget; if (a && a.setAttribute) a.setAttribute("href", WA + encodeURIComponent(build())); }
+          send: function (e) {
+            var a = e && e.currentTarget;
+            if (missing(st.cotName, st.cotPhone, st.cotEmail)) { if (e && e.preventDefault) e.preventDefault(); self.setState({ cotErr: true }); return; }
+            if (a && a.setAttribute) a.setAttribute("href", WA + encodeURIComponent(build()));
+          }
         };
       })(),
       showGrid: !sel, showPkg: !!sel,
