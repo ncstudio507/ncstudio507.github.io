@@ -471,7 +471,7 @@ Calcula tu paquete aquí
 </div>
 
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tu idea o temática
-<textarea rows="3" onInput="{{cot.setIdea}}" placeholder="Estilo, colores, cuántas personas, lo que imaginas…" style="padding: 10px 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px; resize: vertical">{{cot.idea}}</textarea>
+<textarea rows="3" data-field="idea" onInput="{{cot.setIdea}}" placeholder="Estilo, colores, cuántas personas, lo que imaginas…" style="padding: 10px 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px; resize: vertical">{{cot.idea}}</textarea>
 </label>
 <sc-if value="{{cot.showErr}}" hint-placeholder-val="{{false}}">
 <div role="alert" style="padding: 12px 14px; border-radius: 6px; border: 1.5px solid #B42318; background: #FEF3F2; color: #7A271A; font-size: 14px; line-height: 1.45">{{cot.errText}}</div>
@@ -922,7 +922,7 @@ Calcula tu paquete aquí
 <span style="padding: 10px 12px; border-radius: 6px; background: #F2E4D2; font-size: 14px">Fecha elegida: {{xc.fecha}}</span>
 </sc-if>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Hora de inicio del evento
-<input type="time" value="{{xc.time}}" onInput="{{xc.setTime}}" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+<input type="time" data-field="time" value="{{xc.time}}" onInput="{{xc.setTime}}" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
 </label>
 </div>
 
@@ -938,10 +938,10 @@ Calcula tu paquete aquí
 <input type="email" inputmode="email" autocomplete="email" value="{{xc.email}}" data-field="email" onInput="{{xc.setEmail}}" placeholder="tucorreo@ejemplo.com" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{xc.bEmail}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
 </label>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tipo de evento
-<input type="text" value="{{xc.type}}" onInput="{{xc.setType}}" placeholder="Cumpleaños, bautizo, boda, aniversario, empresa…" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+<input type="text" data-field="type" value="{{xc.type}}" onInput="{{xc.setType}}" placeholder="Cumpleaños, bautizo, boda, aniversario, empresa…" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
 </label>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Detalles de tu evento
-<textarea rows="3" onInput="{{xc.setIdea}}" placeholder="Cantidad de invitados, momentos importantes, temática…" style="padding: 10px 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px; resize: vertical">{{xc.idea}}</textarea>
+<textarea rows="3" data-field="xidea" onInput="{{xc.setIdea}}" placeholder="Cantidad de invitados, momentos importantes, temática…" style="padding: 10px 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px; resize: vertical">{{xc.idea}}</textarea>
 </label>
 <sc-if value="{{xc.showErr}}" hint-placeholder-val="{{false}}">
 <div role="alert" style="padding: 12px 14px; border-radius: 6px; border: 1.5px solid #B42318; background: #FEF3F2; color: #7A271A; font-size: 14px; line-height: 1.45">{{xc.errText}}</div>
@@ -1658,7 +1658,15 @@ function money(x) { return "$" + (Math.round(x * 100) % 100 ? x.toFixed(2) : Str
 var MONTHS = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
 var WDAYS = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
 function iso(d) { var m = d.getMonth() + 1, x = d.getDate(); return d.getFullYear() + "-" + (m < 10 ? "0" : "") + m + "-" + (x < 10 ? "0" : "") + x; }
-function slotsFor(d) { var w = d.getDay(); return (w === 0 || w === 6) ? ["10:00 a. m. · Estudio", "4:30 p. m. · Exteriores"] : ["7:00 p. m. · Estudio"]; }
+function slotsFor(d) {
+  var w = d.getDay(), all = (w === 0 || w === 6) ? ["10:00 a. m. · Estudio", "4:30 p. m. · Exteriores"] : ["7:00 p. m. · Estudio"], now = new Date();
+  if (iso(d) !== iso(now)) return all;
+  return all.filter(function (sl) {
+    var m = sl.match(/(\d+):(\d+) (a|p)/); if (!m) return true;
+    var t = new Date(d.getFullYear(), d.getMonth(), d.getDate(), (+m[1] % 12) + (m[3] === "p" ? 12 : 0), +m[2]);
+    return t.getTime() - now.getTime() > 60 * 60 * 1000;
+  });
+}
 
 function num(s) { return parseFloat(String(s).replace(/[^0-9.]/g, "")) || 0; }
 function sortedProps(pkg) {
@@ -1691,7 +1699,7 @@ function calModel(self, K, accent) {
   for (var dn = 1; dn <= daysIn; dn++) {
     (function (dn) {
       var d = new Date(first.getFullYear(), first.getMonth(), dn), k = iso(d);
-      var past = k < todayIso, busy = BUSY.indexOf(k) >= 0, nS = slotsFor(d).length, on = st[K.sel] === k, free = !past && !busy;
+      var nS = slotsFor(d).length, past = k < todayIso || nS === 0, busy = BUSY.indexOf(k) >= 0, on = st[K.sel] === k, free = !past && !busy;
       cells.push({ blank: false, real: true, n: dn, disabled: !free,
         sub: past ? "" : (busy ? "Ocupado" : (nS === 1 ? "1 cupo" : nS + " cupos")),
         aria: dn + " de " + MONTHS[d.getMonth()] + (past ? ", fecha pasada" : (busy ? ", ocupado" : ", disponible")),
@@ -1854,7 +1862,7 @@ class Component extends DCLogic {
         for (var dn = 1; dn <= daysIn; dn++) {
           (function (dn) {
             var d = new Date(first.getFullYear(), first.getMonth(), dn); var k = iso(d);
-            var past = k < todayIso, busy = BUSY.indexOf(k) >= 0, nS = slotsFor(d).length;
+            var nS = slotsFor(d).length, past = k < todayIso || nS === 0, busy = BUSY.indexOf(k) >= 0;
             var on = self.state.calSel === k, free = !past && !busy;
             cells.push({ blank: false, real: true, n: dn, disabled: !free,
               sub: past ? "" : (busy ? "Ocupado" : (nS === 1 ? "1 cupo" : nS + " cupos")),
@@ -2273,8 +2281,11 @@ class Component extends DCLogic {
     window.__ncRender(tpl, comp.renderVals(), frag);
     var keep = {};
     root.querySelectorAll("[data-keep-scroll]").forEach(function (el) { keep[el.getAttribute("data-keep-scroll")] = el.scrollTop; });
+    var ae = document.activeElement, fk = ae && ae.getAttribute ? ae.getAttribute("data-field") : null, ss = null, se = null;
+    if (fk) { try { ss = ae.selectionStart; se = ae.selectionEnd; } catch (e) {} }
     root.replaceChildren(frag);
     root.querySelectorAll("[data-keep-scroll]").forEach(function (el) { var k = el.getAttribute("data-keep-scroll"); if (k in keep) el.scrollTop = keep[k]; });
+    if (fk) { var ne = root.querySelector('[data-field="' + fk + '"]'); if (ne && ne.offsetParent !== null) { try { ne.focus({ preventScroll: true }); if (ss != null) ne.setSelectionRange(ss, se); } catch (e) {} } }
   }
   window.__ncSchedule = function () { if (!queued) { queued = true; requestAnimationFrame(draw); } };
   draw();
