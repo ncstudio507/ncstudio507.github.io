@@ -464,10 +464,13 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     var r = FD, s = r.resumen, h = segFin("hoy");
     h += '<section><div class="row" style="justify-content:space-between"><h2>Finanzas · ' + esc(s.mes.charAt(0) + s.mes.slice(1).toLowerCase()) + '</h2><a class="btn2" href="' + esc(r.url) + '" target="_blank" rel="noopener" style="text-decoration:none">Abrir hoja de finanzas ↗</a></div>' +
       '<div class="kpis"><div class="kpi"><span>Ingresos NC</span><b>' + money(s.ingresosNC) + '</b></div><div class="kpi"><span>Gastos NC</span><b>' + money(s.gastosNC) + '</b></div><div class="kpi"><span>Gastos Nelson</span><b>' + money(s.gastosNelson) + '</b></div><div class="kpi"><span>Por revisar</span><b>' + r.pendientes.length + '</b></div></div></section>';
-    if (r.repartos.length) h += '<section><h2>Repartos pendientes</h2><p class="hint">Trabajos ya pagados completos. Anota cuánto le tocó a cada uno; lo que sobra se registra como viáticos.</p>' + r.repartos.map(function (x, i) {
+    if (r.repartos.length) h += '<section><h2>Repartos pendientes</h2><p class="hint">Trabajos ya pagados completos. Ya viene llenada la sugerencia según los costos del paquete (Charlie y Nelson ganan lo mismo); cámbiala si repartieron distinto.</p>' + r.repartos.map(function (x, i) {
+      var g = x.sug || {};
       return '<div class="card2" id="rp-' + esc(x.id) + '"><div class="top2"><span><b style="font-size:16px">' + esc(x.name) + '</b><br><small class="hint">' + esc(x.service + " · " + x.fecha) + '</small></span><b>' + money(x.total) + '</b></div>' +
-        '<div class="g3"><label for="rn' + i + '">Nelson ($)<input id="rn' + i + '" type="number" min="0" step="0.5" inputmode="decimal"></label><label for="rc' + i + '">Charlie ($)<input id="rc' + i + '" type="number" min="0" step="0.5" inputmode="decimal"></label><label for="rx' + i + '">NC Studio ($)<input id="rx' + i + '" type="number" min="0" step="0.5" inputmode="decimal"></label></div>' +
-        '<div class="row"><button class="btn" id="rok' + i + '">Guardar repartición</button><span class="hint" id="rv' + i + '">Viáticos: ' + money(x.total) + '</span></div></div>';
+        '<p class="hint" style="margin:0">Sugerencia: Charlie ' + money(g.charlie || 0) + ' · Nelson ' + money(g.nelson || 0) + ' · NC ' + money(g.nc || 0) + ' · Viáticos ' + money(g.viaticos || 0) + '</p>' +
+        '<div class="g2"><label for="rc' + i + '">Charlie ($)<input id="rc' + i + '" type="number" min="0" step="0.5" inputmode="decimal"></label><label for="rn' + i + '">Nelson ($)<input id="rn' + i + '" type="number" min="0" step="0.5" inputmode="decimal"></label>' +
+        '<label for="rx' + i + '">NC Studio ($)<input id="rx' + i + '" type="number" min="0" step="0.5" inputmode="decimal"></label><label for="rw' + i + '">Viáticos ($) <small>(estudio, gasolina, traslado, maquillaje…)</small><input id="rw' + i + '" type="number" min="0" step="0.5" inputmode="decimal"></label></div>' +
+        '<div class="row"><button class="btn" id="rok' + i + '">Guardar repartición</button><span class="hint" id="rv' + i + '"></span></div><div id="rm' + i + '"></div></div>';
     }).join('<div style="height:10px"></div>') + '</section>';
     if (r.pendientes.length) h += '<section><h2>Por revisar (' + r.pendientes.length + ')</h2><p class="hint">Yappys que no son de una reserva y entradas del calendario que conviene revisar.</p>' + r.pendientes.map(function (m, i) {
       return '<div class="card2"><div class="top2"><span><b style="font-size:16px">' + esc(m.persona || m.desc || "Movimiento") + '</b><br><small class="hint">' + esc([m.fecha, m.metodo, m.ref && m.origen === "Yappy" ? m.ref : "", m.estado === "Revisar" ? "del calendario: " + m.tipo + " / " + m.cat : ""].filter(Boolean).join(" · ")) + '</small></span><b>' + money(m.monto) + '</b></div><button class="btn2" data-x="' + i + '">Clasificar</button><div id="pcw' + i + '" hidden>' + formMov("pc" + i, m, m.origen === "Yappy") + '</div></div>';
@@ -480,11 +483,32 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     }).join("") + '</div></section>';
     app.innerHTML = h; bindSeg();
     r.repartos.forEach(function (x, i) {
-      function upd() { var v = x.total - Number($("rn" + i).value || 0) - Number($("rc" + i).value || 0) - Number($("rx" + i).value || 0); $("rv" + i).textContent = v < -0.009 ? "Te pasaste por " + money(-v) : "Viáticos: " + money(Math.max(0, v)); }
-      ["rn", "rc", "rx"].forEach(function (k) { $(k + i).oninput = upd; });
+      var g = x.sug || {};
+      $("rc" + i).value = g.charlie != null ? g.charlie : ""; $("rn" + i).value = g.nelson != null ? g.nelson : ""; $("rx" + i).value = g.nc != null ? g.nc : ""; $("rw" + i).value = g.viaticos != null ? g.viaticos : "";
+      function upd() {
+        var v = Math.round((x.total - ["rn", "rc", "rx", "rw"].reduce(function (s, k) { return s + Number($(k + i).value || 0); }, 0)) * 100) / 100;
+        $("rv" + i).innerHTML = Math.abs(v) < 0.01 ? '<span class="pos">✓ Cuadra con ' + money(x.total) + '</span>' : (v > 0 ? '<span class="neg">Falta repartir ' + money(v) + '</span>' : '<span class="neg">Te pasaste por ' + money(-v) + '</span>');
+      }
+      ["rn", "rc", "rx", "rw"].forEach(function (k) { $(k + i).oninput = upd; }); upd();
       $("rok" + i).onclick = function () {
         var b = $("rok" + i); b.disabled = true; b.innerHTML = '<span class="spin"></span>Guardando…';
-        call({ action: "fin_reparto", pin: PIN, id: x.id, nelson: $("rn" + i).value, charlie: $("rc" + i).value, nc: $("rx" + i).value }).then(function (q) { if (q.ok) finanzas(); else { b.disabled = false; b.textContent = "Guardar repartición"; } }).catch(function () { b.disabled = false; b.textContent = "Guardar repartición"; });
+        call({ action: "fin_reparto", pin: PIN, id: x.id, nelson: $("rn" + i).value, charlie: $("rc" + i).value, nc: $("rx" + i).value, viaticos: $("rw" + i).value }).then(function (q) {
+          if (!q.ok) { b.disabled = false; b.textContent = "Guardar repartición"; return; }
+          b.remove(); $("rv" + i).innerHTML = '<span class="pos">✓ Repartición guardada</span>';
+          ["rn", "rc", "rx", "rw"].forEach(function (k) { $(k + i).disabled = true; });
+          $("rm" + i).innerHTML = '<div style="display:grid;gap:10px;margin-top:6px"><h3 style="margin:0;font-size:16px">Mensaje para Charlie</h3><label for="rt' + i + '">Puedes editarlo antes de enviar<textarea id="rt' + i + '" style="min-height:220px"></textarea></label>' +
+            '<a class="wa" id="rwa' + i + '" target="_blank" rel="noopener">Enviar por WhatsApp a Charlie</a><div class="row"><button class="btn2" id="rem' + i + '">Enviar por correo a Charlie</button><button class="btn2" id="rcp' + i + '">Copiar</button><span class="hint" id="rst' + i + '"></span></div>' +
+            '<button class="btn2" id="rfin' + i + '">Listo</button></div>';
+          var t = $("rt" + i); t.value = q.mensaje || "";
+          function wa() { $("rwa" + i).href = "https://wa.me/507" + (q.tel || "") + "?text=" + encodeURIComponent(t.value); }
+          t.oninput = wa; wa();
+          $("rem" + i).onclick = function () {
+            var e = $("rem" + i); e.disabled = true; e.textContent = "Enviando…";
+            call({ action: "fin_charlie", pin: PIN, id: x.id }).then(function (z) { e.textContent = z.ok ? "✓ Correo enviado" : "No se pudo enviar"; }).catch(function () { e.disabled = false; e.textContent = "Enviar por correo a Charlie"; });
+          };
+          $("rcp" + i).onclick = function () { if (navigator.clipboard) navigator.clipboard.writeText(t.value).then(function () { $("rst" + i).textContent = "✓ Copiado"; }); else { t.select(); document.execCommand("copy"); } };
+          $("rfin" + i).onclick = function () { finanzas(); };
+        }).catch(function () { b.disabled = false; b.textContent = "Guardar repartición"; });
       };
     });
     Array.prototype.forEach.call(app.querySelectorAll("[data-x]"), function (b) { b.onclick = function () { var w = $("pcw" + b.getAttribute("data-x")); w.hidden = !w.hidden; b.textContent = w.hidden ? "Clasificar" : "Cerrar"; }; });
