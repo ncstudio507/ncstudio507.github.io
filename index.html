@@ -163,7 +163,7 @@ Escríbenos
 <span style="font-size: 15px; line-height: 1.45; color: #F2E4D2">{{s.text}}</span>
 <span style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: auto; padding-top: 12px">
 <sc-for list="{{s.ctas}}" as="b" hint-placeholder-count="2">
-<a href="{{b.href}}" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 20px; border-radius: 999px; background: {{b.bg}}; border: 1.5px solid {{accent}}; color: {{b.fg}}; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 14px">{{b.label}} →</a>
+<a href="{{b.href}}" onClick="{{b.go}}" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 20px; border-radius: 999px; background: {{b.bg}}; border: 1.5px solid {{accent}}; color: {{b.fg}}; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 14px">{{b.label}} →</a>
 </sc-for>
 </span>
 </div>
@@ -179,9 +179,14 @@ Escríbenos
 <div style="display: flex; flex-direction: column; gap: 6px">
 <p style="margin: 0; font-family: Montserrat, sans-serif; font-size: 16px; font-weight: 600; color: #3D3B3E">Portafolio</p>
 <h2 style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(34px, 4.5vw, 52px); line-height: 1.1">Tu esencia, capturada con <span style="background: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 200 14%27 preserveAspectRatio=%27none%27%3E%3Cpath d=%27M3 9 C 45 4, 120 3, 197 7%27 stroke=%27%23F99824%27 stroke-width=%274%27 fill=%27none%27 stroke-linecap=%27round%27/%3E%3C/svg%3E') no-repeat 0 100% / 100% 0.3em; padding-bottom: 0.1em">creatividad</span></h2>
-<p style="margin: 0; color: #3D3B3E">Toca una experiencia para ver sus fotos y sus paquetes.</p>
+<p style="margin: 0; color: #3D3B3E">{{pfHint}}</p>
 </div>
 <a href="https://instagram.com/ncstudio507" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 24px; border-radius: 999px; border: 1.5px solid #222020; color: #222020; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 15px">Ver más en Instagram</a>
+</div>
+<div role="group" aria-label="Filtrar experiencias" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: -12px">
+<sc-for list="{{pfTabs}}" as="t" hint-placeholder-count="3">
+<button type="button" onClick="{{t.pick}}" aria-pressed="{{t.pressed}}" style="min-height: 42px; padding: 0 18px; border-radius: 999px; border: 1.5px solid #222020; background: {{t.bg}}; color: {{t.fg}}; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 14px; cursor: pointer">{{t.label}}</button>
+</sc-for>
 </div>
 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px">
 <sc-for list="{{portfolio}}" as="g" hint-placeholder-count="10">
@@ -1416,6 +1421,7 @@ var WA = "https://wa.me/50766313762?text=";
 // Feed JSON de Behold (https://behold.so). Pega aquí el link del feed para que la franja de Instagram se actualice sola.
 var IG_FEED = "https://feeds.behold.so/qnBMUzAR3CYanHqAU3Re";
 var IG_FALLBACK = ["suenos", "levelup", "dulce", "infantil", "granext", "folklore"];
+var EVENTOS = ["infantil", "limitless"];
 var WHY = [
   ["Te guiamos en todo momento", "No necesitas saber posar. Te dirigimos con naturalidad para que te veas y te sientas tú, sin poses forzadas."],
   ["Una experiencia, no solo fotos", "Desde la asesoría previa hasta la entrega: ideas de vestuario, locación y concepto pensadas para tu historia."],
@@ -2030,7 +2036,8 @@ class Component extends DCLogic {
         };
       })
     };
-    var portfolio = PACKAGES.filter(function (p) { return !!GAL[p.id]; }).map(function (p) {
+    var pf = this.state.pf || "";
+    var portfolio = PACKAGES.filter(function (p) { return !!GAL[p.id] && (!pf || (pf === "ev") === (EVENTOS.indexOf(p.id) >= 0)); }).map(function (p) {
       return {
         src: B + GAL[p.id][0] + ".jpg", title: p.title, kind: p.kind,
         open: function () { self.setState({ lbId: p.id, lbIdx: 0 }); }
@@ -2505,11 +2512,16 @@ class Component extends DCLogic {
         if (a && a.setAttribute) a.setAttribute("href", WA + encodeURIComponent("Hola, NC Studio." + (n ? " Soy " + n + "." : "") + (m ? "\n\n" + m : " Tengo una consulta.")));
       },
       portfolio: portfolio,
+      pfTabs: [["", "Todas"], ["ses", "Sesiones de fotos"], ["ev", "Coberturas de eventos"]].map(function (t) {
+        var on = pf === t[0];
+        return { label: t[1], pressed: on ? "true" : "false", bg: on ? "#222020" : "transparent", fg: on ? "#FEFEFE" : "#222020", pick: function () { self.setState({ pf: t[0] }); } };
+      }),
+      pfHint: pf === "ev" ? "Coberturas: toca una para ver sus fotos y paquetes." : (pf === "ses" ? "Sesiones de fotos: toca una para ver sus fotos y paquetes." : "Toca una experiencia para ver sus fotos y sus paquetes."),
       start: [
         { img: B + GAL.suenos[0] + ".jpg", eyebrow: "Quiero", title: "Una sesión de fotos", text: "Cumpleaños, XV años, embarazo, bebé, graduación o estudio. Elige tu experiencia y arma tu paquete.",
-          ctas: [{ href: "#portafolio", label: "Ver experiencias", bg: accent, fg: "#222020" }] },
+          ctas: [{ href: "#portafolio", label: "Ver sesiones", bg: accent, fg: "#222020", go: function () { self.setState({ pf: "ses" }); } }] },
         { img: B + GAL.infantil[0] + ".jpg", eyebrow: "Tengo", title: "Un evento", text: "Fiestas, cumpleaños, bautizos y celebraciones con Momentos, o carreras y eventos deportivos con Limitless.",
-          ctas: [{ href: "#momentos", label: "Momentos", bg: accent, fg: "#222020" }, { href: "#limitless", label: "Limitless", bg: "transparent", fg: "#FEFEFE" }] }
+          ctas: [{ href: "#portafolio", label: "Ver coberturas", bg: accent, fg: "#222020", go: function () { self.setState({ pf: "ev" }); } }] }
       ],
       why: WHY.map(function (w, i) { var d = i % 2 === 0; return { title: w[0], text: w[1], bg: d ? "#222020" : "#F2E4D2", fg: d ? "#FEFEFE" : "#222020", sub: d ? "#F2E4D2" : "#3D3B3E" }; }),
       cifras: CIFRAS.map(function (c) { return { n: c[0], label: c[1] }; }),
