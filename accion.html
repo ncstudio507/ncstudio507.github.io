@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>NC Studio · Reservas</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<style>
+body{margin:0;background:#F2E4D2;font-family:Arial,Helvetica,sans-serif;color:#222020}
+.card{max-width:560px;margin:24px auto;background:#FEFEFE;border-radius:10px;overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,.08)}
+.top{background:#222020;padding:18px 22px}
+.top img{height:40px;display:block}
+.top h1{margin:10px 0 0;font-family:Georgia,serif;font-weight:400;font-size:24px;color:#FEFEFE}
+.bar{height:5px;background:#F99824}
+.body{padding:22px;font-size:16px;line-height:1.55}
+.foot{padding:14px 22px;background:#222020;color:#F2E4D2;font-size:12px}
+.spin{width:28px;height:28px;border:3px solid #F2E4D2;border-top-color:#F99824;border-radius:50%;animation:s 1s linear infinite;display:inline-block;vertical-align:middle;margin-right:10px}
+@keyframes s{to{transform:rotate(360deg)}}
+.btn{display:inline-block;padding:14px 22px;border-radius:6px;font-weight:bold;text-decoration:none;font-size:15px;margin:4px 0;border:0;cursor:pointer}
+@media (max-width:600px){.card{margin:0;border-radius:0;min-height:100vh}}
+</style>
+</head>
+<body>
+<div class="card">
+<div class="top"><img src="logo.png" alt="NC Studio"><h1 id="t">Procesando…</h1></div>
+<div class="bar"></div>
+<div class="body" id="b"><span class="spin" aria-hidden="true"></span>Un momento, estamos procesando tu respuesta.</div>
+<div class="foot">NC Studio · Reservas</div>
+</div>
+<script>
+(function () {
+  var SCRIPT = "https://script.google.com/macros/s/AKfycbzaT3OjIAFX5CET8Opyjnehye_XOfdI_kwA0DxEDusXzCzesOtffZUwsvE2-IbEp4yvIQ/exec";
+  var q = new URLSearchParams(location.search);
+  var a = q.get("a"), id = q.get("id"), t = q.get("t");
+  var T = document.getElementById("t"), B = document.getElementById("b");
+  function show(title, html) { T.textContent = title; B.innerHTML = html; document.title = title + " · NC Studio"; }
+  if (!a || !id || !t) { show("Enlace incompleto", "Este enlace no tiene todos los datos. Ábrelo desde el botón del correo."); return; }
+  var etiqueta = { si: "confirmar la disponibilidad", no: "avisar que no está disponible", pago: "confirmar el abono" }[a] || "continuar";
+  function enviar() {
+    show("Procesando…", '<span class="spin" aria-hidden="true"></span>Un momento, estamos procesando tu respuesta.');
+    fetch(SCRIPT, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: a, id: id, t: t }) })
+      .then(function (r) { return r.json(); })
+      .then(function (r) { show(r.title || "Listo", r.html || ""); })
+      .catch(function () {
+        show("No pudimos conectar", 'Revisa tu internet e inténtalo de nuevo.<br><br><button class="btn" id="re" style="background:#F99824;color:#222020">Intentar de nuevo</button>');
+        document.getElementById("re").onclick = enviar;
+      });
+  }
+  show("¿Confirmas?", 'Vas a <b>' + etiqueta + '</b> de la solicitud <b>' + id.replace(/[<>&"]/g, "") + '</b>.<br><br><button class="btn" id="ok" style="background:#F99824;color:#222020">Sí, continuar</button>');
+  document.getElementById("ok").onclick = enviar;
+})();
+</script>
+</body>
+</html>
