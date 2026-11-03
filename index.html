@@ -1701,7 +1701,7 @@ function missing(n, ph, em) {
 var NC_SCRIPT = "https://script.google.com/macros/s/AKfycbzaT3OjIAFX5CET8Opyjnehye_XOfdI_kwA0DxEDusXzCzesOtffZUwsvE2-IbEp4yvIQ/exec";
 function ncPost(payload) {
   if (!NC_SCRIPT) return false;
-  try { fetch(NC_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) }); return true; } catch (e) { return false; }
+  try { fetch(NC_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) }).catch(function () {}); return true; } catch (e) { return false; }
 }
 function parseLines(arr) {
   return arr.map(function (l) { var t = String(l).replace(/^•\s*/, ""), i = t.lastIndexOf(": "); return { name: i > 0 ? t.slice(0, i) : t, price: i > 0 ? t.slice(i + 2) : "" }; });
