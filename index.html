@@ -49,8 +49,9 @@ details[open] .faq-ico { transform: rotate(45deg); }
 <nav aria-label="Secciones" style="display: flex; flex-wrap: wrap; align-items: center; gap: 2px 22px; font-family: Montserrat, sans-serif; font-size: 15px; font-weight: 600">
 <a href="#quienes-somos" style="color: #F2E4D2; text-decoration: none; padding: 12px 0">Quiénes somos</a>
 <a href="#portafolio" style="color: #F2E4D2; text-decoration: none; padding: 12px 0">Portafolio</a>
+<button type="button" onClick="{{cot.openAny}}" style="padding: 12px 0; border: 0; background: transparent; color: #F2E4D2; font: inherit; cursor: pointer">Arma tu paquete</button>
 <a href="#preguntas" style="color: #F2E4D2; text-decoration: none; padding: 12px 0">Preguntas frecuentes</a>
-<a href="#reservar" style="background: {{accent}}; color: #222020; text-decoration: none; padding: 11px 22px; border-radius: 999px">Reservar</a>
+<a href="#portafolio" style="background: {{accent}}; color: #222020; text-decoration: none; padding: 11px 22px; border-radius: 999px">Reservar</a>
 </nav>
 </div>
 </header>
@@ -556,23 +557,6 @@ Calcula tu paquete aquí
 </sc-if>
 
 <div style="display: flex; flex-direction: column; gap: 4px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.sn.d}}. ¿Dónde será la sesión?</span>
-<span style="font-size: 13px; color: #3D3B3E">Marca el lugar o los lugares donde te gustaría la sesión.</span>
-<sc-for list="{{cot.locs}}" as="l" hint-placeholder-count="7">
-<button type="button" role="checkbox" aria-checked="{{l.checked}}" onClick="{{l.toggle}}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border: 0; border-bottom: 1px solid #EFE6DA; background: transparent; color: #222020; text-align: left; cursor: pointer; width: 100%">
-<span style="display: flex; align-items: center; gap: 12px; min-width: 0">
-<span aria-hidden="true" style="flex: none; width: 24px; height: 24px; border-radius: 5px; border: 2px solid #222020; background: {{l.boxBg}}; color: #222020; display: flex; align-items: center; justify-content: center">
-<sc-if value="{{l.on}}" hint-placeholder-val="{{false}}">
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
-</sc-if>
-</span>
-<span style="font-family: 'Tenor Sans', Georgia, serif; font-size: 15px">{{l.name}}</span>
-</span>
-</button>
-</sc-for>
-</div>
-
-<div style="display: flex; flex-direction: column; gap: 4px">
 <span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.sn.i}}. ¿Quieres fotos impresas?</span>
 <span style="font-size: 13px; color: #3D3B3E">Elige cuántas quieres de cada tamaño.</span>
 <sc-for list="{{cot.prints}}" as="x" hint-placeholder-count="4">
@@ -611,6 +595,25 @@ Calcula tu paquete aquí
 </sc-for>
 </div>
 
+</div>
+
+<div style="display: {{cot.vL}}; flex-direction: column; gap: 22px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.sn.d}}. ¿Dónde será la sesión?</span>
+<span style="font-size: 13px; color: #3D3B3E">Marca el lugar o los lugares donde te gustaría la sesión.</span>
+<sc-for list="{{cot.locs}}" as="l" hint-placeholder-count="7">
+<button type="button" role="checkbox" aria-checked="{{l.checked}}" onClick="{{l.toggle}}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border: 0; border-bottom: 1px solid #EFE6DA; background: transparent; color: #222020; text-align: left; cursor: pointer; width: 100%">
+<span style="display: flex; align-items: center; gap: 12px; min-width: 0">
+<span aria-hidden="true" style="flex: none; width: 24px; height: 24px; border-radius: 5px; border: 2px solid #222020; background: {{l.boxBg}}; color: #222020; display: flex; align-items: center; justify-content: center">
+<sc-if value="{{l.on}}" hint-placeholder-val="{{false}}">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+</sc-if>
+</span>
+<span style="font-family: 'Tenor Sans', Georgia, serif; font-size: 15px">{{l.name}}</span>
+</span>
+</button>
+</sc-for>
+</div>
 </div>
 
 <div style="display: {{cot.vC}}; flex-direction: column; gap: 22px">
@@ -683,7 +686,7 @@ Calcula tu paquete aquí
 </div>
 <sc-if value="{{cot.showNext}}" hint-placeholder-val="{{false}}">
 <button type="button" onClick="{{cot.goNext}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; border-radius: 6px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px; cursor: pointer">
-Siguiente: fecha y datos
+Siguiente: lugar, fecha y datos
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
 </button>
 </sc-if>
@@ -1636,10 +1639,11 @@ class Component extends DCLogic {
           fromScratch: function () { self.setState({ cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} }); },
           isPkg: !!pk, noPkg: !pk,
           title: pk ? "Mejora tu experiencia" : "Arma tu paquete",
-          subtitle: pk ? (st.cotStep === 2 ? "Último paso: tus datos y la fecha de tu sesión." : "Elige los extras que quieras agregar a tu paquete.") : "Elige lo que quieres y te enviamos la cotización por WhatsApp.",
+          subtitle: pk ? (st.cotStep === 2 ? "Último paso: tus datos, el lugar y la fecha de tu sesión." : "Elige los extras que quieras agregar a tu paquete.") : "Elige lo que quieres y te enviamos la cotización por WhatsApp.",
           inclTitle: pk ? "Tu paquete incluye" : "La propuesta inicial incluye",
           pkgLabel: pk ? pk.title + " · " + pk.nm + " (" + money(pk.price) + ")" : "",
-          sn: pk ? { t: "1", f: "1", p: "2", d: "3", i: "4", c: "2" } : { t: "1", f: "3", p: "4", d: "5", i: "6", c: "7" },
+          sn: pk ? { t: "1", f: "1", p: "2", i: "3", d: "2", c: "3" } : { t: "1", f: "3", p: "4", i: "5", d: "6", c: "7" },
+          vL: !pk || st.cotStep === 2 ? "flex" : "none",
           step: pk ? (st.cotStep === 2 ? 2 : 1) : 1,
           vD: !pk || st.cotStep === 2 ? "flex" : "none",
           vB: !pk || st.cotStep !== 2 ? "flex" : "none",
@@ -1683,7 +1687,11 @@ class Component extends DCLogic {
         };
       })(),
       showGrid: !sel, showPkg: !!sel,
-      back: function () { self.setState({ sel: null }); setTimeout(function () { var el = document.getElementById("portafolio"); if (el) el.scrollIntoView(); }, 60); },
+      back: function () {
+        try { if (window.location.hash) history.replaceState(null, "", window.location.pathname + window.location.search); } catch (e) {}
+        self.setState({ sel: null });
+        setTimeout(function () { var el = document.getElementById("portafolio"); if (el) el.scrollIntoView({ behavior: "auto", block: "start" }); }, 120);
+      },
       current: current,
       waGeneral: WA + encodeURIComponent("Hola, NC Studio. Quiero reservar o cotizar una sesión."),
       portfolio: portfolio,
