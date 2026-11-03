@@ -56,12 +56,20 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 .wa{display:flex;align-items:center;justify-content:center;gap:8px;background:#25D366;color:#0b2e17;font:bold 17px Arial,sans-serif;text-decoration:none;border-radius:8px;padding:16px}
 .back{background:none;border:0;font:bold 15px Arial,sans-serif;color:var(--fg);cursor:pointer;padding:4px 0;justify-self:start}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.kpi{background:var(--soft);border-radius:8px;padding:12px 14px;display:grid;gap:2px}.kpi b{font-size:20px;font-variant-numeric:tabular-nums}.kpi span{font-size:13px;color:var(--muted)}
+.mv{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:12px 0;border-bottom:1px solid var(--line);align-items:center}
+.mv .m{font-weight:bold;font-variant-numeric:tabular-nums;text-align:right}.mv .m.in{color:#067647}.mv small{color:var(--muted);font-size:13px;grid-column:1/-1}
+.mv .ac{grid-column:1/-1;display:flex;gap:8px}.mv .ac button{font:bold 13px Arial,sans-serif;background:none;border:1px solid var(--line);border-radius:6px;padding:6px 10px;cursor:pointer;color:var(--fg)}
+.card2{border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:10px;background:#fff}
+.card2 .top2{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}.card2 .top2 b{font-size:18px;font-variant-numeric:tabular-nums}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}@media (max-width:560px){.g3{grid-template-columns:1fr}}
 .chk{display:flex;gap:8px;align-items:center;font-weight:normal;grid-template-columns:none}.chk input{width:20px;height:20px;accent-color:var(--accent)}
 </style>
 </head>
 <body>
 <div class="top"><img src="logo.png" alt="NC Studio"><span>Agendar reserva</span><a href="#" id="salir" hidden>Cambiar PIN</a></div>
-<nav class="tabs" id="tabs" hidden><button id="tA" aria-pressed="true">Agendar</button><button id="tC" aria-pressed="false">Clientes</button></nav>
+<nav class="tabs" id="tabs" hidden><button id="tA" aria-pressed="true">Agendar</button><button id="tC" aria-pressed="false">Clientes</button><button id="tF" aria-pressed="false">Finanzas</button></nav>
 <div class="bar"></div>
 <main id="app"></main>
 <script>
@@ -87,9 +95,12 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     });
   });
 
-  function tab(w) { $("tabs").hidden = false; $("tA").setAttribute("aria-pressed", w === "A"); $("tC").setAttribute("aria-pressed", w === "C"); }
+  function tab(w) { $("tabs").hidden = false; $("tA").setAttribute("aria-pressed", w === "A"); $("tC").setAttribute("aria-pressed", w === "C"); $("tF").setAttribute("aria-pressed", w === "F"); }
   $("tA").onclick = function () { form(); };
   $("tC").onclick = function () { clientes(); };
+  $("tF").onclick = function () { finanzas(); };
+  var QS = new URLSearchParams(location.search), REPARTO = QS.get("reparto");
+  function inicio() { if (REPARTO) { var r = REPARTO; REPARTO = null; finanzas(r); } else form(); }
   function pinView(msg) {
     salir.hidden = true; $("tabs").hidden = true;
     app.innerHTML = '<section><h2>Entrar</h2><p class="hint">Escribe el PIN de tu página para agendar. Lo encuentras en tu código de Apps Script, en la línea <b>PIN</b>.</p>' +
@@ -98,7 +109,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       var v = $("pin").value.trim(); if (!v) return;
       $("pok").disabled = true; $("pok").innerHTML = '<span class="spin"></span>Revisando…';
       call({ action: "pin", pin: v }).then(function (r) {
-        if (r.ok) { PIN = v; setPin(v); form(); } else pinView("PIN incorrecto.");
+        if (r.ok) { PIN = v; setPin(v); inicio(); } else pinView("PIN incorrecto.");
       }).catch(function () { pinView("No pudimos conectar. Revisa tu internet."); });
     };
     $("pin").onkeydown = function (e) { if (e.key === "Enter") $("pok").click(); };
@@ -273,7 +284,9 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       ["con", x.firmado ? "✍️ Contrato (ya firmado)" : "✍️ Contrato para firmar", !!x.contrato],
       ["rec", "⏰ Recordatorio", x.estado === "Confirmado"],
       ["pru", "📷 Fotos de prueba", x.kind !== "evento" && x.estado === "Confirmado"],
-      ["fin", "🎁 Fotos finales", x.estado === "Confirmado"]].filter(function (a) { return a[2]; });
+      ["fin", "🎁 Fotos finales", x.estado === "Confirmado"],
+      ["saldo", "💵 Saldo cobrado", x.estado === "Confirmado" && !x.saldoPagado],
+      ["rep", "🧮 Anotar repartición", !!x.saldoPagado && !x.reparto]].filter(function (a) { return a[2]; });
     app.innerHTML = '<button class="back" id="bk">‹ Todos los clientes</button><section>' + chip(x.estado) + '<h2>' + esc(x.name) + '</h2>' +
       '<p class="hint" style="font-size:15px;line-height:1.6">' + esc(x.id) + " · " + esc(x.service) + "<br>" + esc(x.fecha) + " · " + esc(x.place) + "<br>📱 " + esc(x.phone) + " · ✉️ " + esc(x.email) + "<br>Total " + esc(x.total) + " · abono " + esc(x.abono) + (x.contrato ? (x.firmado ? " · ✅ contrato firmado" : " · contrato pendiente de firma") : "") + '</p>' +
       '<div class="acts">' + acts.map(function (a) { return '<button class="act" data-k="' + a[0] + '" aria-pressed="' + (a[0] === cual) + '">' + a[1] + '</button>'; }).join("") + '</div></section><div id="cmp"></div>';
@@ -283,6 +296,21 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
   }
   function componer(x, k) {
     var box = $("cmp");
+    if (k === "rep") { finanzas(x.id); return; }
+    if (k === "saldo") {
+      box.innerHTML = '<section><h2>Saldo cobrado</h2><p>Registra el pago del saldo de ' + esc(x.name) + '. Después te pedimos cómo repartieron el trabajo.</p>' +
+        '<div class="g2"><label for="sm">Monto ($)<input id="sm" type="number" min="0" step="0.5" inputmode="decimal"></label><label for="sme">Método<select id="sme"><option>Efectivo</option><option>Yappy</option><option>Transferencia</option></select></label></div>' +
+        '<button class="btn" id="sok">Registrar saldo</button><p class="err" id="serr"></p></section>';
+      $("sm").value = x.saldoN || "";
+      $("sok").onclick = function () {
+        $("sok").disabled = true; $("sok").innerHTML = '<span class="spin"></span>Guardando…';
+        call({ action: "fin_saldo", pin: PIN, id: x.id, monto: $("sm").value, metodo: $("sme").value }).then(function (r) {
+          if (!r.ok) { $("serr").innerHTML = esc(r.title) + ". " + (r.html || ""); $("sok").disabled = false; $("sok").textContent = "Registrar saldo"; return; }
+          finanzas(x.id);
+        }).catch(function () { $("serr").textContent = "No pudimos conectar."; $("sok").disabled = false; $("sok").textContent = "Registrar saldo"; });
+      };
+      box.scrollIntoView({ block: "start", behavior: "smooth" }); return;
+    }
     if (k === "pago" || k === "si") {
       var pg = k === "pago", lb = pg ? "Sí, abono recibido" : "Sí, enviar cotización";
       box.innerHTML = pg
@@ -329,8 +357,95 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     };
     $("cmp").scrollIntoView({ block: "start", behavior: "smooth" });
   }
+  /* ---------- Finanzas ---------- */
+  var FD = null;
+  var GRUPOS = [["Negocio (NC Studio)", ["Ingreso NC", "Gasto NC", "Inversión NC", "Deudas NC"]], ["Nelson", ["Ingreso Nelson", "Gasto Nelson", "Ahorro Nelson"]], ["Charlie", ["Ingreso Charlie", "Gasto Charlie"]], ["Otros", ["Sin impacto"]]];
+  var ENTRA = { "Ingreso NC": 1, "Ingreso Nelson": 1, "Ingreso Charlie": 1 };
+  function hoyIso() { var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
+  function finanzas(foco) {
+    tab("F"); salir.hidden = false;
+    app.innerHTML = '<div class="msg"><span class="spin"></span>Cargando tus finanzas (revisando tu calendario y tus Yappy)…</div>';
+    call({ action: "fin_list", pin: PIN }).then(function (r) {
+      if (r.title === "PIN incorrecto") { setPin(""); pinView("El PIN cambió. Escríbelo de nuevo."); return; }
+      if (!r.ok) { app.innerHTML = '<div class="msg">No pudimos cargar tus finanzas. ¿Ya pegaste el código nuevo en Apps Script y ejecutaste <b>configurar</b>?</div>'; return; }
+      FD = r; pintaFin(foco);
+    }).catch(function () { app.innerHTML = '<div class="msg">No pudimos conectar. Revisa tu internet.</div>'; });
+  }
+  function formMov(p, m, conReserva) {
+    m = m || {};
+    var tipos = GRUPOS.map(function (g) { return '<optgroup label="' + esc(g[0]) + '">' + g[1].map(function (t) { return '<option' + (m.tipo === t ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join("") + '</optgroup>'; }).join("");
+    if (conReserva && FD.abiertas.length) tipos = '<option value="Reserva">Abono o saldo de una reserva</option>' + tipos;
+    return '<div class="g2"><label for="' + p + 't">Tipo<select id="' + p + 't"><option value="">Elige…</option>' + tipos + '</select></label>' +
+      '<label for="' + p + 'c" id="' + p + 'cl">Categoría<select id="' + p + 'c"></select></label>' +
+      '<label for="' + p + 'r" id="' + p + 'rl" hidden>Reserva<select id="' + p + 'r"><option value="">Elige la reserva…</option>' + FD.abiertas.map(function (a) { return '<option value="' + esc(a.id) + '">' + esc(a.name + " · " + a.falta + " " + money(a.monto)) + '</option>'; }).join("") + '</select></label></div>' +
+      '<div class="g3"><label for="' + p + 'm">Monto ($)<input id="' + p + 'm" type="number" min="0" step="0.01" inputmode="decimal"></label>' +
+      '<label for="' + p + 'me">Método<select id="' + p + 'me">' + FD.metodos.map(function (x) { return '<option' + (m.metodo === x ? ' selected' : '') + '>' + x + '</option>'; }).join("") + '</select></label>' +
+      '<label for="' + p + 'f">Fecha<input id="' + p + 'f" type="date"></label></div>' +
+      '<div class="g2"><label for="' + p + 'd">¿De qué fue?<input id="' + p + 'd" autocomplete="off" placeholder="Ej.: Gasolina para la sesión de Ana"></label><label for="' + p + 'p">Persona <small>(quién pagó o a quién)</small><input id="' + p + 'p" autocomplete="off"></label></div>' +
+      '<div class="row"><button class="btn" id="' + p + 'ok">Guardar</button><span class="err" id="' + p + 'e"></span></div>';
+  }
+  function bindMov(p, m, alGuardar) {
+    m = m || {};
+    $(p + "m").value = m.monto || ""; $(p + "f").value = m.fecha || hoyIso(); $(p + "d").value = m.desc || ""; $(p + "p").value = m.persona || "";
+    function cats() {
+      var t = $(p + "t").value, res = t === "Reserva";
+      $(p + "rl").hidden = !res; $(p + "cl").hidden = res;
+      $(p + "c").innerHTML = (FD.tipos[t] || []).map(function (c) { return '<option' + (m.cat === c ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join("");
+    }
+    $(p + "t").onchange = cats; cats();
+    var igual = FD.abiertas.filter(function (a) { return Math.abs(Number(a.monto) - Number(m.monto || -1)) < 0.01; });
+    if (igual.length === 1) $(p + "r").value = igual[0].id;
+    $(p + "ok").onclick = function () {
+      var t = $(p + "t").value; if (!t) { $(p + "e").textContent = "Elige el tipo."; return; }
+      if (t === "Reserva" && !$(p + "r").value) { $(p + "e").textContent = "Elige la reserva."; return; }
+      var mov = { forzar: !!m._forzar, id: m.id || "", tipo: t, cat: $(p + "c").value, reserva: $(p + "r").value, monto: $(p + "m").value, metodo: $(p + "me").value, fecha: $(p + "f").value, desc: $(p + "d").value.trim(), persona: $(p + "p").value.trim() };
+      if (t !== "Reserva" && !(Number(mov.monto) > 0)) { $(p + "e").textContent = "Escribe el monto."; return; }
+      var b = $(p + "ok"); b.disabled = true; b.innerHTML = '<span class="spin"></span>Guardando…';
+      call({ action: "fin_save", pin: PIN, mov: mov }).then(function (r) {
+        if (!r.ok) { if (r.forzar) m._forzar = true; b.disabled = false; b.textContent = r.forzar ? "Guardar igual" : "Guardar"; $(p + "e").innerHTML = esc(r.title || "Error") + ". " + (r.html || ""); return; }
+        (alGuardar || finanzas)();
+      }).catch(function () { b.disabled = false; b.textContent = "Guardar"; $(p + "e").textContent = "No pudimos conectar."; });
+    };
+  }
+  function pintaFin(foco) {
+    var r = FD, s = r.resumen, h = "";
+    h += '<section><div class="row" style="justify-content:space-between"><h2>Finanzas · ' + esc(s.mes.charAt(0) + s.mes.slice(1).toLowerCase()) + '</h2><a class="btn2" href="' + esc(r.url) + '" target="_blank" rel="noopener" style="text-decoration:none">Abrir hoja de finanzas ↗</a></div>' +
+      '<div class="kpis"><div class="kpi"><span>Ingresos NC</span><b>' + money(s.ingresosNC) + '</b></div><div class="kpi"><span>Gastos NC</span><b>' + money(s.gastosNC) + '</b></div><div class="kpi"><span>Gastos Nelson</span><b>' + money(s.gastosNelson) + '</b></div><div class="kpi"><span>Por revisar</span><b>' + r.pendientes.length + '</b></div></div></section>';
+    if (r.repartos.length) h += '<section><h2>Repartos pendientes</h2><p class="hint">Trabajos ya pagados completos. Anota cuánto le tocó a cada uno; lo que sobra se registra como viáticos.</p>' + r.repartos.map(function (x, i) {
+      return '<div class="card2" id="rp-' + esc(x.id) + '"><div class="top2"><span><b style="font-size:16px">' + esc(x.name) + '</b><br><small class="hint">' + esc(x.service + " · " + x.fecha) + '</small></span><b>' + money(x.total) + '</b></div>' +
+        '<div class="g3"><label for="rn' + i + '">Nelson ($)<input id="rn' + i + '" type="number" min="0" step="0.5" inputmode="decimal"></label><label for="rc' + i + '">Charlie ($)<input id="rc' + i + '" type="number" min="0" step="0.5" inputmode="decimal"></label><label for="rx' + i + '">NC Studio ($)<input id="rx' + i + '" type="number" min="0" step="0.5" inputmode="decimal"></label></div>' +
+        '<div class="row"><button class="btn" id="rok' + i + '">Guardar repartición</button><span class="hint" id="rv' + i + '">Viáticos: ' + money(x.total) + '</span></div></div>';
+    }).join('<div style="height:10px"></div>') + '</section>';
+    if (r.pendientes.length) h += '<section><h2>Por revisar (' + r.pendientes.length + ')</h2><p class="hint">Yappys que no son de una reserva y entradas del calendario que conviene revisar.</p>' + r.pendientes.map(function (m, i) {
+      return '<div class="card2"><div class="top2"><span><b style="font-size:16px">' + esc(m.persona || m.desc || "Movimiento") + '</b><br><small class="hint">' + esc([m.fecha, m.metodo, m.ref && m.origen === "Yappy" ? m.ref : "", m.estado === "Revisar" ? "del calendario: " + m.tipo + " / " + m.cat : ""].filter(Boolean).join(" · ")) + '</small></span><b>' + money(m.monto) + '</b></div><button class="btn2" data-x="' + i + '">Clasificar</button><div id="pcw' + i + '" hidden>' + formMov("pc" + i, m, m.origen === "Yappy") + '</div></div>';
+    }).join('<div style="height:10px"></div>') + '</section>';
+    h += '<section><h2>Registrar gasto o ingreso</h2><p class="hint">En efectivo, Yappy, tarjeta o transferencia. También puedes seguir anotándolos en tu calendario: se leen solos cada hora.</p>' + formMov("nv", null, false) + '</section>';
+    h += '<section><h2>Últimos movimientos</h2><div id="ult">' + r.ultimos.map(function (m, i) {
+      var entra = ENTRA[m.tipo];
+      return '<div class="mv"><span><b>' + esc(m.cat || m.tipo) + '</b> · ' + esc(m.desc || m.persona || "") + '</span><span class="m' + (entra ? ' in' : '') + '">' + (entra ? '+' : '−') + money(m.monto) + '</span><small>' + esc(m.fecha + " · " + m.tipo + (m.metodo ? " · " + m.metodo : "") + " · " + m.origen) + '</small>' +
+        (m.origen === "Reserva" ? '' : '<div class="ac"><button data-e="' + i + '">Editar</button><button data-b="' + i + '">Borrar</button></div><div id="ed' + i + '"></div>') + '</div>';
+    }).join("") + '</div></section>';
+    app.innerHTML = h;
+    r.repartos.forEach(function (x, i) {
+      function upd() { var v = x.total - Number($("rn" + i).value || 0) - Number($("rc" + i).value || 0) - Number($("rx" + i).value || 0); $("rv" + i).textContent = v < -0.009 ? "Te pasaste por " + money(-v) : "Viáticos: " + money(Math.max(0, v)); }
+      ["rn", "rc", "rx"].forEach(function (k) { $(k + i).oninput = upd; });
+      $("rok" + i).onclick = function () {
+        var b = $("rok" + i); b.disabled = true; b.innerHTML = '<span class="spin"></span>Guardando…';
+        call({ action: "fin_reparto", pin: PIN, id: x.id, nelson: $("rn" + i).value, charlie: $("rc" + i).value, nc: $("rx" + i).value }).then(function (q) { if (q.ok) finanzas(); else { b.disabled = false; b.textContent = "Guardar repartición"; } }).catch(function () { b.disabled = false; b.textContent = "Guardar repartición"; });
+      };
+    });
+    Array.prototype.forEach.call(app.querySelectorAll("[data-x]"), function (b) { b.onclick = function () { var w = $("pcw" + b.getAttribute("data-x")); w.hidden = !w.hidden; b.textContent = w.hidden ? "Clasificar" : "Cerrar"; }; });
+    r.pendientes.forEach(function (m, i) { bindMov("pc" + i, Object.assign({}, m, { tipo: m.estado === "Revisar" ? m.tipo : "", cat: m.estado === "Revisar" ? "" : m.cat })); });
+    bindMov("nv", null);
+    Array.prototype.forEach.call(app.querySelectorAll("[data-e]"), function (b) { b.onclick = function () { var i = +b.getAttribute("data-e"), m = r.ultimos[i]; $("ed" + i).innerHTML = '<div class="card2" style="margin-top:8px">' + formMov("ue" + i, m, false) + '</div>'; bindMov("ue" + i, m); }; });
+    Array.prototype.forEach.call(app.querySelectorAll("[data-b]"), function (b) { b.onclick = function () {
+      if (!b.dataset.ok) { b.dataset.ok = 1; b.textContent = "¿Seguro? Toca otra vez"; return; }
+      b.disabled = true; call({ action: "fin_del", pin: PIN, id: r.ultimos[+b.getAttribute("data-b")].id }).then(function () { finanzas(); });
+    }; });
+    if (foco) { var el = $("rp-" + foco); if (el) el.scrollIntoView({ block: "start", behavior: "smooth" }); }
+  }
   salir.onclick = function (e) { e.preventDefault(); setPin(""); PIN = ""; pinView(); };
-  if (PIN) form(); else pinView();
+  if (PIN) inicio(); else pinView();
 })();
 </script>
 </body>

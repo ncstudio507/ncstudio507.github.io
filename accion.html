@@ -37,7 +37,7 @@ body{margin:0;background:#F2E4D2;font-family:Arial,Helvetica,sans-serif;color:#2
   var T = document.getElementById("t"), B = document.getElementById("b");
   function show(title, html) { T.textContent = title; B.innerHTML = html; document.title = title + " · NC Studio"; }
   if (!a || !id || !t) { show("Enlace incompleto", "Este enlace no tiene todos los datos. Ábrelo desde el botón del correo."); return; }
-  var etiqueta = { si: "confirmar la disponibilidad", no: "avisar que no está disponible", pago: "confirmar el abono" }[a] || "continuar";
+  var etiqueta = { si: "confirmar la disponibilidad", no: "avisar que no está disponible", pago: "confirmar el abono", saldo: "registrar el pago del saldo" }[a] || "continuar";
   var extra = {};
   function enviar() {
     var body = { action: a, id: id, t: t }; for (var k in extra) body[k] = extra[k];
