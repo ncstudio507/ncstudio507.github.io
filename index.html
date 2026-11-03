@@ -409,21 +409,32 @@ Crea tu paquete aquí
 </div>
 </section>
 
-<section id="preguntas" style="background: #F2E4D2; padding: 88px 20px">
-<div style="max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px">
+<section id="preguntas" style="background: #F2E4D2; padding: 64px 20px">
+<div style="max-width: 1160px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 24px 48px; align-items: start">
+<div style="display: flex; flex-direction: column; gap: 14px">
 <div style="display: flex; flex-direction: column; gap: 6px">
 <p style="margin: 0; font-family: Montserrat, sans-serif; font-size: 16px; font-weight: 600; color: #3D3B3E">Preguntas frecuentes</p>
 <h2 style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(34px, 4.5vw, 52px); line-height: 1.1">Resolvemos tus dudas</h2>
-<p style="margin: 0; color: #3D3B3E">Toca una pregunta para ver la respuesta. Si no encuentras la tuya, escríbenos por WhatsApp.</p>
+<p style="margin: 0; color: #3D3B3E">Elige un tema y toca una pregunta para ver la respuesta.</p>
 </div>
-<div style="display: flex; flex-direction: column; gap: 10px">
+<div role="group" aria-label="Temas de preguntas" style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{faqTabs}}" as="t" hint-placeholder-count="5">
+<button type="button" onClick="{{t.pick}}" aria-pressed="{{t.pressed}}" style="min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1.5px solid #222020; background: {{t.bg}}; color: {{t.fg}}; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 14px; cursor: pointer">{{t.label}}</button>
+</sc-for>
+</div>
+<a href="{{waGeneral}}" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; min-height: 46px; padding: 0 22px; border-radius: 999px; background: #222020; color: #FEFEFE; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 15px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.6-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg>
+¿Otra pregunta? Escríbenos
+</a>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px; min-width: 0">
 <sc-for list="{{faq}}" as="f" hint-placeholder-count="6">
-<details style="border-radius: 8px; background: #FEFEFE; border: 1.5px solid #E4D6C3">
-<summary style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 16px 18px; cursor: pointer; list-style: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px; line-height: 1.35">
+<details style="border-radius: 8px; background: #FEFEFE; border: 1px solid #E4D6C3">
+<summary style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; cursor: pointer; list-style: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px; line-height: 1.35">
 <span>{{f.q}}</span>
-<span class="faq-ico" aria-hidden="true" style="flex: none; width: 30px; height: 30px; border-radius: 999px; transition: transform .2s; background: {{accent}}; color: #222020; display: flex; align-items: center; justify-content: center; font-size: 20px; line-height: 1">+</span>
+<span class="faq-ico" aria-hidden="true" style="flex: none; width: 26px; height: 26px; border-radius: 999px; transition: transform .2s; background: {{accent}}; color: #222020; display: flex; align-items: center; justify-content: center; font-size: 20px; line-height: 1">+</span>
 </summary>
-<p style="margin: 0; padding: 0 18px 18px; font-size: 16px; color: #3D3B3E; white-space: pre-line">{{f.a}}</p>
+<p style="margin: 0; padding: 0 16px 16px; font-size: 15px; line-height: 1.55; color: #3D3B3E; white-space: pre-line">{{f.a}}</p>
 <sc-if value="{{f.tras}}" hint-placeholder-val="{{false}}">
 <div style="padding: 0 18px 18px">
 <div style="width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 14px; padding: 20px; border-radius: 10px; background: #222020; color: #FEFEFE; box-sizing: border-box">
@@ -463,12 +474,6 @@ Calcula tu paquete aquí
 </sc-if>
 </details>
 </sc-for>
-</div>
-<div>
-<a href="{{waGeneral}}" style="display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 24px; border-radius: 999px; background: #222020; color: #FEFEFE; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 15px">
-<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.6-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg>
-¿Otra pregunta? Escríbenos
-</a>
 </div>
 </div>
 </section>
@@ -1422,6 +1427,13 @@ var WA = "https://wa.me/50766313762?text=";
 var IG_FEED = "https://feeds.behold.so/qnBMUzAR3CYanHqAU3Re";
 var IG_FALLBACK = ["suenos", "levelup", "dulce", "infantil", "granext", "folklore"];
 var EVENTOS = ["infantil", "limitless"];
+var FAQ_CATS = [
+  ["Reservas y pagos", [0, 1, 2, 3, 18]],
+  ["Lugar y horarios", [4, 5, 6, 7]],
+  ["Tu sesión", [11, 15, 16]],
+  ["Fotos y entrega", [12, 13, 14, 17]],
+  ["Bebés", [8, 9, 10]]
+];
 var WHY = [
   ["Te guiamos en todo momento", "No necesitas saber posar. Te dirigimos con naturalidad para que te veas y te sientas tú, sin poses forzadas."],
   ["Una experiencia, no solo fotos", "Desde la asesoría previa hasta la entrega: ideas de vestuario, locación y concepto pensadas para tu historia."],
@@ -2528,7 +2540,8 @@ class Component extends DCLogic {
       cifrasOn: CIFRAS.length > 0,
       ig: (this.state.igPosts || IG_FALLBACK.map(function (k, i) { return { src: B + GAL[k][Math.min(1, GAL[k].length - 1)] + ".jpg", href: "https://instagram.com/ncstudio507", video: false, multi: false }; })).map(function (p, i) { return Object.assign({ label: "Publicación " + (i + 1) + " en Instagram" }, p); }),
       footPk: PACKAGES.filter(function (p) { return p.id !== "limitless"; }).map(function (p) { return { title: p.title, href: "#" + p.title.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") }; }),
-      faq: FAQ,
+      faq: FAQ_CATS[this.state.faqCat || 0][1].map(function (i) { return FAQ[i]; }),
+      faqTabs: FAQ_CATS.map(function (c, i) { var on = (self.state.faqCat || 0) === i; return { label: c[0], pressed: on ? "true" : "false", bg: on ? "#222020" : "transparent", fg: on ? "#FEFEFE" : "#222020", pick: function () { self.setState({ faqCat: i }); } }; }),
       trasList: TRAS.map(function (t, i) { return { place: trasLabel(t), price: t[1], first: i === 0, rest: i > 0 }; }),
       lb: lb,
       steps: [
