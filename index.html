@@ -224,6 +224,15 @@ Ver todas las experiencias
 </div>
 </div>
 
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px">
+<sc-for list="{{current.info}}" as="inf" hint-placeholder-count="3">
+<div style="display: flex; flex-direction: column; gap: 4px; padding: 16px 18px; border-radius: 8px; background: #FEFEFE">
+<span style="font-family: Montserrat, sans-serif; font-size: 15px; font-weight: 700">{{inf.label}}</span>
+<span style="font-size: 15px; color: #3D3B3E; white-space: pre-line">{{inf.text}}</span>
+</div>
+</sc-for>
+</div>
+
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 18px; align-items: stretch">
 <sc-for list="{{current.proposals}}" as="p" hint-placeholder-count="3">
 <article style="display: flex; flex-direction: column; gap: 16px; padding: 28px 24px; border-radius: 10px; border: 1.5px solid #222020; background: {{p.bg}}; color: {{p.fg}}">
@@ -260,16 +269,20 @@ Ver disponibilidad y reservar
 </sc-for>
 </div>
 
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; padding: 26px 24px; border-radius: 10px; background: #222020; color: #FEFEFE">
+<div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 6px">
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 28px; line-height: 1.15">¿Quieres un paquete creado exclusivamente para ti?</span>
+<span style="font-size: 15px; color: #F2E4D2">Elige tus fotos, lugares y extras, y recibe tu cotización al instante. Desde $55.</span>
+</div>
+<button type="button" onClick="{{createHere}}" style="display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 24px; border-radius: 999px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px; cursor: pointer">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+Crea tu paquete aquí
+</button>
+</div>
+<p style="margin: -14px 0 0; text-align: center; font-size: 15px; color: #3D3B3E">¿Tienes dudas? <a href="#preguntas" style="font-family: Montserrat, sans-serif; font-weight: 700; color: #222020">Mira las preguntas frecuentes</a></p>
 
 
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px">
-<sc-for list="{{current.info}}" as="inf" hint-placeholder-count="3">
-<div style="display: flex; flex-direction: column; gap: 4px; padding: 16px 18px; border-radius: 8px; background: #FEFEFE">
-<span style="font-family: Montserrat, sans-serif; font-size: 15px; font-weight: 700">{{inf.label}}</span>
-<span style="font-size: 15px; color: #3D3B3E; white-space: pre-line">{{inf.text}}</span>
-</div>
-</sc-for>
-</div>
+
 <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start">
 <sc-if value="{{current.showTras}}" hint-placeholder-val="{{true}}">
 <div style="flex: 1 1 300px; min-width: 0; max-width: 560px; display: flex; flex-direction: column; gap: 14px; padding: 20px; border-radius: 10px; background: #222020; color: #FEFEFE; box-sizing: border-box">
@@ -339,17 +352,6 @@ WhatsApp
 </sc-if>
 </div>
 
-<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; padding: 26px 24px; border-radius: 10px; background: #222020; color: #FEFEFE">
-<div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 6px">
-<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 28px; line-height: 1.15">¿Quieres un paquete creado exclusivamente para ti?</span>
-<span style="font-size: 15px; color: #F2E4D2">Elige tus fotos, lugares y extras, y recibe tu cotización al instante. Desde $55.</span>
-</div>
-<button type="button" onClick="{{createHere}}" style="display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 24px; border-radius: 999px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px; cursor: pointer">
-<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
-Crea tu paquete aquí
-</button>
-</div>
-<p style="margin: -14px 0 0; text-align: center; font-size: 15px; color: #3D3B3E">¿Tienes dudas? <a href="#preguntas" style="font-family: Montserrat, sans-serif; font-weight: 700; color: #222020">Mira las preguntas frecuentes</a></p>
 
 <sc-if value="{{current.hasTesti}}" hint-placeholder-val="{{true}}">
 <div style="display: flex; flex-direction: column; gap: 14px">
