@@ -32,27 +32,45 @@ button:focus-visible, a:focus-visible { outline: 3px solid #F99824; outline-offs
 html { scroll-behavior: smooth; }
 summary::-webkit-details-marker { display: none; }
 details[open] .faq-ico { transform: rotate(45deg); }
+[id]{scroll-margin-top:72px}.nc-slogan{font-size:10px!important;letter-spacing:.12em!important;padding:5px 9px!important}@media (max-width:379px){.nc-slogan{font-size:9px!important;letter-spacing:.06em!important;padding:5px 7px!important}}@media (min-width:900px){.nc-slogan{font-size:13px!important;letter-spacing:.3em!important;padding:6px 12px!important}}.nc-nav-desk{display:none}.nc-menu-btn{display:inline-flex}@media (min-width:900px){.nc-nav-desk{display:flex}.nc-menu-btn{display:none}.nc-nav-mob{display:none!important}}
 </style>
 <div id="nc-root"></div>
 <template id="nc-tpl">
 
 <div style="width: 100%; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 17px; line-height: 1.6">
 
-<header style="background: #222020; padding: 12px 20px; border-bottom: 1px solid #3D3B3E">
-<div style="max-width: 1160px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px">
-<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px">
-<a href="#quienes-somos" aria-label="NC Studio, inicio" style="display: flex; align-items: center; padding: 6px 0">
+<header style="position: sticky; top: 0; z-index: 60; background: #222020; border-bottom: 1px solid #3D3B3E">
+<div style="max-width: 1160px; margin: 0 auto; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px 24px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; min-width: 0">
+<a href="#quienes-somos" aria-label="NC Studio, inicio" style="display: flex; align-items: center; padding: 4px 0">
 <img src="img/9829ea1d0acede8e44636a5e99bd7b84.png" alt="NC Studio" style="height: 40px; width: auto; display: block">
 </a>
-<p style="margin: 0; background: {{accent}}; color: #222020; padding: 6px 12px; font-family: 'EB Garamond', Georgia, serif; font-size: clamp(10px, 2.9vw, 13px); letter-spacing: clamp(0.1em, 0.85vw, 0.3em); white-space: nowrap; max-width: 100%; box-sizing: border-box">PROFESIONAL · CERCANO · CREATIVO</p>
+<p class="nc-slogan" style="margin: 0; background: {{accent}}; color: #222020; padding: 6px 12px; font-family: 'EB Garamond', Georgia, serif; font-size: clamp(10px, 2.9vw, 13px); letter-spacing: clamp(0.1em, 0.85vw, 0.3em); white-space: nowrap; max-width: 100%; box-sizing: border-box">PROFESIONAL · CERCANO · CREATIVO</p>
 </div>
-<nav aria-label="Secciones" style="display: flex; flex-wrap: wrap; align-items: center; gap: 2px 22px; font-family: Montserrat, sans-serif; font-size: 15px; font-weight: 600">
-<a href="#quienes-somos" style="color: #F2E4D2; text-decoration: none; padding: 12px 0">Quiénes somos</a>
-<a href="#portafolio" style="color: #F2E4D2; text-decoration: none; padding: 12px 0">Portafolio</a>
-<button type="button" onClick="{{cot.openAny}}" style="padding: 12px 0; border: 0; background: transparent; color: #F2E4D2; font: inherit; cursor: pointer">Arma tu paquete personalizado</button>
-<a href="#portafolio" style="background: {{accent}}; color: #222020; text-decoration: none; padding: 11px 22px; border-radius: 999px">Reservar</a>
+<nav class="nc-nav-desk" aria-label="Menú principal" style="align-items: center; gap: 26px; font-family: Montserrat, sans-serif; font-size: 15px; font-weight: 600; white-space: nowrap">
+<a href="#quienes-somos" style="color: #F2E4D2; text-decoration: none; padding: 10px 0">Quiénes somos</a>
+<a href="#portafolio" style="color: #F2E4D2; text-decoration: none; padding: 10px 0">Portafolio</a>
+<a href="#portafolio" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 22px; border-radius: 999px; background: {{accent}}; color: #222020; text-decoration: none">Reservar</a>
+<button type="button" onClick="{{cot.openAny}}" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 20px; border-radius: 999px; border: 1.5px solid {{accent}}; background: transparent; color: #FEFEFE; font: inherit; cursor: pointer">Arma tu paquete personalizado</button>
 </nav>
+<button type="button" class="nc-menu-btn" onClick="{{menu.toggle}}" aria-expanded="{{menu.expanded}}" aria-controls="nc-menu" style="flex: none; align-items: center; gap: 6px; min-height: 44px; padding: 0 10px; border-radius: 6px; border: 1.5px solid #F2E4D2; background: transparent; color: #FEFEFE; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 14px; cursor: pointer">
+<sc-if value="{{menu.closed}}" hint-placeholder-val="{{true}}">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
+</sc-if>
+<sc-if value="{{menu.open}}" hint-placeholder-val="{{false}}">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+</sc-if>
+Menú
+</button>
 </div>
+<sc-if value="{{menu.open}}" hint-placeholder-val="{{false}}">
+<nav id="nc-menu" class="nc-nav-mob" aria-label="Menú principal" style="display: flex; flex-direction: column; padding: 4px 20px 18px; border-top: 1px solid #3D3B3E; font-family: Montserrat, sans-serif; font-weight: 600">
+<a href="#quienes-somos" onClick="{{menu.close}}" style="display: flex; align-items: center; min-height: 54px; border-bottom: 1px solid #3D3B3E; color: #FEFEFE; text-decoration: none; font-size: 17px">Quiénes somos</a>
+<a href="#portafolio" onClick="{{menu.close}}" style="display: flex; align-items: center; min-height: 54px; border-bottom: 1px solid #3D3B3E; color: #FEFEFE; text-decoration: none; font-size: 17px">Portafolio</a>
+<a href="#portafolio" onClick="{{menu.close}}" style="display: flex; align-items: center; justify-content: center; min-height: 52px; margin-top: 16px; border-radius: 999px; background: {{accent}}; color: #222020; text-decoration: none; font-size: 16px; font-weight: 700">Reservar</a>
+<button type="button" onClick="{{cot.openAny}}" style="display: flex; align-items: center; justify-content: center; min-height: 52px; margin-top: 10px; border-radius: 999px; border: 1.5px solid {{accent}}; background: transparent; color: #FEFEFE; font-family: Montserrat, sans-serif; font-size: 16px; font-weight: 700; cursor: pointer">Arma tu paquete personalizado</button>
+</nav>
+</sc-if>
 </header>
 
 <section id="quienes-somos" style="background: #222020; color: #FEFEFE; padding: 56px 20px 72px">
@@ -1617,7 +1635,7 @@ function calModel(self, K, accent) {
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0, cotOpen: false, cotExp: null, cotN: 3, cotL: {}, cotQ: {}, cotC: {}, cotName: "", cotPhone: "", cotEmail: "", cotDate: "", cotIdea: "", cotOff: 0, cotSel: null, cotSlot: null, cotDeclined: "", cotPkg: null, cotStep: 1, upOpen: false, upCtx: null, xcId: null, xcStep: 1, xcBase: null, xcQ: {}, xcC: {}, xcL: {}, xcOff: 0, xcSel: null, xcSlot: null, xcType: "", xcTime: "", xcIdea: "" };
+    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0, cotOpen: false, cotExp: null, cotN: 3, cotL: {}, cotQ: {}, cotC: {}, cotName: "", cotPhone: "", cotEmail: "", cotDate: "", cotIdea: "", cotOff: 0, cotSel: null, cotSlot: null, cotDeclined: "", cotPkg: null, cotStep: 1, upOpen: false, upCtx: null, menuOpen: false, xcId: null, xcStep: 1, xcBase: null, xcQ: {}, xcC: {}, xcL: {}, xcOff: 0, xcSel: null, xcSlot: null, xcType: "", xcTime: "", xcIdea: "" };
   }
   componentDidMount() {
     var self = this;
@@ -1772,6 +1790,15 @@ class Component extends DCLogic {
           ready: ready, summary: summary, wa: WA + encodeURIComponent(waMsg)
         };
       })(),
+      menu: {
+        open: !!self.state.menuOpen, closed: !self.state.menuOpen, expanded: self.state.menuOpen ? "true" : "false",
+        toggle: function () { self.setState({ menuOpen: !self.state.menuOpen }); },
+        close: function (e) {
+          var a = e && e.currentTarget, h = a && a.getAttribute ? a.getAttribute("href") : "";
+          if (h && h.charAt(0) === "#") { e.preventDefault(); setTimeout(function () { var el = document.getElementById(h.slice(1)); if (el) el.scrollIntoView({ behavior: "auto", block: "start" }); }, 60); }
+          self.setState({ menuOpen: false });
+        }
+      },
       createHere: function () {
         if (XC[sel]) openXC(sel, XC[sel].defBase, 1);
         else self.setState(Object.assign({ cotOpen: true, cotStep: 1, cotExp: sel || self.state.cotExp }, self.state.cotPkg ? { cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} } : {}));
@@ -1985,7 +2012,7 @@ class Component extends DCLogic {
           sug: sug || { key: "" }, hasSug: !!sug,
           sugYes: function () { if (!sug) return; self.setState({ cotOpen: false, cotDeclined: sug.key, sel: expObj.id, calOpen: true, calCtx: { exp: sug.exp, prop: sug.name, price: sug.price }, calOff: 0, calSel: null, calSlot: null }); },
           sugNo: function () { if (sug) self.setState({ cotDeclined: sug.key }); },
-          openAny: function () { self.setState(pk ? { cotOpen: true, cotStep: 1, cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} } : { cotOpen: true, cotStep: 1 }); },
+          openAny: function () { self.setState(pk ? { menuOpen: false, cotOpen: true, cotStep: 1, cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} } : { menuOpen: false, cotOpen: true, cotStep: 1 }); },
           openHere: function () { self.setState(Object.assign({ cotOpen: true, cotStep: 1, cotExp: sel || st.cotExp }, pk ? { cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} } : {})); },
           fromScratch: function () { self.setState({ cotStep: 1, cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} }); },
           isPkg: !!pk, noPkg: !pk,
