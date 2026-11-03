@@ -32,7 +32,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #F99824; outline-offs
 html { scroll-behavior: smooth; }
 summary::-webkit-details-marker { display: none; }
 details[open] .faq-ico { transform: rotate(45deg); }
-[id]{scroll-margin-top:72px}.nc-calc-aside{display:none}@media (min-width:900px){.nc-calc{max-width:1160px!important}.nc-calc-body{flex-direction:row!important;align-items:flex-start!important;gap:36px!important;padding:26px 36px 30px!important}.nc-calc-main{flex:1 1 auto}.nc-calc-aside{display:flex!important}.nc-group{display:grid!important;grid-template-columns:1fr 1fr;column-gap:28px}.nc-group>.nc-gtitle{grid-column:1/-1;justify-self:start}.nc-locs{grid-template-columns:repeat(4,minmax(0,1fr))!important}.nc-calc-foot{padding-left:36px!important;padding-right:36px!important}}.nc-slogan{font-size:10px!important;letter-spacing:.12em!important;padding:5px 9px!important}@media (max-width:379px){.nc-slogan{font-size:9px!important;letter-spacing:.06em!important;padding:5px 7px!important}}@media (min-width:900px){.nc-slogan{font-size:13px!important;letter-spacing:.3em!important;padding:6px 12px!important}}.nc-nav-desk{display:none}.nc-menu-btn{display:inline-flex}@media (min-width:900px){.nc-nav-desk{display:flex}.nc-menu-btn{display:none}.nc-nav-mob{display:none!important}}
+[id]{scroll-margin-top:72px}.nc-calc-aside{display:none}@media (min-width:900px){.nc-calc{max-width:1160px!important}.nc-calc-body{flex-direction:row!important;align-items:flex-start!important;gap:36px!important;padding:26px 36px 30px!important}.nc-calc-main{flex:1 1 auto}.nc-calc-aside{display:flex!important}.nc-group{display:grid!important;grid-template-columns:1fr 1fr;column-gap:28px}.nc-group>.nc-gtitle{grid-column:1/-1;justify-self:start}.nc-locs{grid-template-columns:repeat(4,minmax(0,1fr))!important}.nc-calc-foot{padding-left:36px!important;padding-right:36px!important}}@media (min-width:1100px){.nc-calc{max-width:none!important}.nc-calc-body{padding:28px 48px 32px!important;gap:48px!important}.nc-calc-aside{width:380px!important}.nc-s1[style*="display: flex"]{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px 36px;align-items:start}.nc-s1>.nc-full{grid-column:1/-1}.nc-pr[style*="display: flex"]{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px 40px;align-items:start}.nc-pr>*{grid-column:2}.nc-pr>[data-prguide]{grid-column:1;grid-row:1/span 20}.nc-cal{display:grid!important;grid-template-columns:minmax(0,1fr) 320px;column-gap:40px;row-gap:10px;align-items:start}.nc-cal>*{grid-column:1}.nc-cal>[data-slots]{grid-column:2;grid-row:1/span 4;border-top:0!important;padding-top:0!important}.nc-cal>.nc-chosen,.nc-cal>.nc-side{grid-column:2}.nc-calx[style*="display: flex"]{display:grid!important;grid-template-columns:minmax(0,1fr) 320px;column-gap:40px;row-gap:10px;align-items:start}.nc-calx>*{grid-column:1}.nc-calx>.nc-side{grid-column:2;grid-row:1/span 2}.nc-calx>.nc-chosen{grid-column:2;grid-row:3}.nc-form{display:grid!important;grid-template-columns:1fr 1fr;gap:14px 28px}.nc-form>span{grid-column:1/-1}.nc-formx[style*="display: flex"]{display:grid!important;grid-template-columns:1fr 1fr;gap:14px 28px}.nc-formx>span,.nc-formx>label:has(textarea),.nc-formx>div{grid-column:1/-1}.nc-calc-foot{flex-direction:row!important;align-items:center;gap:28px!important;padding-top:16px!important;padding-bottom:16px!important}.nc-calc-foot>div:first-child{margin-right:auto}.nc-calc-foot>div:nth-child(2){width:420px;flex:none}.nc-calc-foot>span{max-width:260px}}@media (min-width:1500px){.nc-group{grid-template-columns:repeat(3,minmax(0,1fr))!important}.nc-locs{grid-template-columns:repeat(6,minmax(0,1fr))!important}}.nc-slogan{font-size:10px!important;letter-spacing:.12em!important;padding:5px 9px!important}@media (max-width:379px){.nc-slogan{font-size:9px!important;letter-spacing:.06em!important;padding:5px 7px!important}}@media (min-width:900px){.nc-slogan{font-size:13px!important;letter-spacing:.3em!important;padding:6px 12px!important}}.nc-nav-desk{display:none}.nc-menu-btn{display:inline-flex}@media (min-width:900px){.nc-nav-desk{display:flex}.nc-menu-btn{display:none}.nc-nav-mob{display:none!important}}
 </style>
 <div id="nc-root"></div>
 <template id="nc-tpl">
@@ -458,7 +458,7 @@ Calcula tu paquete aquí
 <span style="font-family: 'EB Garamond', Georgia, serif; font-size: 27px; line-height: 1.15">{{cot.subtitle}}</span>
 
 <div style="display: {{cot.vD}}; flex-direction: column; gap: 22px">
-<div style="display: flex; flex-direction: column; gap: 12px">
+<div class="nc-form" style="display: flex; flex-direction: column; gap: 12px">
 <span style="font-size: 13px; color: #3D3B3E">Los necesitamos para confirmar tu reserva. Todos son obligatorios.</span>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tu nombre
 <input type="text" autocomplete="name" value="{{cot.name}}" data-field="name" onInput="{{cot.setName}}" placeholder="Nombre y apellido" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{cot.bName}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
@@ -479,7 +479,7 @@ Calcula tu paquete aquí
 </sc-if>
 </div>
 
-<div style="display: {{cot.vB}}; flex-direction: column; gap: 22px">
+<div class="nc-s1" style="display: {{cot.vB}}; flex-direction: column; gap: 22px">
 <div style="display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 8px; background: #F2E4D2">
 <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px">
 <span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">{{cot.inclTitle}}</span>
@@ -528,7 +528,7 @@ Calcula tu paquete aquí
 </div>
 
 <sc-if value="{{cot.hasExp}}" hint-placeholder-val="{{true}}">
-<div style="display: flex; flex-direction: column; gap: 4px">
+<div class="nc-full" style="display: flex; flex-direction: column; gap: 4px">
 <span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.sn.p}}. Personaliza tu sesión</span>
 <span style="font-size: 13px; color: #3D3B3E">Extras pensados para {{cot.expName}}.</span>
 <sc-for list="{{cot.groups}}" as="g" hint-placeholder-count="4">
@@ -573,11 +573,11 @@ Calcula tu paquete aquí
 </div>
 </sc-if>
 <sc-if value="{{cot.noExp}}" hint-placeholder-val="{{false}}">
-<div style="padding: 14px 16px; border-radius: 8px; border: 1.5px dashed #D9CDBE; font-size: 14px; color: #3D3B3E">Elige el tipo de sesión para ver los extras que puedes agregar.</div>
+<div class="nc-full" style="padding: 14px 16px; border-radius: 8px; border: 1.5px dashed #D9CDBE; font-size: 14px; color: #3D3B3E">Elige el tipo de sesión para ver los extras que puedes agregar.</div>
 </sc-if>
 </div>
 
-<div style="display: {{cot.vP}}; flex-direction: column; gap: 12px">
+<div class="nc-pr" style="display: {{cot.vP}}; flex-direction: column; gap: 12px">
 <span style="font-size: 13px; color: #3D3B3E">Tus fotos favoritas impresas en papel fotográfico profesional.</span>
 <sc-if value="{{cot.prOn}}" hint-placeholder-val="{{true}}">
 <div data-prguide="1" style="display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 8px; background: #FBF7F1; border: 1px solid #EFE6DA">
@@ -648,7 +648,7 @@ Calcula tu paquete aquí
 
 <div style="display: {{cot.vC}}; flex-direction: column; gap: 22px">
 <div style="display: flex; flex-direction: column; gap: 12px">
-<div style="display: flex; flex-direction: column; gap: 10px">
+<div class="nc-cal" style="display: flex; flex-direction: column; gap: 10px">
 <p style="margin: 0; font-size: 13px; line-height: 1.45; color: #3D3B3E">Lunes a viernes: 7:00 p. m. en estudio. Sábado y domingo: 10:00 a. m. en estudio o 4:30 p. m. en exteriores.</p>
 <div style="display: flex; justify-content: center">
 <div style="display: flex; align-items: center; gap: 8px">
@@ -694,7 +694,7 @@ Calcula tu paquete aquí
 </div>
 </sc-if>
 <sc-if value="{{cot.cal.ready}}" hint-placeholder-val="{{false}}">
-<span style="padding: 10px 12px; border-radius: 6px; background: #F2E4D2; font-size: 14px">Fecha elegida: {{cot.cal.text}}</span>
+<span class="nc-chosen" style="padding: 10px 12px; border-radius: 6px; background: #F2E4D2; font-size: 14px">Fecha elegida: {{cot.cal.text}}</span>
 </sc-if>
 </div>
 </div>
@@ -839,7 +839,7 @@ Calcula tu paquete aquí
 </div>
 </div>
 
-<div style="display: {{xc.vP}}; flex-direction: column; gap: 12px">
+<div class="nc-pr" style="display: {{xc.vP}}; flex-direction: column; gap: 12px">
 <span style="font-size: 13px; color: #3D3B3E">Tus fotos favoritas impresas en papel fotográfico profesional.</span>
 <sc-if value="{{xc.prOn}}" hint-placeholder-val="{{true}}">
 <div data-prguide="1" style="display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 8px; background: #FBF7F1; border: 1px solid #EFE6DA">
@@ -906,7 +906,7 @@ Calcula tu paquete aquí
 </div>
 </div>
 
-<div style="display: {{xc.vF}}; flex-direction: column; gap: 12px">
+<div class="nc-calx" style="display: {{xc.vF}}; flex-direction: column; gap: 12px">
 <div style="display: flex; justify-content: center">
 <div style="display: flex; align-items: center; gap: 8px">
 <button type="button" onClick="{{xc.cal.prev}}" aria-label="Mes anterior" disabled="{{xc.cal.noPrev}}" style="width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: {{xc.cal.prevOp}}">
@@ -940,14 +940,14 @@ Calcula tu paquete aquí
 <span>Actualizado: {{xc.cal.updated}}</span>
 </div>
 <sc-if value="{{xc.hasDate}}" hint-placeholder-val="{{false}}">
-<span style="padding: 10px 12px; border-radius: 6px; background: #F2E4D2; font-size: 14px">Fecha elegida: {{xc.fecha}}</span>
+<span class="nc-chosen" style="padding: 10px 12px; border-radius: 6px; background: #F2E4D2; font-size: 14px">Fecha elegida: {{xc.fecha}}</span>
 </sc-if>
-<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Hora de inicio del evento
+<label class="nc-side" style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Hora de inicio del evento
 <input type="time" data-field="time" value="{{xc.time}}" onInput="{{xc.setTime}}" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
 </label>
 </div>
 
-<div style="display: {{xc.vD}}; flex-direction: column; gap: 12px">
+<div class="nc-formx" style="display: {{xc.vD}}; flex-direction: column; gap: 12px">
 <span style="font-size: 13px; color: #3D3B3E">Los necesitamos para confirmar tu reserva. Nombre, teléfono y correo son obligatorios.</span>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tu nombre
 <input type="text" autocomplete="name" value="{{xc.name}}" data-field="name" onInput="{{xc.setName}}" placeholder="Nombre y apellido" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{xc.bName}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
