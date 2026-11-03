@@ -32,7 +32,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #F99824; outline-offs
 html { scroll-behavior: smooth; }
 summary::-webkit-details-marker { display: none; }
 details[open] .faq-ico { transform: rotate(45deg); }
-[id]{scroll-margin-top:72px}.nc-slogan{font-size:10px!important;letter-spacing:.12em!important;padding:5px 9px!important}@media (max-width:379px){.nc-slogan{font-size:9px!important;letter-spacing:.06em!important;padding:5px 7px!important}}@media (min-width:900px){.nc-slogan{font-size:13px!important;letter-spacing:.3em!important;padding:6px 12px!important}}.nc-nav-desk{display:none}.nc-menu-btn{display:inline-flex}@media (min-width:900px){.nc-nav-desk{display:flex}.nc-menu-btn{display:none}.nc-nav-mob{display:none!important}}
+[id]{scroll-margin-top:72px}.nc-calc-aside{display:none}@media (min-width:900px){.nc-calc{max-width:1160px!important}.nc-calc-body{flex-direction:row!important;align-items:flex-start!important;gap:36px!important;padding:26px 36px 30px!important}.nc-calc-main{flex:1 1 auto}.nc-calc-aside{display:flex!important}.nc-group{display:grid!important;grid-template-columns:1fr 1fr;column-gap:28px}.nc-group>.nc-gtitle{grid-column:1/-1;justify-self:start}.nc-locs{grid-template-columns:repeat(4,minmax(0,1fr))!important}.nc-calc-foot{padding-left:36px!important;padding-right:36px!important}}.nc-slogan{font-size:10px!important;letter-spacing:.12em!important;padding:5px 9px!important}@media (max-width:379px){.nc-slogan{font-size:9px!important;letter-spacing:.06em!important;padding:5px 7px!important}}@media (min-width:900px){.nc-slogan{font-size:13px!important;letter-spacing:.3em!important;padding:6px 12px!important}}.nc-nav-desk{display:none}.nc-menu-btn{display:inline-flex}@media (min-width:900px){.nc-nav-desk{display:flex}.nc-menu-btn{display:none}.nc-nav-mob{display:none!important}}
 </style>
 <div id="nc-root"></div>
 <template id="nc-tpl">
@@ -433,7 +433,7 @@ Calcula tu paquete aquí
 
 <sc-if value="{{cot.open}}" hint-placeholder-val="{{false}}">
 <div style="position: fixed; inset: 0; z-index: 70; background: #F2E4D2; display: flex; justify-content: center">
-<div role="dialog" aria-modal="true" aria-label="{{cot.title}}" style="width: 100%; max-width: 640px; height: 100%; background: #FEFEFE; color: #222020; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 0 1px #EFE6DA">
+<div class="nc-calc" role="dialog" aria-modal="true" aria-label="{{cot.title}}" style="width: 100%; max-width: 640px; height: 100%; background: #FEFEFE; color: #222020; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 0 1px #EFE6DA">
 <div style="flex: none; background: #222020; color: #FEFEFE; padding: 8px 10px 12px">
 <div style="display: flex; align-items: center; gap: 8px">
 <button type="button" onClick="{{nav.back}}" aria-label="Atrás" style="flex: none; width: 44px; height: 44px; border-radius: 6px; border: 0; background: transparent; color: #FEFEFE; cursor: pointer; display: flex; align-items: center; justify-content: center">
@@ -453,7 +453,8 @@ Calcula tu paquete aquí
 </sc-for>
 </div>
 </div>
-<div data-keep-scroll="cot{{cot.step}}" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 22px">
+<div class="nc-calc-body" data-keep-scroll="cot{{cot.step}}" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 22px">
+<div class="nc-calc-main" style="display: flex; flex-direction: column; gap: 22px; min-width: 0">
 <span style="font-family: 'EB Garamond', Georgia, serif; font-size: 27px; line-height: 1.15">{{cot.subtitle}}</span>
 
 <div style="display: {{cot.vD}}; flex-direction: column; gap: 22px">
@@ -531,8 +532,8 @@ Calcula tu paquete aquí
 <span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.sn.p}}. Personaliza tu sesión</span>
 <span style="font-size: 13px; color: #3D3B3E">Extras pensados para {{cot.expName}}.</span>
 <sc-for list="{{cot.groups}}" as="g" hint-placeholder-count="4">
-<div style="display: flex; flex-direction: column; margin-top: 10px">
-<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 21px; line-height: 1.2; padding-bottom: 2px; border-bottom: 2px solid {{accent}}; align-self: flex-start">{{g.title}}</span>
+<div class="nc-group" style="display: flex; flex-direction: column; margin-top: 10px">
+<span class="nc-gtitle" style="font-family: 'EB Garamond', Georgia, serif; font-size: 21px; line-height: 1.2; padding-bottom: 2px; border-bottom: 2px solid {{accent}}; align-self: flex-start">{{g.title}}</span>
 <sc-for list="{{g.items}}" as="x" hint-placeholder-count="4">
 <sc-if value="{{x.isQty}}" hint-placeholder-val="{{false}}">
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #EFE6DA">
@@ -625,7 +626,7 @@ Calcula tu paquete aquí
 <div style="display: {{cot.vL}}; flex-direction: column; gap: 22px">
 <div style="display: flex; flex-direction: column; gap: 4px">
 <span style="font-size: 13px; color: #3D3B3E">Marca el lugar o los lugares. La distancia es aproximada desde Las Tablas.</span>
-<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 6px">
+<div class="nc-locs" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 6px">
 <sc-for list="{{cot.locs}}" as="l" hint-placeholder-count="12">
 <button type="button" role="checkbox" aria-checked="{{l.checked}}" onClick="{{l.toggle}}" style="display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 6px 10px; border-radius: 6px; border: 1.5px solid {{l.border}}; background: {{l.bg}}; color: #222020; text-align: left; cursor: pointer; width: 100%; box-sizing: border-box">
 <span aria-hidden="true" style="flex: none; width: 22px; height: 22px; border-radius: 5px; border: 2px solid #222020; background: {{l.boxBg}}; color: #222020; display: flex; align-items: center; justify-content: center">
@@ -699,8 +700,27 @@ Calcula tu paquete aquí
 </div>
 </div>
 </div>
+<aside class="nc-calc-aside" aria-label="Resumen de tu reserva" style="position: sticky; top: 0; flex: none; width: 330px; flex-direction: column; gap: 12px; padding: 20px; border-radius: 10px; background: #F2E4D2; box-sizing: border-box">
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 26px; line-height: 1.1">Tu reserva</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.sumTitle}}</span>
+<div style="display: flex; flex-direction: column; gap: 6px; padding: 12px 0; border-top: 1px solid #D9CDBE; border-bottom: 1px solid #D9CDBE">
+<div style="display: flex; justify-content: space-between; gap: 10px; font-size: 14px"><span>{{cot.sumBaseLabel}}</span><span style="font-family: Montserrat, sans-serif; font-weight: 700; white-space: nowrap">{{cot.sumBase}}</span></div>
+<sc-for list="{{cot.sumLines}}" as="l" hint-placeholder-count="3">
+<div style="display: flex; justify-content: space-between; gap: 10px; font-size: 14px; color: #3D3B3E"><span>{{l.name}}</span><span style="font-family: Montserrat, sans-serif; font-weight: 600; white-space: nowrap">{{l.price}}</span></div>
+</sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px; font-size: 14px">
+<span><b style="font-family: Montserrat, sans-serif">Lugar:</b> {{cot.sumPlace}}</span>
+<span><b style="font-family: Montserrat, sans-serif">Fecha:</b> {{cot.sumDate}}</span>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding-top: 6px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">Total estimado</span>
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 34px; line-height: 1">{{cot.total}}</span>
+</div>
+</aside>
+</div>
 
-<div style="flex: none; display: flex; flex-direction: column; gap: 10px; padding: 14px 18px 16px; background: #222020; color: #FEFEFE">
+<div class="nc-calc-foot" style="flex: none; display: flex; flex-direction: column; gap: 10px; padding: 14px 18px 16px; background: #222020; color: #FEFEFE">
 <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 12px">
 <div style="display: flex; flex-direction: column; min-width: 0">
 <span style="font-family: Montserrat, sans-serif; font-size: 12px; font-weight: 600; color: #F2E4D2">Total estimado</span>
@@ -732,7 +752,7 @@ Calcula tu paquete aquí
 
 <sc-if value="{{xc.open}}" hint-placeholder-val="{{false}}">
 <div style="position: fixed; inset: 0; z-index: 70; background: #F2E4D2; display: flex; justify-content: center">
-<div role="dialog" aria-modal="true" aria-label="{{xc.title}}" style="width: 100%; max-width: 640px; height: 100%; background: #FEFEFE; color: #222020; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 0 1px #EFE6DA">
+<div class="nc-calc" role="dialog" aria-modal="true" aria-label="{{xc.title}}" style="width: 100%; max-width: 640px; height: 100%; background: #FEFEFE; color: #222020; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 0 1px #EFE6DA">
 <div style="flex: none; background: #222020; color: #FEFEFE; padding: 8px 10px 12px">
 <div style="display: flex; align-items: center; gap: 8px">
 <button type="button" onClick="{{nav.back}}" aria-label="Atrás" style="flex: none; width: 44px; height: 44px; border-radius: 6px; border: 0; background: transparent; color: #FEFEFE; cursor: pointer; display: flex; align-items: center; justify-content: center">
@@ -752,7 +772,8 @@ Calcula tu paquete aquí
 </sc-for>
 </div>
 </div>
-<div data-keep-scroll="xc{{xc.step}}" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 22px">
+<div class="nc-calc-body" data-keep-scroll="xc{{xc.step}}" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 22px">
+<div class="nc-calc-main" style="display: flex; flex-direction: column; gap: 22px; min-width: 0">
 <span style="font-family: 'EB Garamond', Georgia, serif; font-size: 27px; line-height: 1.15">{{xc.subtitle}}</span>
 
 <div style="display: {{xc.v1}}; flex-direction: column; gap: 22px">
@@ -777,8 +798,8 @@ Calcula tu paquete aquí
 <div style="display: flex; flex-direction: column; gap: 4px">
 <span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">2. Mejora tu cobertura</span>
 <sc-for list="{{xc.groups}}" as="g" hint-placeholder-count="4">
-<div style="display: flex; flex-direction: column; margin-top: 10px">
-<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 21px; line-height: 1.2; padding-bottom: 2px; border-bottom: 2px solid {{accent}}; align-self: flex-start">{{g.title}}</span>
+<div class="nc-group" style="display: flex; flex-direction: column; margin-top: 10px">
+<span class="nc-gtitle" style="font-family: 'EB Garamond', Georgia, serif; font-size: 21px; line-height: 1.2; padding-bottom: 2px; border-bottom: 2px solid {{accent}}; align-self: flex-start">{{g.title}}</span>
 <sc-for list="{{g.items}}" as="x" hint-placeholder-count="4">
 <sc-if value="{{x.isQty}}" hint-placeholder-val="{{false}}">
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #EFE6DA">
@@ -866,7 +887,7 @@ Calcula tu paquete aquí
 
 <div style="display: {{xc.vL}}; flex-direction: column; gap: 4px">
 <span style="font-size: 13px; color: #3D3B3E">Marca el lugar. La distancia es aproximada desde Las Tablas; fuera de Las Tablas se suma el traslado.</span>
-<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 6px">
+<div class="nc-locs" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 6px">
 <sc-for list="{{xc.locs}}" as="l" hint-placeholder-count="12">
 <button type="button" role="checkbox" aria-checked="{{l.checked}}" onClick="{{l.toggle}}" style="display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 6px 10px; border-radius: 6px; border: 1.5px solid {{l.border}}; background: {{l.bg}}; color: #222020; text-align: left; cursor: pointer; width: 100%; box-sizing: border-box">
 <span aria-hidden="true" style="flex: none; width: 22px; height: 22px; border-radius: 5px; border: 2px solid #222020; background: {{l.boxBg}}; color: #222020; display: flex; align-items: center; justify-content: center">
@@ -948,8 +969,27 @@ Calcula tu paquete aquí
 </sc-if>
 </div>
 </div>
+<aside class="nc-calc-aside" aria-label="Resumen de tu reserva" style="position: sticky; top: 0; flex: none; width: 330px; flex-direction: column; gap: 12px; padding: 20px; border-radius: 10px; background: #F2E4D2; box-sizing: border-box">
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 26px; line-height: 1.1">Tu reserva</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{xc.sumTitle}}</span>
+<div style="display: flex; flex-direction: column; gap: 6px; padding: 12px 0; border-top: 1px solid #D9CDBE; border-bottom: 1px solid #D9CDBE">
+<div style="display: flex; justify-content: space-between; gap: 10px; font-size: 14px"><span>{{xc.sumBaseLabel}}</span><span style="font-family: Montserrat, sans-serif; font-weight: 700; white-space: nowrap">{{xc.sumBase}}</span></div>
+<sc-for list="{{xc.sumLines}}" as="l" hint-placeholder-count="3">
+<div style="display: flex; justify-content: space-between; gap: 10px; font-size: 14px; color: #3D3B3E"><span>{{l.name}}</span><span style="font-family: Montserrat, sans-serif; font-weight: 600; white-space: nowrap">{{l.price}}</span></div>
+</sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px; font-size: 14px">
+<span><b style="font-family: Montserrat, sans-serif">Lugar:</b> {{xc.sumPlace}}</span>
+<span><b style="font-family: Montserrat, sans-serif">Fecha:</b> {{xc.sumDate}}</span>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding-top: 6px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">Total estimado</span>
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 34px; line-height: 1">{{xc.total}}</span>
+</div>
+</aside>
+</div>
 
-<div style="flex: none; display: flex; flex-direction: column; gap: 10px; padding: 14px 18px 16px; background: #222020; color: #FEFEFE">
+<div class="nc-calc-foot" style="flex: none; display: flex; flex-direction: column; gap: 10px; padding: 14px 18px 16px; background: #222020; color: #FEFEFE">
 <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 12px">
 <div style="display: flex; flex-direction: column; min-width: 0">
 <span style="font-family: Montserrat, sans-serif; font-size: 12px; font-weight: 600; color: #F2E4D2">Total estimado</span>
@@ -2037,6 +2077,9 @@ class Component extends DCLogic {
           open: true, step: step, title: cfg.title, kind: cfg.kind,
           subtitle: ["", "Elige tu cobertura y tus extras", "Elige tus fotos impresas", "¿Dónde será tu evento?", "Elige la fecha y la hora de inicio", "Último paso: tus datos"][step],
           prog: [1, 2, 3, 4, 5].map(function (i) { return { bg: i <= step ? accent : "#3D3B3E" }; }),
+          sumTitle: cfg.title + " · " + cfg.kind, sumBaseLabel: base.label, sumBase: money(base.price),
+          sumLines: parseLines(lines.concat(printLines)),
+          sumPlace: lugares, sumDate: fecha ? fecha + (st.xcTime ? " · " + st.xcTime : "") : "Por elegir",
           v1: step === 1 ? "flex" : "none", vP: step === 2 ? "flex" : "none", vL: step === 3 ? "flex" : "none", vF: step === 4 ? "flex" : "none", vD: step === 5 ? "flex" : "none",
           showNext: step < 5, showSend: step === 5, showBack: step > 1,
           nextLabel: ["", "Siguiente", "Siguiente: lugar", "Siguiente: fecha", "Siguiente: tus datos"][step] || "",
@@ -2140,7 +2183,7 @@ class Component extends DCLogic {
         var incl = ["30 minutos de sesión", "Mínimo 15 fotos de prueba", "3 fotos editadas en alta resolución", "Asesoría previa personalizada", "1 cambio de vestuario", "Dirección de poses", "Galería online privada"];
         function fmtDate(v) { if (!v) return "Por definir"; var a = v.split("-"); var d = new Date(+a[0], +a[1] - 1, +a[2]); return WDAYS[d.getDay()] + " " + d.getDate() + " de " + MONTHS[d.getMonth()] + " de " + d.getFullYear(); }
         function pkLine(id) {
-          var re = { vest: /cambio/i, pers: /persona/i, loc: /locaci/i }[id]; if (!re) return "";
+          var re = { vest: /cambio/i, pers: /personas? extra/i, loc: /locaci/i }[id]; if (!re) return "";
           return pk.items.filter(function (t) { return re.test(t); })[0] || "";
         }
         function chip(on) { return { pressed: on ? "true" : "false", bg: on ? "#222020" : "#FEFEFE", fg: on ? "#FEFEFE" : "#222020", border: on ? "#222020" : "#D9CDBE" }; }
@@ -2239,6 +2282,10 @@ class Component extends DCLogic {
           vL: cstep === 3 ? "flex" : "none",
           step: cstep,
           prog: [1, 2, 3, 4, 5].map(function (i) { return { bg: i <= cstep ? accent : "#3D3B3E" }; }),
+          sumTitle: pk ? pk.title + " · " + pk.nm : "Paquete personalizado" + (expObj ? " · " + expObj.title : ""),
+          sumBaseLabel: pk ? "Paquete" : "Propuesta inicial (3 fotos)", sumBase: money(pk ? pk.price : COT_SERV),
+          sumLines: parseLines((extraF ? ["• " + extraF + (extraF === 1 ? " foto editada extra" : " fotos editadas extra") + ": " + money(fotosCost)] : []).concat(lines, printLines)),
+          sumPlace: lugares, sumDate: ccal.ready ? ccal.text : (st.cotSel ? ccal.selLabel + " (elige la hora)" : "Por elegir"),
           vD: cstep === 5 ? "flex" : "none",
           vB: cstep === 1 ? "flex" : "none",
           vP: cstep === 2 ? "flex" : "none",
