@@ -161,19 +161,6 @@ Ver disponibilidad y reservar
 </sc-for>
 </div>
 
-<sc-if value="{{current.hasExtras}}" hint-placeholder-val="{{true}}">
-<div style="display: flex; flex-direction: column; gap: 14px">
-<h4 style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: 30px">Mejora tu experiencia</h4>
-<ul style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 0 28px">
-<sc-for list="{{current.extras}}" as="ex" hint-placeholder-count="5">
-<li style="display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid #3D3B3E; font-size: 15px">
-<span>{{ex.name}}</span>
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; white-space: nowrap">{{ex.price}}</span>
-</li>
-</sc-for>
-</ul>
-</div>
-</sc-if>
 
 
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px">
@@ -433,9 +420,7 @@ Calcula tu paquete aquí
 <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
 <span style="font-family: 'EB Garamond', Georgia, serif; font-size: 30px; line-height: 1.05">{{cot.title}}</span>
 <span style="font-size: 14px; color: #3D3B3E">{{cot.subtitle}}</span>
-<sc-if value="{{cot.isPkg}}" hint-placeholder-val="{{false}}">
 <span style="margin-top: 4px; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.06em; color: #3D3B3E">PASO {{cot.step}} DE 2</span>
-</sc-if>
 </div>
 <button type="button" onClick="{{cot.close}}" aria-label="Cerrar" style="flex: none; width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; cursor: pointer; display: flex; align-items: center; justify-content: center">
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
@@ -482,7 +467,7 @@ Calcula tu paquete aquí
 
 <sc-if value="{{cot.noPkg}}" hint-placeholder-val="{{true}}">
 <div style="display: flex; flex-direction: column; gap: 10px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">2. ¿Qué tipo de sesión quieres?</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.sn.s}}. ¿Qué tipo de sesión quieres?</span>
 <div role="group" aria-label="Tipo de sesión" style="display: flex; flex-wrap: wrap; gap: 8px">
 <sc-for list="{{cot.exps}}" as="o" hint-placeholder-count="8">
 <button type="button" onClick="{{o.pick}}" aria-pressed="{{o.pressed}}" style="min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1.5px solid {{o.border}}; background: {{o.bg}}; color: {{o.fg}}; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 13px; cursor: pointer">{{o.label}}</button>
@@ -686,7 +671,7 @@ Calcula tu paquete aquí
 </div>
 <sc-if value="{{cot.showNext}}" hint-placeholder-val="{{false}}">
 <button type="button" onClick="{{cot.goNext}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; border-radius: 6px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px; cursor: pointer">
-Siguiente: lugar, fecha y datos
+Siguiente: datos, lugar y fecha
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
 </button>
 </sc-if>
@@ -1209,9 +1194,9 @@ var FAQ = [
   { q: "¿Necesito saber posar?", a: "Para nada. Te guiamos en todo momento, sin poses forzadas, para que te sientas cómodo y todo fluya natural." },
   { q: "¿Cómo elijo mis fotos?", a: "Después de la sesión te enviamos tus fotos de prueba en una galería online privada. Tú escoges tus favoritas y nosotros las editamos." },
   { q: "¿Cuándo recibo mis fotos?", a: "Sesiones: las fotos de prueba llegan de 48 a 72 horas hábiles después de la sesión, y las editadas dos semanas después de que nos envías tu selección.\nEventos: las fotos editadas llegan 10 días después del evento.\nCarreras: la cobertura completa queda lista dentro de los 5 días posteriores." },
-  { q: "¿Puedo tener todas las fotos sin editar?", a: "Sí. Puedes agregar la liberación de galería en «Mejora tu experiencia» y te entregamos todas las fotos de la sesión." },
+  { q: "¿Puedo tener todas las fotos sin editar?", a: "Sí. Agrega la liberación de galería como extra al reservar tu paquete o en «Arma tu paquete», y te entregamos todas las fotos de la sesión." },
   { q: "¿Puedo llevar a más personas a mi sesión?", a: "Sí. Puedes agregar personas extra para fotos grupales o familiares; cada persona suma 10 minutos de sesión y 1 foto editada." },
-  { q: "¿Puedo agregar maquillaje, peinado o más cambios de vestuario?", a: "Sí. Lo encuentras en «Mejora tu experiencia» dentro de cada experiencia. Cada cambio de vestuario extra suma 10 minutos a tu sesión." },
+  { q: "¿Puedo agregar maquillaje, peinado o más cambios de vestuario?", a: "Sí. Al tocar «Ver disponibilidad y reservar» te preguntamos si quieres mejorar tu experiencia y ahí eliges tus extras. También puedes agregarlos en «Arma tu paquete». Cada cambio de vestuario extra suma 10 minutos a tu sesión." },
   { q: "¿Hacen impresiones, álbumes o cuadros?", a: "Sí. Tenemos impresiones desde $3.50, fotografía enmarcada 16×20 y álbum fotográfico de 20 páginas. Pídelos al reservar o agrégalos en tu paquete." },
   { q: "¿Y si ningún paquete es exactamente lo que busco?", a: "Arma tu propio paquete: eliges tus fotos, lugares y extras, ves el total al instante y nos envías tu cotización por WhatsApp.", cot: true }
 ];
@@ -1635,25 +1620,25 @@ class Component extends DCLogic {
           sug: sug || { key: "" }, hasSug: !!sug,
           sugYes: function () { if (!sug) return; self.setState({ cotOpen: false, cotDeclined: sug.key, sel: expObj.id, calOpen: true, calCtx: { exp: sug.exp, prop: sug.name, price: sug.price }, calOff: 0, calSel: null, calSlot: null }); },
           sugNo: function () { if (sug) self.setState({ cotDeclined: sug.key }); },
-          openAny: function () { self.setState(pk ? { cotOpen: true, cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} } : { cotOpen: true }); },
-          openHere: function () { self.setState(Object.assign({ cotOpen: true, cotExp: sel || st.cotExp }, pk ? { cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} } : {})); },
-          fromScratch: function () { self.setState({ cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} }); },
+          openAny: function () { self.setState(pk ? { cotOpen: true, cotStep: 1, cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} } : { cotOpen: true, cotStep: 1 }); },
+          openHere: function () { self.setState(Object.assign({ cotOpen: true, cotStep: 1, cotExp: sel || st.cotExp }, pk ? { cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} } : {})); },
+          fromScratch: function () { self.setState({ cotStep: 1, cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} }); },
           isPkg: !!pk, noPkg: !pk,
           title: pk ? (st.cotStep === 2 ? "Reserva tu sesión" : "Mejora tu experiencia") : "Arma tu paquete",
-          subtitle: pk ? (st.cotStep === 2 ? "Último paso: tus datos, el lugar y la fecha de tu sesión." : "Elige los extras que quieras agregar a tu paquete.") : "Elige lo que quieres y te enviamos la cotización por WhatsApp.",
+          subtitle: st.cotStep === 2 ? "Último paso: tus datos, el lugar y la fecha de tu sesión." : (pk ? "Elige los extras que quieras agregar a tu paquete." : "Elige lo que quieres en tu sesión y te enviamos la cotización por WhatsApp."),
           inclTitle: pk ? "Tu paquete incluye" : "La propuesta inicial incluye",
           pkgLabel: pk ? pk.title + " · " + pk.nm + " (" + money(pk.price) + ")" : "",
-          sn: pk ? { t: "1", f: "1", p: "2", i: "3", d: "2", c: "3" } : { t: "1", f: "3", p: "4", i: "5", d: "6", c: "7" },
-          vL: !pk || st.cotStep === 2 ? "flex" : "none",
-          step: pk ? (st.cotStep === 2 ? 2 : 1) : 1,
-          vD: !pk || st.cotStep === 2 ? "flex" : "none",
-          vB: !pk || st.cotStep !== 2 ? "flex" : "none",
-          vC: !pk || st.cotStep === 2 ? "flex" : "none",
-          showNext: !!pk && st.cotStep !== 2, showSend: !pk || st.cotStep === 2, showBack: !!pk && st.cotStep === 2,
+          sn: pk ? { t: "1", f: "1", p: "2", i: "3", d: "2", c: "3" } : { t: "1", s: "1", f: "2", p: "3", i: "4", d: "2", c: "3" },
+          vL: st.cotStep === 2 ? "flex" : "none",
+          step: st.cotStep === 2 ? 2 : 1,
+          vD: st.cotStep === 2 ? "flex" : "none",
+          vB: st.cotStep !== 2 ? "flex" : "none",
+          vC: st.cotStep === 2 ? "flex" : "none",
+          showNext: st.cotStep !== 2, showSend: st.cotStep === 2, showBack: st.cotStep === 2,
           goNext: function () { self.setState({ cotStep: 2 }); },
           goBack: function () { self.setState({ cotStep: 1 }); },
-          dateTitle: pk ? "Elige la fecha y cuéntanos tu idea" : "Fecha y detalles",
-          cellH: pk ? "66px" : "56px", numFs: pk ? "19px" : "15px", subFs: pk ? "10px" : "9px",
+          dateTitle: "Elige la fecha y cuéntanos tu idea",
+          cellH: "66px", numFs: "19px", subFs: "10px",
           fotosNote: pk ? "Tu paquete ya incluye " + baseF + " fotos editadas. Cada foto adicional suma 10 minutos de sesión y 5 fotos de prueba." : "Recuerda: la propuesta inicial ya incluye 3 fotos editadas. Cada foto adicional suma 10 minutos de sesión y 5 fotos de prueba.",
           sendLabel: pk ? "Enviar reserva por WhatsApp" : "Enviar cotización por WhatsApp",
           close: function () { self.setState({ cotOpen: false }); },
