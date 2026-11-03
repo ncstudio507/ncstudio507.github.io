@@ -415,12 +415,13 @@ Calcula tu paquete aquí
 </div>
 </section>
 
-<section id="reservar" style="background: #222020; color: #FEFEFE; padding: 88px 20px">
+<section id="contacto" style="background: #222020; color: #FEFEFE; padding: 88px 20px">
 <div style="max-width: 1160px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 56px">
 <div style="flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 18px">
-<p style="margin: 0; font-family: Allura, cursive; font-size: 44px; line-height: 1; color: {{accent}}">Reserva hoy</p>
-<h2 style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(34px, 4.5vw, 52px); line-height: 1.1">Separa tu fecha</h2>
-<p style="margin: 0; color: #F2E4D2">Trabajamos con cupos limitados para garantizar la calidad de cada experiencia. Tu sesión se confirma con el 50 % de abono y la firma del contrato.</p>
+<p style="margin: 0; font-family: Allura, cursive; font-size: 44px; line-height: 1; color: {{accent}}">¿Tienes dudas?</p>
+<h2 style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(34px, 4.5vw, 52px); line-height: 1.1">Hablemos</h2>
+<p style="margin: 0; color: #F2E4D2">¿Quieres algo personalizado, tienes una pregunta sobre un paquete o sobre cómo reservar? Escríbenos y te respondemos con gusto.</p>
+<a href="#portafolio" style="align-self: flex-start; display: inline-flex; align-items: center; min-height: 48px; padding: 0 24px; border-radius: 999px; border: 1.5px solid #F2E4D2; color: #FEFEFE; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 15px">¿Listo? Ver paquetes y reservar</a>
 <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px; font-size: 16px; color: #F2E4D2">
 <span>WhatsApp y Yappy: 6631-3762</span>
 <span>Pagos por Yappy o en efectivo</span>
@@ -434,32 +435,10 @@ Calcula tu paquete aquí
 <input id="nombre" type="text" placeholder="Tu nombre" style="min-height: 48px; padding: 0 14px; border-radius: 6px; border: 1px solid #F2E4D2; background: #222020; color: #FEFEFE; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
 </div>
 <div style="display: flex; flex-direction: column; gap: 6px">
-<label for="tipo" style="font-family: Montserrat, sans-serif; font-size: 14px; font-weight: 600; color: #F2E4D2">Experiencia</label>
-<select id="tipo" style="min-height: 48px; padding: 0 14px; border-radius: 6px; border: 1px solid #F2E4D2; background: #222020; color: #FEFEFE; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
-<option>Level Up (fotografía creativa de cumpleaños)</option>
-<option>Sueños de 15 (fotografía creativa de XV años)</option>
-<option>Dulce Espera (fotografía creativa de embarazo)</option>
-<option>12 Meses de Amor (fotografía del primer año de tu bebé)</option>
-<option>Level Up en estudio (fotografía de estudio para cumpleaños)</option>
-<option>Folklore (fotografía típica de estudio)</option>
-<option>Momentos (cobertura fotográfica de eventos)</option>
-<option>Primer Logro (fotografía para graduación de kínder)</option>
-<option>Gran Logro (fotografía de retrato para graduación)</option>
-<option>Gran Logro exteriores (fotografía de graduación en exteriores)</option>
-<option>Game On (fotografía de retrato deportiva)</option>
-<option>Limitless (fotografía deportiva para carreras)</option>
-<option>Otra / no estoy seguro</option>
-</select>
+<label for="mensaje" style="font-family: Montserrat, sans-serif; font-size: 14px; font-weight: 600; color: #F2E4D2">Tu pregunta</label>
+<textarea id="mensaje" rows="4" placeholder="Escribe aquí tu duda o tu idea…" style="padding: 12px 14px; border-radius: 6px; border: 1px solid #F2E4D2; background: #222020; color: #FEFEFE; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px; resize: vertical"></textarea>
 </div>
-<div style="display: flex; flex-direction: column; gap: 6px">
-<label for="fecha" style="font-family: Montserrat, sans-serif; font-size: 14px; font-weight: 600; color: #F2E4D2">Fecha tentativa</label>
-<input id="fecha" type="date" style="min-height: 48px; padding: 0 14px; border-radius: 6px; border: 1px solid #F2E4D2; background: #222020; color: #FEFEFE; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
-</div>
-<div style="display: flex; flex-direction: column; gap: 6px">
-<label for="mensaje" style="font-family: Montserrat, sans-serif; font-size: 14px; font-weight: 600; color: #F2E4D2">Cuéntanos tu idea</label>
-<textarea id="mensaje" rows="4" placeholder="Temática, lugar, cuántas personas…" style="padding: 12px 14px; border-radius: 6px; border: 1px solid #F2E4D2; background: #222020; color: #FEFEFE; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px; resize: vertical"></textarea>
-</div>
-<a href="{{waGeneral}}" style="display: inline-flex; align-items: center; justify-content: center; min-height: 52px; border-radius: 999px; background: {{accent}}; color: #222020; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">Enviar por WhatsApp</a>
+<a href="{{waDuda}}" onClick="{{dudaSend}}" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; justify-content: center; min-height: 52px; border-radius: 999px; background: {{accent}}; color: #222020; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">Enviar pregunta por WhatsApp</a>
 </form>
 </div>
 </section>
@@ -2393,6 +2372,12 @@ class Component extends DCLogic {
       },
       current: current,
       waGeneral: WA + encodeURIComponent("Hola, NC Studio. Quiero reservar o cotizar una sesión."),
+      waDuda: WA + encodeURIComponent("Hola, NC Studio. Tengo una consulta."),
+      dudaSend: function (e) {
+        var a = e && e.currentTarget, g = function (id) { var el = document.getElementById(id); return el ? String(el.value || "").trim() : ""; };
+        var n = g("nombre"), m = g("mensaje");
+        if (a && a.setAttribute) a.setAttribute("href", WA + encodeURIComponent("Hola, NC Studio." + (n ? " Soy " + n + "." : "") + (m ? "\n\n" + m : " Tengo una consulta.")));
+      },
       portfolio: portfolio,
       faq: FAQ,
       trasList: TRAS.map(function (t, i) { return { place: trasLabel(t), price: t[1], first: i === 0, rest: i > 0 }; }),
