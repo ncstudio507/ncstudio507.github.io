@@ -442,11 +442,11 @@ Calcula tu paquete aquí
 
 <sc-if value="{{cot.open}}" hint-placeholder-val="{{false}}">
 <div style="position: fixed; inset: 0; z-index: 70; background: rgba(34, 32, 32, 0.75); display: flex; align-items: center; justify-content: center; padding: 10px; box-sizing: border-box">
-<div role="dialog" aria-modal="true" aria-label="Arma tu paquete" style="width: 100%; max-width: 600px; max-height: 96vh; background: #FEFEFE; color: #222020; border-radius: 10px; display: flex; flex-direction: column; overflow: hidden">
+<div role="dialog" aria-modal="true" aria-label="{{cot.title}}" style="width: 100%; max-width: 600px; max-height: 96vh; background: #FEFEFE; color: #222020; border-radius: 10px; display: flex; flex-direction: column; overflow: hidden">
 <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 18px 18px 12px; border-bottom: 1px solid #EFE6DA">
 <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
-<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 30px; line-height: 1.05">Arma tu paquete</span>
-<span style="font-size: 14px; color: #3D3B3E">Elige lo que quieres y te enviamos la cotización por WhatsApp.</span>
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 30px; line-height: 1.05">{{cot.title}}</span>
+<span style="font-size: 14px; color: #3D3B3E">{{cot.subtitle}}</span>
 </div>
 <button type="button" onClick="{{cot.close}}" aria-label="Cerrar" style="flex: none; width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; cursor: pointer; display: flex; align-items: center; justify-content: center">
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
@@ -469,8 +469,11 @@ Calcula tu paquete aquí
 
 <div style="display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 8px; background: #F2E4D2">
 <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">La propuesta inicial incluye</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">{{cot.inclTitle}}</span>
 </div>
+<sc-if value="{{cot.isPkg}}" hint-placeholder-val="{{false}}">
+<span style="align-self: flex-start; padding: 4px 10px; border-radius: 999px; background: #222020; color: #FEFEFE; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 13px">{{cot.pkgLabel}}</span>
+</sc-if>
 <ul style="margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px 14px">
 <sc-for list="{{cot.incl}}" as="it" hint-placeholder-count="8">
 <li style="display: flex; gap: 8px; align-items: flex-start; font-size: 14px; line-height: 1.4">
@@ -479,8 +482,12 @@ Calcula tu paquete aquí
 </li>
 </sc-for>
 </ul>
+<sc-if value="{{cot.isPkg}}" hint-placeholder-val="{{false}}">
+<button type="button" onClick="{{cot.fromScratch}}" style="align-self: flex-start; min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1.5px solid #222020; background: transparent; color: #222020; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 13px; cursor: pointer">Prefiero armar mi paquete desde cero</button>
+</sc-if>
 </div>
 
+<sc-if value="{{cot.noPkg}}" hint-placeholder-val="{{true}}">
 <div style="display: flex; flex-direction: column; gap: 10px">
 <span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">2. ¿Qué tipo de sesión quieres?</span>
 <div role="group" aria-label="Tipo de sesión" style="display: flex; flex-wrap: wrap; gap: 8px">
@@ -489,14 +496,15 @@ Calcula tu paquete aquí
 </sc-for>
 </div>
 </div>
+</sc-if>
 
 <div style="display: flex; flex-direction: column; gap: 10px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">3. ¿Quieres fotos editadas adicionales?</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.sn.f}}. ¿Quieres fotos editadas adicionales?</span>
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 16px; border-radius: 8px; border: 1.5px solid #222020">
 <div style="display: flex; flex-direction: column; min-width: 0; gap: 2px">
 <span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.fotosLabel}}</span>
 <span style="font-family: Montserrat, sans-serif; font-weight: 600; font-size: 13px; color: #222020">{{cot.fotosTotal}}</span>
-<span style="font-size: 12px; color: #3D3B3E">Recuerda: la propuesta inicial ya incluye 3 fotos editadas. Cada foto adicional suma 10 minutos de sesión y 5 fotos de prueba.</span>
+<span style="font-size: 12px; color: #3D3B3E">{{cot.fotosNote}}</span>
 </div>
 <div style="flex: none; display: flex; align-items: center; gap: 6px">
 <button type="button" onClick="{{cot.fotosDec}}" aria-label="Una foto adicional menos" style="width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 22px; cursor: pointer; opacity: {{cot.fotosDecOp}}">−</button>
@@ -508,7 +516,7 @@ Calcula tu paquete aquí
 
 <sc-if value="{{cot.hasExp}}" hint-placeholder-val="{{true}}">
 <div style="display: flex; flex-direction: column; gap: 4px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">4. Personaliza tu sesión</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.sn.p}}. Personaliza tu sesión</span>
 <span style="font-size: 13px; color: #3D3B3E">Extras pensados para {{cot.expName}}.</span>
 <sc-for list="{{cot.groups}}" as="g" hint-placeholder-count="4">
 <div style="display: flex; flex-direction: column; margin-top: 10px">
@@ -537,7 +545,12 @@ Calcula tu paquete aquí
 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
 </sc-if>
 </span>
+<span style="display: flex; flex-direction: column; min-width: 0">
 <span style="font-family: 'Tenor Sans', Georgia, serif; font-size: 15px">{{x.name}}</span>
+<sc-if value="{{x.hasInNote}}" hint-placeholder-val="{{false}}">
+<span style="font-family: Montserrat, sans-serif; font-weight: 600; font-size: 12px; color: #3D3B3E">{{x.inNote}}</span>
+</sc-if>
+</span>
 </span>
 </button>
 </sc-if>
@@ -551,7 +564,7 @@ Calcula tu paquete aquí
 </sc-if>
 
 <div style="display: flex; flex-direction: column; gap: 4px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">5. ¿Dónde será la sesión?</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.sn.d}}. ¿Dónde será la sesión?</span>
 <span style="font-size: 13px; color: #3D3B3E">Marca el lugar o los lugares donde te gustaría la sesión.</span>
 <sc-for list="{{cot.locs}}" as="l" hint-placeholder-count="7">
 <button type="button" role="checkbox" aria-checked="{{l.checked}}" onClick="{{l.toggle}}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border: 0; border-bottom: 1px solid #EFE6DA; background: transparent; color: #222020; text-align: left; cursor: pointer; width: 100%">
@@ -568,7 +581,7 @@ Calcula tu paquete aquí
 </div>
 
 <div style="display: flex; flex-direction: column; gap: 4px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">6. ¿Quieres fotos impresas?</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.sn.i}}. ¿Quieres fotos impresas?</span>
 <span style="font-size: 13px; color: #3D3B3E">Elige cuántas quieres de cada tamaño.</span>
 <sc-for list="{{cot.prints}}" as="x" hint-placeholder-count="4">
 <sc-if value="{{x.isQty}}" hint-placeholder-val="{{false}}">
@@ -594,7 +607,12 @@ Calcula tu paquete aquí
 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
 </sc-if>
 </span>
+<span style="display: flex; flex-direction: column; min-width: 0">
 <span style="font-family: 'Tenor Sans', Georgia, serif; font-size: 15px">{{x.name}}</span>
+<sc-if value="{{x.hasInNote}}" hint-placeholder-val="{{false}}">
+<span style="font-family: Montserrat, sans-serif; font-weight: 600; font-size: 12px; color: #3D3B3E">{{x.inNote}}</span>
+</sc-if>
+</span>
 </span>
 </button>
 </sc-if>
@@ -602,7 +620,7 @@ Calcula tu paquete aquí
 </div>
 
 <div style="display: flex; flex-direction: column; gap: 12px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">7. Fecha y detalles</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.sn.c}}. Fecha y detalles</span>
 <div style="display: flex; flex-direction: column; gap: 10px">
 <span style="font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Elige tu fecha y hora</span>
 <p style="margin: 0; font-size: 14px; color: #3D3B3E">Entre semana: 7:00 p. m. en estudio. Fines de semana: 10:00 a. m. en estudio y 4:30 p. m. en exteriores.</p>
@@ -669,9 +687,27 @@ Calcula tu paquete aquí
 </div>
 <a href="{{cot.wa}}" onClick="{{cot.send}}" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; border-radius: 6px; background: {{accent}}; color: #222020; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.6-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg>
-Enviar cotización por WhatsApp
+{{cot.sendLabel}}
 </a>
 <span style="font-size: 12px; color: #F2E4D2">Precio estimado. Te confirmamos la cotización final y la disponibilidad por WhatsApp.</span>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{up.open}}" hint-placeholder-val="{{false}}">
+<div style="position: fixed; inset: 0; z-index: 80; background: rgba(34, 32, 32, 0.8); display: flex; align-items: center; justify-content: center; padding: 14px; box-sizing: border-box">
+<div role="alertdialog" aria-modal="true" aria-label="¿Quieres mejorar tu experiencia?" style="position: relative; width: 100%; max-width: 440px; max-height: 92vh; overflow-y: auto; background: #FEFEFE; color: #222020; border-radius: 10px; padding: 22px 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px">
+<button type="button" onClick="{{up.close}}" aria-label="Cerrar" style="position: absolute; top: 12px; right: 12px; width: 40px; height: 40px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; cursor: pointer; display: flex; align-items: center; justify-content: center">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+</button>
+<span style="font-family: Allura, cursive; font-size: 36px; line-height: 1; color: {{accent}}; padding-right: 48px">Antes de reservar…</span>
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 28px; line-height: 1.1">¿Quieres mejorar tu experiencia?</span>
+<span style="align-self: flex-start; padding: 4px 10px; border-radius: 999px; background: #F2E4D2; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 13px">{{up.label}}</span>
+<span style="font-size: 15px; line-height: 1.5; color: #3D3B3E">Tenemos servicios extra que te pueden interesar: maquillaje y peinado, video detrás de cámaras, fotos adicionales, impresiones y mucho más. ¿Deseas revisarlos?</span>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<button type="button" onClick="{{up.yes}}" style="min-height: 50px; padding: 0 18px; border-radius: 6px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px; cursor: pointer">Sí, quiero ver los extras</button>
+<button type="button" onClick="{{up.no}}" style="min-height: 46px; padding: 0 18px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 15px; cursor: pointer">No, continuar con mi reserva</button>
 </div>
 </div>
 </div>
@@ -1195,6 +1231,7 @@ var TABNAME = {
 var BUSY = ["2026-11-03","2026-11-05","2026-11-07","2026-11-08","2026-11-20","2026-11-22","2026-11-27","2026-11-28","2026-11-29","2026-12-13","2026-12-17","2026-12-19"];
 var BUSY_UPDATED = "2 de noviembre de 2026, 6:59 p. m.";
 var COT_SERV = 55;
+var COT_FOTO_EXTRA = 10;
 var COT_INCL_FOTOS = 3;
 // Total por cantidad de fotos: 3 = $55; fotos 4 a 6 a $10 c/u (6 = $85); de 6 a 12 sube $8.33 por foto (9 = $110, 12 = $135);
 // fotos 13 a 24 a $7.50 c/u; de la 25 en adelante a $3.50 c/u. Cada total se redondea hacia arriba a un múltiplo de $5.
@@ -1320,7 +1357,7 @@ function calModel(self, K, accent) {
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0, cotOpen: false, cotExp: null, cotN: 3, cotL: {}, cotQ: {}, cotC: {}, cotName: "", cotPhone: "", cotEmail: "", cotDate: "", cotIdea: "", cotOff: 0, cotSel: null, cotSlot: null, cotDeclined: "" };
+    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0, cotOpen: false, cotExp: null, cotN: 3, cotL: {}, cotQ: {}, cotC: {}, cotName: "", cotPhone: "", cotEmail: "", cotDate: "", cotIdea: "", cotOff: 0, cotSel: null, cotSlot: null, cotDeclined: "", cotPkg: null, upOpen: false, upCtx: null };
   }
   componentDidMount() {
     var self = this;
@@ -1373,7 +1410,11 @@ class Component extends DCLogic {
           small: pr.small, hasSmall: pr.small.length > 0, badge: f && cur.proposals.length > 1,
           bg: f ? "#222020" : "#FEFEFE", fg: f ? "#FEFEFE" : "#222020", sub: f ? "#F2E4D2" : "#3D3B3E",
           btnBg: accent, btnFg: "#222020", outline: f ? "#F2E4D2" : "#222020",
-          openCal: function () { self.setState({ calOpen: true, calCtx: { exp: cur.title, prop: nm, price: pr.price }, calOff: 0, calSel: null, calSlot: null }); },
+          openCal: function () {
+            var ctx = { exp: cur.title, prop: nm, price: pr.price };
+            if (COT_SES.indexOf(cur.id) >= 0 && cur.id !== "bebe" && propFotos(pr) > 0) self.setState({ upOpen: true, upCtx: { ctx: ctx, expId: cur.id, title: cur.title, nm: nm, pr: pr } });
+            else self.setState({ calOpen: true, calCtx: ctx, calOff: 0, calSel: null, calSlot: null });
+          },
           wa: WA + encodeURIComponent("Hola, NC Studio. Me interesa " + cur.title + ", " + nm.toLowerCase() + " (" + pr.price + "). ¿Tienen fecha disponible?")
         };
       })
@@ -1464,21 +1505,42 @@ class Component extends DCLogic {
           ready: ready, summary: summary, wa: WA + encodeURIComponent(waMsg)
         };
       })(),
+      up: (function () {
+        var u = self.state.upCtx;
+        return {
+          open: !!self.state.upOpen,
+          label: u ? u.title + " · " + u.nm + " (" + u.pr.price + ")" : "",
+          yes: function () {
+            if (!u) return;
+            var pr = u.pr, cv = propCovers(pr), c = {}, t = pr.items.join(" | "), m;
+            Object.keys(cv.c).forEach(function (k) { c[k] = true; });
+            var mins = (m = t.match(/(\d+) horas? de sesión/i)) ? +m[1] * 60 : ((m = t.match(/(\d+) minutos/i)) ? +m[1] : 60);
+            var pru = (m = t.match(/Mínimo (\d+) fotos de prueba/i)) ? +m[1] : 0;
+            self.setState({ upOpen: false, cotOpen: true, cotExp: u.expId, cotN: propFotos(pr), cotC: c, cotQ: {}, cotDeclined: "",
+              cotPkg: { expId: u.expId, title: u.title, nm: u.nm, price: num(pr.price), fotos: propFotos(pr), items: pr.items, cv: cv, mins: mins, pruebas: pru } });
+          },
+          no: function () { if (u) self.setState({ upOpen: false, calOpen: true, calCtx: u.ctx, calOff: 0, calSel: null, calSlot: null }); },
+          close: function () { self.setState({ upOpen: false }); }
+        };
+      })(),
       cot: (function () {
         var st = self.state;
         var q = st.cotQ, c = st.cotC, L = st.cotL, nF = st.cotN, exp = st.cotExp;
         var locs = TRAS.map(function (t, i) { var v = parseFloat(String(t[1]).replace(/[^0-9.]/g, "")) || 0; return { id: "t" + i, place: i === 0 ? "Estudio o Las Tablas" : t[0], v: v }; });
         locs.push({ id: "otro", place: "Otro lugar", v: 0, other: true });
-        var extraF = Math.max(0, nF - COT_INCL_FOTOS);
-        var fotosCost = cotFotosPrice(extraF);
-        var total = COT_SERV + fotosCost, mins = nF * 10, fotos = nF, pruebas = nF * 5, lines = [], printLines = [];
+        var pk = st.cotPkg, baseF = pk ? pk.fotos : COT_INCL_FOTOS;
+        var extraF = Math.max(0, nF - baseF);
+        var fotosCost = pk ? extraF * COT_FOTO_EXTRA : cotFotosPrice(extraF);
+        var total = (pk ? pk.price : COT_SERV) + fotosCost, mins = pk ? pk.mins + extraF * 10 : nF * 10, fotos = nF, pruebas = pk ? pk.pruebas + extraF * 5 : nF * 5, lines = [], printLines = [];
+        function pinc(it) { return pk && it.kind === "q" ? (pk.cv.q[it.id] || 0) : 0; }
+        function pprice(it) { return pk && it.id === "rcp" && pk.cv.c.rcv && !pk.cv.c.rcp ? it.price - 10 : it.price; }
         var groups = COT_GROUPS.map(function (g) { return { title: g.title, list: g.items.filter(function (it) { return cotFits(it.only, exp); }) }; }).filter(function (g) { return g.list.length; });
         function tally(it, out) {
           if (it.kind === "q") {
-            var n = q[it.id] || 0; if (!n) return; var v = it.cost(n);
+            var n = q[it.id] || 0; if (!n) return; var inc0 = pinc(it); var v = it.cost(inc0 + n) - it.cost(inc0);
             total += v; mins += n * (it.min || 0); fotos += n * (it.fotos || 0); pruebas += n * 5 * (it.fotos || 0);
             out.push("• " + n + " × " + it.name.toLowerCase() + ": " + money(v));
-          } else if (c[it.id]) { total += it.price; out.push("• " + it.name + ": " + money(it.price)); }
+          } else if (c[it.id] && !(pk && pk.cv.c[it.id])) { var pv = pprice(it); total += pv; out.push("• " + it.name + (pv !== it.price ? " (cambio de virtual a presencial)" : "") + ": " + money(pv)); }
         }
         if (exp) groups.forEach(function (g) { g.list.forEach(function (it) { tally(it, lines); }); });
         COT_PRINTS.forEach(function (it) { tally(it, printLines); });
@@ -1489,21 +1551,26 @@ class Component extends DCLogic {
         var expName = expObj ? TABNAME[expObj.id][0] : (exp === "otra" ? "Otra" : "Por definir");
         var incl = ["30 minutos de sesión", "Mínimo 15 fotos de prueba", "3 fotos editadas en alta resolución", "Asesoría previa personalizada", "1 cambio de vestuario", "Dirección de poses", "Galería online privada"];
         function fmtDate(v) { if (!v) return "Por definir"; var a = v.split("-"); var d = new Date(+a[0], +a[1] - 1, +a[2]); return WDAYS[d.getDay()] + " " + d.getDate() + " de " + MONTHS[d.getMonth()] + " de " + d.getFullYear(); }
+        function pkLine(id) {
+          var re = { vest: /cambio/i, pers: /persona/i, loc: /locaci/i }[id]; if (!re) return "";
+          return pk.items.filter(function (t) { return re.test(t); })[0] || "";
+        }
         function chip(on) { return { pressed: on ? "true" : "false", bg: on ? "#222020" : "#FEFEFE", fg: on ? "#FEFEFE" : "#222020", border: on ? "#222020" : "#D9CDBE" }; }
         function view(it) {
           if (it.kind === "q") {
-            var n = q[it.id] || 0;
-            return { isQty: true, isChk: false, name: it.name, note: it.note || "", hasNote: !!it.note, n: n, decOp: n ? 1 : 0.35,
+            var n = q[it.id] || 0, pl = pk ? pkLine(it.id) : "";
+            var nt = (it.note || "") + (pl ? (it.note ? ". " : "") + "Tu paquete ya incluye: " + pl.charAt(0).toLowerCase() + pl.slice(1) : "");
+            return { isQty: true, isChk: false, name: it.name, note: nt, hasNote: !!nt, n: n, decOp: n ? 1 : 0.35,
               dec: function () { if (n > 0) { var nq = Object.assign({}, q); nq[it.id] = n - 1; self.setState({ cotQ: nq }); } },
               inc: function () { if (n < 99) { var nq = Object.assign({}, q); nq[it.id] = n + 1; self.setState({ cotQ: nq }); } } };
           }
-          var on = !!c[it.id];
-          return { isQty: false, isChk: true, name: it.name, on: on, checked: on ? "true" : "false", boxBg: on ? accent : "#FEFEFE",
+          var on = !!c[it.id], inN = pk && pk.cv.c[it.id] ? "Incluido en tu paquete" : (pk && pprice(it) !== it.price ? "Cambia tu reunión virtual por presencial" : "");
+          return { isQty: false, isChk: true, name: it.name, on: on, checked: on ? "true" : "false", boxBg: on ? accent : "#FEFEFE", inNote: inN, hasInNote: !!inN,
             toggle: function () { var nc = Object.assign({}, c); nc[it.id] = !on; if (!on && it.excl) it.excl.forEach(function (k) { nc[k] = false; }); self.setState({ cotC: nc }); } };
         }
         // ¿Hay una propuesta ya armada parecida y más barata?
         var sug = null;
-        if (expObj && expObj.proposals && st.cotOpen) {
+        if (!pk && expObj && expObj.proposals && st.cotOpen) {
           var core = COT_SERV + fotosCost, items = [];
           groups.forEach(function (g) { g.list.forEach(function (it) { items.push(it); }); });
           items.forEach(function (it) { if (it.kind === "q") { var n = q[it.id] || 0; if (n) core += it.cost(n); } else if (c[it.id]) core += it.price; });
@@ -1526,14 +1593,18 @@ class Component extends DCLogic {
         }
         var ccal = calModel(self, { off: "cotOff", sel: "cotSel", slot: "cotSlot" }, accent);
         function build() {
-          var m = ["Hola, NC Studio. Armé mi paquete personalizado en la página:", ""];
+          var m = [pk ? "Hola, NC Studio. Quiero reservar este paquete y mejorar mi experiencia:" : "Hola, NC Studio. Armé mi paquete personalizado en la página:", ""];
           m.push("*Nombre:* " + (st.cotName.trim() || "—"));
           m.push("*Teléfono:* " + (st.cotPhone.trim() || "—"));
           m.push("*Correo:* " + (st.cotEmail.trim() || "—"));
           m.push("*Sesión:* " + expName);
           m.push("*Lugar:* " + lugares);
           m.push("*Fecha y hora:* " + (ccal.ready ? ccal.text : "Por definir"));
-          m.push("", "*Propuesta inicial (" + money(COT_SERV) + "):* 30 min de sesión, 3 fotos editadas, asesoría previa, 1 cambio de vestuario, dirección de poses y galería online privada.");
+          if (pk) m.push("", "*Paquete:* " + pk.title + ", " + pk.nm.toLowerCase() + " (" + money(pk.price) + "): " + pk.items.join(", ").toLowerCase() + ".");
+          else m.push("", "*Propuesta inicial (" + money(COT_SERV) + "):* 30 min de sesión, 3 fotos editadas, asesoría previa, 1 cambio de vestuario, dirección de poses y galería online privada.");
+          var off = pk ? Object.keys(pk.cv.c).filter(function (k) { return !c[k] && !(k === "rcv" && c.rcp); }) : [];
+          var offN = []; COT_GROUPS.forEach(function (g) { g.items.forEach(function (it) { if (off.indexOf(it.id) >= 0) offN.push(it.name.toLowerCase()); }); });
+          if (offN.length) m.push("*Del paquete no necesito:* " + offN.join(", "));
           if (extraF) m.push("*Fotos editadas extra:* " + extraF + " (" + money(fotosCost) + ")");
           if (lines.length) { m.push("", "*Extras:*"); m.push.apply(m, lines); }
           if (printLines.length) { m.push("", "*Impresiones:*"); m.push.apply(m, printLines); }
@@ -1550,21 +1621,30 @@ class Component extends DCLogic {
           sug: sug || { key: "" }, hasSug: !!sug,
           sugYes: function () { if (!sug) return; self.setState({ cotOpen: false, cotDeclined: sug.key, sel: expObj.id, calOpen: true, calCtx: { exp: sug.exp, prop: sug.name, price: sug.price }, calOff: 0, calSel: null, calSlot: null }); },
           sugNo: function () { if (sug) self.setState({ cotDeclined: sug.key }); },
-          openAny: function () { self.setState({ cotOpen: true }); },
-          openHere: function () { self.setState({ cotOpen: true, cotExp: sel || st.cotExp }); },
+          openAny: function () { self.setState(pk ? { cotOpen: true, cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} } : { cotOpen: true }); },
+          openHere: function () { self.setState(Object.assign({ cotOpen: true, cotExp: sel || st.cotExp }, pk ? { cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} } : {})); },
+          fromScratch: function () { self.setState({ cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} }); },
+          isPkg: !!pk, noPkg: !pk,
+          title: pk ? "Mejora tu experiencia" : "Arma tu paquete",
+          subtitle: pk ? "Agrega lo que quieras a tu paquete y envíanos tu reserva por WhatsApp." : "Elige lo que quieres y te enviamos la cotización por WhatsApp.",
+          inclTitle: pk ? "Tu paquete incluye" : "La propuesta inicial incluye",
+          pkgLabel: pk ? pk.title + " · " + pk.nm + " (" + money(pk.price) + ")" : "",
+          sn: pk ? { f: "2", p: "3", d: "4", i: "5", c: "6" } : { f: "3", p: "4", d: "5", i: "6", c: "7" },
+          fotosNote: pk ? "Tu paquete ya incluye " + baseF + " fotos editadas. Cada foto adicional suma 10 minutos de sesión y 5 fotos de prueba." : "Recuerda: la propuesta inicial ya incluye 3 fotos editadas. Cada foto adicional suma 10 minutos de sesión y 5 fotos de prueba.",
+          sendLabel: pk ? "Enviar reserva por WhatsApp" : "Enviar cotización por WhatsApp",
           close: function () { self.setState({ cotOpen: false }); },
-          incl: incl,
+          incl: pk ? pk.items : incl,
           exps: PACKAGES.map(function (p) { var o = chip(exp === p.id); o.label = TABNAME[p.id][0]; o.pick = function () { self.setState({ cotExp: p.id }); }; return o; })
             .concat([(function () { var o = chip(exp === "otra"); o.label = "Otra"; o.pick = function () { self.setState({ cotExp: "otra" }); }; return o; })()]),
           hasExp: !!exp, noExp: !exp, expName: exp === "otra" ? "tu sesión" : (expObj ? expObj.title : ""),
           groups: groups.map(function (g) { return { title: g.title, items: g.list.map(view) }; }),
           prints: COT_PRINTS.map(view),
           fotos: nF,
-          extraFotos: nF - COT_INCL_FOTOS,
-          fotosLabel: (nF - COT_INCL_FOTOS === 1 ? "1 foto adicional" : (nF - COT_INCL_FOTOS) + " fotos adicionales"),
-          fotosTotal: "Total: " + nF + " fotos editadas (3 incluidas + " + (nF - COT_INCL_FOTOS) + ")",
-          fotosDecOp: nF > COT_INCL_FOTOS ? 1 : 0.35,
-          fotosDec: function () { if (nF > COT_INCL_FOTOS) self.setState({ cotN: nF - 1 }); },
+          extraFotos: extraF,
+          fotosLabel: (extraF === 1 ? "1 foto adicional" : extraF + " fotos adicionales"),
+          fotosTotal: "Total: " + nF + " fotos editadas (" + baseF + (pk ? " del paquete + " : " incluidas + ") + extraF + ")",
+          fotosDecOp: nF > baseF ? 1 : 0.35,
+          fotosDec: function () { if (nF > baseF) self.setState({ cotN: nF - 1 }); },
           fotosInc: function () { if (nF < 200) self.setState({ cotN: nF + 1 }); },
           locs: locs.map(function (l) {
             var on = !!L[l.id];
