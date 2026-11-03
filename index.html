@@ -432,23 +432,32 @@ Calcula tu paquete aquí
 </footer>
 
 <sc-if value="{{cot.open}}" hint-placeholder-val="{{false}}">
-<div style="position: fixed; inset: 0; z-index: 70; background: rgba(34, 32, 32, 0.75); display: flex; align-items: center; justify-content: center; padding: 10px; box-sizing: border-box">
-<div role="dialog" aria-modal="true" aria-label="{{cot.title}}" style="width: 100%; max-width: 600px; max-height: 96vh; background: #FEFEFE; color: #222020; border-radius: 10px; display: flex; flex-direction: column; overflow: hidden">
-<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 18px 18px 12px; border-bottom: 1px solid #EFE6DA">
-<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
-<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 30px; line-height: 1.05">{{cot.title}}</span>
-<span style="font-size: 14px; color: #3D3B3E">{{cot.subtitle}}</span>
-<span style="margin-top: 4px; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.06em; color: #3D3B3E">PASO {{cot.step}} DE 5</span>
+<div style="position: fixed; inset: 0; z-index: 70; background: #F2E4D2; display: flex; justify-content: center">
+<div role="dialog" aria-modal="true" aria-label="{{cot.title}}" style="width: 100%; max-width: 640px; height: 100%; background: #FEFEFE; color: #222020; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 0 1px #EFE6DA">
+<div style="flex: none; background: #222020; color: #FEFEFE; padding: 8px 10px 12px">
+<div style="display: flex; align-items: center; gap: 8px">
+<button type="button" onClick="{{nav.back}}" aria-label="Atrás" style="flex: none; width: 44px; height: 44px; border-radius: 6px; border: 0; background: transparent; color: #FEFEFE; cursor: pointer; display: flex; align-items: center; justify-content: center">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+</button>
+<div style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; align-items: center; text-align: center">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px; line-height: 1.25">{{cot.title}}</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 600; font-size: 12px; color: #F2E4D2">Paso {{cot.step}} de 5</span>
 </div>
-<button type="button" onClick="{{cot.close}}" aria-label="Cerrar" style="flex: none; width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; cursor: pointer; display: flex; align-items: center; justify-content: center">
-<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+<button type="button" onClick="{{nav.close}}" aria-label="Cerrar" style="flex: none; width: 44px; height: 44px; border-radius: 6px; border: 0; background: transparent; color: #FEFEFE; cursor: pointer; display: flex; align-items: center; justify-content: center">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
 </button>
 </div>
+<div aria-hidden="true" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin: 8px 6px 0">
+<sc-for list="{{cot.prog}}" as="g" hint-placeholder-count="5">
+<span style="height: 5px; border-radius: 3px; background: {{g.bg}}"></span>
+</sc-for>
+</div>
+</div>
 <div data-keep-scroll="cot{{cot.step}}" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 22px">
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 27px; line-height: 1.15">{{cot.subtitle}}</span>
 
 <div style="display: {{cot.vD}}; flex-direction: column; gap: 22px">
 <div style="display: flex; flex-direction: column; gap: 12px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">Tus datos</span>
 <span style="font-size: 13px; color: #3D3B3E">Los necesitamos para confirmar tu reserva. Todos son obligatorios.</span>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tu nombre
 <input type="text" autocomplete="name" value="{{cot.name}}" data-field="name" onInput="{{cot.setName}}" placeholder="Nombre y apellido" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{cot.bName}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
@@ -568,13 +577,8 @@ Calcula tu paquete aquí
 </div>
 
 <div style="display: {{cot.vP}}; flex-direction: column; gap: 12px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">¿Deseas fotos impresas?</span>
 <span style="font-size: 13px; color: #3D3B3E">Tus fotos favoritas impresas en papel fotográfico profesional.</span>
-<div role="group" aria-label="¿Deseas fotos impresas?" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
-<button type="button" onClick="{{cot.prYes}}" aria-pressed="{{cot.prYesP}}" style="min-height: 50px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #222020; background: {{cot.prYesBg}}; color: {{cot.prYesFg}}; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px; cursor: pointer">Sí, quiero</button>
-<button type="button" onClick="{{cot.prNo}}" style="min-height: 50px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px; cursor: pointer">No, gracias</button>
-</div>
-<sc-if value="{{cot.prOn}}" hint-placeholder-val="{{false}}">
+<sc-if value="{{cot.prOn}}" hint-placeholder-val="{{true}}">
 <div data-prguide="1" style="display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 8px; background: #FBF7F1; border: 1px solid #EFE6DA">
 <span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 13px">Así se ven los tamaños (a escala, en pulgadas)</span>
 <svg viewBox="0 0 330 157" role="img" aria-label="Comparación de tamaños de fotos impresas a escala: cartera, 4×6, 5×7, 8×10 y 11×17 pulgadas" style="width: 100%; max-width: 340px; height: auto; display: block; margin: 0 auto"><rect x="26.0" y="98.5" width="17.5" height="24.5" rx="2" fill="#F2E4D2" stroke="#222020" stroke-width="1.5"></rect><text x="34.8" y="139.0" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="700" font-size="11" fill="#222020">Cartera</text><text x="34.8" y="152.0" text-anchor="middle" font-family="Montserrat, sans-serif" font-size="9.5" fill="#3D3B3E">2.5×3.5</text><rect x="63.5" y="81.0" width="28.0" height="42.0" rx="2" fill="#F2E4D2" stroke="#222020" stroke-width="1.5"></rect><text x="77.5" y="139.0" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="700" font-size="11" fill="#222020">4×6</text><rect x="111.5" y="74.0" width="35.0" height="49.0" rx="2" fill="#F2E4D2" stroke="#222020" stroke-width="1.5"></rect><text x="129.0" y="139.0" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="700" font-size="11" fill="#222020">5×7</text><rect x="166.5" y="53.0" width="56.0" height="70.0" rx="2" fill="#F2E4D2" stroke="#222020" stroke-width="1.5"></rect><text x="194.5" y="139.0" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="700" font-size="11" fill="#222020">8×10</text><rect x="242.5" y="4.0" width="77.0" height="119.0" rx="2" fill="#FDF1E2" stroke="#222020" stroke-width="1.5"></rect><text x="281.0" y="139.0" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="700" font-size="11" fill="#222020">11×17</text></svg>
@@ -620,7 +624,6 @@ Calcula tu paquete aquí
 
 <div style="display: {{cot.vL}}; flex-direction: column; gap: 22px">
 <div style="display: flex; flex-direction: column; gap: 4px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">¿Dónde será la sesión?</span>
 <span style="font-size: 13px; color: #3D3B3E">Marca el lugar o los lugares. La distancia es aproximada desde Las Tablas.</span>
 <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 6px">
 <sc-for list="{{cot.locs}}" as="l" hint-placeholder-count="12">
@@ -644,7 +647,6 @@ Calcula tu paquete aquí
 
 <div style="display: {{cot.vC}}; flex-direction: column; gap: 22px">
 <div style="display: flex; flex-direction: column; gap: 12px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.dateTitle}}</span>
 <div style="display: flex; flex-direction: column; gap: 10px">
 <p style="margin: 0; font-size: 13px; line-height: 1.45; color: #3D3B3E">Lunes a viernes: 7:00 p. m. en estudio. Sábado y domingo: 10:00 a. m. en estudio o 4:30 p. m. en exteriores.</p>
 <div style="display: flex; justify-content: center">
@@ -707,12 +709,6 @@ Calcula tu paquete aquí
 <span style="font-family: 'EB Garamond', Georgia, serif; font-size: 40px; line-height: 1; color: {{accent}}">{{cot.total}}</span>
 </div>
 <div style="display: flex; gap: 8px">
-<sc-if value="{{cot.showBack}}" hint-placeholder-val="{{false}}">
-<button type="button" onClick="{{cot.goBack}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex: none; min-height: 52px; padding: 0 16px; border-radius: 6px; border: 1.5px solid #F2E4D2; background: transparent; color: #FEFEFE; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 14px; cursor: pointer">
-<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
-{{cot.backLabel}}
-</button>
-</sc-if>
 <sc-if value="{{cot.showNext}}" hint-placeholder-val="{{false}}">
 <button type="button" onClick="{{cot.goNext}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex: 1 1 auto; min-width: 0; padding: 0 12px; min-height: 52px; border-radius: 6px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px; cursor: pointer">
 {{cot.nextLabel}}
@@ -735,19 +731,29 @@ Calcula tu paquete aquí
 </sc-if>
 
 <sc-if value="{{xc.open}}" hint-placeholder-val="{{false}}">
-<div style="position: fixed; inset: 0; z-index: 70; background: rgba(34, 32, 32, 0.75); display: flex; align-items: center; justify-content: center; padding: 10px; box-sizing: border-box">
-<div role="dialog" aria-modal="true" aria-label="{{xc.title}}" style="width: 100%; max-width: 600px; max-height: 96vh; background: #FEFEFE; color: #222020; border-radius: 10px; display: flex; flex-direction: column; overflow: hidden">
-<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 18px 18px 12px; border-bottom: 1px solid #EFE6DA">
-<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
-<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 30px; line-height: 1.05">{{xc.title}}</span>
-<span style="font-size: 14px; color: #3D3B3E">{{xc.subtitle}}</span>
-<span style="margin-top: 4px; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.06em; color: #3D3B3E">PASO {{xc.step}} DE 5</span>
+<div style="position: fixed; inset: 0; z-index: 70; background: #F2E4D2; display: flex; justify-content: center">
+<div role="dialog" aria-modal="true" aria-label="{{xc.title}}" style="width: 100%; max-width: 640px; height: 100%; background: #FEFEFE; color: #222020; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 0 1px #EFE6DA">
+<div style="flex: none; background: #222020; color: #FEFEFE; padding: 8px 10px 12px">
+<div style="display: flex; align-items: center; gap: 8px">
+<button type="button" onClick="{{nav.back}}" aria-label="Atrás" style="flex: none; width: 44px; height: 44px; border-radius: 6px; border: 0; background: transparent; color: #FEFEFE; cursor: pointer; display: flex; align-items: center; justify-content: center">
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+</button>
+<div style="flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; align-items: center; text-align: center">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px; line-height: 1.25">{{xc.title}}</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 600; font-size: 12px; color: #F2E4D2">Paso {{xc.step}} de 5</span>
 </div>
-<button type="button" onClick="{{xc.close}}" aria-label="Cerrar" style="flex: none; width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; cursor: pointer; display: flex; align-items: center; justify-content: center">
-<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+<button type="button" onClick="{{nav.close}}" aria-label="Cerrar" style="flex: none; width: 44px; height: 44px; border-radius: 6px; border: 0; background: transparent; color: #FEFEFE; cursor: pointer; display: flex; align-items: center; justify-content: center">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
 </button>
 </div>
+<div aria-hidden="true" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin: 8px 6px 0">
+<sc-for list="{{xc.prog}}" as="g" hint-placeholder-count="5">
+<span style="height: 5px; border-radius: 3px; background: {{g.bg}}"></span>
+</sc-for>
+</div>
+</div>
 <div data-keep-scroll="xc{{xc.step}}" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 22px">
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 27px; line-height: 1.15">{{xc.subtitle}}</span>
 
 <div style="display: {{xc.v1}}; flex-direction: column; gap: 22px">
 <div style="display: flex; flex-direction: column; gap: 10px">
@@ -813,13 +819,8 @@ Calcula tu paquete aquí
 </div>
 
 <div style="display: {{xc.vP}}; flex-direction: column; gap: 12px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">¿Deseas fotos impresas?</span>
 <span style="font-size: 13px; color: #3D3B3E">Tus fotos favoritas impresas en papel fotográfico profesional.</span>
-<div role="group" aria-label="¿Deseas fotos impresas?" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
-<button type="button" onClick="{{xc.prYes}}" aria-pressed="{{xc.prYesP}}" style="min-height: 50px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #222020; background: {{xc.prYesBg}}; color: {{xc.prYesFg}}; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px; cursor: pointer">Sí, quiero</button>
-<button type="button" onClick="{{xc.prNo}}" style="min-height: 50px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px; cursor: pointer">No, gracias</button>
-</div>
-<sc-if value="{{xc.prOn}}" hint-placeholder-val="{{false}}">
+<sc-if value="{{xc.prOn}}" hint-placeholder-val="{{true}}">
 <div data-prguide="1" style="display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 8px; background: #FBF7F1; border: 1px solid #EFE6DA">
 <span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 13px">Así se ven los tamaños (a escala, en pulgadas)</span>
 <svg viewBox="0 0 330 157" role="img" aria-label="Comparación de tamaños de fotos impresas a escala: cartera, 4×6, 5×7, 8×10 y 11×17 pulgadas" style="width: 100%; max-width: 340px; height: auto; display: block; margin: 0 auto"><rect x="26.0" y="98.5" width="17.5" height="24.5" rx="2" fill="#F2E4D2" stroke="#222020" stroke-width="1.5"></rect><text x="34.8" y="139.0" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="700" font-size="11" fill="#222020">Cartera</text><text x="34.8" y="152.0" text-anchor="middle" font-family="Montserrat, sans-serif" font-size="9.5" fill="#3D3B3E">2.5×3.5</text><rect x="63.5" y="81.0" width="28.0" height="42.0" rx="2" fill="#F2E4D2" stroke="#222020" stroke-width="1.5"></rect><text x="77.5" y="139.0" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="700" font-size="11" fill="#222020">4×6</text><rect x="111.5" y="74.0" width="35.0" height="49.0" rx="2" fill="#F2E4D2" stroke="#222020" stroke-width="1.5"></rect><text x="129.0" y="139.0" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="700" font-size="11" fill="#222020">5×7</text><rect x="166.5" y="53.0" width="56.0" height="70.0" rx="2" fill="#F2E4D2" stroke="#222020" stroke-width="1.5"></rect><text x="194.5" y="139.0" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="700" font-size="11" fill="#222020">8×10</text><rect x="242.5" y="4.0" width="77.0" height="119.0" rx="2" fill="#FDF1E2" stroke="#222020" stroke-width="1.5"></rect><text x="281.0" y="139.0" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="700" font-size="11" fill="#222020">11×17</text></svg>
@@ -864,7 +865,6 @@ Calcula tu paquete aquí
 </div>
 
 <div style="display: {{xc.vL}}; flex-direction: column; gap: 4px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">¿Dónde será el evento?</span>
 <span style="font-size: 13px; color: #3D3B3E">Marca el lugar. La distancia es aproximada desde Las Tablas; fuera de Las Tablas se suma el traslado.</span>
 <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 6px">
 <sc-for list="{{xc.locs}}" as="l" hint-placeholder-count="12">
@@ -886,7 +886,6 @@ Calcula tu paquete aquí
 </div>
 
 <div style="display: {{xc.vF}}; flex-direction: column; gap: 12px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">Elige la fecha de tu evento</span>
 <div style="display: flex; justify-content: center">
 <div style="display: flex; align-items: center; gap: 8px">
 <button type="button" onClick="{{xc.cal.prev}}" aria-label="Mes anterior" disabled="{{xc.cal.noPrev}}" style="width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: {{xc.cal.prevOp}}">
@@ -928,7 +927,6 @@ Calcula tu paquete aquí
 </div>
 
 <div style="display: {{xc.vD}}; flex-direction: column; gap: 12px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">Tus datos</span>
 <span style="font-size: 13px; color: #3D3B3E">Los necesitamos para confirmar tu reserva. Nombre, teléfono y correo son obligatorios.</span>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tu nombre
 <input type="text" autocomplete="name" value="{{xc.name}}" data-field="name" onInput="{{xc.setName}}" placeholder="Nombre y apellido" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{xc.bName}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
@@ -960,12 +958,6 @@ Calcula tu paquete aquí
 <span style="font-family: 'EB Garamond', Georgia, serif; font-size: 40px; line-height: 1; color: {{accent}}">{{xc.total}}</span>
 </div>
 <div style="display: flex; gap: 8px">
-<sc-if value="{{xc.showBack}}" hint-placeholder-val="{{false}}">
-<button type="button" onClick="{{xc.goBack}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex: none; min-height: 52px; padding: 0 16px; border-radius: 6px; border: 1.5px solid #F2E4D2; background: transparent; color: #FEFEFE; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 14px; cursor: pointer">
-<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
-{{xc.backLabel}}
-</button>
-</sc-if>
 <sc-if value="{{xc.showNext}}" hint-placeholder-val="{{false}}">
 <button type="button" onClick="{{xc.goNext}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex: 1 1 auto; min-width: 0; padding: 0 12px; min-height: 52px; border-radius: 6px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px; cursor: pointer">
 {{xc.nextLabel}}
@@ -982,6 +974,19 @@ Reservar por WhatsApp
 <sc-if value="{{xc.showSend}}" hint-placeholder-val="{{true}}">
 <span style="font-size: 12px; color: #F2E4D2">Precio estimado. Te confirmamos la cotización final y la disponibilidad por WhatsApp.</span>
 </sc-if>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{prAsk.open}}" hint-placeholder-val="{{false}}">
+<div style="position: fixed; inset: 0; z-index: 85; background: rgba(34, 32, 32, 0.8); display: flex; align-items: center; justify-content: center; padding: 14px; box-sizing: border-box">
+<div role="alertdialog" aria-modal="true" aria-label="¿Deseas fotos impresas?" style="width: 100%; max-width: 420px; background: #FEFEFE; color: #222020; border-radius: 10px; padding: 22px 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px">
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 28px; line-height: 1.1">¿Deseas fotos impresas?</span>
+<span style="font-size: 15px; line-height: 1.5; color: #3D3B3E">Lleva tus fotos favoritas en papel fotográfico profesional: desde tamaño cartera hasta 11×17 para enmarcar.</span>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<button type="button" onClick="{{prAsk.yes}}" style="min-height: 50px; padding: 0 18px; border-radius: 6px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px; cursor: pointer">Sí, quiero ver los tamaños</button>
+<button type="button" onClick="{{prAsk.no}}" style="min-height: 46px; padding: 0 18px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 15px; cursor: pointer">No, gracias</button>
 </div>
 </div>
 </div>
@@ -1721,7 +1726,13 @@ function calModel(self, K, accent) {
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0, cotOpen: false, cotExp: null, cotN: 3, cotL: {}, cotQ: {}, cotC: {}, cotName: "", cotPhone: "", cotEmail: "", cotDate: "", cotIdea: "", cotOff: 0, cotSel: null, cotSlot: null, cotDeclined: "", cotPkg: null, cotStep: 1, cotErr: false, xcErr: false, errPop: null, upOpen: false, upCtx: null, menuOpen: false, xcId: null, xcStep: 1, xcBase: null, xcQ: {}, xcC: {}, xcL: {}, xcOff: 0, xcSel: null, xcSlot: null, xcType: "", xcTime: "", xcIdea: "" };
+    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0, cotOpen: false, cotExp: null, cotN: 3, cotL: {}, cotQ: {}, cotC: {}, cotName: "", cotPhone: "", cotEmail: "", cotDate: "", cotIdea: "", cotOff: 0, cotSel: null, cotSlot: null, cotDeclined: "", cotPkg: null, cotStep: 1, cotErr: false, xcErr: false, errPop: null, prAsk: null, upOpen: false, upCtx: null, menuOpen: false, xcId: null, xcStep: 1, xcBase: null, xcQ: {}, xcC: {}, xcL: {}, xcOff: 0, xcSel: null, xcSlot: null, xcType: "", xcTime: "", xcIdea: "" };
+  }
+  navPush() { this._hd = (this._hd || 0) + 1; try { history.pushState({ nc: this._hd }, "", window.location.href); } catch (e) {} }
+  calcBack() {
+    var st = this.state, t;
+    if (st.xcId) { t = (st.xcStep || 1) - 1; if (t === 2 && st.xcPr !== true) t = 1; if (t >= 1) this.setState({ xcStep: t }); else this.setState({ xcId: null }); return; }
+    if (st.cotOpen) { t = (st.cotStep || 1) - 1; if (t === 2 && st.cotPr !== true) t = 1; if (t >= 1) this.setState({ cotStep: t }); else this.setState({ cotOpen: false }); }
   }
   componentDidMount() {
     var self = this;
@@ -1737,6 +1748,12 @@ class Component extends DCLogic {
     }
     fromHash();
     window.addEventListener("hashchange", fromHash);
+    window.addEventListener("popstate", function () {
+      if (!(self._hd > 0)) return;
+      self._hd--;
+      if (self.state.errPop || self.state.prAsk) { self.setState({ errPop: null, prAsk: null }); return; }
+      self.calcBack();
+    });
   }
   renderVals() {
     var self = this;
@@ -1755,6 +1772,7 @@ class Component extends DCLogic {
     });
     var cur = PACKAGES.filter(function (p) { return p.id === sel; })[0] || PACKAGES[0];
     function openXC(id, baseId, step) {
+      self.navPush();
       self.setState({ upOpen: false, cotOpen: false, xcPr: null, xcId: id, xcStep: step, xcBase: baseId, xcQ: {}, xcC: {}, xcL: {}, xcOff: 0, xcSel: null, xcSlot: null });
     }
     var current = {
@@ -1876,6 +1894,26 @@ class Component extends DCLogic {
           ready: ready, summary: summary, wa: WA + encodeURIComponent(waMsg)
         };
       })(),
+      nav: {
+        back: function () { if (self._hd > 0) history.back(); else self.calcBack(); },
+        close: function () { var n = self._hd || 0; self._hd = 0; self.setState({ cotOpen: false, xcId: null }); if (n) { try { history.go(-n); } catch (e) {} } }
+      },
+      prAsk: (function () {
+        var k = self.state.prAsk;
+        function go(yes) {
+          if (k === "xc") {
+            var nq = Object.assign({}, self.state.xcQ);
+            if (!yes) COT_PRINTS.forEach(function (it) { delete nq[it.id]; });
+            self.setState({ prAsk: null, xcPr: !!yes, xcQ: nq, xcStep: yes ? 2 : 3 });
+          } else {
+            var nq2 = Object.assign({}, self.state.cotQ);
+            if (!yes) COT_PRINTS.forEach(function (it) { delete nq2[it.id]; });
+            self.setState({ prAsk: null, cotPr: !!yes, cotQ: nq2, cotStep: yes ? 2 : 3 });
+          }
+          self.navPush();
+        }
+        return { open: !!k, yes: function () { go(true); }, no: function () { go(false); } };
+      })(),
       errPop: (function () {
         var list = self.state.errPop;
         return {
@@ -1900,7 +1938,7 @@ class Component extends DCLogic {
       },
       createHere: function () {
         if (XC[sel]) openXC(sel, XC[sel].defBase, 1);
-        else self.setState(Object.assign({ cotOpen: true, cotStep: 1, cotExp: sel || self.state.cotExp }, self.state.cotPkg ? { cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} } : {}));
+        else { self.navPush(); self.setState(Object.assign({ cotOpen: true, cotStep: 1, cotPr: null, cotExp: sel || self.state.cotExp }, self.state.cotPkg ? { cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} } : {})); }
       },
       xc: (function () {
         var st = self.state, id = st.xcId, cfg = id && XC[id];
@@ -1961,16 +1999,17 @@ class Component extends DCLogic {
         }
         return {
           open: true, step: step, title: cfg.title, kind: cfg.kind,
-          subtitle: ["", "Elige tu cobertura y los extras que quieras.", "Fotos impresas de tu evento.", "¿Dónde será tu evento?", "Elige la fecha y la hora de inicio.", "Último paso: tus datos para confirmar."][step],
+          subtitle: ["", "Elige tu cobertura y tus extras", "Elige tus fotos impresas", "¿Dónde será tu evento?", "Elige la fecha y la hora de inicio", "Último paso: tus datos"][step],
+          prog: [1, 2, 3, 4, 5].map(function (i) { return { bg: i <= step ? accent : "#3D3B3E" }; }),
           v1: step === 1 ? "flex" : "none", vP: step === 2 ? "flex" : "none", vL: step === 3 ? "flex" : "none", vF: step === 4 ? "flex" : "none", vD: step === 5 ? "flex" : "none",
           showNext: step < 5, showSend: step === 5, showBack: step > 1,
           nextLabel: ["", "Siguiente", "Siguiente: lugar", "Siguiente: fecha", "Siguiente: tus datos"][step] || "",
-          prOn: st.xcPr === true, prYesP: st.xcPr === true ? "true" : "false",
+          prOn: true, prYesP: st.xcPr === true ? "true" : "false",
           prYesBg: st.xcPr === true ? "#222020" : "#FEFEFE", prYesFg: st.xcPr === true ? "#FEFEFE" : "#222020",
           prYes: function () { self.setState({ xcPr: true }); setTimeout(function () { var e = document.querySelector("[data-prguide]"); if (e && e.scrollIntoView) e.scrollIntoView({ behavior: "smooth", block: "start" }); }, 90); },
           prNo: function () { var nq = Object.assign({}, q); COT_PRINTS.forEach(function (it) { delete nq[it.id]; }); self.setState({ xcPr: false, xcQ: nq, xcStep: 3 }); },
           backLabel: "Atrás",
-          goNext: function () { if (step < 5) self.setState({ xcStep: step + 1 }); },
+          goNext: function () { if (step === 1) { self.setState({ prAsk: "xc" }); return; } if (step < 5) { self.setState({ xcStep: step + 1 }); self.navPush(); } },
           goBack: function () { if (step > 1) self.setState({ xcStep: step - 1 }); },
           showErr: !!st.xcErr && !!xmiss, errText: xmiss ? "Para enviar tu reserva completa: " + xmiss + "." : "",
           bName: st.xcErr && !String(xn || "").trim() ? "#B42318" : "#D9CDBE",
@@ -2023,6 +2062,7 @@ class Component extends DCLogic {
         };
         function openPkg(step) {
             if (!u) return;
+            self.navPush();
             var pr = u.pr, cv = propCovers(pr), c = {}, t = pr.items.join(" | "), m;
             Object.keys(cv.c).forEach(function (k) { c[k] = true; });
             var mins = (m = t.match(/(\d+) horas? de sesión/i)) ? +m[1] * 60 : ((m = t.match(/(\d+) minutos/i)) ? +m[1] : 60);
@@ -2130,29 +2170,30 @@ class Component extends DCLogic {
           sug: sug || { key: "" }, hasSug: !!sug,
           sugYes: function () { if (!sug) return; self.setState({ cotOpen: false, cotDeclined: sug.key, sel: expObj.id, calOpen: true, calCtx: { exp: sug.exp, prop: sug.name, price: sug.price }, calOff: 0, calSel: null, calSlot: null }); },
           sugNo: function () { if (sug) self.setState({ cotDeclined: sug.key }); },
-          openAny: function () { self.setState(pk ? { menuOpen: false, cotOpen: true, cotPr: null, cotStep: 1, cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} } : { menuOpen: false, cotOpen: true, cotPr: null, cotStep: 1 }); },
-          openHere: function () { self.setState(Object.assign({ cotOpen: true, cotStep: 1, cotExp: sel || st.cotExp }, pk ? { cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} } : {})); },
+          openAny: function () { self.navPush(); self.setState(pk ? { menuOpen: false, cotOpen: true, cotPr: null, cotStep: 1, cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} } : { menuOpen: false, cotOpen: true, cotPr: null, cotStep: 1 }); },
+          openHere: function () { self.navPush(); self.setState(Object.assign({ cotOpen: true, cotStep: 1, cotExp: sel || st.cotExp }, pk ? { cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} } : {})); },
           fromScratch: function () { self.setState({ cotStep: 1, cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} }); },
           isPkg: !!pk, noPkg: !pk,
           title: pk ? (cstep > 1 ? "Reserva tu sesión" : "Mejora tu experiencia") : "Arma tu paquete",
-          subtitle: cstep === 2 ? "Fotos impresas para tus favoritas." : cstep === 3 ? "¿Dónde quieres tu sesión?" : (cstep === 4 ? "Elige el día y la hora de tu sesión." : (cstep === 5 ? "Último paso: tus datos para confirmar." : (pk ? "Elige los extras que quieras agregar a tu paquete." : "Elige lo que quieres en tu sesión y te enviamos la cotización por WhatsApp."))),
+          subtitle: cstep === 2 ? "Elige tus fotos impresas" : cstep === 3 ? "¿Dónde quieres tu sesión?" : (cstep === 4 ? "Elige el día y la hora" : (cstep === 5 ? "Último paso: tus datos" : (pk ? "Agrega extras a tu paquete" : "Arma tu sesión a tu medida"))),
           inclTitle: pk ? "Tu paquete incluye" : "La propuesta inicial incluye",
           pkgLabel: pk ? pk.title + " · " + pk.nm + " (" + money(pk.price) + ")" : "",
           sn: pk ? { t: "1", f: "1", p: "2", i: "3", d: "2", c: "3" } : { t: "1", s: "1", f: "2", p: "3", i: "4", d: "2", c: "3" },
           vL: cstep === 3 ? "flex" : "none",
           step: cstep,
+          prog: [1, 2, 3, 4, 5].map(function (i) { return { bg: i <= cstep ? accent : "#3D3B3E" }; }),
           vD: cstep === 5 ? "flex" : "none",
           vB: cstep === 1 ? "flex" : "none",
           vP: cstep === 2 ? "flex" : "none",
           vC: cstep === 4 ? "flex" : "none",
           showNext: cstep < 5, showSend: cstep === 5, showBack: cstep > 1,
           nextLabel: ["", "Siguiente", "Siguiente: lugar", "Siguiente: fecha", "Siguiente: tus datos"][cstep] || "",
-          prOn: st.cotPr === true, prYesP: st.cotPr === true ? "true" : "false",
+          prOn: true, prYesP: st.cotPr === true ? "true" : "false",
           prYesBg: st.cotPr === true ? "#222020" : "#FEFEFE", prYesFg: st.cotPr === true ? "#FEFEFE" : "#222020",
           prYes: function () { self.setState({ cotPr: true }); setTimeout(function () { var e = document.querySelector("[data-prguide]"); if (e && e.scrollIntoView) e.scrollIntoView({ behavior: "smooth", block: "start" }); }, 90); },
           prNo: function () { var nq = Object.assign({}, q); COT_PRINTS.forEach(function (it) { delete nq[it.id]; }); self.setState({ cotPr: false, cotQ: nq, cotStep: 3 }); },
           backLabel: "Atrás",
-          goNext: function () { if (cstep < 5) self.setState({ cotStep: cstep + 1 }); },
+          goNext: function () { if (cstep === 1) { self.setState({ prAsk: "cot" }); return; } if (cstep < 5) { self.setState({ cotStep: cstep + 1 }); self.navPush(); } },
           goBack: function () { if (cstep > 1) self.setState({ cotStep: cstep - 1 }); },
           showErr: !!st.cotErr && !!cmiss, errText: cmiss ? "Para enviar tu reserva completa: " + cmiss + "." : "",
           bName: st.cotErr && !st.cotName.trim() ? "#B42318" : "#D9CDBE",
