@@ -451,13 +451,13 @@ Calcula tu paquete aquí
 <span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">Tus datos</span>
 <span style="font-size: 13px; color: #3D3B3E">Los necesitamos para confirmar tu reserva. Todos son obligatorios.</span>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tu nombre
-<input type="text" autocomplete="name" value="{{cot.name}}" onInput="{{cot.setName}}" placeholder="Nombre y apellido" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{cot.bName}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+<input type="text" autocomplete="name" value="{{cot.name}}" data-field="name" onInput="{{cot.setName}}" placeholder="Nombre y apellido" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{cot.bName}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
 </label>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Número de teléfono
-<input type="tel" inputmode="tel" autocomplete="tel" value="{{cot.phone}}" onInput="{{cot.setPhone}}" placeholder="6000-0000" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{cot.bPhone}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+<input type="tel" inputmode="tel" autocomplete="tel" value="{{cot.phone}}" data-field="phone" onInput="{{cot.setPhone}}" placeholder="6000-0000" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{cot.bPhone}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
 </label>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Correo electrónico
-<input type="email" inputmode="email" autocomplete="email" value="{{cot.email}}" onInput="{{cot.setEmail}}" placeholder="tucorreo@ejemplo.com" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{cot.bEmail}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+<input type="email" inputmode="email" autocomplete="email" value="{{cot.email}}" data-field="email" onInput="{{cot.setEmail}}" placeholder="tucorreo@ejemplo.com" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{cot.bEmail}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
 </label>
 </div>
 
@@ -919,13 +919,13 @@ Calcula tu paquete aquí
 <span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">Tus datos</span>
 <span style="font-size: 13px; color: #3D3B3E">Los necesitamos para confirmar tu reserva. Nombre, teléfono y correo son obligatorios.</span>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tu nombre
-<input type="text" autocomplete="name" value="{{xc.name}}" onInput="{{xc.setName}}" placeholder="Nombre y apellido" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{xc.bName}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+<input type="text" autocomplete="name" value="{{xc.name}}" data-field="name" onInput="{{xc.setName}}" placeholder="Nombre y apellido" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{xc.bName}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
 </label>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Número de teléfono
-<input type="tel" inputmode="tel" autocomplete="tel" value="{{xc.phone}}" onInput="{{xc.setPhone}}" placeholder="6000-0000" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{xc.bPhone}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+<input type="tel" inputmode="tel" autocomplete="tel" value="{{xc.phone}}" data-field="phone" onInput="{{xc.setPhone}}" placeholder="6000-0000" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{xc.bPhone}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
 </label>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Correo electrónico
-<input type="email" inputmode="email" autocomplete="email" value="{{xc.email}}" onInput="{{xc.setEmail}}" placeholder="tucorreo@ejemplo.com" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{xc.bEmail}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+<input type="email" inputmode="email" autocomplete="email" value="{{xc.email}}" data-field="email" onInput="{{xc.setEmail}}" placeholder="tucorreo@ejemplo.com" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{xc.bEmail}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
 </label>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tipo de evento
 <input type="text" value="{{xc.type}}" onInput="{{xc.setType}}" placeholder="Cumpleaños, bautizo, boda, aniversario, empresa…" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
@@ -963,7 +963,7 @@ Calcula tu paquete aquí
 <sc-if value="{{xc.showSend}}" hint-placeholder-val="{{true}}">
 <a href="{{xc.wa}}" onClick="{{xc.send}}" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex: 1 1 auto; min-width: 0; padding: 0 12px; min-height: 52px; border-radius: 6px; background: {{accent}}; color: #222020; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.6-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg>
-Enviar reserva por WhatsApp
+Reservar por WhatsApp
 </a>
 </sc-if>
 </div>
@@ -971,6 +971,26 @@ Enviar reserva por WhatsApp
 <span style="font-size: 12px; color: #F2E4D2">Precio estimado. Te confirmamos la cotización final y la disponibilidad por WhatsApp.</span>
 </sc-if>
 </div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{errPop.open}}" hint-placeholder-val="{{false}}">
+<div style="position: fixed; inset: 0; z-index: 90; background: rgba(34, 32, 32, 0.8); display: flex; align-items: center; justify-content: center; padding: 14px; box-sizing: border-box">
+<div role="alertdialog" aria-modal="true" aria-label="{{errPop.title}}" style="width: 100%; max-width: 420px; background: #FEFEFE; color: #222020; border-radius: 10px; padding: 22px 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 12px">
+<span aria-hidden="true" style="flex: none; width: 40px; height: 40px; border-radius: 50%; background: #FEF3F2; color: #B42318; display: flex; align-items: center; justify-content: center; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 22px">!</span>
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 25px; line-height: 1.15">{{errPop.title}}</span>
+</div>
+<ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px">
+<sc-for list="{{errPop.items}}" as="it" hint-placeholder-count="2">
+<li style="display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 6px; border-left: 4px solid #B42318; background: #FEF3F2">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px; color: #7A271A">{{it.label}}</span>
+<span style="font-size: 14px; color: #3D3B3E">{{it.hint}}</span>
+</li>
+</sc-for>
+</ul>
+<button type="button" onClick="{{errPop.fix}}" style="min-height: 50px; padding: 0 18px; border-radius: 6px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px; cursor: pointer">Completar mis datos</button>
 </div>
 </div>
 </sc-if>
@@ -1601,6 +1621,13 @@ XC_GROUPS.infantil = [
 function cotFits(only, exp) { return !only || only.indexOf(exp) >= 0 || (exp === "otra" && only === COT_SES); }
 function okPhone(v) { return String(v || "").replace(/\D/g, "").length >= 7; }
 function okEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v || "").trim()); }
+function missingList(n, ph, em) {
+  var m = [];
+  if (!String(n || "").trim()) m.push({ key: "name", label: "Tu nombre", hint: "Escribe tu nombre y apellido." });
+  if (!okPhone(ph)) m.push({ key: "phone", label: "Número de teléfono", hint: String(ph || "").trim() ? "Revisa el número: debe tener al menos 7 dígitos." : "Escribe tu número de WhatsApp." });
+  if (!okEmail(em)) m.push({ key: "email", label: "Correo electrónico", hint: String(em || "").trim() ? "Revisa el correo: debe verse así, nombre@correo.com." : "Escribe tu correo electrónico." });
+  return m;
+}
 function missing(n, ph, em) {
   var m = [];
   if (!String(n || "").trim()) m.push("tu nombre");
@@ -1680,7 +1707,7 @@ function calModel(self, K, accent) {
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0, cotOpen: false, cotExp: null, cotN: 3, cotL: {}, cotQ: {}, cotC: {}, cotName: "", cotPhone: "", cotEmail: "", cotDate: "", cotIdea: "", cotOff: 0, cotSel: null, cotSlot: null, cotDeclined: "", cotPkg: null, cotStep: 1, cotErr: false, xcErr: false, upOpen: false, upCtx: null, menuOpen: false, xcId: null, xcStep: 1, xcBase: null, xcQ: {}, xcC: {}, xcL: {}, xcOff: 0, xcSel: null, xcSlot: null, xcType: "", xcTime: "", xcIdea: "" };
+    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0, cotOpen: false, cotExp: null, cotN: 3, cotL: {}, cotQ: {}, cotC: {}, cotName: "", cotPhone: "", cotEmail: "", cotDate: "", cotIdea: "", cotOff: 0, cotSel: null, cotSlot: null, cotDeclined: "", cotPkg: null, cotStep: 1, cotErr: false, xcErr: false, errPop: null, upOpen: false, upCtx: null, menuOpen: false, xcId: null, xcStep: 1, xcBase: null, xcQ: {}, xcC: {}, xcL: {}, xcOff: 0, xcSel: null, xcSlot: null, xcType: "", xcTime: "", xcIdea: "" };
   }
   componentDidMount() {
     var self = this;
@@ -1835,6 +1862,19 @@ class Component extends DCLogic {
           ready: ready, summary: summary, wa: WA + encodeURIComponent(waMsg)
         };
       })(),
+      errPop: (function () {
+        var list = self.state.errPop;
+        return {
+          open: !!(list && list.length),
+          items: (list || []).map(function (x) { return { label: x.label, hint: x.hint }; }),
+          title: list && list.length === 1 ? "Te falta un dato para enviar tu reserva" : "Te faltan algunos datos para enviar tu reserva",
+          fix: function () {
+            var first = list && list[0] ? list[0].key : "";
+            self.setState({ errPop: null });
+            setTimeout(function () { var el = document.querySelector('[data-field="' + first + '"]'); if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); el.focus(); } }, 120);
+          }
+        };
+      })(),
       menu: {
         open: !!self.state.menuOpen, closed: !self.state.menuOpen, expanded: self.state.menuOpen ? "true" : "false",
         toggle: function () { self.setState({ menuOpen: !self.state.menuOpen }); },
@@ -1951,7 +1991,8 @@ class Component extends DCLogic {
           send: function (e) {
             var a = e && e.currentTarget;
             var nn = st.xcName != null ? st.xcName : st.cotName, pp = st.xcPhone != null ? st.xcPhone : st.cotPhone, ee = st.xcEmail != null ? st.xcEmail : st.cotEmail;
-            if (missing(nn, pp, ee)) { if (e && e.preventDefault) e.preventDefault(); self.setState({ xcErr: true }); return; }
+            var ml = missingList(nn, pp, ee);
+            if (ml.length) { if (e && e.preventDefault) e.preventDefault(); self.setState({ xcErr: true, errPop: ml }); return; }
             if (a && a.setAttribute) a.setAttribute("href", WA + encodeURIComponent(build()));
           }
         };
@@ -2106,7 +2147,7 @@ class Component extends DCLogic {
           dateTitle: "Elige el día y la hora",
           cellH: "58px", numFs: "18px", subFs: "10px",
           fotosNote: pk ? "Tu paquete ya incluye " + baseF + " fotos editadas. Cada foto adicional suma 10 minutos de sesión y 5 fotos de prueba." : "Recuerda: la propuesta inicial ya incluye 3 fotos editadas. Cada foto adicional suma 10 minutos de sesión y 5 fotos de prueba.",
-          sendLabel: pk ? "Enviar reserva por WhatsApp" : "Enviar cotización por WhatsApp",
+          sendLabel: pk ? "Reservar por WhatsApp" : "Cotizar por WhatsApp",
           close: function () { self.setState({ cotOpen: false }); },
           incl: pk ? pk.items : incl,
           exps: PACKAGES.filter(function (p) { return !XC[p.id] && p.id !== "limitless"; }).map(function (p) { var o = chip(exp === p.id); o.label = TABNAME[p.id][0]; o.pick = function () { self.setState({ cotExp: p.id }); }; return o; })
@@ -2137,7 +2178,8 @@ class Component extends DCLogic {
           wa: WA + encodeURIComponent(build()),
           send: function (e) {
             var a = e && e.currentTarget;
-            if (missing(st.cotName, st.cotPhone, st.cotEmail)) { if (e && e.preventDefault) e.preventDefault(); self.setState({ cotErr: true }); return; }
+            var ml = missingList(st.cotName, st.cotPhone, st.cotEmail);
+            if (ml.length) { if (e && e.preventDefault) e.preventDefault(); self.setState({ cotErr: true, errPop: ml }); return; }
             if (a && a.setAttribute) a.setAttribute("href", WA + encodeURIComponent(build()));
           }
         };
