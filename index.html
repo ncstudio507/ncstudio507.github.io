@@ -122,7 +122,7 @@ Menú
 <p style="margin: 0; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 18px; color: #F2E4D2">Fotografía y audiovisual en Las Tablas, Panamá, desde 2019</p>
 <p style="margin: 0; max-width: 520px; color: #F2E4D2">Somos dos amigos apasionados por la fotografía. Acompañamos a quinceañeras, futuras mamás, familias, graduandos y deportistas a guardar sus momentos más importantes, con la creatividad, el estilo y la calidad que nos caracterizan.</p>
 <p style="margin: 0; max-width: 520px; color: #F2E4D2">Te guiamos con seguridad, sin poses forzadas, para que todo fluya de forma natural, auténtica y con mucha vibra.</p>
-<p style="margin: 6px 0 0; font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 28px; line-height: 1.2">No vendemos fotos, vendemos experiencias.</p>
+<p style="margin: 6px 0 0; font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 28px; line-height: 1.2">No vendemos fotos, vendemos <span style="background: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 200 14%27 preserveAspectRatio=%27none%27%3E%3Cpath d=%27M3 9 C 45 4, 120 3, 197 7%27 stroke=%27%23F99824%27 stroke-width=%274%27 fill=%27none%27 stroke-linecap=%27round%27/%3E%3C/svg%3E') no-repeat 0 100% / 100% 0.3em; padding-bottom: 0.1em">experiencias</span>.</p>
 <div style="display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px">
 <a href="#portafolio" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 26px; border-radius: 999px; background: {{accent}}; color: #222020; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">Ver paquetes y precios</a>
 <a href="#preguntas" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 26px; border-radius: 999px; border: 1.5px solid {{accent}}; background: transparent; color: #FEFEFE; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">Preguntas frecuentes</a>
@@ -134,6 +134,42 @@ Escríbenos
 </div>
 <img src="img/5ed9f54d47c7461ec00ca1f815be185f.jpg" alt="Nelson y Charlie revisando fotos en la cámara" style="order: -1; flex: 1 1 400px; min-width: 0; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 6px; display: block">
 </div>
+<sc-if value="{{cifrasOn}}" hint-placeholder-val="{{true}}">
+<div style="display: flex; flex-direction: column; gap: 18px">
+<p style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-size: clamp(26px, 3vw, 34px); line-height: 1.1">Nuestro recorrido <span style="font-family: Allura, cursive; font-size: 1.4em; color: {{accent}}">en cifras</span></p>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); border-top: 1px solid #3D3B3E; border-left: 1px solid #3D3B3E">
+<sc-for list="{{cifras}}" as="c" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 26px 14px; text-align: center; border-right: 1px solid #3D3B3E; border-bottom: 1px solid #3D3B3E">
+<span style="font-family: Montserrat, sans-serif; font-weight: 600; font-size: clamp(24px, 3vw, 30px); letter-spacing: 0.06em; color: {{accent}}; font-variant-numeric: tabular-nums">{{c.n}}</span>
+<span style="font-size: 15px; line-height: 1.4; color: #F2E4D2">{{c.label}}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+</div>
+</section>
+
+<section style="background: #F2E4D2; padding: 64px 20px">
+<div style="max-width: 1160px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px">
+<h2 style="margin: 0; text-align: center; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(30px, 4vw, 44px); line-height: 1.15; text-wrap: balance">¿Por dónde <span style="background: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 200 14%27 preserveAspectRatio=%27none%27%3E%3Cpath d=%27M3 9 C 45 4, 120 3, 197 7%27 stroke=%27%23F99824%27 stroke-width=%274%27 fill=%27none%27 stroke-linecap=%27round%27/%3E%3C/svg%3E') no-repeat 0 100% / 100% 0.3em; padding-bottom: 0.1em">empezamos</span>?</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px">
+<sc-for list="{{start}}" as="s" hint-placeholder-count="2">
+<div style="display: flex; flex-direction: column; border-radius: 8px; overflow: hidden; background: #222020; color: #FEFEFE">
+<img src="{{s.img}}" alt="" loading="lazy" style="width: 100%; aspect-ratio: 16 / 9; object-fit: cover; object-position: 50% 22%; display: block">
+<div style="flex: 1; display: flex; flex-direction: column; gap: 6px; padding: 20px 22px 24px">
+<span style="font-family: Allura, cursive; font-size: 34px; line-height: 1; color: {{accent}}">{{s.eyebrow}}</span>
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 30px; line-height: 1.1">{{s.title}}</span>
+<span style="font-size: 15px; line-height: 1.45; color: #F2E4D2">{{s.text}}</span>
+<span style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: auto; padding-top: 12px">
+<sc-for list="{{s.ctas}}" as="b" hint-placeholder-count="2">
+<a href="{{b.href}}" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 20px; border-radius: 999px; background: {{b.bg}}; border: 1.5px solid {{accent}}; color: {{b.fg}}; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 14px">{{b.label}} →</a>
+</sc-for>
+</span>
+</div>
+</div>
+</sc-for>
+</div>
 </div>
 </section>
 
@@ -142,7 +178,7 @@ Escríbenos
 <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 20px">
 <div style="display: flex; flex-direction: column; gap: 6px">
 <p style="margin: 0; font-family: Montserrat, sans-serif; font-size: 16px; font-weight: 600; color: #3D3B3E">Portafolio</p>
-<h2 style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(34px, 4.5vw, 52px); line-height: 1.1">Tu esencia, capturada con creatividad</h2>
+<h2 style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(34px, 4.5vw, 52px); line-height: 1.1">Tu esencia, capturada con <span style="background: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 200 14%27 preserveAspectRatio=%27none%27%3E%3Cpath d=%27M3 9 C 45 4, 120 3, 197 7%27 stroke=%27%23F99824%27 stroke-width=%274%27 fill=%27none%27 stroke-linecap=%27round%27/%3E%3C/svg%3E') no-repeat 0 100% / 100% 0.3em; padding-bottom: 0.1em">creatividad</span></h2>
 <p style="margin: 0; color: #3D3B3E">Toca una experiencia para ver sus fotos y sus paquetes.</p>
 </div>
 <a href="https://instagram.com/ncstudio507" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 24px; border-radius: 999px; border: 1.5px solid #222020; color: #222020; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 15px">Ver más en Instagram</a>
@@ -333,6 +369,23 @@ Crea tu paquete aquí
 </section>
 </sc-if>
 
+<section style="padding: 88px 20px 0">
+<div style="max-width: 1160px; margin: 0 auto; display: flex; flex-direction: column; gap: 36px">
+<div style="display: flex; flex-direction: column; gap: 6px; align-items: center; text-align: center">
+<p style="margin: 0; font-family: Montserrat, sans-serif; font-size: 16px; font-weight: 600; color: #3D3B3E">¿Por qué elegirnos?</p>
+<h2 style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(34px, 4.5vw, 52px); line-height: 1.1; text-wrap: balance">Lo que hace <span style="background: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 200 14%27 preserveAspectRatio=%27none%27%3E%3Cpath d=%27M3 9 C 45 4, 120 3, 197 7%27 stroke=%27%23F99824%27 stroke-width=%274%27 fill=%27none%27 stroke-linecap=%27round%27/%3E%3C/svg%3E') no-repeat 0 100% / 100% 0.3em; padding-bottom: 0.1em">diferente</span> tu experiencia</h2>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); border-radius: 8px; overflow: hidden">
+<sc-for list="{{why}}" as="w" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 36px 24px; text-align: center; background: {{w.bg}}; color: {{w.fg}}">
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 26px; line-height: 1.15; text-wrap: balance">{{w.title}}</span>
+<span style="width: 72px; height: 2px; background: {{accent}}"></span>
+<span style="font-size: 15px; line-height: 1.6; color: {{w.sub}}">{{w.text}}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</section>
 <section style="padding: 88px 20px">
 <div style="max-width: 1160px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px">
 <div style="display: flex; flex-direction: column; gap: 6px">
@@ -415,6 +468,26 @@ Calcula tu paquete aquí
 </div>
 </section>
 
+<section aria-label="Instagram de NC Studio" style="background: #FEFEFE; padding-top: 64px">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 0 20px 28px; text-align: center">
+<span style="font-family: Allura, cursive; font-size: 46px; line-height: 1; color: {{accent}}">Síguenos</span>
+<a href="https://instagram.com/ncstudio507" target="_blank" rel="noopener" style="font-family: Montserrat, sans-serif; font-weight: 600; font-size: clamp(22px, 3vw, 30px); letter-spacing: 0.12em; color: #222020; text-decoration: none">@NCSTUDIO507</a>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(max(120px, 16.66%), 1fr))">
+<sc-for list="{{ig}}" as="p" hint-placeholder-count="6">
+<a href="{{p.href}}" target="_blank" rel="noopener" aria-label="{{p.label}}" style="position: relative; display: block; aspect-ratio: 1 / 1; overflow: hidden; background: #222020">
+<img src="{{p.src}}" alt="" loading="lazy" style="width: 100%; height: 100%; object-fit: cover; display: block">
+<sc-if value="{{p.video}}" hint-placeholder-val="{{false}}">
+<span style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center"><svg width="54" height="54" viewBox="0 0 24 24" aria-hidden="true" style="filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5))"><path d="M8 5.5v13l11-6.5z" fill="#FEFEFE"></path></svg></span>
+</sc-if>
+<sc-if value="{{p.multi}}" hint-placeholder-val="{{false}}">
+<span style="position: absolute; top: 10px; right: 10px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FEFEFE" stroke-width="2" aria-hidden="true" style="filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6))"><rect x="7" y="7" width="13" height="13" rx="2"></rect><path d="M4 16V6a2 2 0 0 1 2-2h10"></path></svg></span>
+</sc-if>
+</a>
+</sc-for>
+</div>
+</section>
+
 <section id="contacto" style="background: #222020; color: #FEFEFE; padding: 88px 20px">
 <div style="max-width: 1160px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 56px">
 <div style="flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 18px">
@@ -443,10 +516,44 @@ Calcula tu paquete aquí
 </div>
 </section>
 
-<footer style="background: #222020; border-top: 1px solid #3D3B3E; padding: 28px 20px">
-<div style="max-width: 1160px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; font-family: Montserrat, sans-serif; font-size: 14px; color: #F2E4D2">
-<img src="img/87d16afede333e9d5504add2066d45a4.png" alt="NC" style="height: 44px; width: auto; display: block">
-<span>NC Studio · Fotografía y audiovisual · Las Tablas, Los Santos, Panamá · Desde 2019</span>
+<footer style="background: #222020; border-top: 1px solid #3D3B3E; padding: 56px 20px 24px; color: #F2E4D2; font-family: Montserrat, sans-serif">
+<div style="max-width: 1160px; margin: 0 auto; display: flex; flex-direction: column; gap: 36px">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 32px 28px">
+<div style="display: flex; flex-direction: column; gap: 14px">
+<img src="img/87d16afede333e9d5504add2066d45a4.png" alt="NC Studio" style="height: 52px; width: auto; display: block; align-self: flex-start">
+<p style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 21px; line-height: 1.3; color: #FEFEFE">No vendemos fotos, vendemos experiencias.</p>
+<p style="margin: 0; font-size: 14px; line-height: 1.5">Fotografía y audiovisual en Las Tablas, Los Santos, Panamá, desde 2019.</p>
+<div style="display: flex; gap: 10px">
+<a href="https://instagram.com/ncstudio507" target="_blank" rel="noopener" aria-label="Instagram" style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 1px solid #F2E4D2; border-radius: 6px; color: #F2E4D2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1" fill="currentColor"></circle></svg></a>
+<a href="{{waGeneral}}" aria-label="WhatsApp" style="display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border: 1px solid #F2E4D2; border-radius: 6px; color: #F2E4D2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.6-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg></a>
+</div>
+</div>
+<nav aria-label="Experiencias" style="display: flex; flex-direction: column; gap: 6px">
+<p style="font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.14em; color: #FEFEFE; margin: 0; margin-bottom: 8px">EXPERIENCIAS</p>
+<sc-for list="{{footPk}}" as="f" hint-placeholder-count="8">
+<a href="{{f.href}}" style="color: #F2E4D2; text-decoration: none; font-size: 15px; padding: 4px 0">{{f.title}}</a>
+</sc-for>
+</nav>
+<nav aria-label="Información" style="display: flex; flex-direction: column; gap: 6px">
+<p style="font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.14em; color: #FEFEFE; margin: 0; margin-bottom: 8px">INFORMACIÓN</p>
+<a href="#quienes-somos" style="color: #F2E4D2; text-decoration: none; font-size: 15px; padding: 4px 0">Quiénes somos</a>
+<a href="#portafolio" style="color: #F2E4D2; text-decoration: none; font-size: 15px; padding: 4px 0">Portafolio y paquetes</a>
+<a href="#preguntas" style="color: #F2E4D2; text-decoration: none; font-size: 15px; padding: 4px 0">Preguntas frecuentes</a>
+<a href="#contacto" style="color: #F2E4D2; text-decoration: none; font-size: 15px; padding: 4px 0">Contacto</a>
+</nav>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<p style="font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.14em; color: #FEFEFE; margin: 0; margin-bottom: 8px">CONTACTO</p>
+<a href="{{waGeneral}}" style="color: #F2E4D2; text-decoration: none; font-size: 15px; padding: 4px 0">WhatsApp: 6631-3762</a>
+<span style="font-size: 15px; padding: 4px 0">Yappy: 6631-3762</span>
+<span style="font-size: 15px; padding: 4px 0; line-height: 1.45">Estudio en el barrio Nuevo México, Las Tablas</span>
+<a href="https://instagram.com/ncstudio507" target="_blank" rel="noopener" style="color: #F2E4D2; text-decoration: none; font-size: 15px; padding: 4px 0">@ncstudio507</a>
+<a href="#portafolio" style="display: inline-flex; align-items: center; justify-content: center; align-self: flex-start; min-height: 46px; margin-top: 10px; padding: 0 24px; border-radius: 999px; background: {{accent}}; color: #222020; text-decoration: none; font-weight: 700; font-size: 14px; letter-spacing: 0.06em">RESERVAR</a>
+</div>
+</div>
+<div style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; padding-top: 18px; border-top: 1px solid #3D3B3E; font-size: 13px; color: #B9ADA0">
+<span>© 2026 NC Studio · Nelson García y Charlie Barrera</span>
+<span>Hecho con cariño en Las Tablas, Panamá</span>
+</div>
 </div>
 </footer>
 
@@ -1306,6 +1413,17 @@ class DCLogic {
 }
 
 var WA = "https://wa.me/50766313762?text=";
+// Feed JSON de Behold (https://behold.so). Pega aquí el link del feed para que la franja de Instagram se actualice sola.
+var IG_FEED = "";
+var IG_FALLBACK = ["suenos", "levelup", "dulce", "infantil", "granext", "folklore"];
+var WHY = [
+  ["Te guiamos en todo momento", "No necesitas saber posar. Te dirigimos con naturalidad para que te veas y te sientas tú, sin poses forzadas."],
+  ["Una experiencia, no solo fotos", "Desde la asesoría previa hasta la entrega: ideas de vestuario, locación y concepto pensadas para tu historia."],
+  ["Reservar es fácil", "Eliges tu paquete, tus extras y tu fecha aquí mismo. Recibes tu cotización en PDF y firmas tu contrato en línea."],
+  ["Entrega a tiempo", "Tus pruebas en 48 a 72 horas hábiles y tus fotos editadas en máximo 2 semanas, en tu galería privada."]
+];
+// Cifras reales del recorrido: ["+300", "Sesiones realizadas"]. Vacío = la sección no se muestra.
+var CIFRAS = [];
 
 function prop(name, desc, price, priceNote, items, small, featured) {
   return { name: name, desc: desc, price: price, priceNote: priceNote || "", items: items, small: small || "", featured: !!featured };
@@ -1842,6 +1960,14 @@ class Component extends DCLogic {
     }
     fromHash();
     window.addEventListener("hashchange", fromHash);
+    if (IG_FEED && window.fetch) fetch(IG_FEED).then(function (r) { return r.json(); }).then(function (j) {
+      var arr = Array.isArray(j) ? j : (j && j.posts) || [];
+      var posts = arr.slice(0, 6).map(function (p) {
+        var sz = p.sizes || {}, im = (sz.medium && sz.medium.mediaUrl) || (sz.small && sz.small.mediaUrl) || p.thumbnailUrl || p.mediaUrl;
+        return { src: im, href: p.permalink || "https://instagram.com/ncstudio507", video: p.mediaType === "VIDEO", multi: p.mediaType === "CAROUSEL_ALBUM" };
+      }).filter(function (p) { return p.src; });
+      if (posts.length) self.setState({ igPosts: posts });
+    }).catch(function () {});
     var reduce = false; try { reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch (e) {}
     if (!reduce) this._heroT = setInterval(function () { if (!document.hidden) self.heroShow((self._hero || 0) + 1); }, 5500);
     window.addEventListener("popstate", function () {
@@ -2379,6 +2505,17 @@ class Component extends DCLogic {
         if (a && a.setAttribute) a.setAttribute("href", WA + encodeURIComponent("Hola, NC Studio." + (n ? " Soy " + n + "." : "") + (m ? "\n\n" + m : " Tengo una consulta.")));
       },
       portfolio: portfolio,
+      start: [
+        { img: B + GAL.suenos[0] + ".jpg", eyebrow: "Quiero", title: "Una sesión de fotos", text: "Cumpleaños, XV años, embarazo, bebé, graduación o estudio. Elige tu experiencia y arma tu paquete.",
+          ctas: [{ href: "#portafolio", label: "Ver experiencias", bg: accent, fg: "#222020" }] },
+        { img: B + GAL.infantil[0] + ".jpg", eyebrow: "Tengo", title: "Un evento", text: "Fiestas, cumpleaños, bautizos y celebraciones con Momentos, o carreras y eventos deportivos con Limitless.",
+          ctas: [{ href: "#momentos", label: "Momentos", bg: accent, fg: "#222020" }, { href: "#limitless", label: "Limitless", bg: "transparent", fg: "#FEFEFE" }] }
+      ],
+      why: WHY.map(function (w, i) { var d = i % 2 === 0; return { title: w[0], text: w[1], bg: d ? "#222020" : "#F2E4D2", fg: d ? "#FEFEFE" : "#222020", sub: d ? "#F2E4D2" : "#3D3B3E" }; }),
+      cifras: CIFRAS.map(function (c) { return { n: c[0], label: c[1] }; }),
+      cifrasOn: CIFRAS.length > 0,
+      ig: (this.state.igPosts || IG_FALLBACK.map(function (k, i) { return { src: B + GAL[k][Math.min(1, GAL[k].length - 1)] + ".jpg", href: "https://instagram.com/ncstudio507", video: false, multi: false }; })).map(function (p, i) { return Object.assign({ label: "Publicación " + (i + 1) + " en Instagram" }, p); }),
+      footPk: PACKAGES.filter(function (p) { return p.id !== "limitless"; }).map(function (p) { return { title: p.title, href: "#" + p.title.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") }; }),
       faq: FAQ,
       trasList: TRAS.map(function (t, i) { return { place: trasLabel(t), price: t[1], first: i === 0, rest: i > 0 }; }),
       lb: lb,
