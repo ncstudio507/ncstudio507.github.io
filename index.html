@@ -1523,18 +1523,19 @@ class Component extends DCLogic {
         return {
           open: !!self.state.upOpen,
           label: u ? u.title + " · " + u.nm + " (" + u.pr.price + ")" : "",
-          yes: function () {
+          yes: function () { openPkg(1); },
+          no: function () { openPkg(2); },
+          close: function () { self.setState({ upOpen: false }); }
+        };
+        function openPkg(step) {
             if (!u) return;
             var pr = u.pr, cv = propCovers(pr), c = {}, t = pr.items.join(" | "), m;
             Object.keys(cv.c).forEach(function (k) { c[k] = true; });
             var mins = (m = t.match(/(\d+) horas? de sesión/i)) ? +m[1] * 60 : ((m = t.match(/(\d+) minutos/i)) ? +m[1] : 60);
             var pru = (m = t.match(/Mínimo (\d+) fotos de prueba/i)) ? +m[1] : 0;
-            self.setState({ upOpen: false, cotOpen: true, cotStep: 1, cotExp: u.expId, cotN: propFotos(pr), cotC: c, cotQ: {}, cotDeclined: "",
+            self.setState({ upOpen: false, cotOpen: true, cotStep: step, cotExp: u.expId, cotN: propFotos(pr), cotC: c, cotQ: {}, cotDeclined: "",
               cotPkg: { expId: u.expId, title: u.title, nm: u.nm, price: num(pr.price), fotos: propFotos(pr), items: pr.items, cv: cv, mins: mins, pruebas: pru } });
-          },
-          no: function () { if (u) self.setState({ upOpen: false, calOpen: true, calCtx: u.ctx, calOff: 0, calSel: null, calSlot: null }); },
-          close: function () { self.setState({ upOpen: false }); }
-        };
+        }
       })(),
       cot: (function () {
         var st = self.state;
@@ -1606,7 +1607,7 @@ class Component extends DCLogic {
         }
         var ccal = calModel(self, { off: "cotOff", sel: "cotSel", slot: "cotSlot" }, accent);
         function build() {
-          var m = [pk ? "Hola, NC Studio. Quiero reservar este paquete y mejorar mi experiencia:" : "Hola, NC Studio. Armé mi paquete personalizado en la página:", ""];
+          var m = [pk ? (lines.length || printLines.length || extraF ? "Hola, NC Studio. Quiero reservar este paquete y mejorar mi experiencia:" : "Hola, NC Studio. Quiero reservar este paquete:") : "Hola, NC Studio. Armé mi paquete personalizado en la página:", ""];
           m.push("*Nombre:* " + (st.cotName.trim() || "—"));
           m.push("*Teléfono:* " + (st.cotPhone.trim() || "—"));
           m.push("*Correo:* " + (st.cotEmail.trim() || "—"));
@@ -1638,7 +1639,7 @@ class Component extends DCLogic {
           openHere: function () { self.setState(Object.assign({ cotOpen: true, cotExp: sel || st.cotExp }, pk ? { cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} } : {})); },
           fromScratch: function () { self.setState({ cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} }); },
           isPkg: !!pk, noPkg: !pk,
-          title: pk ? "Mejora tu experiencia" : "Arma tu paquete",
+          title: pk ? (st.cotStep === 2 ? "Reserva tu sesión" : "Mejora tu experiencia") : "Arma tu paquete",
           subtitle: pk ? (st.cotStep === 2 ? "Último paso: tus datos, el lugar y la fecha de tu sesión." : "Elige los extras que quieras agregar a tu paquete.") : "Elige lo que quieres y te enviamos la cotización por WhatsApp.",
           inclTitle: pk ? "Tu paquete incluye" : "La propuesta inicial incluye",
           pkgLabel: pk ? pk.title + " · " + pk.nm + " (" + money(pk.price) + ")" : "",
