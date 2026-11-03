@@ -438,7 +438,7 @@ Calcula tu paquete aquí
 <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
 <span style="font-family: 'EB Garamond', Georgia, serif; font-size: 30px; line-height: 1.05">{{cot.title}}</span>
 <span style="font-size: 14px; color: #3D3B3E">{{cot.subtitle}}</span>
-<span style="margin-top: 4px; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.06em; color: #3D3B3E">PASO {{cot.step}} DE 4</span>
+<span style="margin-top: 4px; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.06em; color: #3D3B3E">PASO {{cot.step}} DE 5</span>
 </div>
 <button type="button" onClick="{{cot.close}}" aria-label="Cerrar" style="flex: none; width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; cursor: pointer; display: flex; align-items: center; justify-content: center">
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
@@ -565,10 +565,22 @@ Calcula tu paquete aquí
 <sc-if value="{{cot.noExp}}" hint-placeholder-val="{{false}}">
 <div style="padding: 14px 16px; border-radius: 8px; border: 1.5px dashed #D9CDBE; font-size: 14px; color: #3D3B3E">Elige el tipo de sesión para ver los extras que puedes agregar.</div>
 </sc-if>
+</div>
 
-<div style="display: flex; flex-direction: column; gap: 4px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.sn.i}}. ¿Quieres fotos impresas?</span>
-<span style="font-size: 13px; color: #3D3B3E">Elige cuántas quieres de cada tamaño.</span>
+<div style="display: {{cot.vP}}; flex-direction: column; gap: 12px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">¿Deseas fotos impresas?</span>
+<span style="font-size: 13px; color: #3D3B3E">Tus fotos favoritas impresas en papel fotográfico profesional.</span>
+<div role="group" aria-label="¿Deseas fotos impresas?" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+<button type="button" onClick="{{cot.prYes}}" aria-pressed="{{cot.prYesP}}" style="min-height: 50px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #222020; background: {{cot.prYesBg}}; color: {{cot.prYesFg}}; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px; cursor: pointer">Sí, quiero</button>
+<button type="button" onClick="{{cot.prNo}}" style="min-height: 50px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px; cursor: pointer">No, gracias</button>
+</div>
+<sc-if value="{{cot.prOn}}" hint-placeholder-val="{{false}}">
+<div data-prguide="1" style="display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 8px; background: #FBF7F1; border: 1px solid #EFE6DA">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 13px">Así se ven los tamaños (a escala, en pulgadas)</span>
+<svg viewBox="0 0 330 157" role="img" aria-label="Comparación de tamaños de fotos impresas a escala: cartera, 4×6, 5×7, 8×10 y 11×17 pulgadas" style="width: 100%; max-width: 340px; height: auto; display: block; margin: 0 auto"><rect x="26.0" y="98.5" width="17.5" height="24.5" rx="2" fill="#F2E4D2" stroke="#222020" stroke-width="1.5"></rect><text x="34.8" y="139.0" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="700" font-size="11" fill="#222020">Cartera</text><text x="34.8" y="152.0" text-anchor="middle" font-family="Montserrat, sans-serif" font-size="9.5" fill="#3D3B3E">2.5×3.5</text><rect x="63.5" y="81.0" width="28.0" height="42.0" rx="2" fill="#F2E4D2" stroke="#222020" stroke-width="1.5"></rect><text x="77.5" y="139.0" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="700" font-size="11" fill="#222020">4×6</text><rect x="111.5" y="74.0" width="35.0" height="49.0" rx="2" fill="#F2E4D2" stroke="#222020" stroke-width="1.5"></rect><text x="129.0" y="139.0" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="700" font-size="11" fill="#222020">5×7</text><rect x="166.5" y="53.0" width="56.0" height="70.0" rx="2" fill="#F2E4D2" stroke="#222020" stroke-width="1.5"></rect><text x="194.5" y="139.0" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="700" font-size="11" fill="#222020">8×10</text><rect x="242.5" y="4.0" width="77.0" height="119.0" rx="2" fill="#FDF1E2" stroke="#222020" stroke-width="1.5"></rect><text x="281.0" y="139.0" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="700" font-size="11" fill="#222020">11×17</text></svg>
+<span style="font-size: 12.5px; line-height: 1.45; color: #3D3B3E">4×6: foto de álbum · 8×10: casi una hoja carta · 11×17: para enmarcar en la pared · Cartera: juego de 6 fotos pequeñas.</span>
+</div>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 14px; margin-top: 4px">¿Cuántas quieres de cada tamaño?</span>
 <sc-for list="{{cot.prints}}" as="x" hint-placeholder-count="4">
 <sc-if value="{{x.isQty}}" hint-placeholder-val="{{false}}">
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #EFE6DA">
@@ -603,8 +615,7 @@ Calcula tu paquete aquí
 </button>
 </sc-if>
 </sc-for>
-</div>
-
+</sc-if>
 </div>
 
 <div style="display: {{cot.vL}}; flex-direction: column; gap: 22px">
@@ -725,7 +736,7 @@ Calcula tu paquete aquí
 <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
 <span style="font-family: 'EB Garamond', Georgia, serif; font-size: 30px; line-height: 1.05">{{xc.title}}</span>
 <span style="font-size: 14px; color: #3D3B3E">{{xc.subtitle}}</span>
-<span style="margin-top: 4px; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.06em; color: #3D3B3E">PASO {{xc.step}} DE 4</span>
+<span style="margin-top: 4px; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.06em; color: #3D3B3E">PASO {{xc.step}} DE 5</span>
 </div>
 <button type="button" onClick="{{xc.close}}" aria-label="Cerrar" style="flex: none; width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; cursor: pointer; display: flex; align-items: center; justify-content: center">
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
@@ -794,10 +805,22 @@ Calcula tu paquete aquí
 </div>
 </sc-for>
 </div>
+</div>
 
-<div style="display: flex; flex-direction: column; gap: 4px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">3. ¿Quieres fotos impresas?</span>
-<span style="font-size: 13px; color: #3D3B3E">Elige cuántas quieres de cada tamaño.</span>
+<div style="display: {{xc.vP}}; flex-direction: column; gap: 12px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">¿Deseas fotos impresas?</span>
+<span style="font-size: 13px; color: #3D3B3E">Tus fotos favoritas impresas en papel fotográfico profesional.</span>
+<div role="group" aria-label="¿Deseas fotos impresas?" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+<button type="button" onClick="{{xc.prYes}}" aria-pressed="{{xc.prYesP}}" style="min-height: 50px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #222020; background: {{xc.prYesBg}}; color: {{xc.prYesFg}}; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px; cursor: pointer">Sí, quiero</button>
+<button type="button" onClick="{{xc.prNo}}" style="min-height: 50px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px; cursor: pointer">No, gracias</button>
+</div>
+<sc-if value="{{xc.prOn}}" hint-placeholder-val="{{false}}">
+<div data-prguide="1" style="display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 8px; background: #FBF7F1; border: 1px solid #EFE6DA">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 13px">Así se ven los tamaños (a escala, en pulgadas)</span>
+<svg viewBox="0 0 330 157" role="img" aria-label="Comparación de tamaños de fotos impresas a escala: cartera, 4×6, 5×7, 8×10 y 11×17 pulgadas" style="width: 100%; max-width: 340px; height: auto; display: block; margin: 0 auto"><rect x="26.0" y="98.5" width="17.5" height="24.5" rx="2" fill="#F2E4D2" stroke="#222020" stroke-width="1.5"></rect><text x="34.8" y="139.0" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="700" font-size="11" fill="#222020">Cartera</text><text x="34.8" y="152.0" text-anchor="middle" font-family="Montserrat, sans-serif" font-size="9.5" fill="#3D3B3E">2.5×3.5</text><rect x="63.5" y="81.0" width="28.0" height="42.0" rx="2" fill="#F2E4D2" stroke="#222020" stroke-width="1.5"></rect><text x="77.5" y="139.0" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="700" font-size="11" fill="#222020">4×6</text><rect x="111.5" y="74.0" width="35.0" height="49.0" rx="2" fill="#F2E4D2" stroke="#222020" stroke-width="1.5"></rect><text x="129.0" y="139.0" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="700" font-size="11" fill="#222020">5×7</text><rect x="166.5" y="53.0" width="56.0" height="70.0" rx="2" fill="#F2E4D2" stroke="#222020" stroke-width="1.5"></rect><text x="194.5" y="139.0" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="700" font-size="11" fill="#222020">8×10</text><rect x="242.5" y="4.0" width="77.0" height="119.0" rx="2" fill="#FDF1E2" stroke="#222020" stroke-width="1.5"></rect><text x="281.0" y="139.0" text-anchor="middle" font-family="Montserrat, sans-serif" font-weight="700" font-size="11" fill="#222020">11×17</text></svg>
+<span style="font-size: 12.5px; line-height: 1.45; color: #3D3B3E">4×6: foto de álbum · 8×10: casi una hoja carta · 11×17: para enmarcar en la pared · Cartera: juego de 6 fotos pequeñas.</span>
+</div>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 14px; margin-top: 4px">¿Cuántas quieres de cada tamaño?</span>
 <sc-for list="{{xc.prints}}" as="x" hint-placeholder-count="4">
 <sc-if value="{{x.isQty}}" hint-placeholder-val="{{false}}">
 <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #EFE6DA">
@@ -832,7 +855,7 @@ Calcula tu paquete aquí
 </button>
 </sc-if>
 </sc-for>
-</div>
+</sc-if>
 </div>
 
 <div style="display: {{xc.vL}}; flex-direction: column; gap: 4px">
@@ -1691,7 +1714,7 @@ class Component extends DCLogic {
     });
     var cur = PACKAGES.filter(function (p) { return p.id === sel; })[0] || PACKAGES[0];
     function openXC(id, baseId, step) {
-      self.setState({ upOpen: false, cotOpen: false, xcId: id, xcStep: step, xcBase: baseId, xcQ: {}, xcC: {}, xcL: {}, xcOff: 0, xcSel: null, xcSlot: null });
+      self.setState({ upOpen: false, cotOpen: false, xcPr: null, xcId: id, xcStep: step, xcBase: baseId, xcQ: {}, xcC: {}, xcL: {}, xcOff: 0, xcSel: null, xcSlot: null });
     }
     var current = {
       title: cur.title, kind: cur.kind, intro: cur.intro, img: cur.img, imgAlt: cur.imgAlt,
@@ -1828,7 +1851,7 @@ class Component extends DCLogic {
       xc: (function () {
         var st = self.state, id = st.xcId, cfg = id && XC[id];
         if (!cfg) return { open: false, v1: "none", v2: "none" };
-        var q = st.xcQ, c = st.xcC, L = st.xcL, step = st.xcStep >= 1 && st.xcStep <= 4 ? st.xcStep : 1;
+        var q = st.xcQ, c = st.xcC, L = st.xcL, step = st.xcStep >= 1 && st.xcStep <= 5 ? st.xcStep : 1;
         var xn = st.xcName != null ? st.xcName : st.cotName, xp = st.xcPhone != null ? st.xcPhone : st.cotPhone, xe = st.xcEmail != null ? st.xcEmail : st.cotEmail;
         var xmiss = missing(xn, xp, xe);
         var base = cfg.bases.filter(function (b) { return b.id === st.xcBase; })[0] || cfg.bases[0];
@@ -1884,12 +1907,16 @@ class Component extends DCLogic {
         }
         return {
           open: true, step: step, title: cfg.title, kind: cfg.kind,
-          subtitle: ["", "Elige tu cobertura y los extras que quieras.", "¿Dónde será tu evento?", "Elige la fecha y la hora de inicio.", "Último paso: tus datos para confirmar."][step],
-          v1: step === 1 ? "flex" : "none", vL: step === 2 ? "flex" : "none", vF: step === 3 ? "flex" : "none", vD: step === 4 ? "flex" : "none",
-          showNext: step < 4, showSend: step === 4, showBack: step > 1,
-          nextLabel: ["", "Siguiente: lugar", "Siguiente: fecha", "Siguiente: tus datos"][step] || "",
+          subtitle: ["", "Elige tu cobertura y los extras que quieras.", "Fotos impresas de tu evento.", "¿Dónde será tu evento?", "Elige la fecha y la hora de inicio.", "Último paso: tus datos para confirmar."][step],
+          v1: step === 1 ? "flex" : "none", vP: step === 2 ? "flex" : "none", vL: step === 3 ? "flex" : "none", vF: step === 4 ? "flex" : "none", vD: step === 5 ? "flex" : "none",
+          showNext: step < 5, showSend: step === 5, showBack: step > 1,
+          nextLabel: ["", "Siguiente", "Siguiente: lugar", "Siguiente: fecha", "Siguiente: tus datos"][step] || "",
+          prOn: st.xcPr === true, prYesP: st.xcPr === true ? "true" : "false",
+          prYesBg: st.xcPr === true ? "#222020" : "#FEFEFE", prYesFg: st.xcPr === true ? "#FEFEFE" : "#222020",
+          prYes: function () { self.setState({ xcPr: true }); setTimeout(function () { var e = document.querySelector("[data-prguide]"); if (e && e.scrollIntoView) e.scrollIntoView({ behavior: "smooth", block: "start" }); }, 90); },
+          prNo: function () { var nq = Object.assign({}, q); COT_PRINTS.forEach(function (it) { delete nq[it.id]; }); self.setState({ xcPr: false, xcQ: nq, xcStep: 3 }); },
           backLabel: "Atrás",
-          goNext: function () { if (step < 4) self.setState({ xcStep: step + 1 }); },
+          goNext: function () { if (step < 5) self.setState({ xcStep: step + 1 }); },
           goBack: function () { if (step > 1) self.setState({ xcStep: step - 1 }); },
           showErr: !!st.xcErr && !!xmiss, errText: xmiss ? "Para enviar tu reserva completa: " + xmiss + "." : "",
           bName: st.xcErr && !String(xn || "").trim() ? "#B42318" : "#D9CDBE",
@@ -1936,7 +1963,7 @@ class Component extends DCLogic {
           label: u ? u.title + " · " + u.nm + " (" + u.pr.price + ")" : "",
           blurb: u && u.xc ? XC[u.expId].blurb : "Tenemos servicios extra que te pueden interesar: maquillaje y peinado, video detrás de cámaras, fotos adicionales, impresiones y mucho más. ¿Deseas revisarlos?",
           yes: function () { if (u && u.xc) openXC(u.expId, u.baseId, 1); else openPkg(1); },
-          no: function () { if (u && u.xc) openXC(u.expId, u.baseId, 2); else openPkg(2); },
+          no: function () { if (u && u.xc) openXC(u.expId, u.baseId, 3); else openPkg(3); },
           close: function () { self.setState({ upOpen: false }); }
         };
         function openPkg(step) {
@@ -1945,7 +1972,7 @@ class Component extends DCLogic {
             Object.keys(cv.c).forEach(function (k) { c[k] = true; });
             var mins = (m = t.match(/(\d+) horas? de sesión/i)) ? +m[1] * 60 : ((m = t.match(/(\d+) minutos/i)) ? +m[1] : 60);
             var pru = (m = t.match(/Mínimo (\d+) fotos de prueba/i)) ? +m[1] : 0;
-            self.setState({ upOpen: false, cotOpen: true, cotStep: step, cotExp: u.expId, cotN: propFotos(pr), cotC: c, cotQ: {}, cotDeclined: "",
+            self.setState({ upOpen: false, cotOpen: true, cotStep: step, cotPr: null, cotExp: u.expId, cotN: propFotos(pr), cotC: c, cotQ: {}, cotDeclined: "",
               cotPkg: { expId: u.expId, title: u.title, nm: u.nm, price: num(pr.price), fotos: propFotos(pr), items: pr.items, cv: cv, mins: mins, pruebas: pru } });
         }
       })(),
@@ -1955,7 +1982,7 @@ class Component extends DCLogic {
         var locs = TRAS.map(function (t, i) { var v = parseFloat(String(t[1]).replace(/[^0-9.]/g, "")) || 0; return { id: "t" + i, place: i === 0 ? "Estudio o Las Tablas" : t[0], v: v }; });
         locs.push({ id: "otro", place: "Otro lugar", v: 0, other: true });
         var pk = st.cotPkg, baseF = pk ? pk.fotos : COT_INCL_FOTOS;
-        var cstep = st.cotStep >= 1 && st.cotStep <= 4 ? st.cotStep : 1, cmiss = missing(st.cotName, st.cotPhone, st.cotEmail);
+        var cstep = st.cotStep >= 1 && st.cotStep <= 5 ? st.cotStep : 1, cmiss = missing(st.cotName, st.cotPhone, st.cotEmail);
         var extraF = Math.max(0, nF - baseF);
         var fotosCost = pk ? extraF * COT_FOTO_EXTRA : cotFotosPrice(extraF);
         var total = (pk ? pk.price : COT_SERV) + fotosCost, mins = pk ? pk.mins + extraF * 10 : nF * 10, fotos = nF, pruebas = pk ? pk.pruebas + extraF * 5 : nF * 5, lines = [], printLines = [];
@@ -2048,24 +2075,29 @@ class Component extends DCLogic {
           sug: sug || { key: "" }, hasSug: !!sug,
           sugYes: function () { if (!sug) return; self.setState({ cotOpen: false, cotDeclined: sug.key, sel: expObj.id, calOpen: true, calCtx: { exp: sug.exp, prop: sug.name, price: sug.price }, calOff: 0, calSel: null, calSlot: null }); },
           sugNo: function () { if (sug) self.setState({ cotDeclined: sug.key }); },
-          openAny: function () { self.setState(pk ? { menuOpen: false, cotOpen: true, cotStep: 1, cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} } : { menuOpen: false, cotOpen: true, cotStep: 1 }); },
+          openAny: function () { self.setState(pk ? { menuOpen: false, cotOpen: true, cotPr: null, cotStep: 1, cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} } : { menuOpen: false, cotOpen: true, cotPr: null, cotStep: 1 }); },
           openHere: function () { self.setState(Object.assign({ cotOpen: true, cotStep: 1, cotExp: sel || st.cotExp }, pk ? { cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} } : {})); },
           fromScratch: function () { self.setState({ cotStep: 1, cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} }); },
           isPkg: !!pk, noPkg: !pk,
           title: pk ? (cstep > 1 ? "Reserva tu sesión" : "Mejora tu experiencia") : "Arma tu paquete",
-          subtitle: cstep === 2 ? "¿Dónde quieres tu sesión?" : (cstep === 3 ? "Elige el día y la hora de tu sesión." : (cstep === 4 ? "Último paso: tus datos para confirmar." : (pk ? "Elige los extras que quieras agregar a tu paquete." : "Elige lo que quieres en tu sesión y te enviamos la cotización por WhatsApp."))),
+          subtitle: cstep === 2 ? "Fotos impresas para tus favoritas." : cstep === 3 ? "¿Dónde quieres tu sesión?" : (cstep === 4 ? "Elige el día y la hora de tu sesión." : (cstep === 5 ? "Último paso: tus datos para confirmar." : (pk ? "Elige los extras que quieras agregar a tu paquete." : "Elige lo que quieres en tu sesión y te enviamos la cotización por WhatsApp."))),
           inclTitle: pk ? "Tu paquete incluye" : "La propuesta inicial incluye",
           pkgLabel: pk ? pk.title + " · " + pk.nm + " (" + money(pk.price) + ")" : "",
           sn: pk ? { t: "1", f: "1", p: "2", i: "3", d: "2", c: "3" } : { t: "1", s: "1", f: "2", p: "3", i: "4", d: "2", c: "3" },
-          vL: cstep === 2 ? "flex" : "none",
+          vL: cstep === 3 ? "flex" : "none",
           step: cstep,
-          vD: cstep === 4 ? "flex" : "none",
+          vD: cstep === 5 ? "flex" : "none",
           vB: cstep === 1 ? "flex" : "none",
-          vC: cstep === 3 ? "flex" : "none",
-          showNext: cstep < 4, showSend: cstep === 4, showBack: cstep > 1,
-          nextLabel: ["", "Siguiente: lugar", "Siguiente: fecha", "Siguiente: tus datos"][cstep] || "",
+          vP: cstep === 2 ? "flex" : "none",
+          vC: cstep === 4 ? "flex" : "none",
+          showNext: cstep < 5, showSend: cstep === 5, showBack: cstep > 1,
+          nextLabel: ["", "Siguiente", "Siguiente: lugar", "Siguiente: fecha", "Siguiente: tus datos"][cstep] || "",
+          prOn: st.cotPr === true, prYesP: st.cotPr === true ? "true" : "false",
+          prYesBg: st.cotPr === true ? "#222020" : "#FEFEFE", prYesFg: st.cotPr === true ? "#FEFEFE" : "#222020",
+          prYes: function () { self.setState({ cotPr: true }); setTimeout(function () { var e = document.querySelector("[data-prguide]"); if (e && e.scrollIntoView) e.scrollIntoView({ behavior: "smooth", block: "start" }); }, 90); },
+          prNo: function () { var nq = Object.assign({}, q); COT_PRINTS.forEach(function (it) { delete nq[it.id]; }); self.setState({ cotPr: false, cotQ: nq, cotStep: 3 }); },
           backLabel: "Atrás",
-          goNext: function () { if (cstep < 4) self.setState({ cotStep: cstep + 1 }); },
+          goNext: function () { if (cstep < 5) self.setState({ cotStep: cstep + 1 }); },
           goBack: function () { if (cstep > 1) self.setState({ cotStep: cstep - 1 }); },
           showErr: !!st.cotErr && !!cmiss, errText: cmiss ? "Para enviar tu reserva completa: " + cmiss + "." : "",
           bName: st.cotErr && !st.cotName.trim() ? "#B42318" : "#D9CDBE",
