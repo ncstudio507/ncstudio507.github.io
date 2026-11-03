@@ -1658,7 +1658,7 @@ function missing(n, ph, em) {
   if (!okEmail(em)) m.push("un correo válido");
   return m.length ? (m.length > 1 ? m.slice(0, -1).join(", ") + " y " + m[m.length - 1] : m[0]) : "";
 }
-var NC_SCRIPT = "";
+var NC_SCRIPT = "https://script.google.com/macros/s/AKfycbzaT3OjIAFX5CET8Opyjnehye_XOfdI_kwA0DxEDusXzCzesOtffZUwsvE2-IbEp4yvIQ/exec";
 function ncPost(payload) {
   if (!NC_SCRIPT) return false;
   try { fetch(NC_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) }); return true; } catch (e) { return false; }
