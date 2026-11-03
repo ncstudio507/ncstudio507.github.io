@@ -432,15 +432,19 @@ Calcula tu paquete aquí
 <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
 <span style="font-family: 'EB Garamond', Georgia, serif; font-size: 30px; line-height: 1.05">{{cot.title}}</span>
 <span style="font-size: 14px; color: #3D3B3E">{{cot.subtitle}}</span>
+<sc-if value="{{cot.isPkg}}" hint-placeholder-val="{{false}}">
+<span style="margin-top: 4px; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.06em; color: #3D3B3E">PASO {{cot.step}} DE 2</span>
+</sc-if>
 </div>
 <button type="button" onClick="{{cot.close}}" aria-label="Cerrar" style="flex: none; width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; cursor: pointer; display: flex; align-items: center; justify-content: center">
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
 </button>
 </div>
-<div data-keep-scroll="cot" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 22px">
+<div data-keep-scroll="cot{{cot.step}}" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 22px">
 
+<div style="display: {{cot.vD}}; flex-direction: column; gap: 22px">
 <div style="display: flex; flex-direction: column; gap: 12px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">1. Tus datos</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.sn.t}}. Tus datos</span>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tu nombre
 <input type="text" autocomplete="name" value="{{cot.name}}" onInput="{{cot.setName}}" placeholder="Nombre y apellido" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
 </label>
@@ -452,6 +456,9 @@ Calcula tu paquete aquí
 </label>
 </div>
 
+</div>
+
+<div style="display: {{cot.vB}}; flex-direction: column; gap: 22px">
 <div style="display: flex; flex-direction: column; gap: 10px; padding: 16px; border-radius: 8px; background: #F2E4D2">
 <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px">
 <span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">{{cot.inclTitle}}</span>
@@ -604,8 +611,11 @@ Calcula tu paquete aquí
 </sc-for>
 </div>
 
+</div>
+
+<div style="display: {{cot.vC}}; flex-direction: column; gap: 22px">
 <div style="display: flex; flex-direction: column; gap: 12px">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.sn.c}}. Fecha y detalles</span>
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{cot.sn.c}}. {{cot.dateTitle}}</span>
 <div style="display: flex; flex-direction: column; gap: 10px">
 <span style="font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Elige tu fecha y hora</span>
 <p style="margin: 0; font-size: 14px; color: #3D3B3E">Entre semana: 7:00 p. m. en estudio. Fines de semana: 10:00 a. m. en estudio y 4:30 p. m. en exteriores.</p>
@@ -629,9 +639,9 @@ Calcula tu paquete aquí
 <span aria-hidden="true"></span>
 </sc-if>
 <sc-if value="{{c.real}}" hint-placeholder-val="{{true}}">
-<button type="button" onClick="{{c.pick}}" disabled="{{c.disabled}}" aria-label="{{c.aria}}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 56px; padding: 4px 0; border-radius: 6px; border: 1.5px solid {{c.border}}; background: {{c.bg}}; color: {{c.fg}}; cursor: {{c.cursor}}; box-sizing: border-box">
-<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px; line-height: 1">{{c.n}}</span>
-<span style="font-size: 9px; line-height: 1.1; letter-spacing: -0.1px; white-space: nowrap; color: {{c.subFg}}">{{c.sub}}</span>
+<button type="button" onClick="{{c.pick}}" disabled="{{c.disabled}}" aria-label="{{c.aria}}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: {{cot.cellH}}; padding: 4px 0; border-radius: 6px; border: 1.5px solid {{c.border}}; background: {{c.bg}}; color: {{c.fg}}; cursor: {{c.cursor}}; box-sizing: border-box">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: {{cot.numFs}}; line-height: 1">{{c.n}}</span>
+<span style="font-size: {{cot.subFs}}; line-height: 1.1; letter-spacing: -0.1px; white-space: nowrap; color: {{c.subFg}}">{{c.sub}}</span>
 </button>
 </sc-if>
 </sc-for>
@@ -661,6 +671,7 @@ Calcula tu paquete aquí
 </label>
 </div>
 </div>
+</div>
 
 <div style="flex: none; display: flex; flex-direction: column; gap: 10px; padding: 14px 18px 16px; background: #222020; color: #FEFEFE">
 <div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 12px">
@@ -670,10 +681,24 @@ Calcula tu paquete aquí
 </div>
 <span style="font-family: 'EB Garamond', Georgia, serif; font-size: 40px; line-height: 1; color: {{accent}}">{{cot.total}}</span>
 </div>
+<sc-if value="{{cot.showNext}}" hint-placeholder-val="{{false}}">
+<button type="button" onClick="{{cot.goNext}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; border-radius: 6px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px; cursor: pointer">
+Siguiente: fecha y datos
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+</button>
+</sc-if>
+<sc-if value="{{cot.showSend}}" hint-placeholder-val="{{true}}">
 <a href="{{cot.wa}}" onClick="{{cot.send}}" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; border-radius: 6px; background: {{accent}}; color: #222020; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.6-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg>
 {{cot.sendLabel}}
 </a>
+</sc-if>
+<sc-if value="{{cot.showBack}}" hint-placeholder-val="{{false}}">
+<button type="button" onClick="{{cot.goBack}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; border-radius: 6px; border: 1.5px solid #F2E4D2; background: transparent; color: #FEFEFE; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 14px; cursor: pointer">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+Volver a los extras
+</button>
+</sc-if>
 <span style="font-size: 12px; color: #F2E4D2">Precio estimado. Te confirmamos la cotización final y la disponibilidad por WhatsApp.</span>
 </div>
 </div>
@@ -1342,7 +1367,7 @@ function calModel(self, K, accent) {
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0, cotOpen: false, cotExp: null, cotN: 3, cotL: {}, cotQ: {}, cotC: {}, cotName: "", cotPhone: "", cotEmail: "", cotDate: "", cotIdea: "", cotOff: 0, cotSel: null, cotSlot: null, cotDeclined: "", cotPkg: null, upOpen: false, upCtx: null };
+    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0, cotOpen: false, cotExp: null, cotN: 3, cotL: {}, cotQ: {}, cotC: {}, cotName: "", cotPhone: "", cotEmail: "", cotDate: "", cotIdea: "", cotOff: 0, cotSel: null, cotSlot: null, cotDeclined: "", cotPkg: null, cotStep: 1, upOpen: false, upCtx: null };
   }
   componentDidMount() {
     var self = this;
@@ -1501,7 +1526,7 @@ class Component extends DCLogic {
             Object.keys(cv.c).forEach(function (k) { c[k] = true; });
             var mins = (m = t.match(/(\d+) horas? de sesión/i)) ? +m[1] * 60 : ((m = t.match(/(\d+) minutos/i)) ? +m[1] : 60);
             var pru = (m = t.match(/Mínimo (\d+) fotos de prueba/i)) ? +m[1] : 0;
-            self.setState({ upOpen: false, cotOpen: true, cotExp: u.expId, cotN: propFotos(pr), cotC: c, cotQ: {}, cotDeclined: "",
+            self.setState({ upOpen: false, cotOpen: true, cotStep: 1, cotExp: u.expId, cotN: propFotos(pr), cotC: c, cotQ: {}, cotDeclined: "",
               cotPkg: { expId: u.expId, title: u.title, nm: u.nm, price: num(pr.price), fotos: propFotos(pr), items: pr.items, cv: cv, mins: mins, pruebas: pru } });
           },
           no: function () { if (u) self.setState({ upOpen: false, calOpen: true, calCtx: u.ctx, calOff: 0, calSel: null, calSlot: null }); },
@@ -1611,10 +1636,19 @@ class Component extends DCLogic {
           fromScratch: function () { self.setState({ cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} }); },
           isPkg: !!pk, noPkg: !pk,
           title: pk ? "Mejora tu experiencia" : "Arma tu paquete",
-          subtitle: pk ? "Agrega lo que quieras a tu paquete y envíanos tu reserva por WhatsApp." : "Elige lo que quieres y te enviamos la cotización por WhatsApp.",
+          subtitle: pk ? (st.cotStep === 2 ? "Último paso: tus datos y la fecha de tu sesión." : "Elige los extras que quieras agregar a tu paquete.") : "Elige lo que quieres y te enviamos la cotización por WhatsApp.",
           inclTitle: pk ? "Tu paquete incluye" : "La propuesta inicial incluye",
           pkgLabel: pk ? pk.title + " · " + pk.nm + " (" + money(pk.price) + ")" : "",
-          sn: pk ? { f: "2", p: "3", d: "4", i: "5", c: "6" } : { f: "3", p: "4", d: "5", i: "6", c: "7" },
+          sn: pk ? { t: "1", f: "1", p: "2", d: "3", i: "4", c: "2" } : { t: "1", f: "3", p: "4", d: "5", i: "6", c: "7" },
+          step: pk ? (st.cotStep === 2 ? 2 : 1) : 1,
+          vD: !pk || st.cotStep === 2 ? "flex" : "none",
+          vB: !pk || st.cotStep !== 2 ? "flex" : "none",
+          vC: !pk || st.cotStep === 2 ? "flex" : "none",
+          showNext: !!pk && st.cotStep !== 2, showSend: !pk || st.cotStep === 2, showBack: !!pk && st.cotStep === 2,
+          goNext: function () { self.setState({ cotStep: 2 }); },
+          goBack: function () { self.setState({ cotStep: 1 }); },
+          dateTitle: pk ? "Elige la fecha y cuéntanos tu idea" : "Fecha y detalles",
+          cellH: pk ? "66px" : "56px", numFs: pk ? "19px" : "15px", subFs: pk ? "10px" : "9px",
           fotosNote: pk ? "Tu paquete ya incluye " + baseF + " fotos editadas. Cada foto adicional suma 10 minutos de sesión y 5 fotos de prueba." : "Recuerda: la propuesta inicial ya incluye 3 fotos editadas. Cada foto adicional suma 10 minutos de sesión y 5 fotos de prueba.",
           sendLabel: pk ? "Enviar reserva por WhatsApp" : "Enviar cotización por WhatsApp",
           close: function () { self.setState({ cotOpen: false }); },
