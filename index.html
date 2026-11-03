@@ -2108,23 +2108,12 @@ class Component extends DCLogic {
         }
         var fMin = base.f[0] + fAdd, fMax = base.f[1] + fAdd;
         function build() {
-          var m = ["Hola, NC Studio. Quiero reservar " + cfg.title + " (" + cfg.kind.toLowerCase() + "):", ""];
-          m.push("*Nombre:* " + ((st.xcName || st.cotName || "").trim() || "—"));
-          m.push("*Teléfono:* " + ((st.xcPhone || st.cotPhone || "").trim() || "—"));
-          m.push("*Correo:* " + ((st.xcEmail || st.cotEmail || "").trim() || "—"));
-          m.push("*Tipo de evento:* " + (st.xcType.trim() || "—"));
-          m.push("*Lugar:* " + lugares);
-          m.push("*Fecha:* " + (fecha || "Por definir"));
-          m.push("*Hora de inicio:* " + (st.xcTime.trim() || "Por definir"));
-          m.push("", "*Cobertura:* " + base.label + " (" + money(base.price) + "): " + base.note.toLowerCase() + ", galería online privada.");
-          if (lines.length) { m.push("", "*Extras:*"); m.push.apply(m, lines); }
-          if (printLines.length) { m.push("", "*Impresiones:*"); m.push.apply(m, printLines); }
-          m.push("", "*Tiempo total de cobertura:* " + hours + (hours === 1 ? " hora" : " horas"), "*Fotos editadas:* aprox. " + fMin + " a " + fMax);
-          if (other) m.push("*Traslado a otro lugar:* por cotizar");
-          m.push("*Total estimado:* " + money(total) + (other ? " + traslado" : ""));
-          if (st.xcIdea.trim()) m.push("", "*Detalles:* " + st.xcIdea.trim());
-          m.push("", "¿Me confirman disponibilidad y la cotización final?");
-          return m.join("\n");
+          var nombre = String((st.xcName != null ? st.xcName : st.cotName) || "").trim() || "un cliente";
+          var que = "una cobertura de " + cfg.title + (st.xcType.trim() ? " para un " + st.xcType.trim().toLowerCase() : "") + " con el paquete de " + base.label + " (" + money(base.price) + ")";
+          var extra = total !== base.price ? " (con lo que elegí me sale en " + money(total) + (other ? " + traslado" : "") + ")" : "";
+          var m = "Hola, NC Studio. Soy " + nombre + " y estoy cotizando con ustedes " + que + extra + ".";
+          if (st.xcIdea.trim()) m += "\n\nMi idea es: " + st.xcIdea.trim();
+          return m;
         }
         function payload() {
           var pkg = PACKAGES.filter(function (p) { return p.id === id; })[0];
@@ -2290,27 +2279,12 @@ class Component extends DCLogic {
         }
         var ccal = calModel(self, { off: "cotOff", sel: "cotSel", slot: "cotSlot" }, accent);
         function build() {
-          var m = [pk ? (lines.length || printLines.length || extraF ? "Hola, NC Studio. Quiero reservar este paquete y mejorar mi experiencia:" : "Hola, NC Studio. Quiero reservar este paquete:") : "Hola, NC Studio. Armé mi paquete personalizado en la página:", ""];
-          m.push("*Nombre:* " + (st.cotName.trim() || "—"));
-          m.push("*Teléfono:* " + (st.cotPhone.trim() || "—"));
-          m.push("*Correo:* " + (st.cotEmail.trim() || "—"));
-          m.push("*Sesión:* " + expName);
-          m.push("*Lugar:* " + lugares);
-          m.push("*Fecha y hora:* " + (ccal.ready ? ccal.text : "Por definir"));
-          if (pk) m.push("", "*Paquete:* " + pk.title + ", " + pk.nm.toLowerCase() + " (" + money(pk.price) + "): " + pk.items.join(", ").toLowerCase() + ".");
-          else m.push("", "*Propuesta inicial (" + money(COT_SERV) + "):* 30 min de sesión, 3 fotos editadas, asesoría previa, 1 cambio de vestuario, dirección de poses y galería online privada.");
-          var off = pk ? Object.keys(pk.cv.c).filter(function (k) { return !c[k] && !(k === "rcv" && c.rcp); }) : [];
-          var offN = []; COT_GROUPS.forEach(function (g) { g.items.forEach(function (it) { if (off.indexOf(it.id) >= 0) offN.push(it.name.toLowerCase()); }); });
-          if (offN.length) m.push("*Del paquete no necesito:* " + offN.join(", "));
-          if (extraF) m.push("*Fotos editadas extra:* " + extraF + " (" + money(fotosCost) + ")");
-          if (lines.length) { m.push("", "*Extras:*"); m.push.apply(m, lines); }
-          if (printLines.length) { m.push("", "*Impresiones:*"); m.push.apply(m, printLines); }
-          m.push("", "*Duración estimada:* " + mins + " minutos", "*Fotos de prueba:* mínimo " + pruebas, "*Total de fotos editadas:* " + fotos);
-          if (other) m.push("*Traslado a otro lugar:* por cotizar");
-          m.push("*Total estimado:* " + money(total) + (other ? " + traslado" : ""));
-          if (st.cotIdea.trim()) m.push("", "*Mi idea:* " + st.cotIdea.trim());
-          m.push("", "¿Me confirman disponibilidad y la cotización final?");
-          return m.join("\n");
+          var nombre = st.cotName.trim() || "un cliente";
+          var que = pk ? "una sesión de " + pk.title + " con el paquete de " + money(pk.price) : "un paquete personalizado de " + expName + " que empieza en " + money(COT_SERV);
+          var extra = total !== (pk ? pk.price : COT_SERV) ? " (con lo que elegí me sale en " + money(total) + (other ? " + traslado" : "") + ")" : "";
+          var m = "Hola, NC Studio. Soy " + nombre + " y estoy cotizando con ustedes " + que + extra + ".";
+          if (st.cotIdea.trim()) m += "\n\nMi idea es: " + st.cotIdea.trim();
+          return m;
         }
         function payload() {
           var ex = parseLines(lines);
