@@ -979,6 +979,10 @@ Reservar por WhatsApp
 </div>
 </sc-if>
 
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}">
+<div role="status" style="position: fixed; left: 50%; top: 16px; transform: translateX(-50%); z-index: 95; width: calc(100% - 28px); max-width: 460px; box-sizing: border-box; padding: 14px 16px; border-radius: 8px; background: #222020; color: #FEFEFE; border-left: 5px solid {{accent}}; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 14px; line-height: 1.4; box-shadow: 0 8px 24px rgba(0,0,0,0.25)">{{toast}}</div>
+</sc-if>
+
 <sc-if value="{{prAsk.open}}" hint-placeholder-val="{{false}}">
 <div style="position: fixed; inset: 0; z-index: 85; background: rgba(34, 32, 32, 0.8); display: flex; align-items: center; justify-content: center; padding: 14px; box-sizing: border-box">
 <div role="alertdialog" aria-modal="true" aria-label="¿Deseas fotos impresas?" style="width: 100%; max-width: 420px; background: #FEFEFE; color: #222020; border-radius: 10px; padding: 22px 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px">
@@ -1654,6 +1658,14 @@ function missing(n, ph, em) {
   if (!okEmail(em)) m.push("un correo válido");
   return m.length ? (m.length > 1 ? m.slice(0, -1).join(", ") + " y " + m[m.length - 1] : m[0]) : "";
 }
+var NC_SCRIPT = "";
+function ncPost(payload) {
+  if (!NC_SCRIPT) return false;
+  try { fetch(NC_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) }); return true; } catch (e) { return false; }
+}
+function parseLines(arr) {
+  return arr.map(function (l) { var t = String(l).replace(/^•\s*/, ""), i = t.lastIndexOf(": "); return { name: i > 0 ? t.slice(0, i) : t, price: i > 0 ? t.slice(i + 2) : "" }; });
+}
 function money(x) { return "$" + (Math.round(x * 100) % 100 ? x.toFixed(2) : String(Math.round(x))); }
 var MONTHS = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
 var WDAYS = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
@@ -1734,8 +1746,9 @@ function calModel(self, K, accent) {
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0, cotOpen: false, cotExp: null, cotN: 3, cotL: {}, cotQ: {}, cotC: {}, cotName: "", cotPhone: "", cotEmail: "", cotDate: "", cotIdea: "", cotOff: 0, cotSel: null, cotSlot: null, cotDeclined: "", cotPkg: null, cotStep: 1, cotErr: false, xcErr: false, errPop: null, prAsk: null, upOpen: false, upCtx: null, menuOpen: false, xcId: null, xcStep: 1, xcBase: null, xcQ: {}, xcC: {}, xcL: {}, xcOff: 0, xcSel: null, xcSlot: null, xcType: "", xcTime: "", xcIdea: "" };
+    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0, cotOpen: false, cotExp: null, cotN: 3, cotL: {}, cotQ: {}, cotC: {}, cotName: "", cotPhone: "", cotEmail: "", cotDate: "", cotIdea: "", cotOff: 0, cotSel: null, cotSlot: null, cotDeclined: "", cotPkg: null, cotStep: 1, cotErr: false, xcErr: false, errPop: null, prAsk: null, toast: "", upOpen: false, upCtx: null, menuOpen: false, xcId: null, xcStep: 1, xcBase: null, xcQ: {}, xcC: {}, xcL: {}, xcOff: 0, xcSel: null, xcSlot: null, xcType: "", xcTime: "", xcIdea: "" };
   }
+  flash(t) { var self = this; this.setState({ toast: t }); clearTimeout(this._tt); this._tt = setTimeout(function () { self.setState({ toast: "" }); }, 7000); }
   navPush() { this._hd = (this._hd || 0) + 1; try { history.pushState({ nc: this._hd }, "", window.location.href); } catch (e) {} }
   calcBack() {
     var st = this.state, t;
@@ -1902,6 +1915,7 @@ class Component extends DCLogic {
           ready: ready, summary: summary, wa: WA + encodeURIComponent(waMsg)
         };
       })(),
+      toast: self.state.toast || "", hasToast: !!self.state.toast,
       nav: {
         back: function () { if (self._hd > 0) history.back(); else self.calcBack(); },
         close: function () { var n = self._hd || 0; self._hd = 0; self.setState({ cotOpen: false, xcId: null }); if (n) { try { history.go(-n); } catch (e) {} } }
@@ -1930,6 +1944,7 @@ class Component extends DCLogic {
           title: list && list.length === 1 ? "Te falta un dato para enviar tu reserva" : "Te faltan algunos datos para enviar tu reserva",
           fix: function () {
             var first = list && list[0] ? list[0].key : "";
+            if (first === "date") { self.setState(self.state.xcId ? { errPop: null, xcStep: 4 } : { errPop: null, cotStep: 4 }); self.navPush(); return; }
             self.setState({ errPop: null });
             setTimeout(function () { var el = document.querySelector('[data-field="' + first + '"]'); if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); el.focus(); } }, 120);
           }
@@ -2005,6 +2020,19 @@ class Component extends DCLogic {
           m.push("", "¿Me confirman disponibilidad y la cotización final?");
           return m.join("\n");
         }
+        function payload() {
+          var pkg = PACKAGES.filter(function (p) { return p.id === id; })[0];
+          var pr = pkg ? pkg.proposals.filter(function (x) { return num(x.price) === base.price; })[0] : null;
+          return {
+            v: 1, kind: "evento", service: cfg.title + " · " + base.label,
+            baseLabel: cfg.title + ", " + base.label.toLowerCase(), basePrice: base.price,
+            includes: pr ? pr.items : [base.label, base.note, "Galería online privada"], extras: parseLines(lines), prints: parseLines(printLines), notNeeded: [],
+            name: String(xn || "").trim(), phone: String(xp || "").trim(), email: String(xe || "").trim(),
+            place: lugares, otherPlace: other, dateIso: st.xcSel || "", dateLabel: fecha || "",
+            time: st.xcTime.trim(), venue: "", durationMin: hours * 60, photos: "aprox. " + fMin + " a " + fMax, tests: 0, eventType: st.xcType.trim(),
+            total: total, totalLabel: money(total) + (other ? " + traslado" : ""), notes: st.xcIdea.trim(), whatsappText: build()
+          };
+        }
         return {
           open: true, step: step, title: cfg.title, kind: cfg.kind,
           subtitle: ["", "Elige tu cobertura y tus extras", "Elige tus fotos impresas", "¿Dónde será tu evento?", "Elige la fecha y la hora de inicio", "Último paso: tus datos"][step],
@@ -2053,8 +2081,11 @@ class Component extends DCLogic {
             var a = e && e.currentTarget;
             var nn = st.xcName != null ? st.xcName : st.cotName, pp = st.xcPhone != null ? st.xcPhone : st.cotPhone, ee = st.xcEmail != null ? st.xcEmail : st.cotEmail;
             var ml = missingList(nn, pp, ee);
+            if (!st.xcSel) ml.push({ key: "date", label: "Fecha del evento", hint: "Elige un día en el paso 4." });
             if (ml.length) { if (e && e.preventDefault) e.preventDefault(); self.setState({ xcErr: true, errPop: ml }); return; }
             if (a && a.setAttribute) a.setAttribute("href", WA + encodeURIComponent(build()));
+            xn = nn; xp = pp; xe = ee;
+            if (ncPost(payload())) self.flash("¡Solicitud enviada! Te confirmamos la disponibilidad por correo y WhatsApp.");
           }
         };
       })(),
@@ -2172,6 +2203,24 @@ class Component extends DCLogic {
           m.push("", "¿Me confirman disponibilidad y la cotización final?");
           return m.join("\n");
         }
+        function payload() {
+          var ex = parseLines(lines);
+          if (extraF) ex.unshift({ name: extraF + (extraF === 1 ? " foto editada extra" : " fotos editadas extra"), price: money(fotosCost) });
+          var off = pk ? Object.keys(pk.cv.c).filter(function (k) { return !c[k] && !(k === "rcv" && c.rcp); }) : [];
+          var offN = []; COT_GROUPS.forEach(function (g) { g.items.forEach(function (it) { if (off.indexOf(it.id) >= 0) offN.push(it.name); }); });
+          var slot = st.cotSlot || "";
+          return {
+            v: 1, kind: pk ? "paquete" : "personalizado",
+            service: pk ? pk.title + " · " + pk.nm : "Paquete personalizado · " + expName,
+            baseLabel: pk ? pk.title + ", " + pk.nm : "Propuesta inicial", basePrice: pk ? pk.price : COT_SERV,
+            includes: pk ? pk.items : incl, extras: ex, prints: parseLines(printLines), notNeeded: offN,
+            name: st.cotName.trim(), phone: st.cotPhone.trim(), email: st.cotEmail.trim(),
+            place: lugares, otherPlace: other, dateIso: st.cotSel || "", dateLabel: st.cotSel ? ccal.selLabel : "",
+            time: slot.split(" · ")[0] || "", venue: slot.split(" · ")[1] || "",
+            durationMin: mins, photos: String(fotos), tests: pruebas, eventType: "",
+            total: total, totalLabel: money(total) + (other ? " + traslado" : ""), notes: st.cotIdea.trim(), whatsappText: build()
+          };
+        }
         return {
           open: !!st.cotOpen,
           cal: ccal,
@@ -2242,8 +2291,10 @@ class Component extends DCLogic {
           send: function (e) {
             var a = e && e.currentTarget;
             var ml = missingList(st.cotName, st.cotPhone, st.cotEmail);
+            if (!(st.cotSel && st.cotSlot)) ml.push({ key: "date", label: "Fecha y hora de la sesión", hint: "Elige un día y una hora en el paso 4." });
             if (ml.length) { if (e && e.preventDefault) e.preventDefault(); self.setState({ cotErr: true, errPop: ml }); return; }
             if (a && a.setAttribute) a.setAttribute("href", WA + encodeURIComponent(build()));
+            if (ncPost(payload())) self.flash("¡Solicitud enviada! Te confirmamos la disponibilidad por correo y WhatsApp.");
           }
         };
       })(),
