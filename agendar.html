@@ -20,7 +20,7 @@ section{background:var(--card);border-radius:10px;padding:18px 18px 20px;display
 h2{margin:0;font-family:Georgia,serif;font-weight:400;font-size:22px}
 label{display:grid;gap:6px;font-size:14px;font-weight:bold}
 label small{font-weight:normal;color:var(--muted)}
-input,select,textarea{font:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--fg);width:100%;min-width:0}
+input,select,textarea{font:inherit;font-weight:normal;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--fg);width:100%;min-width:0}
 textarea{min-height:80px;resize:vertical}
 input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-color:var(--accent)}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
@@ -42,10 +42,26 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 @keyframes s{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.spin{animation:none}}
 .hint{font-size:13px;color:var(--muted);margin:0}
+.tabs{display:flex;background:var(--fg);padding:0 max(16px,env(safe-area-inset-left));gap:4px}
+.tabs button{flex:1;max-width:200px;font:bold 15px Arial,sans-serif;background:transparent;color:var(--bg);border:0;border-bottom:4px solid transparent;padding:12px 8px;cursor:pointer}
+.tabs button[aria-pressed="true"]{border-bottom-color:var(--accent);color:#fff}
+.cl{display:grid;gap:4px;text-align:left;width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;cursor:pointer;font:inherit;color:var(--fg)}
+.cl b{font-size:17px}.cl span{font-size:14px;color:var(--muted)}
+.chip{display:inline-block;font-size:12px;font-weight:bold;padding:3px 8px;border-radius:99px;background:var(--soft);color:var(--fg);justify-self:start}
+.chip.ok{background:#D1FADF}.chip.wait{background:#FEF0C7}.chip.no{background:#FEE4E2}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:420px){.acts{grid-template-columns:1fr}}
+.act{font:bold 15px Arial,sans-serif;text-align:left;background:#fff;border:1px solid var(--line);border-radius:8px;padding:13px 14px;cursor:pointer;color:var(--fg)}
+.act[aria-pressed="true"]{border-color:var(--accent);background:var(--soft)}
+.wa{display:flex;align-items:center;justify-content:center;gap:8px;background:#25D366;color:#0b2e17;font:bold 17px Arial,sans-serif;text-decoration:none;border-radius:8px;padding:16px}
+.back{background:none;border:0;font:bold 15px Arial,sans-serif;color:var(--fg);cursor:pointer;padding:4px 0;justify-self:start}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.chk{display:flex;gap:8px;align-items:center;font-weight:normal;grid-template-columns:none}.chk input{width:20px;height:20px;accent-color:var(--accent)}
 </style>
 </head>
 <body>
 <div class="top"><img src="logo.png" alt="NC Studio"><span>Agendar reserva</span><a href="#" id="salir" hidden>Cambiar PIN</a></div>
+<nav class="tabs" id="tabs" hidden><button id="tA" aria-pressed="true">Agendar</button><button id="tC" aria-pressed="false">Clientes</button></nav>
 <div class="bar"></div>
 <main id="app"></main>
 <script>
@@ -71,8 +87,11 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     });
   });
 
+  function tab(w) { $("tabs").hidden = false; $("tA").setAttribute("aria-pressed", w === "A"); $("tC").setAttribute("aria-pressed", w === "C"); }
+  $("tA").onclick = function () { form(); };
+  $("tC").onclick = function () { clientes(); };
   function pinView(msg) {
-    salir.hidden = true;
+    salir.hidden = true; $("tabs").hidden = true;
     app.innerHTML = '<section><h2>Entrar</h2><p class="hint">Escribe el PIN de tu página para agendar. Lo encuentras en tu código de Apps Script, en la línea <b>PIN</b>.</p>' +
       '<label for="pin">PIN<input id="pin" inputmode="numeric" autocomplete="off"></label><p class="err" id="perr">' + esc(msg || "") + '</p><button class="btn" id="pok">Entrar</button></section>';
     $("pok").onclick = function () {
@@ -87,7 +106,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 
   var manual = false;
   function form() {
-    salir.hidden = false; manual = false;
+    salir.hidden = false; manual = false; tab("A");
     var hoy = new Date(); hoy.setMinutes(hoy.getMinutes() - hoy.getTimezoneOffset());
     var opts = '<option value="">Elige…</option>' + DATA.P.map(function (p) {
       return '<optgroup label="' + esc(p.title) + '">' + OPTS.filter(function (o) { return o.exp === p; }).map(function (o) { return '<option value="' + o.key + '">' + esc(o.title + " · " + o.nm + " (" + money(o.price) + ")") + '</option>'; }).join("") + '</optgroup>';
@@ -193,7 +212,122 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       app.innerHTML = '<div class="msg"><h2></h2><div id="rh"></div><p><button class="btn" id="otra">Agendar otra reserva</button></p></div>';
       app.querySelector("h2").textContent = r.title || "Listo"; $("rh").innerHTML = r.html || ""; window.scrollTo(0, 0);
       $("otra").onclick = form;
+      var ver = document.createElement("button"); ver.className = "btn2"; ver.textContent = "Ver en Clientes"; ver.style.marginLeft = "10px";
+      ver.onclick = function () { clientes(r.id); }; $("otra").after(ver);
     }).catch(function () { go.disabled = false; go.textContent = "Agendar y enviar"; $("ferr").textContent = "No pudimos conectar. Revisa tu internet e inténtalo de nuevo."; });
+  }
+  /* ---------- Clientes: mensajes por WhatsApp ---------- */
+  var LIST = null, YAPPY = "6631-3762";
+  function wnum(p) { var d = String(p || "").replace(/\D/g, ""); if (d.length <= 8) d = "507" + d; return d; }
+  function first(n) { return String(n || "").trim().split(/\s+/)[0]; }
+  function chip(e) { var k = e === "Confirmado" ? "ok" : e === "Cotización enviada" ? "wait" : e === "No disponible" ? "no" : ""; return '<span class="chip ' + k + '">' + esc(e === "Cotización enviada" ? "Esperando abono" : e) + '</span>'; }
+  function clientes(abrir) {
+    tab("C"); salir.hidden = false;
+    app.innerHTML = '<div class="msg"><span class="spin"></span>Cargando clientes…</div>';
+    call({ action: "clientes", pin: PIN }).then(function (r) {
+      if (r.title === "PIN incorrecto") { setPin(""); pinView("El PIN cambió. Escríbelo de nuevo."); return; }
+      if (!r.ok) { app.innerHTML = '<div class="msg">No pudimos cargar la lista. ¿Ya actualizaste el código de Apps Script?</div>'; return; }
+      LIST = r.list; YAPPY = r.yappy || YAPPY;
+      var it = abrir && LIST.filter(function (x) { return x.id === abrir; })[0];
+      if (it) detalle(it); else lista("");
+    }).catch(function () { app.innerHTML = '<div class="msg">No pudimos conectar. Revisa tu internet.</div>'; });
+  }
+  function lista(q) {
+    app.innerHTML = '<section><div class="row"><label for="bq" style="flex:1">Buscar cliente<input id="bq" placeholder="Nombre, teléfono o NC-…" autocomplete="off"></label><button class="btn2" id="rf" style="align-self:end">↻ Actualizar</button></div></section><div id="ls" style="display:grid;gap:10px"></div>';
+    $("bq").value = q || "";
+    function pinta() {
+      var t = $("bq").value.toLowerCase().trim();
+      var hoy = new Date().toISOString().slice(0, 10);
+      var L = LIST.filter(function (x) { return x.estado !== "No disponible" || t; }).filter(function (x) { return !t || (x.name + " " + x.phone + " " + x.id + " " + x.service).toLowerCase().indexOf(t) >= 0; });
+      L.sort(function (a, b) { var fa = a.dateIso >= hoy, fb = b.dateIso >= hoy; if (fa !== fb) return fa ? -1 : 1; return fa ? (a.dateIso < b.dateIso ? -1 : 1) : (a.dateIso > b.dateIso ? -1 : 1); });
+      $("ls").innerHTML = L.length ? "" : '<div class="msg">No hay clientes que coincidan.</div>';
+      L.forEach(function (x) {
+        var b = document.createElement("button"); b.className = "cl";
+        b.innerHTML = chip(x.estado) + "<b>" + esc(x.name) + "</b><span>" + esc(x.service) + "</span><span>" + esc(x.fecha) + " · " + esc(x.phone) + "</span>";
+        b.onclick = function () { detalle(x); }; $("ls").appendChild(b);
+      });
+    }
+    $("bq").oninput = pinta; $("rf").onclick = function () { clientes(); }; pinta();
+  }
+  function msgs(x) {
+    var n = first(x.name), ev = x.kind === "evento", firma = "\n\n— Nelson y Charlie · NC Studio";
+    function acc(g) { return g ? "\n\n🔗 " + g.link + (g.clave ? "\n🔑 Contraseña: " + g.clave : "") + (g.pin ? "\n📥 PIN de descarga: " + g.pin : "") : ""; }
+    return {
+      cot: "¡Hola, " + n + "! 💛 Muchas gracias por tu preferencia. ¡Tenemos disponible tu fecha: " + x.fecha + "! 🙌🏼\n\nTu cotización de *" + x.service + "*:\n• Total: " + x.total + "\n• Abono para reservar (50 %): *" + x.abono + "*\n• Saldo el día de la " + (ev ? "cobertura" : "sesión") + ": " + x.saldo +
+        "\n\nPara bloquear tu fecha, envía el abono por *Yappy al " + YAPPY + "* en un plazo máximo de 48 horas y mándanos la captura por aquí. 📲\n\nTambién te enviamos la cotización en PDF a tu correo (" + x.email + "). ¡Cualquier duda, quedamos a la orden!" + firma,
+      con: "¡Hola, " + n + "! 💛 Ya recibimos tu abono de " + x.abono + ". ¡Tu fecha está oficialmente reservada! 🙌🏼\n\nSolo falta un paso: lee y firma tu contrato en línea aquí 👇\n" + x.contrato + "\n\nMarca la casilla «Acepto» y presiona «Enviar confirmación». Te llegará una copia en PDF a tu correo.\n\n¡Gracias por confiar en nosotros! ✨" + firma,
+      rec: "¡Hola, " + n + "! ✨ ¡Ya casi llega el gran día!\n\n📅 " + x.fecha + "\n📍 " + x.place + "\n📸 " + x.service + "\n💵 Saldo a pagar ese día: " + x.saldo + "\n\nPara que todo salga increíble:\n" +
+        (ev ? "• Cuéntanos los momentos clave que no nos podemos perder (brindis, pastel, entradas).\n• Compártenos la hora exacta y la dirección del lugar.\n" : "• Prepara tus looks y accesorios con tiempo; déjalos listos la noche anterior.\n• Descansa bien y mantente hidratada.\n") +
+        "• Llega puntual para aprovechar al máximo la luz y el tiempo.\n\n" + (ev ? "Tus fotos editadas te llegan en tu galería en línea 10 días después del evento." : "Las pruebas te llegan de 48 a 72 horas hábiles después de la sesión.") + " ¿Nos confirmas que recibiste este mensaje? 💛" + firma,
+      pru: "¡Hola, " + n + "! 📸 ¡Tus fotos de prueba ya están listas!" + acc(x.gp) +
+        "\n\n*Cómo elegir tus fotos:*\n1. Entra al link y toca el corazón ♡ en tus favoritas (la primera vez te pide tu correo).\n2. Revisa tu selección en «Favorites», arriba a la derecha.\n3. Puedes elegir *" + (x.photos || "las") + " fotos* incluidas en tu paquete. Fotos extra: $10 c/u. Liberación de galería (todas sin editar): $60.\n4. Cuando termines, escríbenos por aquí: «Ya elegí mis fotos» ✅\n\nTus fotos finales te llegan en máximo 2 semanas después de recibir tu selección. 💛" + firma,
+      fin: "¡Hola, " + n + "! 🎁 ¡Llegaron tus fotos finales!" + acc(x.gf) +
+        "\n\nPuedes descargarlas y compartirlas con quien quieras. Gracias por permitirnos vivir esta experiencia contigo; esperamos volver a verte pronto frente a la cámara. 💛\n\nSi te gustó, nos ayudaría muchísimo que nos dejes un testimonio cortito. ¡Gracias! ✨" + firma
+    };
+  }
+  function detalle(x, cual) {
+    tab("C");
+    var acts = [["si", "✅ Sí hay disponibilidad", x.estado === "Pendiente"],
+      ["cot", "💬 Cotización y abono", x.estado !== "No disponible"],
+      ["pago", "💰 Marcar abono recibido", x.estado === "Cotización enviada"],
+      ["con", x.firmado ? "✍️ Contrato (ya firmado)" : "✍️ Contrato para firmar", !!x.contrato],
+      ["rec", "⏰ Recordatorio", x.estado === "Confirmado"],
+      ["pru", "📷 Fotos de prueba", x.kind !== "evento" && x.estado === "Confirmado"],
+      ["fin", "🎁 Fotos finales", x.estado === "Confirmado"]].filter(function (a) { return a[2]; });
+    app.innerHTML = '<button class="back" id="bk">‹ Todos los clientes</button><section>' + chip(x.estado) + '<h2>' + esc(x.name) + '</h2>' +
+      '<p class="hint" style="font-size:15px;line-height:1.6">' + esc(x.id) + " · " + esc(x.service) + "<br>" + esc(x.fecha) + " · " + esc(x.place) + "<br>📱 " + esc(x.phone) + " · ✉️ " + esc(x.email) + "<br>Total " + esc(x.total) + " · abono " + esc(x.abono) + (x.contrato ? (x.firmado ? " · ✅ contrato firmado" : " · contrato pendiente de firma") : "") + '</p>' +
+      '<div class="acts">' + acts.map(function (a) { return '<button class="act" data-k="' + a[0] + '" aria-pressed="' + (a[0] === cual) + '">' + a[1] + '</button>'; }).join("") + '</div></section><div id="cmp"></div>';
+    $("bk").onclick = function () { lista(""); };
+    Array.prototype.forEach.call(app.querySelectorAll(".act"), function (b) { b.onclick = function () { detalle(x, b.getAttribute("data-k")); }; });
+    if (cual) componer(x, cual);
+  }
+  function componer(x, k) {
+    var box = $("cmp");
+    if (k === "pago" || k === "si") {
+      var pg = k === "pago", lb = pg ? "Sí, abono recibido" : "Sí, enviar cotización";
+      box.innerHTML = pg
+        ? '<section><h2>¿Ya llegó el abono?</h2><p>Marca el abono de <b>' + esc(x.abono) + '</b> de ' + esc(x.name) + ' como recibido. Le llegará por correo la confirmación con el enlace del contrato, y después podrás mandárselo también por WhatsApp.</p><button class="btn" id="okp">' + lb + '</button><p class="err" id="perr2"></p></section>'
+        : '<section><h2>¿Tienes disponible esa fecha?</h2><p>' + esc(x.fecha) + '. Le enviamos a ' + esc(x.name) + ' la cotización en PDF por correo y separamos la fecha en tu calendario. Después puedes mandarle el resumen por WhatsApp.</p><button class="btn" id="okp">' + lb + '</button><p class="err" id="perr2"></p></section>';
+      $("okp").onclick = function () {
+        $("okp").disabled = true; $("okp").innerHTML = '<span class="spin"></span>Enviando…';
+        call({ action: k, id: x.id, t: x.t }).then(function (r) {
+          if (!r.ok) { $("perr2").innerHTML = esc(r.title) + ". " + (r.html || ""); $("okp").disabled = false; $("okp").textContent = lb; return; }
+          call({ action: "clientes", pin: PIN }).then(function (r2) { LIST = r2.list || LIST; var y = LIST.filter(function (z) { return z.id === x.id; })[0] || x; detalle(y, pg ? "con" : "cot"); });
+        }).catch(function () { $("perr2").textContent = "No pudimos conectar."; $("okp").disabled = false; $("okp").textContent = lb; });
+      };
+      box.scrollIntoView({ block: "start", behavior: "smooth" }); return;
+    }
+    var gkey = k === "pru" ? "gp" : k === "fin" ? "gf" : "";
+    if (gkey && !x[gkey]) { galForm(x, k, gkey); return; }
+    var txt = msgs(x)[k];
+    box.innerHTML = '<section><h2>Mensaje</h2>' + (gkey ? '<button class="btn2" id="cg">Cambiar link de la galería</button>' : "") +
+      '<label for="mt">Puedes editarlo antes de enviar<textarea id="mt" style="min-height:300px"></textarea></label>' +
+      '<a class="wa" id="wa" target="_blank" rel="noopener">Abrir en WhatsApp</a><div class="row"><button class="btn2" id="cp">Copiar mensaje</button><span class="hint" id="cps"></span></div>' +
+      '<p class="hint">Se abre el chat de ' + esc(x.name) + ' (' + esc(x.phone) + ') con el mensaje escrito. Solo presiona enviar ➤ en WhatsApp.</p></section>';
+    var mt = $("mt"); mt.value = txt;
+    function link() { $("wa").href = "https://wa.me/" + wnum(x.phone) + "?text=" + encodeURIComponent(mt.value); }
+    mt.oninput = link; link();
+    $("cp").onclick = function () { var ok = function () { $("cps").textContent = "✓ Copiado"; }; if (navigator.clipboard) navigator.clipboard.writeText(mt.value).then(ok, function () { mt.select(); }); else { mt.select(); document.execCommand("copy"); ok(); } };
+    if ($("cg")) $("cg").onclick = function () { galForm(x, k, gkey); };
+    box.scrollIntoView({ block: "start", behavior: "smooth" });
+  }
+  function galForm(x, k, gkey) {
+    var g = x[gkey] || {}, pr = k === "pru";
+    $("cmp").innerHTML = '<section><h2>' + (pr ? "Galería de pruebas" : "Galería final") + '</h2><p class="hint">Pega los datos de la galería de Pixieset. Se guardan para este cliente.</p>' +
+      '<label for="gl">Link de la galería<input id="gl" type="url" placeholder="https://…" autocomplete="off"></label><div class="g2"><label for="gc">Contraseña <small>(opcional)</small><input id="gc" autocomplete="off"></label><label for="gn">PIN de descarga <small>(opcional)</small><input id="gn" autocomplete="off"></label></div>' +
+      '<label class="chk"><input type="checkbox" id="gm" checked> Enviarle también el correo con las instrucciones</label><button class="btn" id="gok">Guardar y preparar mensaje</button><p class="err" id="gerr"></p></section>';
+    $("gl").value = g.link || ""; $("gc").value = g.clave || ""; $("gn").value = g.pin || "";
+    $("gok").onclick = function () {
+      var lk = $("gl").value.trim();
+      if (!/^https?:\/\//i.test(lk)) { $("gerr").textContent = "Pega el link completo (empieza con https://)."; return; }
+      $("gok").disabled = true; $("gok").innerHTML = '<span class="spin"></span>Guardando…';
+      var body = { action: pr ? "pruebas" : "final", id: x.id, t: x.t, link: lk, clave: $("gc").value.trim(), pin: $("gn").value.trim(), correo: $("gm").checked };
+      call(body).then(function (r) {
+        if (!r.ok) { $("gerr").innerHTML = esc(r.title) + ". " + (r.html || ""); $("gok").disabled = false; $("gok").textContent = "Guardar y preparar mensaje"; return; }
+        x[gkey] = { link: body.link, clave: body.clave, pin: body.pin }; componer(x, k);
+      }).catch(function () { $("gerr").textContent = "No pudimos conectar."; $("gok").disabled = false; $("gok").textContent = "Guardar y preparar mensaje"; });
+    };
+    $("cmp").scrollIntoView({ block: "start", behavior: "smooth" });
   }
   salir.onclick = function (e) { e.preventDefault(); setPin(""); PIN = ""; pinView(); };
   if (PIN) form(); else pinView();
