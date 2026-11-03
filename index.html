@@ -49,7 +49,6 @@ details[open] .faq-ico { transform: rotate(45deg); }
 <nav aria-label="Secciones" style="display: flex; flex-wrap: wrap; align-items: center; gap: 2px 22px; font-family: Montserrat, sans-serif; font-size: 15px; font-weight: 600">
 <a href="#quienes-somos" style="color: #F2E4D2; text-decoration: none; padding: 12px 0">Quiénes somos</a>
 <a href="#portafolio" style="color: #F2E4D2; text-decoration: none; padding: 12px 0">Portafolio</a>
-<button type="button" onClick="{{cot.openAny}}" style="padding: 12px 0; border: 0; background: transparent; color: #F2E4D2; font: inherit; cursor: pointer">Arma tu paquete</button>
 <a href="#preguntas" style="color: #F2E4D2; text-decoration: none; padding: 12px 0">Preguntas frecuentes</a>
 <a href="#portafolio" style="background: {{accent}}; color: #222020; text-decoration: none; padding: 11px 22px; border-radius: 999px">Reservar</a>
 </nav>
@@ -68,6 +67,7 @@ details[open] .faq-ico { transform: rotate(45deg); }
 <p style="margin: 6px 0 0; font-family: 'EB Garamond', Georgia, serif; font-style: italic; font-size: 28px; line-height: 1.2">No vendemos fotos, vendemos experiencias.</p>
 <div style="display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px">
 <a href="#portafolio" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 26px; border-radius: 999px; background: {{accent}}; color: #222020; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">Ver paquetes y precios</a>
+<button type="button" onClick="{{cot.openAny}}" style="display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 26px; border-radius: 999px; border: 1.5px solid {{accent}}; background: transparent; color: #FEFEFE; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px; cursor: pointer">Arma tu paquete personalizado</button>
 <a href="{{waGeneral}}" style="display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 26px; border-radius: 999px; border: 1.5px solid #F2E4D2; color: #FEFEFE; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 15px">
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.6-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg>
 Escríbenos
@@ -245,7 +245,7 @@ WhatsApp
 <span style="font-family: 'EB Garamond', Georgia, serif; font-size: 28px; line-height: 1.15">¿Quieres un paquete creado exclusivamente para ti?</span>
 <span style="font-size: 15px; color: #F2E4D2">Elige tus fotos, lugares y extras, y recibe tu cotización al instante. Desde $55.</span>
 </div>
-<button type="button" onClick="{{cot.openHere}}" style="display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 24px; border-radius: 999px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px; cursor: pointer">
+<button type="button" onClick="{{createHere}}" style="display: inline-flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 24px; border-radius: 999px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px; cursor: pointer">
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
 Crea tu paquete aquí
 </button>
@@ -693,6 +693,234 @@ Volver a los extras
 </div>
 </sc-if>
 
+<sc-if value="{{xc.open}}" hint-placeholder-val="{{false}}">
+<div style="position: fixed; inset: 0; z-index: 70; background: rgba(34, 32, 32, 0.75); display: flex; align-items: center; justify-content: center; padding: 10px; box-sizing: border-box">
+<div role="dialog" aria-modal="true" aria-label="{{xc.title}}" style="width: 100%; max-width: 600px; max-height: 96vh; background: #FEFEFE; color: #222020; border-radius: 10px; display: flex; flex-direction: column; overflow: hidden">
+<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 18px 18px 12px; border-bottom: 1px solid #EFE6DA">
+<div style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 30px; line-height: 1.05">{{xc.title}}</span>
+<span style="font-size: 14px; color: #3D3B3E">{{xc.subtitle}}</span>
+<span style="margin-top: 4px; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.06em; color: #3D3B3E">PASO {{xc.step}} DE 2</span>
+</div>
+<button type="button" onClick="{{xc.close}}" aria-label="Cerrar" style="flex: none; width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; cursor: pointer; display: flex; align-items: center; justify-content: center">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+</button>
+</div>
+<div data-keep-scroll="xc{{xc.step}}" style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 22px">
+
+<div style="display: {{xc.v1}}; flex-direction: column; gap: 22px">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">1. {{xc.baseTitle}}</span>
+<div role="radiogroup" aria-label="Tiempo de cobertura" style="display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{xc.bases}}" as="b" hint-placeholder-count="3">
+<button type="button" role="radio" aria-checked="{{b.checked}}" onClick="{{b.pick}}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 8px; border: 1.5px solid #222020; background: {{b.bg}}; color: {{b.fg}}; text-align: left; cursor: pointer; width: 100%">
+<span style="display: flex; align-items: center; gap: 12px; min-width: 0">
+<span aria-hidden="true" style="flex: none; width: 20px; height: 20px; border-radius: 50%; border: 2px solid currentColor; background: {{b.dot}}"></span>
+<span style="display: flex; flex-direction: column; min-width: 0">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">{{b.label}}</span>
+<span style="font-size: 13px; color: {{b.sub}}">{{b.note}}</span>
+</span>
+</span>
+<span style="flex: none; font-family: 'EB Garamond', Georgia, serif; font-size: 26px; line-height: 1">{{b.price}}</span>
+</button>
+</sc-for>
+</div>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">2. Mejora tu cobertura</span>
+<sc-for list="{{xc.groups}}" as="g" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; margin-top: 10px">
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 21px; line-height: 1.2; padding-bottom: 2px; border-bottom: 2px solid {{accent}}; align-self: flex-start">{{g.title}}</span>
+<sc-for list="{{g.items}}" as="x" hint-placeholder-count="4">
+<sc-if value="{{x.isQty}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #EFE6DA">
+<div style="display: flex; flex-direction: column; min-width: 0">
+<span style="font-size: 15px">{{x.name}}</span>
+<sc-if value="{{x.hasNote}}" hint-placeholder-val="{{false}}">
+<span style="font-size: 12px; color: #3D3B3E">{{x.note}}</span>
+</sc-if>
+</div>
+<div style="flex: none; display: flex; align-items: center; gap: 6px">
+<button type="button" onClick="{{x.dec}}" aria-label="Quitar uno: {{x.name}}" style="width: 40px; height: 40px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 20px; cursor: pointer; opacity: {{x.decOp}}">−</button>
+<span aria-live="polite" style="min-width: 28px; text-align: center; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">{{x.n}}</span>
+<button type="button" onClick="{{x.inc}}" aria-label="Agregar uno: {{x.name}}" style="width: 40px; height: 40px; border-radius: 6px; border: 0; background: #222020; color: #FEFEFE; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 20px; cursor: pointer">+</button>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{x.isChk}}" hint-placeholder-val="{{true}}">
+<button type="button" role="checkbox" aria-checked="{{x.checked}}" onClick="{{x.toggle}}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border: 0; border-bottom: 1px solid #EFE6DA; background: transparent; color: #222020; text-align: left; cursor: pointer; width: 100%">
+<span style="display: flex; align-items: center; gap: 12px; min-width: 0">
+<span aria-hidden="true" style="flex: none; width: 24px; height: 24px; border-radius: 5px; border: 2px solid #222020; background: {{x.boxBg}}; color: #222020; display: flex; align-items: center; justify-content: center">
+<sc-if value="{{x.on}}" hint-placeholder-val="{{false}}">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+</sc-if>
+</span>
+<span style="display: flex; flex-direction: column; min-width: 0">
+<span style="font-family: 'Tenor Sans', Georgia, serif; font-size: 15px">{{x.name}}</span>
+<sc-if value="{{x.hasInNote}}" hint-placeholder-val="{{false}}">
+<span style="font-family: Montserrat, sans-serif; font-weight: 600; font-size: 12px; color: #3D3B3E">{{x.inNote}}</span>
+</sc-if>
+</span>
+</span>
+</button>
+</sc-if>
+</sc-for>
+</div>
+</sc-for>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">3. ¿Quieres fotos impresas?</span>
+<span style="font-size: 13px; color: #3D3B3E">Elige cuántas quieres de cada tamaño.</span>
+<sc-for list="{{xc.prints}}" as="x" hint-placeholder-count="4">
+<sc-if value="{{x.isQty}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #EFE6DA">
+<div style="display: flex; flex-direction: column; min-width: 0">
+<span style="font-size: 15px">{{x.name}}</span>
+<sc-if value="{{x.hasNote}}" hint-placeholder-val="{{false}}">
+<span style="font-size: 12px; color: #3D3B3E">{{x.note}}</span>
+</sc-if>
+</div>
+<div style="flex: none; display: flex; align-items: center; gap: 6px">
+<button type="button" onClick="{{x.dec}}" aria-label="Quitar uno: {{x.name}}" style="width: 40px; height: 40px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 20px; cursor: pointer; opacity: {{x.decOp}}">−</button>
+<span aria-live="polite" style="min-width: 28px; text-align: center; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">{{x.n}}</span>
+<button type="button" onClick="{{x.inc}}" aria-label="Agregar uno: {{x.name}}" style="width: 40px; height: 40px; border-radius: 6px; border: 0; background: #222020; color: #FEFEFE; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 20px; cursor: pointer">+</button>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{x.isChk}}" hint-placeholder-val="{{true}}">
+<button type="button" role="checkbox" aria-checked="{{x.checked}}" onClick="{{x.toggle}}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border: 0; border-bottom: 1px solid #EFE6DA; background: transparent; color: #222020; text-align: left; cursor: pointer; width: 100%">
+<span style="display: flex; align-items: center; gap: 12px; min-width: 0">
+<span aria-hidden="true" style="flex: none; width: 24px; height: 24px; border-radius: 5px; border: 2px solid #222020; background: {{x.boxBg}}; color: #222020; display: flex; align-items: center; justify-content: center">
+<sc-if value="{{x.on}}" hint-placeholder-val="{{false}}">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+</sc-if>
+</span>
+<span style="display: flex; flex-direction: column; min-width: 0">
+<span style="font-family: 'Tenor Sans', Georgia, serif; font-size: 15px">{{x.name}}</span>
+<sc-if value="{{x.hasInNote}}" hint-placeholder-val="{{false}}">
+<span style="font-family: Montserrat, sans-serif; font-weight: 600; font-size: 12px; color: #3D3B3E">{{x.inNote}}</span>
+</sc-if>
+</span>
+</span>
+</button>
+</sc-if>
+</sc-for>
+</div>
+</div>
+
+<div style="display: {{xc.v2}}; flex-direction: column; gap: 22px">
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">1. Tus datos</span>
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tu nombre
+<input type="text" autocomplete="name" value="{{xc.name}}" onInput="{{xc.setName}}" placeholder="Nombre y apellido" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Número de teléfono
+<input type="tel" inputmode="tel" autocomplete="tel" value="{{xc.phone}}" onInput="{{xc.setPhone}}" placeholder="6000-0000" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Correo electrónico
+<input type="email" inputmode="email" autocomplete="email" value="{{xc.email}}" onInput="{{xc.setEmail}}" placeholder="tucorreo@ejemplo.com" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+</label>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">2. Tu evento</span>
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tipo de evento
+<input type="text" value="{{xc.type}}" onInput="{{xc.setType}}" placeholder="Cumpleaños, bautizo, boda, aniversario, empresa…" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Hora de inicio
+<input type="time" value="{{xc.time}}" onInput="{{xc.setTime}}" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+</label>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">3. ¿Dónde será el evento?</span>
+<sc-for list="{{xc.locs}}" as="l" hint-placeholder-count="7">
+<button type="button" role="checkbox" aria-checked="{{l.checked}}" onClick="{{l.toggle}}" style="display: flex; align-items: center; gap: 12px; padding: 10px 0; border: 0; border-bottom: 1px solid #EFE6DA; background: transparent; color: #222020; text-align: left; cursor: pointer; width: 100%">
+<span aria-hidden="true" style="flex: none; width: 24px; height: 24px; border-radius: 5px; border: 2px solid #222020; background: {{l.boxBg}}; color: #222020; display: flex; align-items: center; justify-content: center">
+<sc-if value="{{l.on}}" hint-placeholder-val="{{false}}">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+</sc-if>
+</span>
+<span style="font-family: 'Tenor Sans', Georgia, serif; font-size: 15px">{{l.name}}</span>
+</button>
+</sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">4. Elige la fecha</span>
+<div style="display: flex; justify-content: center">
+<div style="display: flex; align-items: center; gap: 8px">
+<button type="button" onClick="{{xc.cal.prev}}" aria-label="Mes anterior" disabled="{{xc.cal.noPrev}}" style="width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: {{xc.cal.prevOp}}">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+</button>
+<span style="min-width: 150px; text-align: center; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">{{xc.cal.monthLabel}}</span>
+<button type="button" onClick="{{xc.cal.next}}" aria-label="Mes siguiente" disabled="{{xc.cal.noNext}}" style="width: 44px; height: 44px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: {{xc.cal.nextOp}}">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+</button>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px">
+<sc-for list="{{xc.cal.dows}}" as="d" hint-placeholder-count="7">
+<span style="text-align: center; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 12px; color: #3D3B3E; padding: 4px 0">{{d}}</span>
+</sc-for>
+<sc-for list="{{xc.cal.cells}}" as="c" hint-placeholder-count="35">
+<sc-if value="{{c.blank}}" hint-placeholder-val="{{false}}">
+<span aria-hidden="true"></span>
+</sc-if>
+<sc-if value="{{c.real}}" hint-placeholder-val="{{true}}">
+<button type="button" onClick="{{c.pick}}" disabled="{{c.disabled}}" aria-label="{{c.aria}}" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 66px; padding: 4px 0; border-radius: 6px; border: 1.5px solid {{c.border}}; background: {{c.bg}}; color: {{c.fg}}; cursor: {{c.cursor}}; box-sizing: border-box">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 19px; line-height: 1">{{c.n}}</span>
+<span style="font-size: 10px; line-height: 1.1; white-space: nowrap; color: {{c.subFg}}">{{c.sub}}</span>
+</button>
+</sc-if>
+</sc-for>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: #3D3B3E">
+<span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid #F99824; background: #FEFEFE"></span>Disponible</span>
+<span style="display: inline-flex; align-items: center; gap: 6px"><span aria-hidden="true" style="width: 14px; height: 14px; border-radius: 3px; background: #3D3B3E"></span>Ocupado</span>
+<span>Actualizado: {{xc.cal.updated}}</span>
+</div>
+<sc-if value="{{xc.hasDate}}" hint-placeholder-val="{{false}}">
+<span style="padding: 10px 12px; border-radius: 6px; background: #F2E4D2; font-size: 14px">Fecha elegida: {{xc.fecha}}</span>
+</sc-if>
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Detalles de tu evento
+<textarea rows="3" onInput="{{xc.setIdea}}" placeholder="Cantidad de invitados, momentos importantes, temática…" style="padding: 10px 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px; resize: vertical">{{xc.idea}}</textarea>
+</label>
+</div>
+</div>
+</div>
+
+<div style="flex: none; display: flex; flex-direction: column; gap: 10px; padding: 14px 18px 16px; background: #222020; color: #FEFEFE">
+<div style="display: flex; align-items: flex-end; justify-content: space-between; gap: 12px">
+<div style="display: flex; flex-direction: column; min-width: 0">
+<span style="font-family: Montserrat, sans-serif; font-size: 12px; font-weight: 600; color: #F2E4D2">Total estimado</span>
+<span style="font-size: 13px; color: #F2E4D2">{{xc.meta}}</span>
+</div>
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 40px; line-height: 1; color: {{accent}}">{{xc.total}}</span>
+</div>
+<sc-if value="{{xc.showNext}}" hint-placeholder-val="{{false}}">
+<button type="button" onClick="{{xc.goNext}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; border-radius: 6px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px; cursor: pointer">
+Siguiente: datos, lugar y fecha
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+</button>
+</sc-if>
+<sc-if value="{{xc.showSend}}" hint-placeholder-val="{{true}}">
+<a href="{{xc.wa}}" onClick="{{xc.send}}" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; border-radius: 6px; background: {{accent}}; color: #222020; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.6-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg>
+Enviar reserva por WhatsApp
+</a>
+</sc-if>
+<sc-if value="{{xc.showBack}}" hint-placeholder-val="{{false}}">
+<button type="button" onClick="{{xc.goBack}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; border-radius: 6px; border: 1.5px solid #F2E4D2; background: transparent; color: #FEFEFE; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 14px; cursor: pointer">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+Volver a los extras
+</button>
+</sc-if>
+<span style="font-size: 12px; color: #F2E4D2">Precio estimado. Te confirmamos la cotización final y la disponibilidad por WhatsApp.</span>
+</div>
+</div>
+</div>
+</sc-if>
+
 <sc-if value="{{up.open}}" hint-placeholder-val="{{false}}">
 <div style="position: fixed; inset: 0; z-index: 80; background: rgba(34, 32, 32, 0.8); display: flex; align-items: center; justify-content: center; padding: 14px; box-sizing: border-box">
 <div role="alertdialog" aria-modal="true" aria-label="¿Quieres mejorar tu experiencia?" style="position: relative; width: 100%; max-width: 440px; max-height: 92vh; overflow-y: auto; background: #FEFEFE; color: #222020; border-radius: 10px; padding: 22px 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px">
@@ -702,7 +930,7 @@ Volver a los extras
 <span style="font-family: Allura, cursive; font-size: 36px; line-height: 1; color: {{accent}}; padding-right: 48px">Antes de reservar…</span>
 <span style="font-family: 'EB Garamond', Georgia, serif; font-size: 28px; line-height: 1.1">¿Quieres mejorar tu experiencia?</span>
 <span style="align-self: flex-start; padding: 4px 10px; border-radius: 999px; background: #F2E4D2; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 13px">{{up.label}}</span>
-<span style="font-size: 15px; line-height: 1.5; color: #3D3B3E">Tenemos servicios extra que te pueden interesar: maquillaje y peinado, video detrás de cámaras, fotos adicionales, impresiones y mucho más. ¿Deseas revisarlos?</span>
+<span style="font-size: 15px; line-height: 1.5; color: #3D3B3E">{{up.blurb}}</span>
 <div style="display: flex; flex-direction: column; gap: 8px">
 <button type="button" onClick="{{up.yes}}" style="min-height: 50px; padding: 0 18px; border-radius: 6px; border: 0; background: {{accent}}; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px; cursor: pointer">Sí, quiero ver los extras</button>
 <button type="button" onClick="{{up.no}}" style="min-height: 46px; padding: 0 18px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 15px; cursor: pointer">No, continuar con mi reserva</button>
@@ -1031,7 +1259,7 @@ var PACKAGES = [
   },
   {
     id: "infantil", tab: "Momentos (coberturas)", title: "Momentos", kind: "Cobertura fotográfica de eventos",
-    img: "img/6f283345c376ba1251d0fdc00e7dfbd5.jpg", imgAlt: "Niña celebrando su cumpleaños de sirenita",
+    img: "img/47afb0ee2ea4cb916feb0fe22cd01ed4.jpg", imgAlt: "Joven sonriendo frente a los invitados durante un evento",
     intro: "Cumpleaños, bautizos, aniversarios, fiestas familiares o eventos de empresa: te acompañamos con una mirada atenta a esos momentos que pasan demasiado rápido, para guardar cada emoción tal como ocurre.",
     proposals: [
       prop("Propuesta 1", "Para eventos largos donde no quieres que se escape ningún momento.", "$250", "USD · hora extra: $60 con 40 fotos editadas más",
@@ -1209,7 +1437,7 @@ var GAL = {
   levelup: ["66d414fe4caaeb1bc501312d804fbc58","cbe235cf48610bf741abc2b2736f60ff","3a9d73ff6f4c153b632d81b21d3448d2","c1a0779a6c042177f73f40009257e2c0","fc077081b18bbc990813c648296b4d42","f64cec57bc93f864fe61e5f32d53c27c","5c47cbedefc8eb22d0330ef8ca1c950b","bc12a799c66e299a6cea0e299c6cc023","217dc9d9ae536ddcbfa9922a165ff61b","d3814823cc8ffab758eee471b5497179","4cb7684f79e0f05d845134555475dd3f","15195569a773220d0a80b4f8f94734b2","6807a4602571a218c01920f617039093","ad1f35b8d9493a82b41a031c8a32c508","c0648151f8355ac982ff71f5e2f15df7","42d2b65dd971683e675665b628c9e256","0b0e60afc8f9cd52107d3b934835035f","7c0e60a425e106638f6fc6d48efeb7e1","7910eec13ae5e1194b86531234e64930"],
   estudio: ["5a201c2d11dd0805fc73c2458f3dc1dc","9d37082818a53004aa2218437edb3422","4515bb8a7de4bfaa1a3d291d03190e27","1ad434e8fc9337c64b71a10a66eae445","c3580a39fec35c33253dfdc6dd234265","d9082973868ed29ef4587d41612bff00","5bb795bf0c8134576bde36c8a318e525","c8539344dc7278e30a60050973fcad9b"],
   folklore: ["5ea3b7f296f3cec4b38a4620d33fcaf8","609edafdb13a808635f2baed15b6c4cc","b0ea04fc287e9eb754870faf067f8ff2","6fae9d7d5c11650b331d753eaa060d47","5f8018a304bbdc4eed58f3c23a25d155","71d22bda05f1275615d8124b388e411b","8ba824ea4e2883f3f488fee8cf3bb00e","e899e6c9abb28c24bb2899774886fd74","67703215d765dc37edefd8f7fa2c3667"],
-  infantil: ["15e961edf1647668f34626687419d30f","07aed15eb42396acdc6a1c2a89a89dea","47afb0ee2ea4cb916feb0fe22cd01ed4","b87517360183596da47a608e1ce93e00","62838de371841050f10336484ec10cd4","03ff5a2bc25141550ca9bb23e26ed632","55714c8a4a90307c0a21588077c746bd","a62bedda82e6e8ded7e0e9f850ba8816","ee8e17e00d31ff19d12877a6fc6e9454","d80990e2a5b96cd98d2542488d63d427","e1cb663cf8ac4bc92821b4e5bb2a07bb","e26c37a74fb2934d43cd0504c978f991","a6c3abeb687edbbe1ce9189827ce65a0","c83bb895e5fc328802e451caef54457a","734ce9a9385ad3f1933df4e866ffcf37","fbc61e6dd15113a12e2e0254fca2c481"],
+  infantil: ["47afb0ee2ea4cb916feb0fe22cd01ed4","15e961edf1647668f34626687419d30f","07aed15eb42396acdc6a1c2a89a89dea","b87517360183596da47a608e1ce93e00","62838de371841050f10336484ec10cd4","03ff5a2bc25141550ca9bb23e26ed632","55714c8a4a90307c0a21588077c746bd","a62bedda82e6e8ded7e0e9f850ba8816","ee8e17e00d31ff19d12877a6fc6e9454","d80990e2a5b96cd98d2542488d63d427","e1cb663cf8ac4bc92821b4e5bb2a07bb","e26c37a74fb2934d43cd0504c978f991","a6c3abeb687edbbe1ce9189827ce65a0","c83bb895e5fc328802e451caef54457a","734ce9a9385ad3f1933df4e866ffcf37","fbc61e6dd15113a12e2e0254fca2c481"],
   primer: ["cd8f9728faae7a08b02691d120c16ab5","997ccae929972c82a34212474ec7155e","300552f1947a094134354068f2d47697","c8648695d9ba31af0752f4cc3e272b5c","2a166a6739eef1f7471592e939c4e87e","398cf60e3247d11b7a882178ad710c02","68ee22e2c6470a4afe229acc5da57925"],
   gran: ["0f6810869156c5bd69ccbeb09bbe4bff","2d9bea714b058c9f48eda15883e5c99d","5570633a91e2c8efec96a93a263bf6a7","e443d9af454d5fbd99469793ca7ea9e2","7d606f9fd3eeb47e79ffc48e51c774d0","867a90dd03d745d54b86fffb08bf0b70","2e58d22779ef50a935217c0ca686ef70","1f574c6f1b02860110933e80a3086ccd","f39d4b7c5a0f799f6c39a36d2da73fb8"],
   gameon: ["fcdc1b33dc6834a0a4281145c1ea8e14","b61a9d8959a0b37f47087d40444bafa5","9a2266a85ce5755c1b1b0ea37feebf18","341457082bcc15b28e07e75be86c361b","4d2892cc6b9e57cff9c3d476cb059318","72585b0e8e8621ca24c38ccbcee09202","bdbb4cc0b1954812f03b63219aaded18","ae377a768917aa80c4ffad4d44c28ba4","9d08dd91f1246cbc291b58bc6ac3200a"],
@@ -1245,6 +1473,20 @@ function cotTotalFotos(n) {
 function cotFotosPrice(extra) { return cotTotalFotos(extra + 3) - 55; }
 var COT_SES = ["levelup", "suenos", "dulce", "bebe", "estudio", "folklore", "primer", "gran", "granext", "gameon"];
 var COT_EVT = ["infantil", "otra"];
+var XC = {
+  infantil: {
+    title: "Momentos", kind: "Cobertura de eventos",
+    baseTitle: "¿Cuánto tiempo de cobertura necesitas?",
+    bases: [
+      { id: "h1", label: "1 hora de cobertura", note: "Aprox. 75 a 100 fotos editadas", price: 90, h: 1, f: [75, 100] },
+      { id: "h2", label: "2 horas de cobertura", note: "Aprox. 125 a 200 fotos editadas", price: 150, h: 2, f: [125, 200] },
+      { id: "h3", label: "3 horas de cobertura", note: "Aprox. 225 a 300 fotos editadas", price: 250, h: 3, f: [225, 300] }
+    ],
+    defBase: "h2",
+    blurb: "Tenemos extras que te pueden interesar: video resumen o video para redes, photo booth con fotos impresas al instante, horas extra, álbum, impresiones y mucho más. ¿Deseas revisarlos?"
+  }
+};
+
 function cq(id, name, unit, o) { o = o || {}; o.id = id; o.kind = "q"; o.name = name; o.cost = o.cost || function (n) { return n * unit; }; return o; }
 function cc(id, name, price, o) { o = o || {}; o.id = id; o.kind = "c"; o.name = name; o.price = price; return o; }
 var COT_GROUPS = [
@@ -1278,9 +1520,29 @@ var COT_GROUPS = [
   ] }
 ];
 COT_GROUPS[4].items[0].price = 60; COT_GROUPS[4].items[1].price = 25; COT_GROUPS[4].items[2].price = 90; COT_GROUPS[4].items[3].price = 70;
+var XC_GROUPS = {};
 var COT_PRINTS = [
   cq("p46", "Fotos 4×6", 3.5), cq("p57", "Fotos 5×7", 5), cq("p810", "Fotos 8×10", 8), cq("p1117", "Fotos 11×17", 12),
   cq("cart", "Juegos de 6 fotos tamaño cartera", 5)
+];
+XC_GROUPS.infantil = [
+  { title: "Más tiempo y más fotos", items: [
+    cq("hx", "Horas extra de cobertura", 60, { note: "Cada hora suma 40 fotos editadas", fotos: 40, h: 1 }),
+    cq("fx", "Fotos editadas extra", 2, { step: 10, note: "Se agregan de 10 en 10", fotos: 1 }),
+    cq("lib", "Fotos sin editar (liberación de galería)", 1, { step: 50, note: "Se agregan de 50 en 50" })
+  ] },
+  { title: "Video", items: [
+    cc("vvert", "Video vertical de 1 min para redes (Full HD 1080p)", 75),
+    cc("vhor", "Video resumen horizontal de 10 min (Full HD 1080p)", 150)
+  ] },
+  { title: "Photo booth", items: [
+    cc("pb50", "Photo booth: 50 fotos impresas al instante", 85, { excl: ["pb75", "pb100"] }),
+    cc("pb75", "Photo booth: 75 fotos impresas al instante", 100, { excl: ["pb50", "pb100"] }),
+    cc("pb100", "Photo booth: 100 fotos impresas al instante", 125, { excl: ["pb50", "pb75"] })
+  ] },
+  { title: "Entrega y recuerdos", items: [
+    cc("usb", "USB con fotografías", 25), cc("alb", "Álbum fotográfico (20 páginas)", 90), cc("enm", "Fotografía enmarcada 16×20", 70)
+  ] }
 ];
 function cotFits(only, exp) { return !only || only.indexOf(exp) >= 0 || (exp === "otra" && only === COT_SES); }
 function money(x) { return "$" + (Math.round(x * 100) % 100 ? x.toFixed(2) : String(Math.round(x))); }
@@ -1355,7 +1617,7 @@ function calModel(self, K, accent) {
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0, cotOpen: false, cotExp: null, cotN: 3, cotL: {}, cotQ: {}, cotC: {}, cotName: "", cotPhone: "", cotEmail: "", cotDate: "", cotIdea: "", cotOff: 0, cotSel: null, cotSlot: null, cotDeclined: "", cotPkg: null, cotStep: 1, upOpen: false, upCtx: null };
+    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0, cotOpen: false, cotExp: null, cotN: 3, cotL: {}, cotQ: {}, cotC: {}, cotName: "", cotPhone: "", cotEmail: "", cotDate: "", cotIdea: "", cotOff: 0, cotSel: null, cotSlot: null, cotDeclined: "", cotPkg: null, cotStep: 1, upOpen: false, upCtx: null, xcId: null, xcStep: 1, xcBase: null, xcQ: {}, xcC: {}, xcL: {}, xcOff: 0, xcSel: null, xcSlot: null, xcType: "", xcTime: "", xcIdea: "" };
   }
   componentDidMount() {
     var self = this;
@@ -1388,6 +1650,9 @@ class Component extends DCLogic {
       };
     });
     var cur = PACKAGES.filter(function (p) { return p.id === sel; })[0] || PACKAGES[0];
+    function openXC(id, baseId, step) {
+      self.setState({ upOpen: false, cotOpen: false, xcId: id, xcStep: step, xcBase: baseId, xcQ: {}, xcC: {}, xcL: {}, xcOff: 0, xcSel: null, xcSlot: null });
+    }
     var current = {
       title: cur.title, kind: cur.kind, intro: cur.intro, img: cur.img, imgAlt: cur.imgAlt,
       hasExtras: cur.extras.length > 0,
@@ -1410,7 +1675,11 @@ class Component extends DCLogic {
           btnBg: accent, btnFg: "#222020", outline: f ? "#F2E4D2" : "#222020",
           openCal: function () {
             var ctx = { exp: cur.title, prop: nm, price: pr.price };
-            if (COT_SES.indexOf(cur.id) >= 0 && cur.id !== "bebe" && propFotos(pr) > 0) self.setState({ upOpen: true, upCtx: { ctx: ctx, expId: cur.id, title: cur.title, nm: nm, pr: pr } });
+            if (XC[cur.id]) {
+              var bm = XC[cur.id].bases.filter(function (b) { return b.price === num(pr.price); })[0];
+              self.setState({ upOpen: true, upCtx: { xc: true, ctx: ctx, expId: cur.id, title: cur.title, nm: nm, pr: pr, baseId: bm ? bm.id : XC[cur.id].defBase } });
+            }
+            else if (COT_SES.indexOf(cur.id) >= 0 && cur.id !== "bebe" && propFotos(pr) > 0) self.setState({ upOpen: true, upCtx: { ctx: ctx, expId: cur.id, title: cur.title, nm: nm, pr: pr } });
             else self.setState({ calOpen: true, calCtx: ctx, calOff: 0, calSel: null, calSlot: null });
           },
           wa: WA + encodeURIComponent("Hola, NC Studio. Me interesa " + cur.title + ", " + nm.toLowerCase() + " (" + pr.price + "). ¿Tienen fecha disponible?")
@@ -1503,13 +1772,109 @@ class Component extends DCLogic {
           ready: ready, summary: summary, wa: WA + encodeURIComponent(waMsg)
         };
       })(),
+      createHere: function () {
+        if (XC[sel]) openXC(sel, XC[sel].defBase, 1);
+        else self.setState(Object.assign({ cotOpen: true, cotStep: 1, cotExp: sel || self.state.cotExp }, self.state.cotPkg ? { cotPkg: null, cotN: COT_INCL_FOTOS, cotC: {}, cotQ: {} } : {}));
+      },
+      xc: (function () {
+        var st = self.state, id = st.xcId, cfg = id && XC[id];
+        if (!cfg) return { open: false, v1: "none", v2: "none" };
+        var q = st.xcQ, c = st.xcC, L = st.xcL, step = st.xcStep === 2 ? 2 : 1;
+        var base = cfg.bases.filter(function (b) { return b.id === st.xcBase; })[0] || cfg.bases[0];
+        var total = base.price, hours = base.h, fAdd = 0, lines = [], printLines = [];
+        var groups = XC_GROUPS[id] || [];
+        function tally(it, out) {
+          if (it.kind === "q") {
+            var n = q[it.id] || 0; if (!n) return; var v = it.cost(n);
+            total += v; hours += n * (it.h || 0); fAdd += n * (it.fotos || 0);
+            out.push("• " + n + " × " + it.name.toLowerCase() + ": " + money(v));
+          } else if (c[it.id]) { total += it.price; out.push("• " + it.name + ": " + money(it.price)); }
+        }
+        groups.forEach(function (g) { g.items.forEach(function (it) { tally(it, lines); }); });
+        COT_PRINTS.forEach(function (it) { tally(it, printLines); });
+        var locs = TRAS.map(function (t, i) { var v = parseFloat(String(t[1]).replace(/[^0-9.]/g, "")) || 0; return { id: "t" + i, place: t[0], v: v }; });
+        locs.push({ id: "otro", place: "Otro lugar", v: 0, other: true });
+        var picked = locs.filter(function (l) { return !!L[l.id]; }), other = false;
+        picked.forEach(function (l) { if (l.other) other = true; if (l.v) { total += l.v; lines.push("• Traslado a " + l.place + ": " + money(l.v)); } });
+        var lugares = picked.length ? picked.map(function (l) { return l.place; }).join(", ") : "Por definir";
+        var cal = calModel(self, { off: "xcOff", sel: "xcSel", slot: "xcSlot" }, accent);
+        cal.cells.forEach(function (x) { if (x.real && !x.disabled) x.sub = "Libre"; });
+        var fecha = st.xcSel ? cal.selLabel : "";
+        function view(it) {
+          if (it.kind === "q") {
+            var n = q[it.id] || 0, stp = it.step || 1;
+            return { isQty: true, isChk: false, name: it.name, note: it.note || "", hasNote: !!it.note, n: n, decOp: n ? 1 : 0.35,
+              dec: function () { if (n > 0) { var nq = Object.assign({}, q); nq[it.id] = Math.max(0, n - stp); self.setState({ xcQ: nq }); } },
+              inc: function () { if (n < 999) { var nq = Object.assign({}, q); nq[it.id] = n + stp; self.setState({ xcQ: nq }); } } };
+          }
+          var on = !!c[it.id];
+          return { isQty: false, isChk: true, name: it.name, on: on, checked: on ? "true" : "false", boxBg: on ? accent : "#FEFEFE", hasInNote: false,
+            toggle: function () { var nc = Object.assign({}, c); nc[it.id] = !on; if (!on && it.excl) it.excl.forEach(function (k) { nc[k] = false; }); self.setState({ xcC: nc }); } };
+        }
+        var fMin = base.f[0] + fAdd, fMax = base.f[1] + fAdd;
+        function build() {
+          var m = ["Hola, NC Studio. Quiero reservar " + cfg.title + " (" + cfg.kind.toLowerCase() + "):", ""];
+          m.push("*Nombre:* " + ((st.xcName || st.cotName || "").trim() || "—"));
+          m.push("*Teléfono:* " + ((st.xcPhone || st.cotPhone || "").trim() || "—"));
+          m.push("*Correo:* " + ((st.xcEmail || st.cotEmail || "").trim() || "—"));
+          m.push("*Tipo de evento:* " + (st.xcType.trim() || "—"));
+          m.push("*Lugar:* " + lugares);
+          m.push("*Fecha:* " + (fecha || "Por definir"));
+          m.push("*Hora de inicio:* " + (st.xcTime.trim() || "Por definir"));
+          m.push("", "*Cobertura:* " + base.label + " (" + money(base.price) + "): " + base.note.toLowerCase() + ", galería online privada.");
+          if (lines.length) { m.push("", "*Extras:*"); m.push.apply(m, lines); }
+          if (printLines.length) { m.push("", "*Impresiones:*"); m.push.apply(m, printLines); }
+          m.push("", "*Tiempo total de cobertura:* " + hours + (hours === 1 ? " hora" : " horas"), "*Fotos editadas:* aprox. " + fMin + " a " + fMax);
+          if (other) m.push("*Traslado a otro lugar:* por cotizar");
+          m.push("*Total estimado:* " + money(total) + (other ? " + traslado" : ""));
+          if (st.xcIdea.trim()) m.push("", "*Detalles:* " + st.xcIdea.trim());
+          m.push("", "¿Me confirman disponibilidad y la cotización final?");
+          return m.join("\n");
+        }
+        return {
+          open: true, step: step, title: cfg.title, kind: cfg.kind,
+          subtitle: step === 2 ? "Último paso: tus datos, tu evento, el lugar y la fecha." : "Elige tu cobertura y los extras que quieras.",
+          v1: step === 1 ? "flex" : "none", v2: step === 2 ? "flex" : "none",
+          showNext: step === 1, showSend: step === 2, showBack: step === 2,
+          goNext: function () { self.setState({ xcStep: 2 }); },
+          goBack: function () { self.setState({ xcStep: 1 }); },
+          close: function () { self.setState({ xcId: null }); },
+          baseTitle: cfg.baseTitle,
+          bases: cfg.bases.map(function (b) {
+            var on = b.id === base.id;
+            return { label: b.label, note: b.note, price: money(b.price), checked: on ? "true" : "false", bg: on ? "#222020" : "#FEFEFE", fg: on ? "#FEFEFE" : "#222020", sub: on ? "#F2E4D2" : "#3D3B3E", dot: on ? accent : "#FEFEFE",
+              pick: function () { self.setState({ xcBase: b.id }); } };
+          }),
+          groups: groups.map(function (g) { return { title: g.title, items: g.items.map(view) }; }),
+          prints: COT_PRINTS.map(view),
+          locs: locs.map(function (l) {
+            var on = !!L[l.id];
+            return { name: l.place, on: on, checked: on ? "true" : "false", boxBg: on ? accent : "#FEFEFE",
+              toggle: function () { var nl = Object.assign({}, L); nl[l.id] = !on; self.setState({ xcL: nl }); } };
+          }),
+          cal: cal, hasDate: !!fecha, fecha: fecha,
+          name: st.xcName != null ? st.xcName : st.cotName, phone: st.xcPhone != null ? st.xcPhone : st.cotPhone, email: st.xcEmail != null ? st.xcEmail : st.cotEmail,
+          type: st.xcType, time: st.xcTime, idea: st.xcIdea,
+          setName: function (e) { st.xcName = e && e.target ? e.target.value : ""; },
+          setPhone: function (e) { st.xcPhone = e && e.target ? e.target.value : ""; },
+          setEmail: function (e) { st.xcEmail = e && e.target ? e.target.value : ""; },
+          setType: function (e) { st.xcType = e && e.target ? e.target.value : ""; },
+          setTime: function (e) { st.xcTime = e && e.target ? e.target.value : ""; },
+          setIdea: function (e) { st.xcIdea = e && e.target ? e.target.value : ""; },
+          total: money(total) + (other ? " + traslado" : ""),
+          meta: hours + (hours === 1 ? " hora" : " horas") + " de cobertura · aprox. " + fMin + " a " + fMax + " fotos editadas",
+          wa: WA + encodeURIComponent(build()),
+          send: function (e) { var a = e && e.currentTarget; if (a && a.setAttribute) a.setAttribute("href", WA + encodeURIComponent(build())); }
+        };
+      })(),
       up: (function () {
         var u = self.state.upCtx;
         return {
           open: !!self.state.upOpen,
           label: u ? u.title + " · " + u.nm + " (" + u.pr.price + ")" : "",
-          yes: function () { openPkg(1); },
-          no: function () { openPkg(2); },
+          blurb: u && u.xc ? XC[u.expId].blurb : "Tenemos servicios extra que te pueden interesar: maquillaje y peinado, video detrás de cámaras, fotos adicionales, impresiones y mucho más. ¿Deseas revisarlos?",
+          yes: function () { if (u && u.xc) openXC(u.expId, u.baseId, 1); else openPkg(1); },
+          no: function () { if (u && u.xc) openXC(u.expId, u.baseId, 2); else openPkg(2); },
           close: function () { self.setState({ upOpen: false }); }
         };
         function openPkg(step) {
@@ -1643,7 +2008,7 @@ class Component extends DCLogic {
           sendLabel: pk ? "Enviar reserva por WhatsApp" : "Enviar cotización por WhatsApp",
           close: function () { self.setState({ cotOpen: false }); },
           incl: pk ? pk.items : incl,
-          exps: PACKAGES.map(function (p) { var o = chip(exp === p.id); o.label = TABNAME[p.id][0]; o.pick = function () { self.setState({ cotExp: p.id }); }; return o; })
+          exps: PACKAGES.filter(function (p) { return !XC[p.id] && p.id !== "limitless"; }).map(function (p) { var o = chip(exp === p.id); o.label = TABNAME[p.id][0]; o.pick = function () { self.setState({ cotExp: p.id }); }; return o; })
             .concat([(function () { var o = chip(exp === "otra"); o.label = "Otra"; o.pick = function () { self.setState({ cotExp: "otra" }); }; return o; })()]),
           hasExp: !!exp, noExp: !exp, expName: exp === "otra" ? "tu sesión" : (expObj ? expObj.title : ""),
           groups: groups.map(function (g) { return { title: g.title, items: g.list.map(view) }; }),
