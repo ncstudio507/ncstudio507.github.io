@@ -17,6 +17,7 @@ body{margin:0;background:#F2E4D2;font-family:Arial,Helvetica,sans-serif;color:#2
 .foot{padding:14px 22px;background:#222020;color:#F2E4D2;font-size:12px}
 .spin{width:28px;height:28px;border:3px solid #F2E4D2;border-top-color:#F99824;border-radius:50%;animation:s 1s linear infinite;display:inline-block;vertical-align:middle;margin-right:10px}
 @keyframes s{to{transform:rotate(360deg)}}
+.f label{display:block;font-size:14px;font-weight:bold;margin:14px 0 6px}.f input{width:100%;box-sizing:border-box;font-size:16px;padding:12px;border:1px solid #c9b9a5;border-radius:6px}.f small{color:#666}
 .btn{display:inline-block;padding:14px 22px;border-radius:6px;font-weight:bold;text-decoration:none;font-size:15px;margin:4px 0;border:0;cursor:pointer}
 @media (max-width:600px){.card{margin:0;border-radius:0;min-height:100vh}}
 </style>
@@ -37,15 +38,32 @@ body{margin:0;background:#F2E4D2;font-family:Arial,Helvetica,sans-serif;color:#2
   function show(title, html) { T.textContent = title; B.innerHTML = html; document.title = title + " · NC Studio"; }
   if (!a || !id || !t) { show("Enlace incompleto", "Este enlace no tiene todos los datos. Ábrelo desde el botón del correo."); return; }
   var etiqueta = { si: "confirmar la disponibilidad", no: "avisar que no está disponible", pago: "confirmar el abono" }[a] || "continuar";
+  var extra = {};
   function enviar() {
+    var body = { action: a, id: id, t: t }; for (var k in extra) body[k] = extra[k];
     show("Procesando…", '<span class="spin" aria-hidden="true"></span>Un momento, estamos procesando tu respuesta.');
-    fetch(SCRIPT, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: a, id: id, t: t }) })
+    fetch(SCRIPT, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) })
       .then(function (r) { return r.json(); })
       .then(function (r) { show(r.title || "Listo", r.html || ""); })
       .catch(function () {
         show("No pudimos conectar", 'Revisa tu internet e inténtalo de nuevo.<br><br><button class="btn" id="re" style="background:#F99824;color:#222020">Intentar de nuevo</button>');
         document.getElementById("re").onclick = enviar;
       });
+  }
+  if (a === "pruebas" || a === "final") {
+    var pr = a === "pruebas";
+    show(pr ? "Enviar pruebas" : "Entregar fotos finales", 'Solicitud <b>' + id.replace(/[<>&"]/g, "") + '</b>. Pega los datos de la galería y le enviamos al cliente el correo con todas las instrucciones.' +
+      '<div class="f"><label for="lk">Link de la galería</label><input id="lk" type="url" placeholder="https://…" autocomplete="off">' +
+      '<label for="cl">Contraseña <small>(opcional)</small></label><input id="cl" autocomplete="off">' +
+      '<label for="pn">PIN de descarga <small>(opcional)</small></label><input id="pn" inputmode="numeric" autocomplete="off"></div>' +
+      '<p id="er" style="color:#B42318;font-size:14px;margin:10px 0 0"></p><button class="btn" id="ok" style="background:#F99824;color:#222020;margin-top:14px">' + (pr ? "Enviar pruebas al cliente" : "Enviar fotos finales al cliente") + '</button>');
+    document.getElementById("ok").onclick = function () {
+      var lk = document.getElementById("lk").value.trim();
+      if (!/^https?:\/\//i.test(lk)) { document.getElementById("er").textContent = "Pega el link completo (empieza con https://)."; return; }
+      extra = { link: lk, clave: document.getElementById("cl").value.trim(), pin: document.getElementById("pn").value.trim() };
+      enviar();
+    };
+    return;
   }
   show("¿Confirmas?", 'Vas a <b>' + etiqueta + '</b> de la solicitud <b>' + id.replace(/[<>&"]/g, "") + '</b>.<br><br><button class="btn" id="ok" style="background:#F99824;color:#222020">Sí, continuar</button>');
   document.getElementById("ok").onclick = enviar;
