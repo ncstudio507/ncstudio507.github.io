@@ -1980,6 +1980,15 @@ class Component extends DCLogic {
     }
     fromHash();
     window.addEventListener("hashchange", fromHash);
+    // disponibilidad en vivo desde el calendario (solo fechas); si falla, queda la lista publicada
+    if (NC_SCRIPT && window.fetch) fetch(NC_SCRIPT, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "ocupado" }) })
+      .then(function (r) { return r.json(); }).then(function (j) {
+        if (!j || !j.ok || !Array.isArray(j.busy)) return;
+        BUSY.length = 0; j.busy.forEach(function (k) { if (/^\d{4}-\d{2}-\d{2}$/.test(k)) BUSY.push(k); });
+        var t = new Date(j.at || Date.now()), h = t.getHours(), m = t.getMinutes();
+        BUSY_UPDATED = "en vivo, hoy a las " + ((h % 12) || 12) + ":" + (m < 10 ? "0" : "") + m + (h < 12 ? " a. m." : " p. m.");
+        self.setState({ busyTick: Date.now() });
+      }).catch(function () {});
     if (IG_FEED && window.fetch) fetch(IG_FEED).then(function (r) { return r.json(); }).then(function (j) {
       var arr = Array.isArray(j) ? j : (j && j.posts) || [];
       var posts = arr.slice(0, 6).map(function (p) {
