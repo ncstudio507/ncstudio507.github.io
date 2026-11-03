@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Agendar · NC Studio</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<style>
+:root{--bg:#F2E4D2;--card:#FEFEFE;--fg:#222020;--muted:#5d5650;--line:#D9CDBE;--accent:#F99824;--soft:#FDF1E2;--err:#B42318}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--fg);font-size:16px}
+.top{background:var(--fg);padding:14px max(16px,env(safe-area-inset-left));display:flex;align-items:center;gap:14px}
+.top img{height:36px;display:block}.top span{color:var(--bg);font-family:Georgia,serif;font-size:20px}
+.top a{margin-left:auto;color:var(--bg);font-size:13px}
+.bar{height:5px;background:var(--accent)}
+main{max-width:760px;margin:0 auto;padding:18px max(16px,env(safe-area-inset-left)) 120px;display:grid;gap:16px}
+section{background:var(--card);border-radius:10px;padding:18px 18px 20px;display:grid;gap:12px}
+h2{margin:0;font-family:Georgia,serif;font-weight:400;font-size:22px}
+label{display:grid;gap:6px;font-size:14px;font-weight:bold}
+label small{font-weight:normal;color:var(--muted)}
+input,select,textarea{font:inherit;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--fg);width:100%;min-width:0}
+textarea{min-height:80px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-color:var(--accent)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.g2{grid-template-columns:1fr}}
+.inc{margin:0;padding:10px 12px 10px 30px;background:var(--soft);border-radius:6px;font-size:14px;line-height:1.6}
+.ex{display:grid;grid-template-columns:1fr 100px 44px;gap:8px;align-items:center}
+.x{border:1px solid var(--line);background:#fff;border-radius:6px;height:44px;font-size:20px;cursor:pointer;color:var(--fg)}
+.btn{font:bold 16px Arial,sans-serif;border:0;border-radius:8px;padding:15px 22px;cursor:pointer;background:var(--accent);color:var(--fg)}
+.btn2{font:bold 14px Arial,sans-serif;border:1px dashed var(--muted);background:transparent;border-radius:6px;padding:10px 14px;cursor:pointer;color:var(--fg);justify-self:start}
+.radio{display:flex;gap:10px;align-items:flex-start;font-weight:normal;font-size:15px;grid-template-columns:none;padding:12px;border:1px solid var(--line);border-radius:8px;cursor:pointer}
+.radio input{width:20px;height:20px;flex:none;margin:1px 0 0;accent-color:var(--accent)}
+.sum{display:grid;gap:6px;font-size:15px}.sum div{display:flex;justify-content:space-between;gap:12px;font-variant-numeric:tabular-nums}
+.sum .t{font-size:20px;font-weight:bold;border-top:1px solid var(--line);padding-top:8px}
+.foot{position:fixed;left:0;right:0;bottom:0;background:var(--fg);color:var(--bg);padding:12px max(16px,env(safe-area-inset-left)) calc(12px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:14px;justify-content:space-between}
+.foot b{font-size:20px;font-variant-numeric:tabular-nums}.foot small{display:block;font-size:12px;opacity:.8}
+.err{color:var(--err);font-size:14px;margin:0}
+.msg{background:var(--card);border-radius:10px;padding:22px;line-height:1.6}.msg h2{margin-bottom:8px}
+.spin{width:22px;height:22px;border:3px solid var(--bg);border-top-color:var(--accent);border-radius:50%;animation:s 1s linear infinite;display:inline-block;vertical-align:middle;margin-right:8px}
+@keyframes s{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+.hint{font-size:13px;color:var(--muted);margin:0}
+</style>
+</head>
+<body>
+<div class="top"><img src="logo.png" alt="NC Studio"><span>Agendar reserva</span><a href="#" id="salir" hidden>Cambiar PIN</a></div>
+<div class="bar"></div>
+<main id="app"></main>
+<script>
+(function () {
+  var SCRIPT = "https://script.google.com/macros/s/AKfycbzaT3OjIAFX5CET8Opyjnehye_XOfdI_kwA0DxEDusXzCzesOtffZUwsvE2-IbEp4yvIQ/exec";
+  var DATA = {"P":[{"id":"levelup","title":"Level Up","props":[{"name":"Propuesta 1","price":"$75","items":["Asesoría previa personalizada","1 hora de sesión","1 locación de libre elección","2 cambios de vestuario","Dirección de poses","Mínimo 30 fotos de prueba","6 fotos editadas en alta resolución","Galería online privada"]},{"name":"Propuesta 2","price":"$120","items":["Asesoría previa personalizada","2 horas de sesión","1 locación de libre elección","2 cambios de vestuario","Dirección de poses","Mínimo 60 fotos de prueba","Hasta 1 persona extra","12 fotos editadas en alta resolución","Galería online privada"]},{"name":"Propuesta 3","price":"$200","items":["Reunión creativa virtual","Moodboard personalizado","Asesoría previa personalizada","3 horas de sesión","2 locaciones de libre elección","3 cambios de vestuario","Dirección de poses","Mínimo 90 fotos de prueba","Hasta 2 personas extra","18 fotos editadas en alta resolución","Galería online privada"]}],"extras":[["Foto editada extra","$10 c/u"],["Reunión creativa virtual","$10"],["Reunión creativa presencial (incluye café)","$45"],["Moodboard personalizado","$15"],["Maquillaje profesional","$35"],["Peinado profesional","$35"],["Maquillaje y peinado","$65"],["Cambio de vestuario extra (cada uno suma 10 minutos de sesión)","$10 c/u"],["Persona extra (cada una suma 10 minutos de sesión y 1 foto editada; de la 2.ª a la 4.ª $12 y de la 5.ª en adelante $10)","$15"],["Locación adicional","$10 c/u"],["Video detrás de cámaras","$35"],["Liberación de galería","$60"],["USB con fotografías","$25"],["Álbum fotográfico (20 páginas)","$90"],["Fotografía enmarcada 16×20","$70"],["Foto impresa 4×6","$3.50 c/u"],["Foto impresa 5×7","$5 c/u"],["Foto impresa 8×10","$8 c/u"],["Foto impresa 11×17","$12 c/u"],["Juego de 6 fotos tamaño cartera","$5"]]},{"id":"suenos","title":"Sueños de 15","props":[{"name":"Propuesta 1","price":"$75","items":["Asesoría previa personalizada","1 hora de sesión","1 locación de libre elección","2 cambios de vestuario","Dirección de poses","Mínimo 30 fotos de prueba","6 fotos editadas en alta resolución","Galería online privada"]},{"name":"Propuesta 2","price":"$120","items":["Asesoría previa personalizada","2 horas de sesión","1 locación de libre elección","2 cambios de vestuario","Dirección de poses","Mínimo 60 fotos de prueba","Hasta 1 persona extra","12 fotos editadas en alta resolución","Galería online privada"]},{"name":"Propuesta 3","price":"$400","items":["Reunión creativa virtual","Moodboard personalizado","Asesoría previa personalizada","3 horas de sesión","2 locaciones de libre elección","Vestido de 15 de estreno","3 cambios de vestuario","Dirección de poses","Mínimo 90 fotos de prueba","Hasta 2 personas extra","18 fotos editadas en alta resolución","Galería online privada"]}],"extras":[["Foto editada extra","$10 c/u"],["Reunión creativa virtual","$10"],["Reunión creativa presencial (incluye café)","$45"],["Moodboard personalizado","$15"],["Maquillaje profesional","$35"],["Peinado profesional","$35"],["Maquillaje y peinado","$65"],["Vestido de 15 de estreno","$200"],["Cambio de vestuario extra (cada uno suma 10 minutos de sesión)","$10 c/u"],["Persona extra (cada una suma 10 minutos de sesión y 1 foto editada; de la 2.ª a la 4.ª $12 y de la 5.ª en adelante $10)","$15"],["Locación adicional","$10 c/u"],["Video detrás de cámaras","$35"],["Liberación de galería","$60"],["USB con fotografías","$25"],["Álbum fotográfico (20 páginas)","$90"],["Fotografía enmarcada 16×20","$70"],["Foto impresa 4×6","$3.50 c/u"],["Foto impresa 5×7","$5 c/u"],["Foto impresa 8×10","$8 c/u"],["Foto impresa 11×17","$12 c/u"],["Juego de 6 fotos tamaño cartera","$5"]]},{"id":"dulce","title":"Dulce Espera","props":[{"name":"Propuesta 1","price":"$200","items":["Reunión creativa virtual","Moodboard personalizado","Asesoría previa personalizada","3 horas de sesión","2 locaciones de libre elección","3 cambios de vestuario","Dirección de poses","Mínimo 90 fotos de prueba","Hasta 2 personas extra","18 fotos editadas en alta resolución","Galería online privada"]},{"name":"Propuesta 2","price":"$120","items":["Asesoría previa personalizada","2 horas de sesión","1 locación de libre elección","2 cambios de vestuario","Dirección de poses","Mínimo 60 fotos de prueba","Hasta 1 persona extra","12 fotos editadas en alta resolución","Galería online privada"]},{"name":"Propuesta 3","price":"$75","items":["Asesoría previa personalizada","1 hora de sesión","1 locación de libre elección","2 cambios de vestuario","Dirección de poses","Mínimo 30 fotos de prueba","6 fotos editadas en alta resolución","Galería online privada"]}],"extras":[["Foto editada extra","$10 c/u"],["Reunión creativa virtual","$10"],["Reunión creativa presencial (incluye café)","$45"],["Moodboard personalizado","$15"],["Maquillaje profesional","$35"],["Peinado profesional","$35"],["Maquillaje y peinado","$65"],["Cambio de vestuario extra (cada uno suma 10 minutos de sesión)","$10 c/u"],["Persona extra (cada una suma 10 minutos de sesión y 1 foto editada; de la 2.ª a la 4.ª $12 y de la 5.ª en adelante $10)","$15"],["Locación adicional","$10 c/u"],["Video detrás de cámaras","$35"],["Liberación de galería","$60"],["USB con fotografías","$25"],["Álbum fotográfico (20 páginas)","$90"],["Fotografía enmarcada 16×20","$70"],["Foto impresa 4×6","$3.50 c/u"],["Foto impresa 5×7","$5 c/u"],["Foto impresa 8×10","$8 c/u"],["Foto impresa 11×17","$12 c/u"],["Juego de 6 fotos tamaño cartera","$5"]]},{"id":"bebe","title":"12 Meses de Amor","props":[{"name":"Propuesta 1","price":"$420","items":["Asesoría previa personalizada","12 sesiones (una por mes)","30 minutos por sesión","1 locación de libre elección","Fotos del bebé","Foto con los padres","Mínimo 35 fotos de prueba por sesión","8 fotos editadas en alta resolución","Galería online privada"]},{"name":"Propuesta 2","price":"$45","items":["Asesoría previa personalizada","30 minutos de sesión en estudio","Fotos del bebé","Foto del bebé con los padres","Mínimo 25 fotos de prueba","5 fotos editadas en alta resolución","Galería online privada"]}],"extras":[["Foto editada extra","$10 c/u"],["Reunión creativa virtual","$10"],["Reunión creativa presencial (incluye café)","$45"],["Moodboard personalizado","$15"],["Maquillaje profesional","$35"],["Peinado profesional","$35"],["Maquillaje y peinado","$65"],["Cambio de vestuario extra (cada uno suma 10 minutos de sesión)","$10 c/u"],["Persona extra (cada una suma 10 minutos de sesión y 1 foto editada; de la 2.ª a la 4.ª $12 y de la 5.ª en adelante $10)","$15"],["Locación adicional","$10 c/u"],["Video detrás de cámaras","$35"],["Liberación de galería","$60"],["USB con fotografías","$25"],["Álbum fotográfico (20 páginas)","$90"],["Fotografía enmarcada 16×20","$70"],["Foto impresa 4×6","$3.50 c/u"],["Foto impresa 5×7","$5 c/u"],["Foto impresa 8×10","$8 c/u"],["Foto impresa 11×17","$12 c/u"],["Juego de 6 fotos tamaño cartera","$5"]]},{"id":"estudio","title":"Level Up en estudio","props":[{"name":"Propuesta 1","price":"$75","items":["Asesoría previa personalizada","1 hora de sesión en estudio","2 cambios de vestuario","Dirección de poses","Mínimo 30 fotos de prueba","6 fotos editadas en alta resolución","Galería online privada"]},{"name":"Propuesta 2","price":"$55","items":["Asesoría previa personalizada","30 minutos de sesión en estudio","1 cambio de vestuario","Dirección de poses","Mínimo 15 fotos de prueba","3 fotos editadas en alta resolución","Galería online privada"]}],"extras":[["Foto editada extra","$10 c/u"],["Reunión creativa virtual","$10"],["Reunión creativa presencial (incluye café)","$45"],["Moodboard personalizado","$15"],["Maquillaje profesional","$35"],["Peinado profesional","$35"],["Maquillaje y peinado","$65"],["Cambio de vestuario extra (cada uno suma 10 minutos de sesión)","$10 c/u"],["Persona extra (cada una suma 10 minutos de sesión y 1 foto editada; de la 2.ª a la 4.ª $12 y de la 5.ª en adelante $10)","$15"],["Locación adicional","$10 c/u"],["Video detrás de cámaras","$35"],["Liberación de galería","$60"],["USB con fotografías","$25"],["Álbum fotográfico (20 páginas)","$90"],["Fotografía enmarcada 16×20","$70"],["Foto impresa 4×6","$3.50 c/u"],["Foto impresa 5×7","$5 c/u"],["Foto impresa 8×10","$8 c/u"],["Foto impresa 11×17","$12 c/u"],["Juego de 6 fotos tamaño cartera","$5"]]},{"id":"folklore","title":"Folklore","props":[{"name":"Propuesta 1","price":"$75","items":["Asesoría previa personalizada","1 hora de sesión","1 locación de libre elección","2 cambios de vestuario","Dirección de poses","Mínimo 30 fotos de prueba","6 fotos editadas en alta resolución","Galería online privada"]},{"name":"Propuesta 2","price":"$55","items":["Asesoría previa personalizada","30 minutos de sesión en estudio","1 cambio de vestuario","Dirección de poses","Mínimo 15 fotos de prueba","3 fotos editadas en alta resolución","Galería online privada"]}],"extras":[["Foto editada extra","$10 c/u"],["Reunión creativa virtual","$10"],["Reunión creativa presencial (incluye café)","$45"],["Moodboard personalizado","$15"],["Maquillaje profesional","$35"],["Peinado profesional","$35"],["Maquillaje y peinado","$65"],["Cambio de vestuario extra (cada uno suma 10 minutos de sesión)","$10 c/u"],["Persona extra (cada una suma 10 minutos de sesión y 1 foto editada; de la 2.ª a la 4.ª $12 y de la 5.ª en adelante $10)","$15"],["Locación adicional","$10 c/u"],["Video detrás de cámaras","$35"],["Liberación de galería","$60"],["USB con fotografías","$25"],["Álbum fotográfico (20 páginas)","$90"],["Fotografía enmarcada 16×20","$70"],["Foto impresa 4×6","$3.50 c/u"],["Foto impresa 5×7","$5 c/u"],["Foto impresa 8×10","$8 c/u"],["Foto impresa 11×17","$12 c/u"],["Juego de 6 fotos tamaño cartera","$5"]]},{"id":"infantil","title":"Momentos","props":[{"name":"Propuesta 1","price":"$250","items":["Cobertura de 3 horas","Registro del ambiente, la decoración y cada detalle","Fotos espontáneas durante todo el evento","Retratos con familia, amigos e invitados","Los momentos clave: brindis, pastel, entrada o lo que haga especial tu evento","Aproximadamente 225 a 300 fotografías editadas","Galería online privada"]},{"name":"Propuesta 2","price":"$150","items":["Cobertura de 2 horas","Registro del ambiente, la decoración y cada detalle","Fotos espontáneas durante todo el evento","Retratos con familia, amigos e invitados","Los momentos clave: brindis, pastel, entrada o lo que haga especial tu evento","Aproximadamente 125 a 200 fotografías editadas","Galería online privada"]},{"name":"Propuesta 3","price":"$90","items":["Cobertura de 1 hora","Registro del ambiente, la decoración y cada detalle","Fotos espontáneas durante todo el evento","Retratos con familia, amigos e invitados","Los momentos clave: brindis, pastel, entrada o lo que haga especial tu evento","Aproximadamente 75 a 100 fotografías editadas","Galería online privada"]}],"extras":[["Foto editada extra","$2 c/u"],["Liberación de galería (fotos sin editar)","$1 c/u"],["Video vertical de 1 min para redes, estilo creador de contenido, grabado con teléfono en Full HD 1080p","$75"],["Video resumen horizontal (10 min aprox.), estilo creador de contenido, grabado con teléfono en Full HD 1080p","$150"],["Photo booth: 50 fotos impresas al instante","$85"],["Photo booth: 75 fotos impresas al instante","$100"],["Photo booth: 100 fotos impresas al instante","$125"],["USB con fotografías","$25"],["Álbum fotográfico (20 páginas)","$90"],["Fotografía enmarcada 16×20","$70"],["Foto impresa 4×6","$3.50 c/u"],["Foto impresa 5×7","$5 c/u"],["Foto impresa 8×10","$8 c/u"],["Foto impresa 11×17","$12 c/u"],["Juego de 6 fotos tamaño cartera","$5"]]},{"id":"primer","title":"Primer Logro","props":[{"name":"Propuesta 1","price":"$15","items":["1 foto individual con toga","1 foto individual en uniforme en la mesita","1 foto grupal","Dirección de poses","1 foto 8×10 y 2 fotos 4×6 impresas","6 fotos impresas tamaño cartera","Galería online privada"]},{"name":"Propuesta 2","price":"$25","items":["1 foto individual con toga","1 foto individual en uniforme en la mesita","1 foto grupal","1 foto familiar (o una tercera individual)","Dirección de poses","1 foto 11×17, 1 foto 8×10 y 2 fotos 5×7 impresas","6 fotos impresas tamaño cartera","Galería online privada"]}],"extras":[["Foto editada extra","$10 c/u"],["Reunión creativa virtual","$10"],["Reunión creativa presencial (incluye café)","$45"],["Moodboard personalizado","$15"],["Maquillaje profesional","$35"],["Peinado profesional","$35"],["Maquillaje y peinado","$65"],["Cambio de vestuario extra (cada uno suma 10 minutos de sesión)","$10 c/u"],["Persona extra (cada una suma 10 minutos de sesión y 1 foto editada; de la 2.ª a la 4.ª $12 y de la 5.ª en adelante $10)","$15"],["Locación adicional","$10 c/u"],["Video detrás de cámaras","$35"],["Liberación de galería","$60"],["USB con fotografías","$25"],["Álbum fotográfico (20 páginas)","$90"],["Fotografía enmarcada 16×20","$70"],["Foto impresa 4×6","$3.50 c/u"],["Foto impresa 5×7","$5 c/u"],["Foto impresa 8×10","$8 c/u"],["Foto impresa 11×17","$12 c/u"],["Juego de 6 fotos tamaño cartera","$5"]]},{"id":"gran","title":"Gran Logro","props":[{"name":"Propuesta 1","price":"$15","items":["2 fotos individuales","1 foto grupal","Dirección de poses","1 foto 8×10 y 2 fotos 4×6 impresas","6 fotos impresas tamaño cartera","Galería online privada"]},{"name":"Propuesta 2","price":"$25","items":["2 fotos individuales","1 foto grupal","1 foto familiar (o una tercera individual)","Dirección de poses","1 foto 11×17, 1 foto 8×10 y 2 fotos 5×7 impresas","6 fotos impresas tamaño cartera","Galería online privada"]}],"extras":[["Foto editada extra","$10 c/u"],["Reunión creativa virtual","$10"],["Reunión creativa presencial (incluye café)","$45"],["Moodboard personalizado","$15"],["Maquillaje profesional","$35"],["Peinado profesional","$35"],["Maquillaje y peinado","$65"],["Cambio de vestuario extra (cada uno suma 10 minutos de sesión)","$10 c/u"],["Persona extra (cada una suma 10 minutos de sesión y 1 foto editada; de la 2.ª a la 4.ª $12 y de la 5.ª en adelante $10)","$15"],["Locación adicional","$10 c/u"],["Video detrás de cámaras","$35"],["Liberación de galería","$60"],["USB con fotografías","$25"],["Álbum fotográfico (20 páginas)","$90"],["Fotografía enmarcada 16×20","$70"],["Foto impresa 4×6","$3.50 c/u"],["Foto impresa 5×7","$5 c/u"],["Foto impresa 8×10","$8 c/u"],["Foto impresa 11×17","$12 c/u"],["Juego de 6 fotos tamaño cartera","$5"]]},{"id":"granext","title":"Gran Logro exteriores","props":[{"name":"Propuesta 1","price":"$75","items":["Asesoría previa personalizada","1 hora de sesión","1 locación de libre elección","Toga y birrete más 1 cambio de vestuario","Dirección de poses","Mínimo 30 fotos de prueba","6 fotos editadas en alta resolución","Galería online privada"]},{"name":"Propuesta 2","price":"$120","items":["Asesoría previa personalizada","2 horas de sesión","1 locación de libre elección","Toga y birrete más 1 cambio de vestuario","Dirección de poses","Mínimo 60 fotos de prueba","Hasta 1 persona extra","12 fotos editadas en alta resolución","Galería online privada"]},{"name":"Propuesta 3","price":"$200","items":["Reunión creativa virtual","Moodboard personalizado","Asesoría previa personalizada","3 horas de sesión","2 locaciones de libre elección","Toga y birrete más 2 cambios de vestuario","Dirección de poses","Mínimo 90 fotos de prueba","Hasta 2 personas extra","18 fotos editadas en alta resolución","Galería online privada"]}],"extras":[["Foto editada extra","$10 c/u"],["Reunión creativa virtual","$10"],["Reunión creativa presencial (incluye café)","$45"],["Moodboard personalizado","$15"],["Maquillaje profesional","$35"],["Peinado profesional","$35"],["Maquillaje y peinado","$65"],["Cambio de vestuario extra (cada uno suma 10 minutos de sesión)","$10 c/u"],["Persona extra (cada una suma 10 minutos de sesión y 1 foto editada; de la 2.ª a la 4.ª $12 y de la 5.ª en adelante $10)","$15"],["Locación adicional","$10 c/u"],["Video detrás de cámaras","$35"],["Liberación de galería","$60"],["USB con fotografías","$25"],["Álbum fotográfico (20 páginas)","$90"],["Fotografía enmarcada 16×20","$70"],["Foto impresa 4×6","$3.50 c/u"],["Foto impresa 5×7","$5 c/u"],["Foto impresa 8×10","$8 c/u"],["Foto impresa 11×17","$12 c/u"],["Juego de 6 fotos tamaño cartera","$5"]]}],"T":[["Las Tablas","Sin costo",0],["Guararé","+$5",10],["Pocrí","+$10",25],["Chitré","+$10",30],["Pedasí","+$10",40],["Tonosí","+$15",60],["Aguadulce","+$25",90],["Santiago","+$30",105],["Penonomé","+$35",125],["Panamá","+$75",280],["Boquete","+$90",330]]};
+  var app = document.getElementById("app"), salir = document.getElementById("salir");
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function num(s) { return parseFloat(String(s).replace(/[^0-9.]/g, "")) || 0; }
+  function money(n) { n = Math.round(n * 100) / 100; return "$" + (n % 1 ? n.toFixed(2) : n); }
+  function call(body) { return fetch(SCRIPT, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) }).then(function (r) { return r.json(); }); }
+  function getPin() { try { return localStorage.getItem("ncPin") || ""; } catch (e) { return ""; } }
+  function setPin(v) { try { if (v) localStorage.setItem("ncPin", v); else localStorage.removeItem("ncPin"); } catch (e) {} }
+  var PIN = getPin();
+
+  // opciones de paquete, en el mismo orden y nombre que en la página
+  var OPTS = [];
+  DATA.P.forEach(function (p) {
+    p.props.slice().sort(function (a, b) { return num(b.price) - num(a.price); }).forEach(function (q, i) {
+      var nm = /^Propuesta \d+$/.test(q.name) ? "Propuesta " + (i + 1) : q.name;
+      OPTS.push({ key: p.id + ":" + i, exp: p, title: p.title, nm: nm, price: num(q.price), items: q.items });
+    });
+  });
+
+  function pinView(msg) {
+    salir.hidden = true;
+    app.innerHTML = '<section><h2>Entrar</h2><p class="hint">Escribe el PIN de tu página para agendar. Lo encuentras en tu código de Apps Script, en la línea <b>PIN</b>.</p>' +
+      '<label for="pin">PIN<input id="pin" inputmode="numeric" autocomplete="off"></label><p class="err" id="perr">' + esc(msg || "") + '</p><button class="btn" id="pok">Entrar</button></section>';
+    $("pok").onclick = function () {
+      var v = $("pin").value.trim(); if (!v) return;
+      $("pok").disabled = true; $("pok").innerHTML = '<span class="spin"></span>Revisando…';
+      call({ action: "pin", pin: v }).then(function (r) {
+        if (r.ok) { PIN = v; setPin(v); form(); } else pinView("PIN incorrecto.");
+      }).catch(function () { pinView("No pudimos conectar. Revisa tu internet."); });
+    };
+    $("pin").onkeydown = function (e) { if (e.key === "Enter") $("pok").click(); };
+  }
+
+  var manual = false;
+  function form() {
+    salir.hidden = false; manual = false;
+    var hoy = new Date(); hoy.setMinutes(hoy.getMinutes() - hoy.getTimezoneOffset());
+    var opts = '<option value="">Elige…</option>' + DATA.P.map(function (p) {
+      return '<optgroup label="' + esc(p.title) + '">' + OPTS.filter(function (o) { return o.exp === p; }).map(function (o) { return '<option value="' + o.key + '">' + esc(o.title + " · " + o.nm + " (" + money(o.price) + ")") + '</option>'; }).join("") + '</optgroup>';
+    }).join("") + '<option value="otro">Otro / personalizado</option>';
+    var tras = DATA.T.map(function (t, i) { return '<option value="' + i + '">' + esc((i === 0 ? "Estudio o Las Tablas" : t[0]) + (t[2] ? " (aprox. " + t[2] + " km)" : "") + " · " + (num(t[1]) ? "+" + money(num(t[1])) : "sin costo")) + '</option>'; }).join("") + '<option value="otro">Otro lugar</option>';
+    app.innerHTML =
+      '<section><h2>Cliente</h2><label for="nm">Nombre completo<input id="nm" autocomplete="off"></label>' +
+      '<div class="g2"><label for="ph">Teléfono / WhatsApp<input id="ph" inputmode="tel" autocomplete="off"></label><label for="em">Correo <small>(ahí le llega la cotización y el contrato)</small><input id="em" type="email" autocomplete="off"></label></div></section>' +
+      '<section><h2>Paquete</h2><label for="pk">Paquete<select id="pk">' + opts + '</select></label>' +
+      '<div id="otroBox" class="g2" hidden><label for="on">Nombre del servicio<input id="on" placeholder="Ej.: Sesión de pareja"></label><label for="op">Precio base ($)<input id="op" type="number" min="0" step="0.5" inputmode="decimal"></label><label for="of">Fotos editadas<input id="of" type="number" min="0" inputmode="numeric"></label><label for="oh">Duración (horas)<input id="oh" type="number" min="0" step="0.5" inputmode="decimal" value="1"></label></div>' +
+      '<ul class="inc" id="inc" hidden></ul></section>' +
+      '<section><h2>Extras</h2><p class="hint">Escribe o elige un extra; el precio se llena solo si es uno de la página.</p><datalist id="exl"></datalist><div id="exs" style="display:grid;gap:8px"></div><button class="btn2" id="addEx" type="button">+ Agregar extra</button></section>' +
+      '<section><h2>Lugar y fecha</h2><label for="tr">Traslado<select id="tr">' + tras + '</select></label><label for="pl">Lugar de las fotos<input id="pl" value="Estudio o Las Tablas"></label>' +
+      '<div class="g2"><label for="dt">Fecha<input id="dt" type="date" min="' + hoy.toISOString().slice(0, 10) + '"></label><label for="tm">Hora<input id="tm" type="time" step="900"></label></div>' +
+      '<label for="nt">Idea o notas <small>(opcional)</small><textarea id="nt"></textarea></label></section>' +
+      '<section><h2>Total y estado</h2><div class="sum" id="sum"></div><label for="tt">Total final ($) <small>(cámbialo si das descuento)</small><input id="tt" type="number" min="0" step="0.5" inputmode="decimal"></label>' +
+      '<label class="radio"><input type="radio" name="st" id="st1" checked><span><b>Enviar cotización y esperar el abono.</b><br>Le llega la cotización en PDF con las instrucciones de Yappy; a ti el botón «Abono recibido».</span></label>' +
+      '<label class="radio"><input type="radio" name="st" id="st2"><span><b>Ya pagó el abono.</b><br>Le llega la cotización, la confirmación y el enlace para firmar el contrato.</span></label>' +
+      '<p class="err" id="ferr"></p></section>' +
+      '<div class="foot"><div><small>Total · abono 50 %</small><b id="ft">$0</b></div><button class="btn" id="go">Agendar y enviar</button></div>';
+    ["nm","ph","em","pl","dt","tm","nt","on","op","of","oh"].forEach(function (k) { $(k).oninput = calc; });
+    $("pk").onchange = function () { $("exs").innerHTML = ""; calc(); };
+    $("tr").onchange = function () { var v = $("tr").value; $("pl").value = v === "otro" ? "" : (v === "0" ? "Estudio o Las Tablas" : DATA.T[+v][0]); if (v === "otro") $("pl").focus(); calc(); };
+    $("tt").oninput = function () { manual = $("tt").value !== ""; calc(); };
+    $("addEx").onclick = function () { addEx(); };
+    $("go").onclick = enviar;
+    calc();
+  }
+
+  function sel() { var v = $("pk").value; return v === "otro" ? "otro" : OPTS.filter(function (o) { return o.key === v; })[0] || null; }
+  function addEx(name, price) {
+    var row = document.createElement("div"); row.className = "ex";
+    var n = "ex" + Date.now() + Math.floor(Math.random() * 999);
+    row.innerHTML = '<input list="exl" placeholder="Extra" aria-label="Extra" id="' + n + 'n"><input type="number" min="0" step="0.5" inputmode="decimal" placeholder="$" aria-label="Precio" id="' + n + 'p"><button class="x" type="button" aria-label="Quitar">×</button>';
+    $("exs").appendChild(row);
+    var a = row.children[0], b = row.children[1];
+    a.value = name || ""; b.value = price != null ? price : "";
+    a.oninput = function () { var o = sel(); var m = o && o !== "otro" ? o.exp.extras.filter(function (e) { return e[0] === a.value; })[0] : null; if (m) b.value = num(m[1]); calc(); };
+    b.oninput = calc;
+    row.children[2].onclick = function () { row.remove(); calc(); };
+    if (!name) a.focus();
+    calc();
+  }
+  function extras() {
+    return Array.prototype.map.call($("exs").children, function (r) { return { name: r.children[0].value.trim(), price: num(r.children[1].value) }; }).filter(function (e) { return e.name; });
+  }
+  function base() {
+    var o = sel();
+    if (!o) return null;
+    if (o === "otro") return { service: $("on").value.trim(), price: num($("op").value), items: [], fotos: $("of").value.trim(), mins: Math.round(num($("oh").value) * 60) || 60, tests: 0, kind: "paquete", baseLabel: $("on").value.trim() };
+    var t = o.items.join(" | "), m;
+    var mins = (m = t.match(/(\d+(?:[.,]\d+)?) horas? de (?:sesión|cobertura)/i)) ? Math.round(num(m[1].replace(",", ".")) * 60) : ((m = t.match(/(\d+) minutos/i)) ? +m[1] : 60);
+    var fotos = (m = t.match(/(\d+) fotos editadas/i)) ? m[1] : ((m = t.match(/(aprox\.?\s*)?(\d+\s*a\s*\d+) fotos/i)) ? "aprox. " + m[2] : "");
+    var tests = (m = t.match(/Mínimo (\d+) fotos de prueba/i)) ? +m[1] : 0;
+    return { service: o.title + " · " + o.nm, price: o.price, items: o.items, fotos: fotos, mins: mins, tests: tests, kind: o.exp.id === "infantil" ? "evento" : "paquete", baseLabel: o.title + ", " + o.nm };
+  }
+  function trasl() { var v = $("tr").value; if (v === "otro" || v === "0") return null; var t = DATA.T[+v]; return num(t[1]) ? { name: "Traslado a " + t[0], price: num(t[1]) } : null; }
+  function calc() {
+    var o = sel(), b = base();
+    if ($("ferr")) $("ferr").textContent = "";
+    $("otroBox").hidden = o !== "otro";
+    var inc = $("inc");
+    if (b && b.items.length) { inc.hidden = false; inc.innerHTML = b.items.map(function (i) { return "<li>" + esc(i) + "</li>"; }).join(""); } else inc.hidden = true;
+    $("exl").innerHTML = o && o !== "otro" ? o.exp.extras.map(function (e) { return '<option value="' + esc(e[0]) + '">' + esc(e[1]) + '</option>'; }).join("") : "";
+    var ex = extras(), tr = trasl(), auto = (b ? b.price : 0) + ex.reduce(function (s, e) { return s + e.price; }, 0) + (tr ? tr.price : 0);
+    if (!manual) $("tt").value = auto || "";
+    var total = manual ? num($("tt").value) : auto;
+    var rows = (b ? '<div><span>' + esc(b.service || "Servicio") + '</span><span>' + money(b.price) + '</span></div>' : "") +
+      ex.map(function (e) { return '<div><span>' + esc(e.name) + '</span><span>' + money(e.price) + '</span></div>'; }).join("") +
+      (tr ? '<div><span>' + esc(tr.name) + '</span><span>' + money(tr.price) + '</span></div>' : "") +
+      ($("tr").value === "otro" ? '<div><span>Traslado</span><span>por cotizar</span></div>' : "") +
+      (manual && total !== auto ? '<div><span>Ajuste</span><span>' + money(total - auto) + '</span></div>' : "") +
+      '<div class="t"><span>Total</span><span>' + money(total) + '</span></div><div><span>Abono 50 %</span><span>' + money(Math.round(total * 50) / 100) + '</span></div>';
+    $("sum").innerHTML = rows;
+    $("ft").textContent = money(total) + " · " + money(Math.round(total * 50) / 100);
+    return { b: b, ex: ex, tr: tr, total: total };
+  }
+  var DIAS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"], MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+  function enviar() {
+    var c = calc(), b = c.b, err = [];
+    var nm = $("nm").value.trim(), ph = $("ph").value.trim(), em = $("em").value.trim(), dt = $("dt").value;
+    if (!nm) err.push("nombre");
+    if (ph.replace(/\D/g, "").length < 7) err.push("teléfono");
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) err.push("correo válido");
+    if (!b || !b.service) err.push("paquete");
+    if (!dt) err.push("fecha");
+    if (!(c.total > 0)) err.push("total");
+    if (err.length) { $("ferr").textContent = "Falta: " + err.join(", ") + "."; $("ferr").scrollIntoView({ block: "center" }); return; }
+    var f = new Date(dt + "T12:00:00");
+    var exs = c.ex.map(function (e) { return { name: e.name, price: money(e.price) }; });
+    if (c.tr) exs.push({ name: c.tr.name, price: money(c.tr.price) });
+    var data = {
+      v: 1, kind: b.kind, service: b.service, baseLabel: b.baseLabel, basePrice: b.price, includes: b.items, extras: exs, prints: [], notNeeded: [],
+      name: nm, phone: ph, email: em, place: $("pl").value.trim() || "Por definir", otherPlace: $("tr").value === "otro",
+      dateIso: dt, dateLabel: DIAS[f.getDay()] + " " + f.getDate() + " de " + MESES[f.getMonth()], time: $("tm").value, venue: "",
+      durationMin: b.mins, photos: String(b.fotos || ""), tests: b.tests, eventType: "", total: c.total, totalLabel: money(c.total) + ($("tr").value === "otro" ? " + traslado" : ""), notes: $("nt").value.trim()
+    };
+    var pag = $("st2").checked;
+    var go = $("go"); go.disabled = true; go.innerHTML = '<span class="spin"></span>Enviando…';
+    call({ action: "agendar", pin: PIN, pagado: pag, data: data }).then(function (r) {
+      if (r.title === "PIN incorrecto") { setPin(""); pinView("El PIN cambió. Escríbelo de nuevo."); return; }
+      if (!r.ok) { go.disabled = false; go.textContent = "Agendar y enviar"; $("ferr").innerHTML = esc(r.title || "Error") + ". " + (r.html || ""); return; }
+      app.innerHTML = '<div class="msg"><h2></h2><div id="rh"></div><p><button class="btn" id="otra">Agendar otra reserva</button></p></div>';
+      app.querySelector("h2").textContent = r.title || "Listo"; $("rh").innerHTML = r.html || ""; window.scrollTo(0, 0);
+      $("otra").onclick = form;
+    }).catch(function () { go.disabled = false; go.textContent = "Agendar y enviar"; $("ferr").textContent = "No pudimos conectar. Revisa tu internet e inténtalo de nuevo."; });
+  }
+  salir.onclick = function (e) { e.preventDefault(); setPin(""); PIN = ""; pinView(); };
+  if (PIN) form(); else pinView();
+})();
+</script>
+</body>
+</html>
