@@ -64,6 +64,10 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 .card2{border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:10px;background:#fff}
 .card2 .top2{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}.card2 .top2 b{font-size:18px;font-variant-numeric:tabular-nums}
 .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}@media (max-width:560px){.g3{grid-template-columns:1fr}}
+.seg{display:flex;gap:6px;flex-wrap:wrap}.seg button{font:bold 14px Arial,sans-serif;border:1.5px solid var(--fg);background:transparent;color:var(--fg);border-radius:999px;padding:9px 16px;cursor:pointer}.seg button[aria-pressed="true"]{background:var(--fg);color:#fff}
+.tb{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}.tb td,.tb th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}.tb td:first-child,.tb th:first-child{text-align:left;white-space:normal}.tb th{font-size:12px;color:var(--muted)}.tb tr.tot td{font-weight:bold;background:var(--soft)}
+.bar{height:8px;border-radius:4px;background:var(--accent)}.neg{color:var(--err)}.pos{color:#067647}
+.scx{overflow-x:auto;margin:0 -4px;padding:0 4px}
 .chk{display:flex;gap:8px;align-items:center;font-weight:normal;grid-template-columns:none}.chk input{width:20px;height:20px;accent-color:var(--accent)}
 </style>
 </head>
@@ -407,8 +411,57 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       }).catch(function () { b.disabled = false; b.textContent = "Guardar"; $(p + "e").textContent = "No pudimos conectar."; });
     };
   }
+  function segFin(act) {
+    return '<div class="seg" role="group" aria-label="Vista de finanzas"><button data-v="hoy" aria-pressed="' + (act === "hoy") + '">Resumen</button><button data-v="rep" aria-pressed="' + (act === "rep") + '">Reportes</button><button data-v="paq" aria-pressed="' + (act === "paq") + '">Costos por paquete</button></div>';
+  }
+  function bindSeg() { Array.prototype.forEach.call(app.querySelectorAll("[data-v]"), function (b) { b.onclick = function () { var v = b.getAttribute("data-v"); if (v === "hoy") finanzas(); else reportes(v === "paq" ? "paq" : null); }; }); }
+  var REP = { mes: new Date().getMonth() + 1, anio: new Date().getFullYear() };
+  function reportes(vista) {
+    tab("F"); salir.hidden = false;
+    app.innerHTML = segFin(vista === "paq" ? "paq" : "rep") + '<div class="msg"><span class="spin"></span>Armando el reporte…</div>'; bindSeg();
+    call({ action: "fin_report", pin: PIN, mes: REP.mes, anio: REP.anio }).then(function (r) {
+      if (!r.ok) { app.innerHTML = segFin("rep") + '<div class="msg">No pudimos cargar el reporte. ¿Ya actualizaste el código?</div>'; bindSeg(); return; }
+      if (vista === "paq") pintaPaq(r); else pintaRep(r);
+    }).catch(function () { app.innerHTML = segFin("rep") + '<div class="msg">No pudimos conectar.</div>'; bindSeg(); });
+  }
+  function filas(arr, total) {
+    var max = Math.max.apply(null, arr.map(function (x) { return x[1]; }).concat([1]));
+    return '<table class="tb">' + arr.map(function (x) { return '<tr><td>' + esc(x[0]) + '<div class="bar" style="width:' + Math.round(x[1] / max * 100) + '%;margin-top:4px;opacity:.6"></div></td><td>' + money(x[1]) + '</td></tr>'; }).join("") + (total !== undefined ? '<tr class="tot"><td>Total</td><td>' + money(total) + '</td></tr>' : '') + '</table>';
+  }
+  function pintaRep(r) {
+    var c = r.conclusiones, h = segFin("rep");
+    var mesesOpt = '<option value="0">Todo el año</option>' + ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"].map(function (m, i) { return '<option value="' + (i + 1) + '"' + (REP.mes === i + 1 ? ' selected' : '') + '>' + m + '</option>'; }).join("");
+    h += '<section><div class="g2"><label for="rm">Mes<select id="rm">' + mesesOpt + '</select></label><label for="ra">Año<input id="ra" type="number" value="' + REP.anio + '" inputmode="numeric"></label></div>' +
+      '<div class="kpis"><div class="kpi"><span>Cobrado a clientes</span><b>' + money(c.cobrado) + '</b></div><div class="kpi"><span>Ganancia de NC</span><b class="' + (c.gananciaNC < 0 ? 'neg' : '') + '">' + money(c.gananciaNC) + '</b></div><div class="kpi"><span>Para Nelson</span><b>' + money(c.nelson) + '</b></div><div class="kpi"><span>Para Charlie</span><b>' + money(c.charlie) + '</b></div></div>' +
+      '<a class="btn2" href="' + esc(r.url) + '" target="_blank" rel="noopener" style="text-decoration:none;justify-self:start">Abrir hoja de finanzas ↗</a></section>';
+    h += '<section><h2>Conclusiones · ' + esc(r.nombreMes.charAt(0) + r.nombreMes.slice(1).toLowerCase()) + '</h2><table class="tb">' +
+      [["Cobrado a clientes", c.cobrado], ["− Pagado a Nelson", -c.nelson], ["− Pagado a Charlie", -c.charlie], ["− Viáticos de sesiones", -c.viaticos], ["− Gastos del negocio", -c.gastosNegocio], ["− Inversión en equipo", -c.inversion]].map(function (x) { return '<tr><td>' + x[0] + '</td><td>' + money(Math.abs(x[1])) + '</td></tr>'; }).join("") +
+      '<tr class="tot"><td>Ganancia de NC</td><td class="' + (c.gananciaNC < 0 ? 'neg' : 'pos') + '">' + money(c.gananciaNC) + '</td></tr><tr><td>Deuda de NC con Nelson</td><td>' + money(r.deudas.nelson) + '</td></tr><tr><td>Deuda de NC con Charlie</td><td>' + money(r.deudas.charlie) + '</td></tr></table></section>';
+    if (r.meses.length) { var mx = Math.max.apply(null, r.meses.map(function (m) { return m.cobrado; }).concat([1])); h += '<section><h2>Mes a mes</h2><table class="tb"><tr><th>Mes</th><th>Cobrado</th><th>Ganancia NC</th></tr>' + r.meses.map(function (m) { return '<tr><td>' + m.mes.charAt(0) + m.mes.slice(1).toLowerCase() + '<div class="bar" style="width:' + Math.round(m.cobrado / mx * 100) + '%;margin-top:4px"></div></td><td>' + money(m.cobrado) + '</td><td class="' + (m.ganancia < 0 ? 'neg' : '') + '">' + money(m.ganancia) + '</td></tr>'; }).join("") + '</table></section>'; }
+    h += '<section><h2>Gastos del negocio</h2>' + (r.gastosNC.length ? filas(r.gastosNC, c.gastosNegocio + c.inversion + (r.gastosNC.some(function (x) { return x[0] === "Viáticos de sesión"; }) ? r.gastosNC.filter(function (x) { return x[0] === "Viáticos de sesión"; })[0][1] : 0)) : '<p class="hint">Sin gastos en este periodo.</p>') + '</section>';
+    ["nelson", "charlie"].forEach(function (k) {
+      var p = r[k], n = k === "nelson" ? "Nelson" : "Charlie";
+      h += '<section><h2>' + n + '</h2><div class="kpis"><div class="kpi"><span>Ingresos</span><b>' + money(p.totalIngresos) + '</b></div><div class="kpi"><span>Gastos personales</span><b>' + money(p.totalGastos) + '</b></div><div class="kpi"><span>Le queda</span><b class="' + (p.neto < 0 ? 'neg' : 'pos') + '">' + money(p.neto) + '</b></div></div>' +
+        (p.ingresos.length ? '<h3 style="margin:6px 0 0;font-size:15px">Ingresos</h3>' + filas(p.ingresos) : '') + (p.gastos.length ? '<h3 style="margin:6px 0 0;font-size:15px">Gastos</h3>' + filas(p.gastos) : '') + '</section>';
+    });
+    h += '<section><h2>Trabajos (' + r.trabajos.length + ')</h2><div class="scx"><table class="tb"><tr><th>Cliente</th><th>Cobrado</th><th>Nelson</th><th>Charlie</th><th>NC</th><th>Viáticos</th></tr>' + r.trabajos.map(function (t) {
+      return '<tr><td><b>' + esc(t.cliente) + '</b><br><small class="hint">' + esc(t.fecha + (t.desc ? " · " + t.desc : "")) + (t.pendiente ? ' · <span class="neg">pendiente de pago</span>' : '') + '</small></td><td>' + money(t.cobrado) + '</td><td>' + money(t.nelson) + '</td><td>' + money(t.charlie) + '</td><td>' + money(t.nc) + '</td><td>' + money(t.viaticos) + '</td></tr>';
+    }).join("") + '</table></div></section>';
+    app.innerHTML = h; bindSeg();
+    $("rm").onchange = function () { REP.mes = +$("rm").value; reportes(); };
+    $("ra").onchange = function () { REP.anio = +$("ra").value || REP.anio; reportes(); };
+  }
+  function pintaPaq(r) {
+    var num = function (x) { return typeof x === "number" ? x : null; };
+    var h = segFin("paq") + '<section><h2>Costos por paquete</h2><p class="hint">Cuánto cuesta producir cada propuesta y la repartición sugerida (Charlie y Nelson ganan lo mismo). Los supuestos se cambian en la hoja "Paquetes y servicios".</p><div class="scx"><table class="tb"><tr><th>Paquete</th><th>Precio</th><th>Costo</th><th>Ganancia</th><th>%</th><th>Charlie</th><th>Nelson</th><th>NC</th><th>Viáticos</th></tr>' +
+      r.paquetes.map(function (p) {
+        var g = num(p.ganancia), pc = num(p.pct);
+        return '<tr><td><b>' + esc(p.exp) + '</b><br><small class="hint">' + esc(p.prop) + '</small></td><td>' + money(p.precio) + '</td><td>' + (num(p.costo) === null ? '—' : money(p.costo)) + '</td><td class="' + (g !== null && g < 0 ? 'neg' : 'pos') + '">' + (g === null ? '—' : money(g)) + '</td><td>' + (pc === null ? '—' : Math.round(pc * 100) + '%') + '</td><td>' + (num(p.charlie) === null ? '—' : money(p.charlie)) + '</td><td>' + (num(p.nelson) === null ? '—' : money(p.nelson)) + '</td><td>' + (num(p.nc) === null ? '—' : money(p.nc)) + '</td><td>' + (num(p.viaticos) === null ? '—' : money(p.viaticos)) + '</td></tr>';
+      }).join("") + '</table></div><a class="btn2" href="' + esc(r.url) + '" target="_blank" rel="noopener" style="text-decoration:none;justify-self:start">Cambiar supuestos en la hoja ↗</a></section>';
+    app.innerHTML = h; bindSeg();
+  }
   function pintaFin(foco) {
-    var r = FD, s = r.resumen, h = "";
+    var r = FD, s = r.resumen, h = segFin("hoy");
     h += '<section><div class="row" style="justify-content:space-between"><h2>Finanzas · ' + esc(s.mes.charAt(0) + s.mes.slice(1).toLowerCase()) + '</h2><a class="btn2" href="' + esc(r.url) + '" target="_blank" rel="noopener" style="text-decoration:none">Abrir hoja de finanzas ↗</a></div>' +
       '<div class="kpis"><div class="kpi"><span>Ingresos NC</span><b>' + money(s.ingresosNC) + '</b></div><div class="kpi"><span>Gastos NC</span><b>' + money(s.gastosNC) + '</b></div><div class="kpi"><span>Gastos Nelson</span><b>' + money(s.gastosNelson) + '</b></div><div class="kpi"><span>Por revisar</span><b>' + r.pendientes.length + '</b></div></div></section>';
     if (r.repartos.length) h += '<section><h2>Repartos pendientes</h2><p class="hint">Trabajos ya pagados completos. Anota cuánto le tocó a cada uno; lo que sobra se registra como viáticos.</p>' + r.repartos.map(function (x, i) {
@@ -425,7 +478,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       return '<div class="mv"><span><b>' + esc(m.cat || m.tipo) + '</b> · ' + esc(m.desc || m.persona || "") + '</span><span class="m' + (entra ? ' in' : '') + '">' + (entra ? '+' : '−') + money(m.monto) + '</span><small>' + esc(m.fecha + " · " + m.tipo + (m.metodo ? " · " + m.metodo : "") + " · " + m.origen) + '</small>' +
         (m.origen === "Reserva" ? '' : '<div class="ac"><button data-e="' + i + '">Editar</button><button data-b="' + i + '">Borrar</button></div><div id="ed' + i + '"></div>') + '</div>';
     }).join("") + '</div></section>';
-    app.innerHTML = h;
+    app.innerHTML = h; bindSeg();
     r.repartos.forEach(function (x, i) {
       function upd() { var v = x.total - Number($("rn" + i).value || 0) - Number($("rc" + i).value || 0) - Number($("rx" + i).value || 0); $("rv" + i).textContent = v < -0.009 ? "Te pasaste por " + money(-v) : "Viáticos: " + money(Math.max(0, v)); }
       ["rn", "rc", "rx"].forEach(function (k) { $(k + i).oninput = upd; });
