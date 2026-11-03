@@ -621,19 +621,24 @@ Calcula tu paquete aquí
 <div style="display: {{cot.vL}}; flex-direction: column; gap: 22px">
 <div style="display: flex; flex-direction: column; gap: 4px">
 <span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">¿Dónde será la sesión?</span>
-<span style="font-size: 13px; color: #3D3B3E">Marca el lugar o los lugares donde te gustaría la sesión.</span>
-<sc-for list="{{cot.locs}}" as="l" hint-placeholder-count="7">
-<button type="button" role="checkbox" aria-checked="{{l.checked}}" onClick="{{l.toggle}}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border: 0; border-bottom: 1px solid #EFE6DA; background: transparent; color: #222020; text-align: left; cursor: pointer; width: 100%">
-<span style="display: flex; align-items: center; gap: 12px; min-width: 0">
-<span aria-hidden="true" style="flex: none; width: 24px; height: 24px; border-radius: 5px; border: 2px solid #222020; background: {{l.boxBg}}; color: #222020; display: flex; align-items: center; justify-content: center">
+<span style="font-size: 13px; color: #3D3B3E">Marca el lugar o los lugares. La distancia es aproximada desde Las Tablas.</span>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 6px">
+<sc-for list="{{cot.locs}}" as="l" hint-placeholder-count="12">
+<button type="button" role="checkbox" aria-checked="{{l.checked}}" onClick="{{l.toggle}}" style="display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 6px 10px; border-radius: 6px; border: 1.5px solid {{l.border}}; background: {{l.bg}}; color: #222020; text-align: left; cursor: pointer; width: 100%; box-sizing: border-box">
+<span aria-hidden="true" style="flex: none; width: 22px; height: 22px; border-radius: 5px; border: 2px solid #222020; background: {{l.boxBg}}; color: #222020; display: flex; align-items: center; justify-content: center">
 <sc-if value="{{l.on}}" hint-placeholder-val="{{false}}">
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
 </sc-if>
 </span>
+<span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.2">
 <span style="font-family: 'Tenor Sans', Georgia, serif; font-size: 15px">{{l.name}}</span>
+<sc-if value="{{l.hasSub}}" hint-placeholder-val="{{true}}">
+<span style="font-family: Montserrat, sans-serif; font-size: 11.5px; font-weight: 600; color: #3D3B3E">{{l.sub}}</span>
+</sc-if>
 </span>
 </button>
 </sc-for>
+</div>
 </div>
 </div>
 
@@ -860,17 +865,24 @@ Calcula tu paquete aquí
 
 <div style="display: {{xc.vL}}; flex-direction: column; gap: 4px">
 <span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">¿Dónde será el evento?</span>
-<span style="font-size: 13px; color: #3D3B3E">Marca el lugar. Fuera de Las Tablas se suma el traslado.</span>
-<sc-for list="{{xc.locs}}" as="l" hint-placeholder-count="7">
-<button type="button" role="checkbox" aria-checked="{{l.checked}}" onClick="{{l.toggle}}" style="display: flex; align-items: center; gap: 12px; padding: 10px 0; border: 0; border-bottom: 1px solid #EFE6DA; background: transparent; color: #222020; text-align: left; cursor: pointer; width: 100%">
-<span aria-hidden="true" style="flex: none; width: 24px; height: 24px; border-radius: 5px; border: 2px solid #222020; background: {{l.boxBg}}; color: #222020; display: flex; align-items: center; justify-content: center">
+<span style="font-size: 13px; color: #3D3B3E">Marca el lugar. La distancia es aproximada desde Las Tablas; fuera de Las Tablas se suma el traslado.</span>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 6px">
+<sc-for list="{{xc.locs}}" as="l" hint-placeholder-count="12">
+<button type="button" role="checkbox" aria-checked="{{l.checked}}" onClick="{{l.toggle}}" style="display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 6px 10px; border-radius: 6px; border: 1.5px solid {{l.border}}; background: {{l.bg}}; color: #222020; text-align: left; cursor: pointer; width: 100%; box-sizing: border-box">
+<span aria-hidden="true" style="flex: none; width: 22px; height: 22px; border-radius: 5px; border: 2px solid #222020; background: {{l.boxBg}}; color: #222020; display: flex; align-items: center; justify-content: center">
 <sc-if value="{{l.on}}" hint-placeholder-val="{{false}}">
-<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>
 </sc-if>
 </span>
+<span style="display: flex; flex-direction: column; min-width: 0; line-height: 1.2">
 <span style="font-family: 'Tenor Sans', Georgia, serif; font-size: 15px">{{l.name}}</span>
+<sc-if value="{{l.hasSub}}" hint-placeholder-val="{{true}}">
+<span style="font-family: Montserrat, sans-serif; font-size: 11.5px; font-weight: 600; color: #3D3B3E">{{l.sub}}</span>
+</sc-if>
+</span>
 </button>
 </sc-for>
+</div>
 </div>
 
 <div style="display: {{xc.vF}}; flex-direction: column; gap: 12px">
@@ -1418,7 +1430,9 @@ var PACKAGES = [
   }
 ];
 
-var TRAS = [["Las Tablas", "Sin costo"], ["Guararé y Pocrí", "+$5"], ["Pedasí, Chitré y Tonosí", "+$10"], ["Aguadulce y Santiago", "+$15"], ["Penonomé", "+$20"], ["Boquete y Panamá", "+$60"]];
+var TRAS = [["Las Tablas", "Sin costo", 0], ["Guararé", "+$5", 10], ["Pocrí", "+$5", 25], ["Chitré", "+$10", 30], ["Pedasí", "+$10", 40], ["Tonosí", "+$10", 80],
+  ["Aguadulce", "+$15", 90], ["Santiago", "+$15", 105], ["Penonomé", "+$20", 125], ["Panamá", "+$60", 280], ["Boquete", "+$60", 330]];
+function trasLabel(t) { return t[2] ? t[0] + " (aprox. " + t[2] + " km de Las Tablas)" : t[0]; }
 var Y = "✓", N = "—";
 var SES = function (extraRows) { return [
   ["Tiempo de sesión", "3 h", "2 h", "1 h"],
@@ -1749,7 +1763,7 @@ class Component extends DCLogic {
       extras: cur.extras.map(function (e) { return { name: e[0], price: e[1] }; }),
       info: INFO[cur.info],
       showTras: true,
-      tras: TRAS.map(function (t, i) { return { place: t[0], price: t[1], first: i === 0, rest: i > 0 }; }),
+      tras: TRAS.map(function (t, i) { return { place: trasLabel(t), price: t[1], first: i === 0, rest: i > 0 }; }),
       hasTesti: !!(TESTI[cur.id] && TESTI[cur.id].length),
       testi: TESTI[cur.id] || [],
       proposals: cur.proposals.slice().sort(function (a, b) {
@@ -1906,7 +1920,7 @@ class Component extends DCLogic {
         }
         groups.forEach(function (g) { g.items.forEach(function (it) { tally(it, lines); }); });
         COT_PRINTS.forEach(function (it) { tally(it, printLines); });
-        var locs = TRAS.map(function (t, i) { var v = parseFloat(String(t[1]).replace(/[^0-9.]/g, "")) || 0; return { id: "t" + i, place: t[0], v: v }; });
+        var locs = TRAS.map(function (t, i) { var v = parseFloat(String(t[1]).replace(/[^0-9.]/g, "")) || 0; return { id: "t" + i, place: t[0], km: t[2], v: v }; });
         locs.push({ id: "otro", place: "Otro lugar", v: 0, other: true });
         var picked = locs.filter(function (l) { return !!L[l.id]; }), other = false;
         picked.forEach(function (l) { if (l.other) other = true; if (l.v) { total += l.v; lines.push("• Traslado a " + l.place + ": " + money(l.v)); } });
@@ -1973,7 +1987,7 @@ class Component extends DCLogic {
           prints: COT_PRINTS.map(view),
           locs: locs.map(function (l) {
             var on = !!L[l.id];
-            return { name: l.place, on: on, checked: on ? "true" : "false", boxBg: on ? accent : "#FEFEFE",
+            return { name: l.place, sub: l.km ? "(aprox. " + l.km + " km)" : (l.id === "t0" ? "Sin traslado" : (l.other ? "Te cotizamos el traslado" : "")), hasSub: true, border: on ? "#222020" : "#D9CDBE", bg: on ? "#FDF1E2" : "#FEFEFE", on: on, checked: on ? "true" : "false", boxBg: on ? accent : "#FEFEFE",
               toggle: function () { var nl = Object.assign({}, L); nl[l.id] = !on; self.setState({ xcL: nl }); } };
           }),
           cal: cal, hasDate: !!fecha, fecha: fecha,
@@ -2020,7 +2034,7 @@ class Component extends DCLogic {
       cot: (function () {
         var st = self.state;
         var q = st.cotQ, c = st.cotC, L = st.cotL, nF = st.cotN, exp = st.cotExp;
-        var locs = TRAS.map(function (t, i) { var v = parseFloat(String(t[1]).replace(/[^0-9.]/g, "")) || 0; return { id: "t" + i, place: i === 0 ? "Estudio o Las Tablas" : t[0], v: v }; });
+        var locs = TRAS.map(function (t, i) { var v = parseFloat(String(t[1]).replace(/[^0-9.]/g, "")) || 0; return { id: "t" + i, place: i === 0 ? "Estudio o Las Tablas" : t[0], km: t[2], v: v }; });
         locs.push({ id: "otro", place: "Otro lugar", v: 0, other: true });
         var pk = st.cotPkg, baseF = pk ? pk.fotos : COT_INCL_FOTOS;
         var cstep = st.cotStep >= 1 && st.cotStep <= 5 ? st.cotStep : 1, cmiss = missing(st.cotName, st.cotPhone, st.cotEmail);
@@ -2164,7 +2178,7 @@ class Component extends DCLogic {
           fotosInc: function () { if (nF < 200) self.setState({ cotN: nF + 1 }); },
           locs: locs.map(function (l) {
             var on = !!L[l.id];
-            return { name: l.place, on: on, checked: on ? "true" : "false", boxBg: on ? accent : "#FEFEFE",
+            return { name: l.place, sub: l.km ? "(aprox. " + l.km + " km)" : (l.id === "t0" ? "Sin traslado" : (l.other ? "Te cotizamos el traslado" : "")), hasSub: true, border: on ? "#222020" : "#D9CDBE", bg: on ? "#FDF1E2" : "#FEFEFE", on: on, checked: on ? "true" : "false", boxBg: on ? accent : "#FEFEFE",
               toggle: function () { var nl = Object.assign({}, L); nl[l.id] = !on; self.setState({ cotL: nl }); } };
           }),
           name: st.cotName, phone: st.cotPhone, email: st.cotEmail, date: st.cotDate, idea: st.cotIdea,
@@ -2194,7 +2208,7 @@ class Component extends DCLogic {
       waGeneral: WA + encodeURIComponent("Hola, NC Studio. Quiero reservar o cotizar una sesión."),
       portfolio: portfolio,
       faq: FAQ,
-      trasList: TRAS.map(function (t, i) { return { place: t[0], price: t[1], first: i === 0, rest: i > 0 }; }),
+      trasList: TRAS.map(function (t, i) { return { place: trasLabel(t), price: t[1], first: i === 0, rest: i > 0 }; }),
       lb: lb,
       steps: [
         { n: "01", title: "Reserva y contrato", text: "Confirmamos tu fecha con el abono del 50 % y la firma del contrato." },
