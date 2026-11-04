@@ -397,10 +397,18 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
   // de quién son las finanzas que estás viendo
   var FE = null, ENT = {
     nc: { n: "NC Studio", g: ["Negocio (NC Studio)", "Otros"], tipos: ["Ingreso NC", "Gasto NC", "Inversión NC", "Deudas NC", "Sin impacto"], rep: ["NC Studio", "Viáticos"], vistas: [["hoy", "Pendientes"], ["nuevo", "+ Registrar"], ["mov", "Movimientos"], ["rep", "Reporte"], ["paq", "Costos por paquete"]] },
-    nelson: { n: "Nelson", g: ["Nelson", "Nelson y Charlie"], tipos: ["Ingreso Nelson", "Gasto Nelson", "Ahorro Nelson"], rep: ["Nelson"], vistas: [["rep", "Resumen"], ["nuevo", "+ Registrar"], ["mov", "Movimientos"]] },
-    charlie: { n: "Charlie", g: ["Charlie", "Nelson y Charlie"], tipos: ["Ingreso Charlie", "Gasto Charlie"], rep: ["Charlie"], vistas: [["rep", "Resumen"], ["nuevo", "+ Registrar"], ["mov", "Movimientos"]] },
+    nelson: { n: "Nelson", g: ["Nelson", "Nelson y Charlie"], tipos: ["Ingreso Nelson", "Gasto Nelson", "Ahorro Nelson"], rep: ["Nelson"], vistas: [["rep", "Resumen"], ["yap", "Yappys"], ["nuevo", "+ Registrar"], ["mov", "Movimientos"]] },
+    charlie: { n: "Charlie", g: ["Charlie", "Nelson y Charlie"], tipos: ["Ingreso Charlie", "Gasto Charlie"], rep: ["Charlie"], vistas: [["rep", "Resumen"], ["yap", "Yappys"], ["nuevo", "+ Registrar"], ["mov", "Movimientos"]] },
     global: { n: "Globales", g: null, tipos: null, rep: null, vistas: [["rep", "Resumen"], ["hoy", "Pendientes"], ["nuevo", "+ Registrar"], ["mov", "Movimientos"]] }
   };
+  // pendientes según la cuenta: los Yappys sin clasificar salen en la cuenta de quien los mandó o recibió
+  function pendDe(fe) {
+    var P = (FD && FD.pendientes) || [];
+    if (fe === "global") return P;
+    if (fe === "nelson" || fe === "charlie") return P.filter(function (m) { return m.origen === "Yappy" && (m.cuenta || "Nelson") === ENT[fe].n; });
+    return P.filter(function (m) { return !(m.origen === "Yappy" && m.cuenta); });
+  }
+  function nPend(fe) { return pendDe(fe).length + (fe === "nc" || fe === "global" ? ((FD && FD.repartos.length) || 0) : 0); }
   function movDe(m) { if (FE === "global" || !FE) return true; var e = ENT[FE]; return m.tipo === "Reparto" ? e.rep.indexOf(m.cat) >= 0 : e.tipos.indexOf(m.tipo) >= 0; }
   var ENTRA = { "Ingreso NC": 1, "Ingreso Nelson": 1, "Ingreso Charlie": 1, "Reparto": 1 };
   function hoyIso() { var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
@@ -414,38 +422,76 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     }).catch(function () { app.innerHTML = '<div class="msg">No pudimos conectar. Revisa tu internet.</div>'; });
   }
   function inicioFin() {
-    var s = FD.resumen, n = FD.repartos.length + FD.pendientes.length, mes = esc(s.mes.charAt(0) + s.mes.slice(1).toLowerCase());
+    var s = FD.resumen, n = nPend("nc"), nN = nPend("nelson"), nC = nPend("charlie"), mes = esc(s.mes.charAt(0) + s.mes.slice(1).toLowerCase());
     var card = function (k, ico, l1, l2) { return '<button class="fe" data-fe="' + k + '"><span class="fei">' + ico + '</span><span><b>' + (k === "global" ? "Finanzas globales" : "Finanzas de " + ENT[k].n) + '</b><small>' + l1 + '</small>' + (l2 ? '<small>' + l2 + '</small>' : '') + '</span></button>'; };
     app.innerHTML = '<section style="gap:6px"><h2>Finanzas · ' + mes + '</h2><p class="hint">Elige de quién quieres ver las finanzas.</p></section><div class="fes">' +
       card("nc", "📸", "Ingresos " + money(s.ingresosNC) + " · gastos " + money(s.gastosNC), n ? '<span class="neg">' + n + ' pendiente' + (n === 1 ? '' : 's') + ' por revisar</span>' : "Todo al día ✓") +
-      card("nelson", '<img src="img/av-nelson.png" alt="">', "Ingresos " + money(s.ingresosNelson || 0) + " · gastos " + money(s.gastosNelson)) +
-      card("charlie", '<img src="img/av-charlie.png" alt="">', "Ingresos " + money(s.ingresosCharlie || 0) + " · gastos " + money(s.gastosCharlie || 0)) +
+      card("nelson", '<img src="img/av-nelson.png" alt="">', "Ingresos " + money(s.ingresosNelson || 0) + " · gastos " + money(s.gastosNelson), nN ? '<span class="neg">' + nN + ' Yappy' + (nN === 1 ? '' : 's') + ' por clasificar</span>' : "") +
+      card("charlie", '<img src="img/av-charlie.png" alt="">', "Ingresos " + money(s.ingresosCharlie || 0) + " · gastos " + money(s.gastosCharlie || 0), nC ? '<span class="neg">' + nC + ' Yappy' + (nC === 1 ? '' : 's') + ' por clasificar</span>' : "") +
       card("global", "🌎", "Todo junto: negocio, Nelson y Charlie") + '</div>';
     bindSeg();
   }
+  /* listas con «Otro…»: se elige de la lista y solo si no está, se escribe */
+  function opcOtro(id, opts, ph) {
+    return '<select id="' + id + 's"><option value="">— Elige —</option>' + opts.map(function (o) { return '<option>' + esc(o) + '</option>'; }).join("") + '<option value="__o">Otro… (escribir)</option></select><input id="' + id + '" autocomplete="off" placeholder="' + esc(ph || "Escribe aquí") + '" hidden style="margin-top:6px">';
+  }
+  function bindOtro(id, val) {
+    var s = $(id + "s"), i = $(id); if (!s) return;
+    var tiene = Array.prototype.some.call(s.options, function (o) { return o.value === val; });
+    if (val && tiene) s.value = val; else if (val) { s.value = "__o"; i.value = val; }
+    i.hidden = s.value !== "__o";
+    s.onchange = function () { i.hidden = s.value !== "__o"; if (!i.hidden) i.focus(); };
+  }
+  function valOtro(id) { var s = $(id + "s"); if (!s) return ($(id) || {}).value || ""; return s.value === "__o" ? $(id).value.trim() : s.value; }
+  function unicos(arr, max) { var o = [], v = {}; arr.forEach(function (x) { x = String(x || "").trim(); if (x && !v[x.toLowerCase()] && !/^Tel\. \d/.test(x)) { v[x.toLowerCase()] = 1; o.push(x); } }); return o.slice(0, max || 15); }
+  var T_GASTO = ["Gasto NC", "Inversión NC", "Gasto Nelson", "Ahorro Nelson", "Gasto Charlie", "Gasto compartido", "Deudas NC", "Sin impacto"];
+  var T_INGRESO = ["Ingreso NC", "Ingreso Nelson", "Ingreso Charlie", "Deudas NC", "Sin impacto"];
+  function esGastoT(t) { return /^(Gasto|Inversión|Ahorro|Deudas)/.test(t || ""); }
+  function rubroDe(t, c) { if (!esGastoT(t)) return ""; var r = "Otros"; Object.keys(FD.rubroDe || {}).forEach(function (k) { if (FD.rubroDe[k].indexOf(c) >= 0) r = k; }); return r; }
+  var RUBRO_ICO = { "Comida": "🍽️", "Gasolina y carro": "⛽", "Transporte y viajes": "🚕", "Casa": "🏠", "Suscripciones": "📱", "Salud": "🩺", "Entretenimiento": "🎉", "Compras": "🛍️", "Regalos y donaciones": "🎁", "Deudas y préstamos": "💳", "Seguros": "🛡️", "Educación": "📚", "Equipo y negocio": "📸", "Ahorro": "🐷", "Otros": "❓" };
   function formMov(p, m, conReserva) {
     m = m || {};
-    var tipos = GRUPOS.filter(function (g) { return p !== "nv" || !FE || !ENT[FE].g || ENT[FE].g.indexOf(g[0]) >= 0; }).map(function (g) { return '<optgroup label="' + esc(g[0]) + '">' + g[1].map(function (t) { return '<option' + (m.tipo === t ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join("") + '</optgroup>'; }).join("");
-    if (conReserva && FD.abiertas.length) tipos = '<option value="Reserva">Abono o saldo de una reserva</option>' + tipos;
-    return '<div class="g2"><label for="' + p + 't">Tipo<select id="' + p + 't"><option value="">Elige…</option>' + tipos + '</select></label>' +
+    var permit = m.sentido === "Enviado" ? T_GASTO : m.sentido === "Recibido" ? T_INGRESO : null;
+    var tipos = GRUPOS.filter(function (g) { return p !== "nv" || !FE || !ENT[FE].g || ENT[FE].g.indexOf(g[0]) >= 0; }).map(function (g) {
+      var ts = g[1].filter(function (t) { return !permit || permit.indexOf(t) >= 0; }); if (!ts.length) return "";
+      return '<optgroup label="' + esc(g[0]) + '">' + ts.map(function (t) { return '<option' + (m.tipo === t ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join("") + '</optgroup>';
+    }).join("");
+    if (conReserva && FD.abiertas.length && m.sentido !== "Enviado") tipos = '<option value="Reserva">Abono o saldo de una reserva</option>' + tipos;
+    var personas = unicos([m.persona, "Nelson", "Charlie"].concat(FD.ultimos.map(function (x) { return x.persona; })), 25);
+    return '<div class="g2"><label for="' + p + 't">' + (m.sentido === "Enviado" ? "¿Para qué fue?" : m.sentido === "Recibido" ? "¿De qué es?" : "Tipo") + '<select id="' + p + 't"><option value="">Elige…</option>' + tipos + '</select></label>' +
       '<label for="' + p + 'c" id="' + p + 'cl">Categoría<select id="' + p + 'c"></select></label>' +
       '<label for="' + p + 'r" id="' + p + 'rl" hidden>Reserva<select id="' + p + 'r"><option value="">Elige la reserva…</option>' + FD.abiertas.map(function (a) { return '<option value="' + esc(a.id) + '">' + esc(a.name + " · " + a.falta + " " + money(a.monto)) + '</option>'; }).join("") + '</select></label></div>' +
+      '<label for="' + p + 'ru" id="' + p + 'rul" hidden>¿En qué se gastó?<select id="' + p + 'ru">' + (FD.rubros || []).map(function (x) { return '<option value="' + esc(x) + '">' + (RUBRO_ICO[x] || "") + ' ' + esc(x) + '</option>'; }).join("") + '</select></label>' +
       '<div class="g3"><label for="' + p + 'm">Monto ($)<input id="' + p + 'm" type="number" min="0" step="0.01" inputmode="decimal"></label>' +
       '<label for="' + p + 'me">Método<select id="' + p + 'me">' + FD.metodos.map(function (x) { return '<option' + (m.metodo === x ? ' selected' : '') + '>' + x + '</option>'; }).join("") + '</select></label>' +
       '<label for="' + p + 'f">Fecha<input id="' + p + 'f" type="date"></label></div>' +
-      '<div class="g2"><label for="' + p + 'd">¿De qué fue?<input id="' + p + 'd" autocomplete="off" placeholder="Ej.: Gasolina para la sesión de Ana"></label><label for="' + p + 'p">Persona <small>(quién pagó o a quién)</small><input id="' + p + 'p" autocomplete="off"></label></div>' +
+      '<div class="g2"><label for="' + p + 'ds">¿De qué fue? <small>(opcional)</small><span id="' + p + 'dw"></span></label><label for="' + p + 'ps">Persona <small>(quién pagó o a quién)</small>' + opcOtro(p + "p", personas, "Nombre") + '</label></div>' +
       '<div class="row"><button class="btn" id="' + p + 'ok">Guardar</button><span class="err" id="' + p + 'e"></span></div>';
   }
   function bindMov(p, m, alGuardar) {
     m = m || {};
-    $(p + "m").value = m.monto || ""; $(p + "f").value = m.fecha || hoyIso(); $(p + "d").value = m.desc || ""; $(p + "p").value = m.persona || "";
+    $(p + "m").value = m.monto || ""; $(p + "f").value = m.fecha || hoyIso();
+    bindOtro(p + "p", m.persona || "");
+    var descIni = /^Tel\. \d/.test(m.desc || "") ? "" : (m.desc || "");
+    function descs() {
+      var t = $(p + "t").value, c = $(p + "c").value, prev = $(p + "ds") ? valOtro(p + "d") : descIni;
+      var sug = unicos(FD.ultimos.filter(function (x) { return x.cat === c && (!t || x.tipo === t); }).map(function (x) { return x.desc; }).concat(c && !/^Otro/.test(c) ? [c] : []), 12);
+      $(p + "dw").innerHTML = opcOtro(p + "d", sug, "Ej.: Gasolina para la sesión de Ana");
+      bindOtro(p + "d", prev);
+    }
+    function rubro(forzar) {
+      var t = $(p + "t").value, el = $(p + "ru"), g = esGastoT(t);
+      $(p + "rul").hidden = !g; if (!g) return;
+      if (forzar || !el.dataset.manual) el.value = (forzar === "ini" && m.rubro) ? m.rubro : rubroDe(t, $(p + "c").value);
+    }
+    $(p + "ru").onchange = function () { this.dataset.manual = 1; };
     function cats() {
       var t = $(p + "t").value, res = t === "Reserva";
       $(p + "rl").hidden = !res; $(p + "cl").hidden = res;
       var all = FD.tipos[t] || [], pl = ((FD.plataformas || {})[t] || []).filter(function (c) { return all.indexOf(c) >= 0; });
       var op = function (c) { return '<option' + (m.cat === c ? ' selected' : '') + '>' + esc(c) + '</option>'; };
       $(p + "c").innerHTML = pl.length ? '<optgroup label="' + (t === "Gasto NC" ? "💻 Plataformas del negocio" : "📺 Streaming y suscripciones") + '">' + pl.map(op).join("") + '</optgroup><optgroup label="Otros">' + all.filter(function (c) { return pl.indexOf(c) < 0; }).map(op).join("") + '</optgroup>' : all.map(op).join("");
-      precio();
+      precio(); rubro(); descs();
     }
     function precio() {
       var v = (FD.precios || {})[$(p + "c").value], el = $(p + "m");
@@ -453,14 +499,14 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       if (v) { el.value = v; el.dataset.auto = 1; } else if (el.dataset.auto) { el.value = ""; delete el.dataset.auto; }
     }
     $(p + "m").oninput = function () { delete this.dataset.auto; };
-    $(p + "c").onchange = precio;
-    $(p + "t").onchange = cats; cats();
+    $(p + "c").onchange = function () { precio(); rubro(); descs(); };
+    $(p + "t").onchange = cats; cats(); rubro("ini");
     var igual = FD.abiertas.filter(function (a) { return Math.abs(Number(a.monto) - Number(m.monto || -1)) < 0.01; });
     if (igual.length === 1) $(p + "r").value = igual[0].id;
     $(p + "ok").onclick = function () {
       var t = $(p + "t").value; if (!t) { $(p + "e").textContent = "Elige el tipo."; return; }
       if (t === "Reserva" && !$(p + "r").value) { $(p + "e").textContent = "Elige la reserva."; return; }
-      var mov = { forzar: !!m._forzar, id: m.id || "", tipo: t, cat: $(p + "c").value, reserva: $(p + "r").value, monto: $(p + "m").value, metodo: $(p + "me").value, fecha: $(p + "f").value, desc: $(p + "d").value.trim(), persona: $(p + "p").value.trim() };
+      var mov = { forzar: !!m._forzar, id: m.id || "", tipo: t, cat: $(p + "c").value, reserva: $(p + "r").value, monto: $(p + "m").value, metodo: $(p + "me").value, fecha: $(p + "f").value, desc: valOtro(p + "d"), persona: valOtro(p + "p"), rubro: esGastoT(t) ? $(p + "ru").value : "" };
       if (t !== "Reserva" && !(Number(mov.monto) > 0)) { $(p + "e").textContent = "Escribe el monto."; return; }
       var b = $(p + "ok"); b.disabled = true; b.innerHTML = '<span class="spin"></span>Guardando…';
       call({ action: "fin_save", pin: PIN, mov: mov }).then(function (r) {
@@ -472,9 +518,9 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
   var FV = "hoy";
   function segFin(act) {
     if (!FE) FE = "nc";
-    var n = FD ? FD.repartos.length + FD.pendientes.length : 0;
+    var n = nPend(FE), ny = pendDe(FE).length;
     var top = '<button class="back" data-fe="">‹ Finanzas</button><div class="seg" role="group" aria-label="De quién" style="margin-top:-8px">' + ["nc", "nelson", "charlie", "global"].map(function (k) { return '<button data-fe="' + k + '" aria-pressed="' + (FE === k) + '">' + (k === "global" ? "Globales" : ENT[k].n) + '</button>'; }).join("") + '</div>';
-    return top + '<div class="seg sub" role="group" aria-label="Vista">' + ENT[FE].vistas.map(function (o) { return '<button data-v="' + o[0] + '" aria-pressed="' + (act === o[0]) + '">' + o[1] + (o[0] === "hoy" && n ? " (" + n + ")" : "") + '</button>'; }).join("") + '</div>';
+    return top + '<div class="seg sub" role="group" aria-label="Vista">' + ENT[FE].vistas.map(function (o) { return '<button data-v="' + o[0] + '" aria-pressed="' + (act === o[0]) + '">' + o[1] + (o[0] === "hoy" && n ? " (" + n + ")" : "") + (o[0] === "yap" && ny ? " (" + ny + ")" : "") + '</button>'; }).join("") + '</div>';
   }
   function irFin() { if (FV === "rep" || FV === "paq") reportes(FV === "paq" ? "paq" : null); else if (FD) { pintaFin(); } else finanzas(); window.scrollTo(0, 0); }
   function bindSeg() {
@@ -510,6 +556,14 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       h += '<section><h2>' + n + '</h2><div class="kpis"><div class="kpi"><span>Ingresos</span><b>' + money(p.totalIngresos) + '</b></div><div class="kpi"><span>Gastos personales</span><b>' + money(p.totalGastos) + '</b></div><div class="kpi"><span>Le queda</span><b class="' + (p.neto < 0 ? 'neg' : 'pos') + '">' + money(p.neto) + '</b></div></div>' +
         (p.ingresos.length ? '<h3 style="margin:6px 0 0;font-size:15px">Ingresos</h3>' + filas(p.ingresos) : '') + (p.gastos.length ? '<h3 style="margin:6px 0 0;font-size:15px">Gastos</h3>' + filas(p.gastos) : '') + '</section>';
     });
+    if (r.rubros) {
+      var rk = FE === "global" ? [["NC Studio", r.rubros.nc], ["Nelson", r.rubros.nelson], ["Charlie", r.rubros.charlie]] : FE === "nc" ? [["NC Studio", r.rubros.nc]] : [[ENT[FE].n, r.rubros[FE]]];
+      rk.forEach(function (x) {
+        if (!x[1] || !x[1].length) return;
+        var tot = x[1].reduce(function (a, b) { return a + b[1]; }, 0);
+        h += '<section><h2>¿En qué se gasta?' + (rk.length > 1 ? ' · ' + esc(x[0]) : '') + '</h2>' + filas(x[1].map(function (y) { return [(RUBRO_ICO[y[0]] || "") + " " + y[0], y[1]]; }), tot) + '</section>';
+      });
+    }
     if (neg) h += '<section><h2>Trabajos (' + r.trabajos.length + ')</h2><div class="scx"><table class="tb"><tr><th>Cliente</th><th>Cobrado</th><th>Nelson</th><th>Charlie</th><th>NC</th><th>Viáticos</th></tr>' + r.trabajos.map(function (t) {
       return '<tr><td><b>' + esc(t.cliente) + '</b><br><small class="hint">' + esc(t.fecha + (t.desc ? " · " + t.desc : "")) + (t.pendiente ? ' · <span class="neg">pendiente de pago</span>' : '') + '</small></td><td>' + money(t.cobrado) + '</td><td>' + money(t.nelson) + '</td><td>' + money(t.charlie) + '</td><td>' + money(t.nc) + '</td><td>' + money(t.viaticos) + '</td></tr>';
     }).join("") + '</table></div></section>';
@@ -540,10 +594,18 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
         '<label for="rx' + i + '">NC Studio ($)<input id="rx' + i + '" type="number" min="0" step="0.5" inputmode="decimal"></label><label for="rw' + i + '">Viáticos ($) <small>(estudio, gasolina, maquillaje…)</small><input id="rw' + i + '" type="number" min="0" step="0.5" inputmode="decimal"></label></div>' +
         '<div class="row"><button class="btn" id="rok' + i + '">Guardar repartición</button><span class="hint" id="rv' + i + '"></span></div><div id="rm' + i + '"></div></div>';
     }).join('<div style="height:10px"></div>') + '</section>';
-    if (FV === "hoy" && !r.repartos.length && !r.pendientes.length) h += '<div class="msg">✓ Todo al día: no hay repartos ni movimientos por revisar.</div>';
-    if (FV === "hoy" && r.pendientes.length) h += '<section><h2>Por revisar (' + r.pendientes.length + ')</h2><p class="hint">Yappys que no son de una reserva y entradas del calendario que conviene revisar.</p>' + r.pendientes.map(function (m, i) {
-      return '<div class="card2"><div class="top2"><span><b style="font-size:16px">' + esc(m.persona || m.desc || "Movimiento") + '</b><br><small class="hint">' + esc([m.fecha, m.metodo, m.ref && m.origen === "Yappy" ? m.ref : "", m.estado === "Revisar" ? "del calendario: " + m.tipo + " / " + m.cat : ""].filter(Boolean).join(" · ")) + '</small></span><b>' + money(m.monto) + '</b></div><button class="btn2" data-x="' + i + '">Clasificar</button><div id="pcw' + i + '" hidden>' + formMov("pc" + i, m, m.origen === "Yappy") + '</div></div>';
-    }).join('<div style="height:10px"></div>') + '</section>';
+    var PEND = pendDe(FE);
+    if (FV === "hoy" && !r.repartos.length && !PEND.length) h += '<div class="msg">✓ Todo al día: no hay repartos ni movimientos por revisar.</div>';
+    function tarjPend(m, i) {
+      return '<div class="card2"><div class="top2"><span><b style="font-size:16px">' + esc(m.persona || m.desc || "Movimiento") + '</b><br><small class="hint">' + esc([m.fecha, m.metodo, m.origen === "Yappy" ? (m.sentido === "Enviado" ? (m.desc || "") : m.ref) : "", m.estado === "Revisar" ? "del calendario: " + m.tipo + " / " + m.cat : ""].filter(Boolean).join(" · ")) + '</small></span><b>' + money(m.monto) + '</b></div><button class="btn2" data-x="' + i + '">Clasificar</button><div id="pcw' + i + '" hidden>' + formMov("pc" + i, m, m.origen === "Yappy") + '</div></div>';
+    }
+    if (FV === "hoy" && PEND.length) h += '<section><h2>Por revisar (' + PEND.length + ')</h2><p class="hint">Entradas del calendario que conviene revisar' + (FE === "global" ? " y Yappys sin clasificar" : "") + '. Los Yappys de sesiones se registran solos.</p>' + PEND.map(tarjPend).join('<div style="height:10px"></div>') + '</section>';
+    if (FV === "yap") {
+      var rec = [], env = [];
+      PEND.forEach(function (m, i) { (m.sentido === "Enviado" ? env : rec).push(tarjPend(m, i)); });
+      h += '<section><h2>📥 Yappys recibidos (' + rec.length + ')</h2><p class="hint">Los que no son de ninguna sesión (los de sesiones se registran solos en NC Studio). Dile al sistema de qué es cada uno.</p>' + (rec.length ? rec.join('<div style="height:10px"></div>') : '<p class="hint">✓ Nada por clasificar.</p>') + '</section>' +
+        '<section><h2>📤 Yappys enviados (' + env.length + ')</h2><p class="hint">Lo que pagaste por Yappy: elige para qué fue y en qué se gastó.</p>' + (env.length ? env.join('<div style="height:10px"></div>') : '<p class="hint">✓ Nada por clasificar.</p>') + '</section>';
+    }
     if (FV === "nuevo") h += '<section><h2>Registrar · ' + esc(FE === "global" ? "cualquier cuenta" : ENT[FE].n) + '</h2><p class="hint">En efectivo, Yappy, tarjeta o transferencia. También puedes seguir anotándolos en tu calendario: se leen solos cada hora.</p>' + formMov("nv", null, false) + '</section>';
     if (FV === "mov") h += '<section><h2>Movimientos · ' + esc(FE === "global" ? "todos" : ENT[FE].n) + '</h2>' + (ult.length ? '' : '<p class="hint">Todavía no hay movimientos.</p>') + '<div id="ult">' + ult.map(function (m, i) {
       var entra = ENTRA[m.tipo];
@@ -581,7 +643,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       };
     });
     Array.prototype.forEach.call(app.querySelectorAll("[data-x]"), function (b) { b.onclick = function () { var w = $("pcw" + b.getAttribute("data-x")); w.hidden = !w.hidden; b.textContent = w.hidden ? "Clasificar" : "Cerrar"; }; });
-    if (FV === "hoy") r.pendientes.forEach(function (m, i) { bindMov("pc" + i, Object.assign({}, m, { tipo: m.estado === "Revisar" ? m.tipo : "", cat: m.estado === "Revisar" ? "" : m.cat })); });
+    if (FV === "hoy" || FV === "yap") PEND.forEach(function (m, i) { bindMov("pc" + i, Object.assign({}, m, { tipo: m.estado === "Revisar" ? m.tipo : "", cat: m.estado === "Revisar" ? "" : m.cat })); });
     if (FV === "nuevo") bindMov("nv", null, function () { FV = "mov"; finanzas(); });
     Array.prototype.forEach.call(app.querySelectorAll("[data-e]"), function (b) { b.onclick = function () { var i = +b.getAttribute("data-e"), m = ult[i]; $("ed" + i).innerHTML = '<div class="card2" style="margin-top:8px">' + formMov("ue" + i, m, false) + '</div>'; bindMov("ue" + i, m); }; });
     Array.prototype.forEach.call(app.querySelectorAll("[data-b]"), function (b) { b.onclick = function () {
@@ -873,16 +935,21 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       return '<div class="mv"><span><b>' + esc(TIPOS[p.k]) + '</b> · ' + esc(p.x.cliente) + '</span><span class="m' + (p.f.slice(0, 10) < hoy ? ' neg' : '') + '">' + esc(fechaBonita(p.f)) + '</span><small>' + esc(p.x.servicio || "") + (p.f.slice(0, 10) < hoy ? " · ya pasó la fecha, ¿lo publicaste?" : "") + '</small></div>';
     }).join("") : '<p class="hint">Todavía no tienes publicaciones programadas. En «Por publicar», abre una sesión, toca «Sugerir fechas» y guarda.</p>') + '</section>';
     if (PV === "hechas") h += listas.length ? '<div class="xg">' + listas.map(tilePub).join("") + '</div>' : '<div class="msg">Aquí aparecen las sesiones ya publicadas o que no van.</div>';
-    if (PV === "nueva") h += '<section><h2>Agregar otra sesión</h2><p class="hint">Para sesiones que no pasaron por el sistema (por ejemplo, las que tenías antes).</p><div class="g2"><label for="nc0">Cliente<input id="nc0" autocomplete="off"></label><label for="ns0">Sesión o servicio<input id="ns0" autocomplete="off" placeholder="Ej.: Dulce Espera"></label><label for="nl0">Carpeta de Drive o galería <small>(opcional)</small><input id="nl0" type="url" placeholder="https://drive.google.com/drive/folders/…"></label><label for="nf0">Fecha de la sesión <small>(opcional)</small><input id="nf0" type="date"></label></div><div class="row"><button class="btn" id="nok0">Agregar a por publicar</button><span class="err" id="ner0"></span></div></section>';
+    if (PV === "nueva") h += '<section><h2>Agregar otra sesión</h2><p class="hint">Para sesiones que no pasaron por el sistema (por ejemplo, las que tenías antes).</p><div class="g2"><label for="nc0s">Cliente<span id="nc0w"></span></label><label for="ns0s">Sesión o servicio' + opcOtro("ns0", DATA.X.map(function (x) { return x.title; }), "Ej.: Sesión navideña") + '</label><label for="nl0">Carpeta de Drive o galería <small>(opcional)</small><input id="nl0" type="url" placeholder="https://drive.google.com/drive/folders/…"></label><label for="nf0">Fecha de la sesión <small>(opcional)</small><input id="nf0" type="date"></label></div><div class="row"><button class="btn" id="nok0">Agregar a por publicar</button><span class="err" id="ner0"></span></div></section>';
     app.innerHTML = h;
     Array.prototype.forEach.call(app.querySelectorAll("[data-pv]"), function (b) { b.onclick = function () { PV = b.getAttribute("data-pv"); pintaPub(); window.scrollTo(0, 0); }; });
     Array.prototype.forEach.call(app.querySelectorAll("[data-pb]"), function (b) { b.onclick = function () { var id = b.getAttribute("data-pb"); pubDet(PUB.filter(function (y) { return y.id === id; })[0]); }; });
     if (PV === "pend" || PV === "hechas") portadas();
     DET = null;
+    if (PV === "nueva") {
+      bindOtro("ns0", "");
+      var pintaCli = function () { $("nc0w").innerHTML = opcOtro("nc0", unicos((BASE || []).map(function (c) { return c.name; }), 200), "Nombre del cliente"); bindOtro("nc0", ""); };
+      pintaCli(); cargaBase(function () { if ($("nc0w")) pintaCli(); });
+    }
     if (PV === "nueva") $("nok0").onclick = function () {
-      var c = $("nc0").value.trim(); if (!c) { $("ner0").textContent = "Escribe el nombre del cliente."; return; }
+      var c = valOtro("nc0"); if (!c) { $("ner0").textContent = "Escribe el nombre del cliente."; return; }
       var b = $("nok0"); b.disabled = true; b.innerHTML = '<span class="spin"></span>Agregando…';
-      call({ action: "pub_save", pin: PIN, p: { cliente: c, servicio: $("ns0").value.trim(), link: $("nl0").value.trim(), fecha: $("nf0").value } }).then(function (r) { if (r.ok) publicar(r.id); else { b.disabled = false; b.textContent = "Agregar a por publicar"; $("ner0").textContent = r.title; } })
+      call({ action: "pub_save", pin: PIN, p: { cliente: c, servicio: valOtro("ns0"), link: $("nl0").value.trim(), fecha: $("nf0").value } }).then(function (r) { if (r.ok) publicar(r.id); else { b.disabled = false; b.textContent = "Agregar a por publicar"; $("ner0").textContent = r.title; } })
         .catch(function () { b.disabled = false; b.textContent = "Agregar a por publicar"; $("ner0").textContent = "No pudimos conectar."; });
     };
     if (foco) { var fx2 = PUB.filter(function (y) { return y.id === foco; })[0]; if (fx2) pubDet(fx2); }
