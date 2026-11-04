@@ -168,6 +168,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       '<section><h2>Extras</h2><p class="hint">Escribe o elige un extra; el precio se llena solo si es uno de la página.</p><datalist id="exl"></datalist><div id="exs" style="display:grid;gap:8px"></div><button class="btn2" id="addEx" type="button">+ Agregar extra</button></section>' +
       '<section><h2>Lugar y fecha</h2><label for="tr">Traslado<select id="tr">' + tras + '</select></label><label for="pl">Lugar de las fotos<input id="pl" value="Estudio o Las Tablas"></label>' +
       '<div class="g2"><label for="dt">Fecha<input id="dt" type="date" min="' + hoy.toISOString().slice(0, 10) + '"></label><label for="tm">Hora<input id="tm" type="time" step="900"></label></div>' +
+      '<label for="ce" id="ceL"><span id="ceT">¿Para cuándo quiere las fotos? <small>(opcional)</small></span><input id="ce" type="date"></label><p class="hint" id="ceH" style="margin-top:-6px">Se agenda la entrega un día antes, con avisos 1 semana, 3 días, 1 día antes y el mismo día.</p>' +
       '<label for="nt">Idea o notas <small>(opcional)</small><textarea id="nt"></textarea></label></section>' +
       '<section><h2>Total y estado</h2><div class="sum" id="sum"></div><label for="tt">Total final ($) <small>(cámbialo si das descuento)</small><input id="tt" type="number" min="0" step="0.5" inputmode="decimal"></label>' +
       '<label class="radio"><input type="radio" name="st" id="st1" checked><span><b>Enviar cotización y esperar el abono.</b><br>Le llega la cotización en PDF con las instrucciones de Yappy; a ti el botón «Abono recibido».</span></label>' +
@@ -175,14 +176,23 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       '<p class="err" id="ferr"></p></section>' +
       '<div class="foot"><div><small>Total · abono 50 %</small><b id="ft">$0</b></div><button class="btn" id="go">Agendar y enviar</button></div>';
     ["nm","ph","em","pl","dt","tm","nt","on","op","of","oh"].forEach(function (k) { $(k).oninput = calc; });
-    $("pk").onchange = function () { $("exs").innerHTML = ""; calc(); };
+    $("pk").onchange = function () { $("exs").innerHTML = ""; calc(); preguntaEntrega(); };
+    preguntaEntrega();
     $("tr").onchange = function () { var v = $("tr").value; $("pl").value = v === "otro" ? "" : (v === "0" ? "Estudio o Las Tablas" : DATA.T[+v][0]); if (v === "otro") $("pl").focus(); calc(); };
     $("tt").oninput = function () { manual = $("tt").value !== ""; calc(); };
     $("addEx").onclick = function () { addEx(); };
-    $("go").onclick = enviar;
+    $("go").onclick = enviarReserva;
     calc();
   }
 
+var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
+  function esCumpleId(id) { return EXP_CUMPLE.indexOf(id) >= 0; }
+  function expSel() { var o = sel(); return o && o !== "otro" ? o.exp.id : ""; }
+  function preguntaEntrega() {
+    var cu = esCumpleId(expSel()), bebe = expSel() === "bebe";
+    $("ceT").innerHTML = cu ? (bebe ? "¿Cuándo cumple años el bebé?" : "¿Cuándo cumple años?") + " <small>(el cumpleaños que se celebra)</small>" : "¿Para cuándo quiere las fotos? <small>(opcional)</small>";
+    $("ceH").textContent = cu ? "Se agenda el cumpleaños y la entrega de las fotos un día antes, con avisos 1 semana, 3 días, 1 día antes y el mismo día." : "Se agenda la entrega un día antes, con avisos 1 semana, 3 días, 1 día antes y el mismo día.";
+  }
   function sel() { var v = $("pk").value; return v === "otro" ? "otro" : OPTS.filter(function (o) { return o.key === v; })[0] || null; }
   function addEx(name, price) {
     var row = document.createElement("div"); row.className = "ex";
@@ -232,7 +242,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     return { b: b, ex: ex, tr: tr, total: total };
   }
   var DIAS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"], MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
-  function enviar() {
+  function enviarReserva() {
     var c = calc(), b = c.b, err = [];
     var nm = $("nm").value.trim(), ph = $("ph").value.trim(), em = $("em").value.trim(), dt = $("dt").value;
     if (!nm) err.push("nombre");
@@ -241,6 +251,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     if (!b || !b.service) err.push("paquete");
     if (!dt) err.push("fecha");
     if (!(c.total > 0)) err.push("total");
+    if (esCumpleId(expSel()) && !$("ce").value) err.push("fecha del cumpleaños");
     if (err.length) { $("ferr").textContent = "Falta: " + err.join(", ") + "."; $("ferr").scrollIntoView({ block: "center" }); return; }
     var f = new Date(dt + "T12:00:00");
     var exs = c.ex.map(function (e) { return { name: e.name, price: money(e.price) }; });
@@ -249,7 +260,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       v: 1, kind: b.kind, service: b.service, baseLabel: b.baseLabel, basePrice: b.price, includes: b.items, extras: exs, prints: [], notNeeded: [],
       name: nm, phone: ph, email: em, place: $("pl").value.trim() || "Por definir", otherPlace: $("tr").value === "otro",
       dateIso: dt, dateLabel: DIAS[f.getDay()] + " " + f.getDate() + " de " + MESES[f.getMonth()], time: $("tm").value, venue: "",
-      durationMin: b.mins, photos: String(b.fotos || ""), tests: b.tests, eventType: "", total: c.total, totalLabel: money(c.total) + ($("tr").value === "otro" ? " + traslado" : ""), notes: $("nt").value.trim()
+      durationMin: b.mins, photos: String(b.fotos || ""), tests: b.tests, eventType: "", total: c.total, totalLabel: money(c.total) + ($("tr").value === "otro" ? " + traslado" : ""), notes: $("nt").value.trim(),
+      expId: expSel(), cumple: esCumpleId(expSel()) ? $("ce").value : "", entregaPara: esCumpleId(expSel()) ? "" : $("ce").value
     };
     var pag = $("st2").checked;
     var go = $("go"); go.disabled = true; go.innerHTML = '<span class="spin"></span>Enviando…';
@@ -328,8 +340,18 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       ["rep", "🧮 Anotar repartición", !!x.saldoPagado && !x.reparto]].filter(function (a) { return a[2]; });
     app.innerHTML = '<button class="back" id="bk">‹ Todos los clientes</button><section>' + chip(x.estado) + '<h2>' + esc(x.name) + '</h2>' +
       '<p class="hint" style="font-size:15px;line-height:1.6">' + esc(x.id) + " · " + esc(x.service) + "<br>" + esc(x.fecha) + " · " + esc(x.place) + "<br>📱 " + esc(x.phone) + " · ✉️ " + esc(x.email) + "<br>Total " + esc(x.total) + " · abono " + esc(x.abono) + (x.contrato ? (x.firmado ? " · ✅ contrato firmado" : " · contrato pendiente de firma") : "") + '</p>' +
+      (x.estado !== "No disponible" ? '<div class="card2" style="gap:8px"><label for="dce">' + (x.esCumple ? "🎂 ¿Cuándo cumple años?" : "🗓️ ¿Para cuándo quiere las fotos?") + '<input id="dce" type="date" value="' + esc(x.cumple || x.entregaPara || "") + '"></label><div class="row"><button class="btn2" id="dceok">Guardar fecha</button><span class="hint" id="dces">' + (x.cumple || x.entregaPara ? (x.entregaLista ? "✓ Entrega agendada en tu calendario" : x.estado === "Confirmado" ? "" : "Se agenda al recibir el abono") : "") + '</span></div></div>' : "") +
       '<div class="acts">' + acts.map(function (a) { return '<button class="act" data-k="' + a[0] + '" aria-pressed="' + (a[0] === cual) + '">' + a[1] + '</button>'; }).join("") + '</div></section><div id="cmp"></div>';
     $("bk").onclick = function () { lista(""); };
+    if ($("dceok")) $("dceok").onclick = function () {
+      var b = this; b.disabled = true; b.innerHTML = '<span class="spin"></span>Guardando…';
+      call({ action: "entrega", pin: PIN, id: x.id, fecha: $("dce").value }).then(function (r) {
+        b.disabled = false; b.textContent = "Guardar fecha";
+        if (!r.ok) { $("dces").innerHTML = '<span class="neg">' + esc(r.title) + '</span>'; return; }
+        x.cumple = r.cumple; x.entregaPara = r.entregaPara; x.entregaLista = r.agendado;
+        $("dces").innerHTML = !r.entrega ? "Fecha borrada" : r.agendado ? '<span class="pos">✓ Entrega agendada para el ' + esc(r.entrega) + '</span>' : "Guardado. Se agenda al recibir el abono.";
+      }).catch(function () { b.disabled = false; b.textContent = "Guardar fecha"; $("dces").textContent = "No pudimos conectar."; });
+    };
     Array.prototype.forEach.call(app.querySelectorAll(".act"), function (b) { b.onclick = function () { detalle(x, b.getAttribute("data-k")); }; });
     if (cual) componer(x, cual);
   }
@@ -986,7 +1008,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     function cerrar(desdeAtras) {
       if (!LBX) return; LBX = null; document.removeEventListener("keydown", tecla); window.removeEventListener("popstate", atras);
       d.remove(); document.body.style.overflow = "";
-      if (!desdeAtras) try { history.back(); } catch (e) {}
+      if (!desdeAtras) try { SALTA_POP = true; history.back(); } catch (e) { SALTA_POP = false; }
     }
     function tecla(e) { if (e.key === "ArrowLeft") { e.preventDefault(); mover(-1); } else if (e.key === "ArrowRight") { e.preventDefault(); mover(1); } else if (e.key === "Escape") { e.preventDefault(); cerrar(); } }
     function atras() { cerrar(true); }
@@ -1379,6 +1401,23 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     $("mcp").onclick = function () { copiar(m.value, function () { $("mcs2").textContent = "✓ Copiado"; }); };
   }
   salir.onclick = function (e) { e.preventDefault(); setPin(""); PIN = ""; pinView(); };
+  /* botón atrás del teléfono: mientras en pantalla hay un «‹ Atrás», el atrás del teléfono lo toca en vez de salir */
+  var GUARDA = false, SALTA_POP = false, TSINC = 0;
+  function sincAtras() {
+    if (LBX) return;
+    var b = app.querySelector(".back");
+    if (b && !GUARDA) { try { history.pushState({ nc: 1 }, ""); GUARDA = true; } catch (e) { } }
+    else if (!b && GUARDA) { GUARDA = false; SALTA_POP = true; try { history.back(); } catch (e) { SALTA_POP = false; } }
+  }
+  if (window.MutationObserver) new MutationObserver(function () { clearTimeout(TSINC); TSINC = setTimeout(sincAtras, 40); }).observe(app, { childList: true, subtree: true });
+  window.addEventListener("popstate", function () {
+    if (SALTA_POP) { SALTA_POP = false; return; }
+    if (LBX) return; // la vista grande de una foto se cierra sola
+    GUARDA = false;
+    var b = app.querySelector(".back");
+    if (b) { b.click(); window.scrollTo(0, 0); }
+    setTimeout(sincAtras, 80);
+  });
   if (PIN) inicio(); else pinView();
 })();
 </script>

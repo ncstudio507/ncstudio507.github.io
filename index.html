@@ -609,6 +609,10 @@ Calcula tu paquete aquí
 </label>
 </div>
 
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">{{cot.entLabel}}
+<input type="date" data-field="ent" value="{{cot.ent}}" onInput="{{cot.setEnt}}" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{cot.bEnt}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+<span style="font-weight: 400; font-size: 12px; color: #6B6466; margin-top: -2px">{{cot.entHint}}</span>
+</label>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tu idea o temática
 <textarea rows="3" data-field="idea" onInput="{{cot.setIdea}}" placeholder="Estilo, colores, cuántas personas, lo que imaginas…" style="padding: 10px 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px; resize: vertical">{{cot.idea}}</textarea>
 </label>
@@ -1131,6 +1135,9 @@ Calcula tu paquete aquí
 </label>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">{{xc.typeLabel}}
 <input type="text" data-field="type" value="{{xc.type}}" onInput="{{xc.setType}}" placeholder="{{xc.typePh}}" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">¿Para cuándo quieres las fotos? (opcional)
+<input type="date" data-field="xent" value="{{xc.ent}}" onInput="{{xc.setEnt}}" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{xc.bEnt}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
 </label>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">{{xc.ideaLabel}}
 <textarea rows="3" data-field="xidea" onInput="{{xc.setIdea}}" placeholder="{{xc.ideaPh}}" style="padding: 10px 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px; resize: vertical">{{xc.idea}}</textarea>
@@ -2001,7 +2008,7 @@ function calModel(self, K, accent) {
 class Component extends DCLogic {
   constructor(props) {
     super(props);
-    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0, cotOpen: false, cotExp: null, cotN: 3, cotL: {}, cotQ: {}, cotC: {}, cotName: "", cotPhone: "", cotEmail: "", cotDate: "", cotIdea: "", cotOff: 0, cotSel: null, cotSlot: null, cotDeclined: "", cotPkg: null, cotStep: 1, cotErr: false, xcErr: false, errPop: null, prAsk: null, toast: "", upOpen: false, upCtx: null, menuOpen: false, xcId: null, xcStep: 1, xcBase: null, xcQ: {}, xcC: {}, xcL: {}, xcOff: 0, xcSel: null, xcSlot: null, xcType: "", xcTime: "", xcIdea: "" };
+    this.state = { calOpen: false, calCtx: null, calOff: 0, calSel: null, calSlot: null, sel: null, lbId: null, lbIdx: 0, cotOpen: false, cotExp: null, cotN: 3, cotL: {}, cotQ: {}, cotC: {}, cotName: "", cotPhone: "", cotEmail: "", cotDate: "", cotIdea: "", cotOff: 0, cotSel: null, cotSlot: null, cotDeclined: "", cotPkg: null, cotStep: 1, cotErr: false, xcErr: false, errPop: null, prAsk: null, toast: "", upOpen: false, upCtx: null, menuOpen: false, xcId: null, xcStep: 1, xcBase: null, xcQ: {}, xcC: {}, xcL: {}, xcOff: 0, xcSel: null, xcSlot: null, xcType: "", xcTime: "", xcIdea: "", cotEnt: "", xcEnt: "" };
   }
   flash(t) { var self = this; this.setState({ toast: t }); clearTimeout(this._tt); this._tt = setTimeout(function () { self.setState({ toast: "" }); }, 7000); }
   heroShow(i) {
@@ -2370,7 +2377,8 @@ class Component extends DCLogic {
             name: String(xn || "").trim(), phone: String(xp || "").trim(), email: String(xe || "").trim(),
             place: lugares, otherPlace: other, dateIso: st.xcSel || "", dateLabel: fecha || "",
             time: st.xcTime.trim(), venue: "", durationMin: hours * 60, photos: run ? "mínimo " + cfg.fotosPorCorredor + " por corredor (aprox. " + fMin + ")" : "aprox. " + fMin + " a " + fMax, tests: 0, eventType: st.xcType.trim(), runners: run ? R : undefined,
-            total: total, totalLabel: money(total) + (other ? " + traslado" : ""), notes: st.xcIdea.trim(), whatsappText: build()
+            total: total, totalLabel: money(total) + (other ? " + traslado" : ""), notes: st.xcIdea.trim(), whatsappText: build(),
+            expId: st.xcId || "", entregaPara: st.xcEnt || ""
           };
         }
         return {
@@ -2420,7 +2428,8 @@ class Component extends DCLogic {
           }),
           cal: cal, hasDate: !!fecha, fecha: fecha,
           name: st.xcName != null ? st.xcName : st.cotName, phone: st.xcPhone != null ? st.xcPhone : st.cotPhone, email: st.xcEmail != null ? st.xcEmail : st.cotEmail,
-          type: st.xcType, time: st.xcTime, idea: st.xcIdea,
+          type: st.xcType, time: st.xcTime, idea: st.xcIdea, ent: st.xcEnt, bEnt: "#D9CDBE",
+          setEnt: function (e) { st.xcEnt = e && e.target ? e.target.value : ""; },
           setName: function (e) { st.xcName = e && e.target ? e.target.value : ""; },
           setPhone: function (e) { st.xcPhone = e && e.target ? e.target.value : ""; },
           setEmail: function (e) { st.xcEmail = e && e.target ? e.target.value : ""; },
@@ -2533,6 +2542,7 @@ class Component extends DCLogic {
           });
         }
         var ccal = calModel(self, { off: "cotOff", sel: "cotSel", slot: "cotSlot" }, accent);
+        var cumple = ["levelup", "estudio", "suenos", "bebe"].indexOf(exp) >= 0;
         function build() {
           var nombre = st.cotName.trim() || "un cliente";
           var que = pk ? "una sesión de " + pk.title + " con el paquete de " + money(pk.price) : "un paquete personalizado de " + expName + " que empieza en " + money(COT_SERV);
@@ -2556,7 +2566,8 @@ class Component extends DCLogic {
             place: lugares, otherPlace: other, dateIso: st.cotSel || "", dateLabel: st.cotSel ? ccal.selLabel : "",
             time: slot.split(" · ")[0] || "", venue: slot.split(" · ")[1] || "",
             durationMin: mins, photos: String(fotos), tests: pruebas, eventType: "",
-            total: total, totalLabel: money(total) + (other ? " + traslado" : ""), notes: st.cotIdea.trim(), whatsappText: build()
+            total: total, totalLabel: money(total) + (other ? " + traslado" : ""), notes: st.cotIdea.trim(), whatsappText: build(),
+            expId: exp || "", cumple: cumple ? st.cotEnt || "" : "", entregaPara: cumple ? "" : st.cotEnt || ""
           };
         }
         return {
@@ -2622,6 +2633,10 @@ class Component extends DCLogic {
               toggle: function () { var nl = Object.assign({}, L); nl[l.id] = !on; self.setState({ cotL: nl }); } };
           }),
           name: st.cotName, phone: st.cotPhone, email: st.cotEmail, date: st.cotDate, idea: st.cotIdea,
+          ent: st.cotEnt, bEnt: st.cotErr && cumple && !st.cotEnt ? "#B42318" : "#D9CDBE",
+          entLabel: cumple ? (exp === "bebe" ? "¿Cuándo cumple años tu bebé?" : "¿Cuándo es el cumpleaños?") : "¿Para cuándo quieres las fotos? (opcional)",
+          entHint: cumple ? "Te entregamos las fotos un día antes del cumpleaños." : "Si las necesitas para una fecha especial, te las entregamos un día antes.",
+          setEnt: function (e) { st.cotEnt = e && e.target ? e.target.value : ""; },
           setPhone: function (e) { st.cotPhone = e && e.target ? e.target.value : ""; },
           setEmail: function (e) { st.cotEmail = e && e.target ? e.target.value : ""; },
           setName: function (e) { st.cotName = e && e.target ? e.target.value : ""; },
@@ -2634,6 +2649,7 @@ class Component extends DCLogic {
             var a = e && e.currentTarget;
             var ml = missingList(st.cotName, st.cotPhone, st.cotEmail);
             if (!(st.cotSel && st.cotSlot)) ml.push({ key: "date", label: "Fecha y hora de la sesión", hint: "Elige un día y una hora en el paso 4." });
+            if (cumple && !st.cotEnt) ml.push({ key: "ent", label: exp === "bebe" ? "Cumpleaños del bebé" : "Fecha del cumpleaños", hint: "Así te entregamos las fotos a tiempo." });
             if (ml.length) { if (e && e.preventDefault) e.preventDefault(); self.setState({ cotErr: true, errPop: ml }); return; }
             if (a && a.setAttribute) a.setAttribute("href", WA + encodeURIComponent(build()));
             if (ncPost(payload())) self.flash("¡Solicitud enviada! Te confirmamos la disponibilidad por correo y WhatsApp.");
