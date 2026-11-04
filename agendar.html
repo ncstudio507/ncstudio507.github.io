@@ -762,7 +762,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     if (!n) { el.innerHTML = ""; return; }
     el.innerHTML = '<div class="card2" style="margin-top:12px"><b>♥ ' + n + (n === 1 ? ' foto elegida' : ' fotos elegidas') + '</b>' +
       '<button class="btn" id="pdl">⬇ Descargar elegidas</button>' + (APP ? '<button class="ig" id="pig">Compartir a Instagram</button>' : '') +
-      '<p class="hint" id="pdls">' + (APP ? 'Se guardan en tu galería, en el álbum «NC Studio». «Compartir» las abre directo en Instagram como carrusel.' : 'Se descargan en buena calidad (2048 px), listas para Instagram.') + '</p></div>';
+      '<p class="hint" id="pdls">' + (APP ? 'Se guardan en tu galería en su tamaño y calidad original, en el álbum «NC Studio». «Compartir» las abre directo en Instagram como carrusel.' : 'Se descargan en su tamaño y calidad original, tal cual están en Drive.') + '</p></div>';
     $("pdl").onclick = function () { descargar(x, false); };
     if ($("pig")) $("pig").onclick = function () { descargar(x, true); };
   }
