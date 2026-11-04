@@ -396,9 +396,9 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
   var GRUPOS = [["Negocio (NC Studio)", ["Ingreso NC", "Gasto NC", "Inversión NC", "Deudas NC"]], ["Nelson", ["Ingreso Nelson", "Gasto Nelson", "Ahorro Nelson"]], ["Charlie", ["Ingreso Charlie", "Gasto Charlie"]], ["Nelson y Charlie", ["Gasto compartido"]], ["Otros", ["Sin impacto"]]];
   // de quién son las finanzas que estás viendo
   var FE = null, ENT = {
-    nc: { n: "NC Studio", g: ["Negocio (NC Studio)", "Otros"], tipos: ["Ingreso NC", "Gasto NC", "Inversión NC", "Deudas NC", "Sin impacto"], rep: ["NC Studio", "Viáticos"], vistas: [["hoy", "Pendientes"], ["nuevo", "+ Registrar"], ["mov", "Movimientos"], ["rep", "Reporte"], ["paq", "Costos por paquete"]] },
-    nelson: { n: "Nelson", g: ["Nelson", "Nelson y Charlie"], tipos: ["Ingreso Nelson", "Gasto Nelson", "Ahorro Nelson"], rep: ["Nelson"], vistas: [["rep", "Resumen"], ["yap", "Yappys"], ["nuevo", "+ Registrar"], ["mov", "Movimientos"]] },
-    charlie: { n: "Charlie", g: ["Charlie", "Nelson y Charlie"], tipos: ["Ingreso Charlie", "Gasto Charlie"], rep: ["Charlie"], vistas: [["rep", "Resumen"], ["yap", "Yappys"], ["nuevo", "+ Registrar"], ["mov", "Movimientos"]] },
+    nc: { n: "NC Studio", g: ["Negocio (NC Studio)", "Otros"], tipos: ["Ingreso NC", "Gasto NC", "Inversión NC", "Deudas NC", "Sin impacto"], rep: ["NC Studio", "Viáticos"], vistas: [["hoy", "Pendientes"], ["nuevo", "+ Registrar"], ["mov", "Movimientos"], ["edo", "Estado de cuenta"], ["rep", "Reporte"], ["paq", "Costos por paquete"]] },
+    nelson: { n: "Nelson", g: ["Nelson", "Nelson y Charlie"], tipos: ["Ingreso Nelson", "Gasto Nelson", "Ahorro Nelson"], rep: ["Nelson"], vistas: [["rep", "Resumen"], ["yap", "Yappys"], ["nuevo", "+ Registrar"], ["mov", "Movimientos"], ["edo", "Estado de cuenta"]] },
+    charlie: { n: "Charlie", g: ["Charlie", "Nelson y Charlie"], tipos: ["Ingreso Charlie", "Gasto Charlie"], rep: ["Charlie"], vistas: [["rep", "Resumen"], ["yap", "Yappys"], ["nuevo", "+ Registrar"], ["mov", "Movimientos"], ["edo", "Estado de cuenta"]] },
     global: { n: "Globales", g: null, tipos: null, rep: null, vistas: [["rep", "Resumen"], ["hoy", "Pendientes"], ["nuevo", "+ Registrar"], ["mov", "Movimientos"]] }
   };
   // pendientes según la cuenta: los Yappys sin clasificar salen en la cuenta de quien los mandó o recibió
@@ -418,7 +418,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     call({ action: "fin_list", pin: PIN }).then(function (r) {
       if (r.title === "PIN incorrecto") { setPin(""); pinView("El PIN cambió. Escríbelo de nuevo."); return; }
       if (!r.ok) { app.innerHTML = '<div class="msg">No pudimos cargar tus finanzas. ¿Ya pegaste el código nuevo en Apps Script y ejecutaste <b>configurar</b>?</div>'; return; }
-      FD = r; if (foco) { FE = "nc"; FV = "hoy"; } if (!FE) inicioFin(); else if (FV === "rep" || FV === "paq") reportes(FV === "paq" ? "paq" : null); else pintaFin(foco);
+      FD = r; if (foco) { FE = "nc"; FV = "hoy"; } if (!FE) inicioFin(); else if (FV === "rep" || FV === "paq") reportes(FV === "paq" ? "paq" : null); else if (FV === "edo") pintaEdo(); else pintaFin(foco);
     }).catch(function () { app.innerHTML = '<div class="msg">No pudimos conectar. Revisa tu internet.</div>'; });
   }
   function inicioFin() {
@@ -461,6 +461,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     var socio = /charlie|nelson|barrera|garc[ií]a/i.test(m.persona || ""), quien = m.cuenta || (FE === "charlie" ? "Charlie" : "Nelson");
     var lbl = m.sentido === "Enviado" ? (socio ? "Lo pasé para comprar equipo de NC" : "Pagué equipo de NC") : m.sentido === "Recibido" ? "Es para comprar equipo de NC" : (p === "nv" && (FE === "nelson" || FE === "charlie") ? "Compré equipo para NC" : "");
     var equipo = lbl ? '<button type="button" class="btn2" id="' + p + 'eq" style="justify-self:start">📸 ' + lbl + '</button><p class="hint" id="' + p + 'eqh" hidden></p>' : "";
+    if (m.sentido && socio) equipo = '<div class="row"><button type="button" class="btn2" id="' + p + 'eq">📸 ' + lbl + '</button><button type="button" class="btn2" id="' + p + 'rp">💸 ' + (m.sentido === "Enviado" ? "Le pasé su parte de la repartición" : "Mi parte de la repartición") + '</button></div><p class="hint" id="' + p + 'eqh" hidden></p>';
     return equipo + '<div class="g2"><label for="' + p + 't">' + (m.sentido === "Enviado" ? "¿Para qué fue?" : m.sentido === "Recibido" ? "¿De qué es?" : "Tipo") + '<select id="' + p + 't"><option value="">Elige…</option>' + tipos + '</select></label>' +
       '<label for="' + p + 'c" id="' + p + 'cl">Categoría<select id="' + p + 'c"></select></label>' +
       '<label for="' + p + 'r" id="' + p + 'rl" hidden>Reserva<select id="' + p + 'r"><option value="">Elige la reserva…</option>' + FD.abiertas.map(function (a) { return '<option value="' + esc(a.id) + '">' + esc(a.name + " · " + a.falta + " " + money(a.monto)) + '</option>'; }).join("") + '</select></label></div>' +
@@ -468,6 +469,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       '<div class="g3"><label for="' + p + 'm">Monto ($)<input id="' + p + 'm" type="number" min="0" step="0.01" inputmode="decimal"></label>' +
       '<label for="' + p + 'me">Método<select id="' + p + 'me">' + FD.metodos.map(function (x) { return '<option' + (m.metodo === x ? ' selected' : '') + '>' + x + '</option>'; }).join("") + '</select></label>' +
       '<label for="' + p + 'f">Fecha<input id="' + p + 'f" type="date"></label></div>' +
+      '<label for="' + p + 'bk">Cuenta de banco <small>(de dónde salió o a dónde entró la plata)</small>' + selBanco(p + "bk", "") + '</label>' +
       '<div class="g2"><label for="' + p + 'ds">¿De qué fue? <small>(opcional)</small><span id="' + p + 'dw"></span></label><label for="' + p + 'ps">Persona <small>(quién pagó o a quién)</small>' + opcOtro(p + "p", personas, "Nombre") + '</label></div>' +
       '<div class="row"><button class="btn" id="' + p + 'ok">Guardar</button><span class="err" id="' + p + 'e"></span></div>';
   }
@@ -503,8 +505,20 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     }
     $(p + "m").oninput = function () { delete this.dataset.auto; };
     $(p + "c").onchange = function () { precio(); rubro(); descs(); };
-    $(p + "t").onchange = cats; cats(); rubro("ini");
+    function banco(ini) {
+      var el = $(p + "bk"); if (!el || el.dataset.manual) return;
+      el.value = ini && m.banco !== undefined && m.id ? (m.banco || "") : bancoDe($(p + "t").value, $(p + "me").value, m.cuenta || (FE === "charlie" ? "Charlie" : FE === "nelson" ? "Nelson" : ""));
+    }
+    $(p + "bk").onchange = function () { this.dataset.manual = 1; };
+    $(p + "me").onchange = function () { banco(); };
+    $(p + "t").onchange = function () { cats(); banco(); }; cats(); rubro("ini"); banco(true);
     var EQ = null;
+    if ($(p + "rp")) $(p + "rp").onclick = function () {
+      // su parte ya quedó registrada en la repartición: este Yappy solo mueve la plata, no es ingreso ni gasto nuevo
+      $(p + "t").value = "Sin impacto"; cats(); $(p + "c").value = "Pago de repartición"; rubro(); descs();
+      if ($(p + "ds")) { $(p + "ds").value = "__o"; $(p + "d").hidden = false; $(p + "d").value = "Parte de la repartición"; }
+      this.textContent = "✓ Listo: revisa y toca Guardar";
+    };
     if ($(p + "eq")) $(p + "eq").onclick = function () {
       // el equipo lo compra NC (aunque lo paguen ustedes): la compra va a los gastos de NC y NC le queda debiendo a quien puso la plata.
       // plata que se pasan entre ustedes para eso: la anota quien la recibe (NC le debe a quien la mandó); quien la manda no la cuenta otra vez.
@@ -526,7 +540,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       var t = $(p + "t").value; if (!t) { $(p + "e").textContent = "Elige el tipo."; return; }
       if (t === "Reserva" && !$(p + "r").value) { $(p + "e").textContent = "Elige la reserva."; return; }
       var eqOk = EQ && EQ.tipo === t && EQ.cat === $(p + "c").value;
-      var mov = { equipo: eqOk ? EQ.equipo : "", quien: eqOk ? EQ.quien : "", de: eqOk ? EQ.de : "", para: eqOk ? EQ.para : "", forzar: !!m._forzar, id: m.id || "", tipo: t, cat: $(p + "c").value, reserva: $(p + "r").value, monto: $(p + "m").value, metodo: $(p + "me").value, fecha: $(p + "f").value, desc: valOtro(p + "d"), persona: valOtro(p + "p"), rubro: esGastoT(t) || $(p + "c").value === "Para comprar equipo" ? $(p + "ru").value : "" };
+      var mov = { equipo: eqOk ? EQ.equipo : "", quien: eqOk ? EQ.quien : "", de: eqOk ? EQ.de : "", para: eqOk ? EQ.para : "", forzar: !!m._forzar, id: m.id || "", tipo: t, cat: $(p + "c").value, reserva: $(p + "r").value, monto: $(p + "m").value, metodo: $(p + "me").value, fecha: $(p + "f").value, desc: valOtro(p + "d"), persona: valOtro(p + "p"), rubro: esGastoT(t) || $(p + "c").value === "Para comprar equipo" ? $(p + "ru").value : "", banco: $(p + "bk").value };
       if (t !== "Reserva" && !(Number(mov.monto) > 0)) { $(p + "e").textContent = "Escribe el monto."; return; }
       var b = $(p + "ok"); b.disabled = true; b.innerHTML = '<span class="spin"></span>Guardando…';
       call({ action: "fin_save", pin: PIN, mov: mov }).then(function (r) {
@@ -534,6 +548,64 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
         (alGuardar || finanzas)();
       }).catch(function () { b.disabled = false; b.textContent = "Guardar"; $(p + "e").textContent = "No pudimos conectar."; });
     };
+  }
+  /* ===================== ESTADO DE CUENTA ===================== */
+  var BANCO_DE = { nc: "Cuenta NC", nelson: "BG Nelson", charlie: "BG Charlie" };
+  var BANCO_NOM = { "Cuenta NC": "Cuenta de NC", "BG Nelson": "Banco General de Nelson", "BG Charlie": "Banco General de Charlie" };
+  function bancoDe(t, met, quien) {
+    quien = /Charlie/.test(quien || t || "") ? "Charlie" : "Nelson";
+    if (met === "Yappy") return "BG " + quien;
+    if (met === "Transferencia") return /NC/.test(t || "") ? "Cuenta NC" : "BG " + quien;
+    return "";
+  }
+  function selBanco(id, val) {
+    return '<select id="' + id + '"><option value="">— Ninguna (efectivo o tarjeta)</option>' + ["Cuenta NC", "BG Nelson", "BG Charlie"].map(function (b) { return '<option value="' + b + '"' + (b === val ? " selected" : "") + '>' + BANCO_NOM[b] + '</option>'; }).join("") + '</select>';
+  }
+  function pintaEdo(set) {
+    var b = BANCO_DE[FE]; if (!b) { FV = ENT[FE].vistas[0][0]; irFin(); return; }
+    app.innerHTML = segFin("edo") + '<div class="msg"><span class="spin"></span>Calculando el estado de cuenta…</div>'; bindSeg();
+    call({ action: "fin_cuenta", pin: PIN, banco: b, set: set || null }).then(function (r) {
+      if (!r.ok) { app.innerHTML = segFin("edo") + '<div class="msg">No pudimos calcularlo. ¿Ya pegaste el código nuevo?</div>'; bindSeg(); return; }
+      var h = segFin("edo");
+      if (!r.inicial) {
+        h += '<section><h2>' + esc(BANCO_NOM[b]) + '</h2><p class="hint">Para empezar, dime desde qué día llevamos la cuenta y cuánto tenía ese día (míralo en tu banca en línea). Desde ahí el sistema suma lo que entra y resta lo que sale.</p>' +
+          '<div class="g2"><label for="eif">Desde el día<input id="eif" type="date" value="' + (new Date().getFullYear()) + '-11-01"></label><label for="eis">Saldo que tenía ese día ($)<input id="eis" type="number" step="0.01" inputmode="decimal"></label></div><div class="row"><button class="btn" id="eiok">Empezar</button><span class="err" id="eie"></span></div></section>';
+        app.innerHTML = h; bindSeg();
+        $("eiok").onclick = function () { if ($("eis").value === "") { $("eie").textContent = "Escribe el saldo."; return; } pintaEdo({ inicial: { fecha: $("eif").value, saldo: $("eis").value } }); };
+        return;
+      }
+      var dif = r.diferencia, ok = dif !== null && Math.abs(dif) < 0.01;
+      h += '<section><h2>' + esc(BANCO_NOM[b]) + '</h2><div class="kpis"><div class="kpi"><span>Saldo al ' + esc(fechaBonita(r.inicial.fecha)) + '</span><b>' + money(r.inicial.saldo) + '</b></div><div class="kpi"><span>Entró</span><b class="pos">+' + money(r.entra) + '</b></div><div class="kpi"><span>Salió</span><b class="neg">−' + money(r.sale) + '</b></div><div class="kpi" style="background:var(--fg);color:#fff"><span style="color:var(--bg)">Debería haber</span><b>' + money(r.esperado) + '</b></div></div>' +
+        '<div class="card2"><label for="ebs">¿Cuánto dice el banco hoy? ($)<input id="ebs" type="number" step="0.01" inputmode="decimal" value="' + (r.real ? r.real.saldo : "") + '"></label><button class="btn" id="ebok">Comparar</button>' +
+        (dif === null ? '' : ok ? '<p class="pos" style="margin:0;font-weight:bold">✓ Cuadra con el banco' + (r.real ? ' (' + esc(fechaBonita(r.real.fecha)) + ')' : '') + '.</p>' :
+          '<p class="neg" style="margin:0;font-weight:bold">' + (dif > 0 ? 'En el banco hay ' + money(dif) + ' más de lo registrado: falta anotar alguna entrada (o se anotó un gasto de más).' : 'En el banco hay ' + money(-dif) + ' menos de lo registrado: falta anotar algún gasto o pago (o se anotó una entrada de más).') + '</p><p class="hint" style="margin:0">Revisa la lista de abajo contra tu banca en línea y anota lo que falte con «+ Registrar».</p>') +
+        '</div><div class="row"><button class="btn2" id="emv">↔ Mover plata entre cuentas</button><button class="btn2" id="eini">Cambiar saldo inicial</button></div><div id="emvf"></div></section>';
+      h += '<section><h2>Movimientos de la cuenta (' + r.movimientos.length + ')</h2>' + (r.movimientos.length ? r.movimientos.map(function (m) {
+        var sc = m.estado === "Por clasificar";
+        var t = m.hacia && m.banco !== b ? "Transferencia desde " + (BANCO_NOM[m.banco] || "otra cuenta") : m.hacia ? "Transferencia a " + (BANCO_NOM[m.hacia] || m.hacia) : sc ? (m.monto > 0 ? "Yappy de " : "Yappy a ") + (m.persona || "?") : (m.cat || m.tipo);
+        if (sc) m.desc = "";
+        return '<div class="mv"><span><b>' + esc(t) + '</b>' + (m.desc || m.persona ? ' · ' + esc(m.desc || m.persona) : '') + '</span><span class="m' + (m.monto > 0 ? ' in' : '') + '">' + (m.monto > 0 ? '+' : '−') + money(Math.abs(m.monto)) + '</span><small>' + esc(m.fecha + " · " + (m.estado === "Por clasificar" ? "sin clasificar · " : "") + m.tipo + (m.metodo ? " · " + m.metodo : "")) + ' · saldo ' + money(m.saldo) + '</small></div>';
+      }).join("") : '<p class="hint">Todavía no hay movimientos desde esa fecha.</p>') + '</section>';
+      app.innerHTML = h; bindSeg();
+      $("ebok").onclick = function () { if ($("ebs").value === "") return; pintaEdo({ banco: { saldo: $("ebs").value } }); };
+      $("eini").onclick = function () {
+        $("emvf").innerHTML = '<div class="card2"><div class="g2"><label for="eif">Desde el día<input id="eif" type="date" value="' + esc(r.inicial.fecha) + '"></label><label for="eis">Saldo ese día ($)<input id="eis" type="number" step="0.01" value="' + r.inicial.saldo + '"></label></div><button class="btn" id="eiok">Guardar</button></div>';
+        $("eiok").onclick = function () { pintaEdo({ inicial: { fecha: $("eif").value, saldo: $("eis").value } }); };
+      };
+      $("emv").onclick = function () {
+        $("emvf").innerHTML = '<div class="card2"><p class="hint" style="margin:0">Por ejemplo, cuando pasas la parte de NC a su cuenta, o sacas de la cuenta de NC para pagar algo con tu Yappy.</p><div class="g2"><label for="etd">Sale de' + selBanco("etd", b) + '</label><label for="eth">Entra a' + selBanco("eth", b === "Cuenta NC" ? "BG Nelson" : "Cuenta NC") + '</label>' +
+          '<label for="etm">Monto ($)<input id="etm" type="number" min="0" step="0.01" inputmode="decimal"></label><label for="etf">Fecha<input id="etf" type="date" value="' + hoyIso() + '"></label></div><button class="btn" id="etok">Guardar transferencia</button><span class="err" id="ete"></span></div>';
+        $("etok").onclick = function () {
+          var de = $("etd").value, a = $("eth").value, mo = $("etm").value;
+          if (!de || !a || de === a) { $("ete").textContent = "Elige dos cuentas distintas."; return; }
+          if (!(Number(mo) > 0)) { $("ete").textContent = "Escribe el monto."; return; }
+          var bt = $("etok"); bt.disabled = true; bt.innerHTML = '<span class="spin"></span>Guardando…';
+          call({ action: "fin_save", pin: PIN, mov: { tipo: "Sin impacto", cat: "Transferencia entre cuentas", monto: mo, metodo: "Transferencia", fecha: $("etf").value, desc: BANCO_NOM[de] + " → " + BANCO_NOM[a], persona: "", banco: de, hacia: a } })
+            .then(function (q) { if (q.ok) { FD = null; pintaEdo(); } else { bt.disabled = false; bt.textContent = "Guardar transferencia"; $("ete").textContent = q.title; } })
+            .catch(function () { bt.disabled = false; bt.textContent = "Guardar transferencia"; $("ete").textContent = "No pudimos conectar."; });
+        };
+      };
+    }).catch(function () { app.innerHTML = segFin("edo") + '<div class="msg">No pudimos conectar.</div>'; bindSeg(); });
   }
   var FV = "hoy", YV = "rec";
   function segFin(act) {
@@ -543,7 +615,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     var top = '<button class="back" data-fe="">‹ Atrás</button><div class="row" style="gap:10px;margin-top:-6px"><span style="font-size:28px;line-height:1">' + ico + '</span><h2>' + (FE === "global" ? "Finanzas globales" : "Finanzas de " + ENT[FE].n) + '</h2></div>';
     return top + '<div class="seg" role="group" aria-label="Vista">' + ENT[FE].vistas.map(function (o) { return '<button data-v="' + o[0] + '" aria-pressed="' + (act === o[0]) + '">' + o[1] + (o[0] === "hoy" && n ? " (" + n + ")" : "") + (o[0] === "yap" && ny ? " (" + ny + ")" : "") + '</button>'; }).join("") + '</div>';
   }
-  function irFin() { if (FV === "rep" || FV === "paq") reportes(FV === "paq" ? "paq" : null); else if (FD) { pintaFin(); } else finanzas(); window.scrollTo(0, 0); }
+  function irFin() { if (FV === "rep" || FV === "paq") reportes(FV === "paq" ? "paq" : null); else if (FV === "edo") pintaEdo(); else if (FD) { pintaFin(); } else finanzas(); window.scrollTo(0, 0); }
   function bindSeg() {
     Array.prototype.forEach.call(app.querySelectorAll("[data-fe]"), function (b) { b.onclick = function () { var k = b.getAttribute("data-fe"); if (!k) { FE = null; if (FD) inicioFin(); else finanzas(); return; } FE = k; FV = ENT[k].vistas[0][0]; irFin(); }; });
     Array.prototype.forEach.call(app.querySelectorAll("[data-v]"), function (b) { b.onclick = function () { FV = b.getAttribute("data-v"); irFin(); }; });
