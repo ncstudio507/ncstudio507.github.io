@@ -72,7 +72,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 .scx{overflow-x:auto;margin:0 -4px;padding:0 4px}
 .xg{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
 .xc{display:grid;grid-template-rows:auto 1fr;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:0;overflow:hidden;cursor:pointer;font:inherit;color:var(--fg)}
-.xc img,.xc .xall{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--fg)}
+.xc img,.xc .xall{width:100%;aspect-ratio:4/3;object-fit:cover;object-position:center 30%;display:block;background:var(--fg)}
 .xc .xall{display:flex;align-items:center;justify-content:center;color:var(--accent);font:400 34px Georgia,serif}
 .xc span{display:grid;gap:2px;padding:10px 12px 12px}.xc b{font-size:15px}.xc small{font-size:12px;color:var(--muted)}
 .ig{font:bold 17px Arial,sans-serif;border:0;border-radius:8px;padding:16px;cursor:pointer;color:#fff;background:linear-gradient(45deg,#C13584,#E1306C,#F77737)}
@@ -80,6 +80,10 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 .fe{display:flex;gap:14px;align-items:center;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;cursor:pointer;font:inherit;color:var(--fg);width:100%}
 .fe .fei{font-size:30px;line-height:1;width:48px;flex:none;display:flex;justify-content:center}.fe .fei img{width:48px;height:48px;object-fit:contain}.fe span{display:grid;gap:3px}.fe b{font-size:18px;font-family:Georgia,serif;font-weight:400}.fe small{font-size:13px;color:var(--muted)}
 .seg.sub button{font-size:13px;padding:7px 12px;border-width:1px}
+.pfotos{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}@media (min-width:560px){.pfotos{grid-template-columns:repeat(4,1fr)}}
+.pf{position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;background:var(--fg)}.pf a,.pf img,.pf .xall{display:block;width:100%;height:100%;object-fit:cover}
+.pf .xall{display:flex;align-items:center;justify-content:center;color:var(--bg);font-size:11px}
+.pst{position:absolute;right:4px;top:4px;width:30px;height:30px;border-radius:50%;border:0;background:rgba(34,32,32,.55);color:#fff;font-size:15px;cursor:pointer;line-height:1}.pst.on{background:var(--accent);color:var(--fg)}
 .chk{display:flex;gap:8px;align-items:center;font-weight:normal;grid-template-columns:none}.chk input{width:20px;height:20px;accent-color:var(--accent)}
 </style>
 </head>
@@ -651,10 +655,83 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     call({ action: "pub_list", pin: PIN }).then(function (r) {
       if (r.title === "PIN incorrecto") { setPin(""); pinView("El PIN cambió. Escríbelo de nuevo."); return; }
       if (!r.ok) { app.innerHTML = '<div class="msg">No pudimos cargar las publicaciones. ¿Ya pegaste el código nuevo en Apps Script?</div>'; return; }
-      PUB = r.list; pintaPub(foco);
+      PUB = r.list; PORTADAS = null; pintaPub(foco);
     }).catch(function () { app.innerHTML = '<div class="msg">No pudimos conectar. Revisa tu internet.</div>'; });
   }
   var PV = "pend", PUB_OPEN = {};
+  var PORTADAS = null, DET = null;
+  function iniciales(n) { return String(n || "NC").trim().split(/\s+/).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join(""); }
+  function tilePub(x) {
+    var c = PORTADAS && PORTADAS[x.id];
+    var res = Object.keys(TIPOS).map(function (k) { var it = x.plan[k]; return TIPOS[k] + ": " + (it.estado === "publicado" ? "✓" : it.estado === "programado" && it.fecha ? fechaBonita(it.fecha).replace(/ ·.*/, "") : it.estado === "no" ? "no va" : "pendiente"); }).join(" · ");
+    return '<button class="xc" data-pb="' + esc(x.id) + '">' + (c ? '<img src="' + c + '" alt="">' : '<div class="xall" data-pi="' + esc(x.id) + '">' + esc(iniciales(x.cliente)) + '</div>') +
+      '<span><b>' + esc(x.cliente) + '</b><small>' + esc(x.servicio || "") + '</small><small>' + esc(res) + '</small></span></button>';
+  }
+  function portadas() {
+    if (PORTADAS) return;
+    PORTADAS = {};
+    call({ action: "pub_portadas", pin: PIN }).then(function (r) {
+      if (!r || !r.ok) return; PORTADAS = r.portadas || {};
+      Object.keys(PORTADAS).forEach(function (id) { var d = app.querySelector('[data-pi="' + id + '"]'); if (d && PORTADAS[id]) { var im = document.createElement("img"); im.src = PORTADAS[id]; im.alt = ""; d.replaceWith(im); } });
+    }).catch(function () { PORTADAS = null; });
+  }
+  function pubDet(x) {
+    DET = x.id; PUB_OPEN[x.id] = 1; tab("P"); window.scrollTo(0, 0);
+    app.innerHTML = '<button class="back" id="pbk">‹ ' + (x.estado === "Por publicar" ? "Por publicar" : "Publicadas") + '</button>' +
+      '<section><div class="row" style="justify-content:space-between"><h2>Fotos</h2><span class="row" id="pfl"></span></div><div id="pfb"><div class="msg" style="padding:12px"><span class="spin"></span>Buscando las fotos…</div></div></section>' +
+      tarjetaPub(x, "d0");
+    if ($("d0tg")) $("d0tg").hidden = true;
+    bindPub(x, "d0");
+    $("pbk").onclick = function () { DET = null; pintaPub(); };
+    fotosDet(x, 0);
+  }
+  function formCarpeta(x, msg) {
+    $("pfb").innerHTML = (msg ? '<p class="hint">' + msg + '</p>' : '') + '<label for="pfc">Link de la carpeta de Drive con las fotos editadas<input id="pfc" type="url" placeholder="https://drive.google.com/drive/folders/…" autocomplete="off"></label><div class="row"><button class="btn2" id="pfok">Guardar carpeta</button><span class="err" id="pfe"></span></div>';
+    $("pfc").value = x.carpeta || "";
+    $("pfok").onclick = function () {
+      var v = $("pfc").value.trim(); if (!/drive\.google\.com/.test(v)) { $("pfe").textContent = "Pega el link de una carpeta de Google Drive."; return; }
+      $("pfok").disabled = true; $("pfok").innerHTML = '<span class="spin"></span>Guardando…';
+      call({ action: "pub_save", pin: PIN, p: { id: x.id, carpeta: v, portada: "" } }).then(function (r) {
+        if (!r.ok) { $("pfok").disabled = false; $("pfok").textContent = "Guardar carpeta"; $("pfe").textContent = r.title; return; }
+        x.carpeta = v; x.portada = ""; if (PORTADAS) delete PORTADAS[x.id]; PORTADAS = null;
+        PUB = PUB.map(function (y) { return y.id === x.id ? Object.assign({}, y, { carpeta: v, portada: "" }) : y; });
+        fotosDet(x, 0);
+      }).catch(function () { $("pfok").disabled = false; $("pfok").textContent = "Guardar carpeta"; $("pfe").textContent = "No pudimos conectar."; });
+    };
+  }
+  function fotosDet(x, desde) {
+    call({ action: "pub_fotos", pin: PIN, id: x.id, desde: desde }).then(function (r) {
+      if (DET !== x.id) return;
+      if (!r.ok) { formCarpeta(x, esc(r.title) + ". " + (r.html || "")); return; }
+      if (r.sinCarpeta) { $("pfl").innerHTML = ""; formCarpeta(x, x.link ? "El link de entrega no es de Drive, así que no puedo ver las fotos. Pega aquí la carpeta de Drive donde están las editadas." : "Pega la carpeta de Drive donde están las fotos editadas y aquí te salen en miniatura."); return; }
+      $("pfl").innerHTML = '<a class="btn2" href="' + esc(r.carpeta) + '" target="_blank" rel="noopener" style="text-decoration:none">Abrir carpeta ↗</a><button class="btn2" id="pfcm">Cambiar</button>';
+      $("pfcm").onclick = function () { formCarpeta(x); };
+      if (!r.total) { $("pfb").innerHTML = '<p class="hint">La carpeta no tiene fotos todavía.</p>'; return; }
+      var html = r.fotos.map(function (f) {
+        var es = x.portada ? x.portada === f.id : (desde === 0 && f === r.fotos[0]);
+        return '<div class="pf"><a href="' + esc(f.url) + '" target="_blank" rel="noopener" title="' + esc(f.name) + '">' + (f.thumb ? '<img src="' + f.thumb + '" alt="' + esc(f.name) + '" loading="lazy">' : '<span class="xall">' + esc(f.name.slice(0, 8)) + '</span>') + '</a>' +
+          '<button class="pst' + (es ? ' on' : '') + '" data-pf="' + esc(f.id) + '" aria-label="Usar de portada" title="Usar de portada">★</button></div>';
+      }).join("");
+      var box = desde ? $("pfg") : null;
+      if (!box) { $("pfb").innerHTML = '<p class="hint" style="margin:0 0 8px">' + r.total + ' fotos · toca una para verla grande; la ★ la pone de portada.</p><div class="pfotos" id="pfg"></div><div id="pfm"></div>'; box = $("pfg"); }
+      box.insertAdjacentHTML("beforeend", html);
+      var mas = r.desde + r.fotos.length;
+      $("pfm").innerHTML = mas < r.total ? '<button class="btn2" id="pfmas" style="margin-top:10px">Ver más fotos (' + (r.total - mas) + ')</button>' : "";
+      if ($("pfmas")) $("pfmas").onclick = function () { this.disabled = true; this.innerHTML = '<span class="spin"></span>Cargando…'; fotosDet(x, mas); };
+      Array.prototype.forEach.call(box.querySelectorAll("[data-pf]"), function (b) {
+        b.onclick = function () {
+          var fid = b.getAttribute("data-pf");
+          Array.prototype.forEach.call(box.querySelectorAll(".pst"), function (z) { z.classList.toggle("on", z === b); });
+          call({ action: "pub_save", pin: PIN, p: { id: x.id, portada: fid } }).then(function (q) {
+            if (!q.ok) return; x.portada = fid; var im = b.parentNode.querySelector("img");
+            PUB = PUB.map(function (y) { return y.id === x.id ? Object.assign({}, y, { portada: fid }) : y; });
+            if (PORTADAS && im) PORTADAS[x.id] = im.src;
+          });
+        };
+      });
+    }).catch(function () { if (DET === x.id) $("pfb").innerHTML = '<p class="hint">No pudimos cargar las fotos. Revisa tu internet.</p>'; });
+  }
+
   function pintaPub(foco) {
     if (foco) { PV = "pend"; PUB_OPEN[foco] = 1; }
     var pend = PUB.filter(function (x) { return x.estado === "Por publicar"; }), listas = PUB.filter(function (x) { return x.estado !== "Por publicar"; });
@@ -664,23 +741,24 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     if (foco) { var fx = PUB.filter(function (y) { return y.id === foco; })[0]; if (fx && fx.estado !== "Por publicar") PV = "hechas"; }
     var op = [["pend", "Por publicar (" + pend.length + ")"], ["cal", "Calendario (" + prox.length + ")"], ["hechas", "Publicadas (" + listas.length + ")"], ["nueva", "+ Agregar"]];
     var h = '<div class="seg" role="group" aria-label="Vista de publicaciones">' + op.map(function (o) { return '<button data-pv="' + o[0] + '" aria-pressed="' + (PV === o[0]) + '">' + o[1] + '</button>'; }).join("") + '</div>';
-    if (PV === "pend") h += pend.length ? '<p class="hint" style="margin:0 2px">Toca «Planificar» en una sesión para ponerle fecha al reel, al carrusel y a las historias. Se guardan en tu calendario «NC Studio · Publicaciones» con aviso 1 hora antes.</p>' + pend.map(function (x, i) { return tarjetaPub(x, "p" + i); }).join("") : '<div class="msg">✓ No tienes sesiones por publicar.</div>';
+    if (PV === "pend") h += pend.length ? '<p class="hint" style="margin:0 2px">Toca una sesión para ver sus fotos y ponerle fecha al reel, al carrusel y a las historias (se guardan en tu calendario «NC Studio · Publicaciones» con aviso 1 hora antes).</p><div class="xg">' + pend.map(tilePub).join("") + '</div>' : '<div class="msg">✓ No tienes sesiones por publicar.</div>';
     if (PV === "cal") h += '<section><h2>Calendario de publicaciones</h2>' + (prox.length ? prox.map(function (p) {
       return '<div class="mv"><span><b>' + esc(TIPOS[p.k]) + '</b> · ' + esc(p.x.cliente) + '</span><span class="m' + (p.f.slice(0, 10) < hoy ? ' neg' : '') + '">' + esc(fechaBonita(p.f)) + '</span><small>' + esc(p.x.servicio || "") + (p.f.slice(0, 10) < hoy ? " · ya pasó la fecha, ¿lo publicaste?" : "") + '</small></div>';
     }).join("") : '<p class="hint">Todavía no tienes publicaciones programadas. En «Por publicar», abre una sesión, toca «Sugerir fechas» y guarda.</p>') + '</section>';
-    if (PV === "hechas") h += listas.length ? listas.map(function (x, i) { return tarjetaPub(x, "l" + i); }).join("") : '<div class="msg">Aquí aparecen las sesiones ya publicadas o que no van.</div>';
-    if (PV === "nueva") h += '<section><h2>Agregar otra sesión</h2><p class="hint">Para sesiones que no pasaron por el sistema (por ejemplo, las que tenías antes).</p><div class="g2"><label for="nc0">Cliente<input id="nc0" autocomplete="off"></label><label for="ns0">Sesión o servicio<input id="ns0" autocomplete="off" placeholder="Ej.: Dulce Espera"></label><label for="nl0">Link de las fotos finales <small>(opcional)</small><input id="nl0" type="url" placeholder="https://…"></label><label for="nf0">Fecha de la sesión <small>(opcional)</small><input id="nf0" type="date"></label></div><div class="row"><button class="btn" id="nok0">Agregar a por publicar</button><span class="err" id="ner0"></span></div></section>';
+    if (PV === "hechas") h += listas.length ? '<div class="xg">' + listas.map(tilePub).join("") + '</div>' : '<div class="msg">Aquí aparecen las sesiones ya publicadas o que no van.</div>';
+    if (PV === "nueva") h += '<section><h2>Agregar otra sesión</h2><p class="hint">Para sesiones que no pasaron por el sistema (por ejemplo, las que tenías antes).</p><div class="g2"><label for="nc0">Cliente<input id="nc0" autocomplete="off"></label><label for="ns0">Sesión o servicio<input id="ns0" autocomplete="off" placeholder="Ej.: Dulce Espera"></label><label for="nl0">Carpeta de Drive o galería <small>(opcional)</small><input id="nl0" type="url" placeholder="https://drive.google.com/drive/folders/…"></label><label for="nf0">Fecha de la sesión <small>(opcional)</small><input id="nf0" type="date"></label></div><div class="row"><button class="btn" id="nok0">Agregar a por publicar</button><span class="err" id="ner0"></span></div></section>';
     app.innerHTML = h;
     Array.prototype.forEach.call(app.querySelectorAll("[data-pv]"), function (b) { b.onclick = function () { PV = b.getAttribute("data-pv"); pintaPub(); window.scrollTo(0, 0); }; });
-    if (PV === "pend") pend.forEach(function (x, i) { bindPub(x, "p" + i); });
-    if (PV === "hechas") listas.forEach(function (x, i) { bindPub(x, "l" + i); });
+    Array.prototype.forEach.call(app.querySelectorAll("[data-pb]"), function (b) { b.onclick = function () { var id = b.getAttribute("data-pb"); pubDet(PUB.filter(function (y) { return y.id === id; })[0]); }; });
+    if (PV === "pend" || PV === "hechas") portadas();
+    DET = null;
     if (PV === "nueva") $("nok0").onclick = function () {
       var c = $("nc0").value.trim(); if (!c) { $("ner0").textContent = "Escribe el nombre del cliente."; return; }
       var b = $("nok0"); b.disabled = true; b.innerHTML = '<span class="spin"></span>Agregando…';
       call({ action: "pub_save", pin: PIN, p: { cliente: c, servicio: $("ns0").value.trim(), link: $("nl0").value.trim(), fecha: $("nf0").value } }).then(function (r) { if (r.ok) publicar(r.id); else { b.disabled = false; b.textContent = "Agregar a por publicar"; $("ner0").textContent = r.title; } })
         .catch(function () { b.disabled = false; b.textContent = "Agregar a por publicar"; $("ner0").textContent = "No pudimos conectar."; });
     };
-    if (foco) { var el = $("pb-" + foco); if (el) setTimeout(function () { el.scrollIntoView({ block: "start", behavior: "smooth" }); }, 50); }
+    if (foco) { var fx2 = PUB.filter(function (y) { return y.id === foco; })[0]; if (fx2) pubDet(fx2); }
   }
   function resumenPlan(x) {
     return Object.keys(TIPOS).map(function (k) {
@@ -717,7 +795,9 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       call({ action: "pub_save", pin: PIN, p: p }).then(function (r) {
         if (!r.ok) { b.disabled = false; b.textContent = lb; $(s + "st").textContent = r.title; return; }
         PUB = PUB.map(function (y) { return y.id === x.id ? Object.assign({}, y, { plan: r.plan, estado: r.estado, notas: p.notas }) : y; });
-        PUB_OPEN[x.id] = 1; pintaPub(r.estado === "Por publicar" ? x.id : null);
+        PUB_OPEN[x.id] = 1;
+        if (DET === x.id) { var nx = PUB.filter(function (y) { return y.id === x.id; })[0]; if (r.estado !== "Por publicar") PV = "hechas"; pubDet(nx); var st = $("d0st"); if (st) st.innerHTML = '<span class="pos">✓ Guardado</span>'; }
+        else pintaPub(r.estado === "Por publicar" ? x.id : null);
       }).catch(function () { b.disabled = false; b.textContent = lb; $(s + "st").textContent = "No pudimos conectar."; });
     }
     $(s + "ok").onclick = function () {
@@ -744,7 +824,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     };
     $(s + "del").onclick = function () {
       var b = $(s + "del"); if (!b.dataset.ok) { b.dataset.ok = 1; b.textContent = "¿Seguro? Toca otra vez"; return; }
-      b.disabled = true; call({ action: "pub_del", pin: PIN, id: x.id }).then(function () { publicar(); });
+      b.disabled = true; call({ action: "pub_del", pin: PIN, id: x.id }).then(function () { DET = null; PORTADAS = null; publicar(); });
     };
   }
 
