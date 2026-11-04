@@ -1,6 +1,24 @@
 package com.ncstudio.app;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.ContentValues;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.provider.MediaStore;
+import android.util.Base64;
+import android.webkit.JavascriptInterface;
+import androidx.core.app.ActivityCompat;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.util.ArrayList;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -201,6 +219,7 @@ public class MainActivity extends AppCompatActivity {
             @Override public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest r) { return external(r.getUrl()); }
         });
         w.setDownloadListener((url, ua, cd, mime, len) -> external(Uri.parse(url)));
+        w.addJavascriptInterface(new Puente(w), "NCApp");
         return w;
     }
 
@@ -216,6 +235,96 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "No hay una app para abrir ese enlace.", Toast.LENGTH_SHORT).show();
         }
         return true;
+    }
+
+    /* ---------- fotos elegidas: guardarlas en la galería y compartirlas a Instagram ---------- */
+    private class Puente {
+        private final WebView web;
+        Puente(WebView w) { web = w; }
+
+        @JavascriptInterface
+        public void descargar(String json) {
+            new Thread(() -> {
+                try {
+                    JSONObject o = new JSONObject(json);
+                    JSONArray fotos = o.getJSONArray("fotos");
+                    int total = fotos.length();
+                    if (Build.VERSION.SDK_INT < 29 && ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        runOnUiThread(() -> ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 7));
+                        avisar(total, total, "Acepta el permiso de fotos y vuelve a tocar el botón.");
+                        return;
+                    }
+                    ArrayList<Uri> uris = new ArrayList<>();
+                    for (int i = 0; i < total; i++) {
+                        avisar(i, total, null);
+                        String url = o.getString("base") + "?a=foto&pin=" + enc(o.getString("pin")) + "&id=" + enc(o.getString("id")) + "&f=" + enc(fotos.getString(i));
+                        JSONObject r = new JSONObject(bajar(url));
+                        if (!r.optBoolean("ok")) continue;
+                        byte[] bytes = Base64.decode(r.getString("b64"), Base64.DEFAULT);
+                        Uri u = guardar(r.optString("name", "NC_" + i + ".jpg"), r.optString("mime", "image/jpeg"), bytes);
+                        if (u != null) uris.add(u);
+                    }
+                    avisar(total, total, "✓ " + uris.size() + (uris.size() == 1 ? " foto guardada" : " fotos guardadas") + " en tu galería (álbum NC Studio).");
+                    if (o.optBoolean("compartir") && !uris.isEmpty()) runOnUiThread(() -> compartir(uris));
+                } catch (Exception e) {
+                    avisar(1, 1, "No se pudieron descargar: " + e.getMessage());
+                }
+            }).start();
+        }
+
+        private void avisar(int hechas, int total, String msg) {
+            String js = "window.ncProgreso && window.ncProgreso(" + hechas + "," + total + "," + (msg == null ? "null" : JSONObject.quote(msg)) + ")";
+            runOnUiThread(() -> web.evaluateJavascript(js, null));
+        }
+    }
+
+    private static String enc(String s) throws Exception { return URLEncoder.encode(s, "UTF-8"); }
+
+    private static String bajar(String url) throws Exception {
+        for (int i = 0; i < 5; i++) { // Apps Script redirige a otro dominio: se sigue a mano
+            HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
+            c.setInstanceFollowRedirects(false);
+            c.setConnectTimeout(30000); c.setReadTimeout(120000);
+            int code = c.getResponseCode();
+            if (code >= 300 && code < 400) { url = c.getHeaderField("Location"); c.disconnect(); continue; }
+            InputStream in = c.getInputStream();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            byte[] buf = new byte[65536]; int n;
+            while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+            in.close(); c.disconnect();
+            return out.toString("UTF-8");
+        }
+        throw new Exception("demasiadas redirecciones");
+    }
+
+    private Uri guardar(String name, String mime, byte[] bytes) throws Exception {
+        if (Build.VERSION.SDK_INT >= 29) {
+            ContentValues v = new ContentValues();
+            v.put(MediaStore.Images.Media.DISPLAY_NAME, name);
+            v.put(MediaStore.Images.Media.MIME_TYPE, mime);
+            v.put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/NC Studio");
+            v.put(MediaStore.Images.Media.IS_PENDING, 1);
+            Uri u = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, v);
+            if (u == null) return null;
+            OutputStream os = getContentResolver().openOutputStream(u);
+            os.write(bytes); os.close();
+            v.clear(); v.put(MediaStore.Images.Media.IS_PENDING, 0);
+            getContentResolver().update(u, v, null, null);
+            return u;
+        }
+        Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+        String s = MediaStore.Images.Media.insertImage(getContentResolver(), bm, name, "NC Studio");
+        return s == null ? null : Uri.parse(s);
+    }
+
+    private void compartir(ArrayList<Uri> uris) {
+        Intent i = new Intent(uris.size() == 1 ? Intent.ACTION_SEND : Intent.ACTION_SEND_MULTIPLE);
+        i.setType("image/*");
+        if (uris.size() == 1) i.putExtra(Intent.EXTRA_STREAM, uris.get(0)); else i.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+        i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        Intent ig = new Intent(i).setPackage("com.instagram.android");
+        try { startActivity(ig); }
+        catch (Exception e) { startActivity(Intent.createChooser(i, "Compartir fotos")); }
     }
 
     /* ---------- utilidades de diseño ---------- */
