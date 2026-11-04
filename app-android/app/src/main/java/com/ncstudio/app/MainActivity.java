@@ -1,6 +1,10 @@
 package com.ncstudio.app;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.SharedPreferences;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.pm.PackageManager;
@@ -126,7 +130,48 @@ public class MainActivity extends AppCompatActivity {
         p.authenticate(info.build());
     }
 
-    private void unlock() { unlocked = true; lockView.setVisibility(View.GONE); }
+    private void unlock() { unlocked = true; lockView.setVisibility(View.GONE); buscarVersion(); }
+
+    /* ---------- aviso de versión nueva: revisa en GitHub si hay una app más reciente ---------- */
+    private static final String RELEASE_API = "https://api.github.com/repos/ncstudio507/ncstudio507.github.io/releases/tags/app";
+    private static final String APK_URL = "https://github.com/ncstudio507/ncstudio507.github.io/releases/download/app/NCStudio.apk";
+    private boolean versionRevisada = false;
+
+    private void buscarVersion() {
+        if (versionRevisada) return;
+        versionRevisada = true;
+        new Thread(() -> {
+            try {
+                java.net.HttpURLConnection c = (java.net.HttpURLConnection) new java.net.URL(RELEASE_API).openConnection();
+                c.setConnectTimeout(15000); c.setReadTimeout(15000);
+                c.setRequestProperty("Accept", "application/vnd.github+json");
+                if (c.getResponseCode() != 200) return;
+                java.io.InputStream in = c.getInputStream();
+                java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+                byte[] buf = new byte[8192]; int n;
+                while ((n = in.read(buf)) > 0) out.write(buf, 0, n);
+                in.close();
+                String body = new JSONObject(out.toString("UTF-8")).optString("body", "");
+                Matcher m = Pattern.compile("Versi[oó]n 1\\.(\\d+)").matcher(body);
+                if (!m.find()) return;
+                int nueva = Integer.parseInt(m.group(1));
+                int actual = (int) (Build.VERSION.SDK_INT >= 28
+                        ? getPackageManager().getPackageInfo(getPackageName(), 0).getLongVersionCode()
+                        : getPackageManager().getPackageInfo(getPackageName(), 0).versionCode);
+                if (nueva <= actual) return;
+                SharedPreferences sp = getSharedPreferences("nc", MODE_PRIVATE);
+                long hoy = System.currentTimeMillis() / 86400000L;
+                if (sp.getInt("avisada", 0) == nueva && sp.getLong("dia", 0) == hoy) return; // máximo un aviso al día
+                sp.edit().putInt("avisada", nueva).putLong("dia", hoy).apply();
+                runOnUiThread(() -> new AlertDialog.Builder(this)
+                        .setTitle("Hay una versión nueva de la app")
+                        .setMessage("La versión 1." + nueva + " ya está lista (tienes la 1." + actual + "). Se descarga y la instalas encima: no pierdes nada.")
+                        .setPositiveButton("Descargar", (d, w) -> external(Uri.parse(APK_URL)))
+                        .setNegativeButton("Después", null)
+                        .show());
+            } catch (Exception ignored) { }
+        }).start();
+    }
 
     /* ---------- pantallas ---------- */
     private View buildLock() {
