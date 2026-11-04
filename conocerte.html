@@ -127,7 +127,7 @@ function fechaNac(inp) {
   leer(); inp._fn = w; inp._fnLeer = leer; inp.style.display = "none"; inp.parentNode.insertBefore(w, inp.nextSibling);
 }
 function sinFechaNac(inp) { if (inp && inp._fn) { inp._fn.remove(); inp._fn = null; inp.style.display = ""; } }
-  if (!id) { pinta({ nuevo: true }); return; }
+  if (!id) { pinta({ nuevo: true, name: q.get("n") || "", phone: q.get("t") || "" }); return; }
   call({ action: "gustos_ver", id: id, c: c }).then(function (r) {
     if (!r.ok) { app.innerHTML = '<div class="msg"><h2>Ups</h2><p>' + esc(r.title) + '. Pídenos el enlace otra vez por WhatsApp.</p></div>'; return; }
     pinta(r);

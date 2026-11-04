@@ -470,6 +470,17 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     if ($("cg")) $("cg").onclick = function () { galForm(x, k, gkey); };
     box.scrollIntoView({ block: "start", behavior: "smooth" });
   }
+  function galBase(x, k) {
+    var pr = k === "pru";
+    $("cmp").innerHTML = '<section><h2>' + (pr ? "Galería de pruebas" : "Galería final") + '</h2><p class="hint">Como no tiene reserva, no se guarda: solo le preparo el mensaje.</p>' +
+      '<label for="bgl">Link de la galería<input id="bgl" type="url" placeholder="https://…" autocomplete="off"></label><div class="g2"><label for="bgc">Contraseña <small>(opcional)</small><input id="bgc" autocomplete="off"></label><label for="bgn">PIN de descarga <small>(opcional)</small><input id="bgn" autocomplete="off"></label></div>' +
+      '<button class="btn" id="bgok">Preparar mensaje</button><p class="err" id="bgerr"></p><div id="bgbox" style="display:grid;gap:12px"></div></section>';
+    $("bgok").onclick = function () {
+      var lk = $("bgl").value.trim(); if (!/^https?:\/\//i.test(lk)) { $("bgerr").textContent = "Pega el link completo (empieza con https://)."; return; }
+      $("bgerr").textContent = ""; var y = Object.assign({}, x); y[pr ? "gp" : "gf"] = { link: lk, clave: $("bgc").value.trim(), pin: $("bgn").value.trim() };
+      panelMsg("bgbox", function () { return x; }, msgs(y)[k], pr ? "Tus fotos de prueba · NC Studio" : "¡Tus fotos finales están listas! · NC Studio");
+    };
+  }
   function galForm(x, k, gkey) {
     var g = x[gkey] || {}, pr = k === "pru";
     $("cmp").innerHTML = '<section><h2>' + (pr ? "Galería de pruebas" : "Galería final") + '</h2><p class="hint">Pega los datos de la galería de Pixieset. Se guardan para este cliente.</p>' +
@@ -985,6 +996,30 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
       '<div class="row"><button class="btn" id="cok">' + (nuevo ? "Guardar cliente y contacto" : "Guardar cambios") + '</button><span class="hint" id="cst"></span></div><p class="err" id="cer"></p></section>';
     $("cn").value = x.name || ""; $("cph").value = x.phone || ""; $("cem").value = x.email || ""; $("cig").value = x.instagram || ""; $("cno").value = x.notas || "";
     $("bkb").onclick = function () { baseCli(); };
+    if (!nuevo) {
+      var del = document.createElement("section"); del.innerHTML = '<button class="btn2" id="bdel" style="border-color:var(--err);color:var(--err);justify-self:start">🗑️ Eliminar cliente</button><div id="bdelc"></div>'; app.appendChild(del);
+      $("bdel").onclick = function () {
+        var b = this; b.disabled = true; $("bdelc").innerHTML = '<div class="msg" style="padding:12px"><span class="spin"></span>Revisando qué tiene…</div>';
+        call({ action: "cliente_borrar", pin: PIN, id: x.id, dry: true }).then(function (r) {
+          b.disabled = false; if (!r.ok) { $("bdelc").innerHTML = '<p class="err">' + esc(r.title) + '</p>'; return; }
+          var z = r.resumen, L = ["su ficha en la base de clientes"];
+          if (z.contacto) L.push("su contacto de Google (si nadie más usa ese número)");
+          if (z.reservas) L.push(z.reservas + (z.reservas === 1 ? " reserva" : " reservas") + " con sus eventos del calendario");
+          if (z.gustos) L.push(z.gustos + (z.gustos === 1 ? " formulario de gustos" : " formularios de gustos"));
+          if (z.publicaciones) L.push(z.publicaciones + (z.publicaciones === 1 ? " sesión en Publicar" : " sesiones en Publicar"));
+          if (z.interesados) L.push("su registro en Interesados");
+          $("bdelc").innerHTML = '<div class="card2" style="border-color:var(--err)"><b>¿Borrar a ' + esc(x.name) + ' de todos lados?</b><p style="margin:0">Se borra:</p><ul style="margin:0;padding-left:20px;line-height:1.6">' + L.map(function (t) { return '<li>' + t + '</li>'; }).join("") + '</ul><p class="hint" style="margin:0">Lo que te pagó se queda en Finanzas, porque esa plata sí entró. Esto no se puede deshacer.</p><div class="row"><button class="btn" id="bdok" style="background:var(--err);color:#fff">Sí, borrar de todos lados</button><button class="btn2" id="bdno">Cancelar</button></div></div>';
+          $("bdno").onclick = function () { $("bdelc").innerHTML = ""; };
+          $("bdok").onclick = function () {
+            var k = this; k.disabled = true; k.innerHTML = '<span class="spin"></span>Borrando…';
+            call({ action: "cliente_borrar", pin: PIN, id: x.id }).then(function (r2) {
+              if (!r2.ok) { k.disabled = false; k.textContent = "Sí, borrar de todos lados"; $("bdelc").insertAdjacentHTML("beforeend", '<p class="err">' + esc(r2.title) + '</p>'); return; }
+              BASE = null; LIST = null; INT = null; GLIST = null; PUB = null; AVC = false; cargaAv(); baseCli();
+            }).catch(function () { k.disabled = false; k.textContent = "Sí, borrar de todos lados"; });
+          };
+        }).catch(function () { b.disabled = false; $("bdelc").innerHTML = '<p class="err">No pudimos conectar.</p>'; });
+      };
+    }
     if ($("bexp")) $("bexp").onclick = function () { experiencias(x); };
     if ($("bpf")) $("bpf").onclick = function () { perfilCli(x); };
     $("cok").onclick = function () {
@@ -1005,7 +1040,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     tab("C"); window.scrollTo(0, 0);
     app.innerHTML = '<button class="back" id="pbk">‹ ' + esc(first(x.name)) + '</button><div class="msg"><span class="spin"></span>Armando su perfil…</div>';
     $("pbk").onclick = function () { fichaCli(x); };
-    call({ action: "perfil", pin: PIN, phone: x.phone, email: x.email }).then(function (r) {
+    call({ action: "perfil", pin: PIN, phone: x.phone, email: x.email, name: x.name }).then(function (r) {
       if (!r.ok) { app.innerHTML = '<button class="back" id="pbk">‹ Volver</button><div class="msg">No pudimos armar el perfil. ¿Ya pegaste el código nuevo?</div>'; $("pbk").onclick = function () { fichaCli(x); }; return; }
       var conf = r.reservas.filter(function (y) { return y.estado === "Confirmado"; });
       var ig = x.instagram || r.instagram, ini = String(x.name || "?").split(/\s+/).map(function (w) { return w.charAt(0); }).slice(0, 2).join("").toUpperCase();
@@ -1465,7 +1500,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     if (EV2 === "mood" || EV2 === "meet") {
       app.innerHTML = segEnv(EV2) + '<section><h2>' + (EV2 === "mood" ? "Enviar el moodboard" : "Reunión creativa por Meet") + '</h2><p class="hint">Elige el cliente.</p></section><div id="ebox"></div>';
       bindEnv(); var cual = EV2;
-      pickRes("ebox", function (x) { return x.estado !== "No disponible"; }, function (x) { if (cual === "mood") moodDe(x); else meetDe(x); });
+      pickRes("ebox", function (x) { return x.estado !== "No disponible"; }, function (x) { if (cual === "mood") moodDe(x); else meetDe(x); }, true);
       return;
     }
     if (EV2 === "contrato") {
@@ -1479,10 +1514,10 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     app.innerHTML = segEnv(EV2) + '<section><h2>' + (fin ? "Enviar fotos finales" : "Enviar fotos de prueba") + '</h2><p class="hint">Elige el cliente; pegas el link de la galería y lo mandas por correo, WhatsApp o los dos.</p></section><div id="ebox"></div>';
     bindEnv();
     pickRes("ebox", function (x) { return x.estado === "Confirmado" && (fin || x.kind !== "evento"); }, function (x) {
-      app.innerHTML = '<button class="back" id="ebk">‹ Elegir otro cliente</button><section><h2>' + esc(x.name) + '</h2><p class="hint">' + esc(x.service + " · " + x.fecha) + '</p></section><div id="cmp"></div>';
+      app.innerHTML = '<button class="back" id="ebk">‹ Elegir otro cliente</button><section><h2>' + esc(x.name) + '</h2><p class="hint">' + esc(x.base ? "Contacto sin reserva · 📱 " + x.phone : x.service + " · " + x.fecha) + '</p></section><div id="cmp"></div>';
       bindEnv(); $("ebk").onclick = function () { enviar(EV2); };
-      componer(x, fin ? "fin" : "pru");
-    });
+      if (x.base) galBase(x, fin ? "fin" : "pru"); else componer(x, fin ? "fin" : "pru");
+    }, true);
   }
   /* panel de mensaje: WhatsApp, Instagram y correo */
   function panelMsg(boxId, dest, txt, asunto) {
@@ -1509,7 +1544,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     app.innerHTML = segEnv("gustos") + '<section><h2>Conocer al cliente</h2><p class="hint">Elige al cliente (los que ya pagaron el abono) y mándale el formulario de gustos. Con sus respuestas armas sus 3 ideas y se las envías en PDF.</p></section><div id="ebox"></div>' +
       '<section><h2>Respuestas recibidas</h2><div id="glst" style="display:grid;gap:8px"><div class="msg"><span class="spin"></span>Cargando…</div></div></section>';
     bindEnv();
-    pickRes("ebox", function (x) { return x.estado === "Confirmado"; }, gustosEnviar);
+    pickRes("ebox", function (x) { return x.estado === "Confirmado"; }, gustosEnviar, true);
     call({ action: "gustos_lista", pin: PIN }).then(function (r) {
       if (!$("glst")) return;
       if (!r.ok) { $("glst").innerHTML = '<p class="hint">No pudimos cargar las respuestas. ¿Ya pegaste el código nuevo?</p>'; return; }
@@ -1524,9 +1559,9 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     call({ action: "gustos_lista", pin: PIN }).then(function (r) { GLIST = r.list || []; var g = GLIST.filter(function (y) { return y.id === gid; })[0]; if (g) gustosDet(g); else gustos(); }).catch(function () { gustos(); });
   }
   function gustosEnviar(x) {
-    var link = x && x.gl ? x.gl : SITE + "conocerte.html", dest = x ? function () { return x; } : function () { return { name: $("gnm").value, phone: $("gph").value, email: $("gem").value, instagram: $("gig").value.replace(/^@/, "") }; };
+    var link = x && x.gl ? x.gl : SITE + "conocerte.html" + (x ? "?n=" + encodeURIComponent(x.name || "") + "&t=" + encodeURIComponent(x.phone || "") : ""), dest = x ? function () { return x; } : function () { return { name: $("gnm").value, phone: $("gph").value, email: $("gem").value, instagram: $("gig").value.replace(/^@/, "") }; };
     app.innerHTML = '<button class="back" id="gbk">‹ Conocer al cliente</button><section><h2>Formulario para ' + (x ? esc(x.name) : "alguien nuevo") + '</h2>' +
-      (x ? '<p class="hint">' + esc(x.service + " · " + x.fecha) + '. Sus respuestas quedan guardadas en su reserva.</p>' : '<div class="g2"><label for="gnm">Nombre<input id="gnm" autocomplete="off"></label><label for="gph">WhatsApp<input id="gph" inputmode="tel" autocomplete="off"></label><label for="gig">Instagram <small>(sin @)</small><input id="gig" autocomplete="off"></label><label for="gem">Correo<input id="gem" type="email" autocomplete="off"></label></div>') +
+      (x ? '<p class="hint">' + (x.base ? "Contacto sin reserva. Sus respuestas quedan guardadas en «Respuestas recibidas»." : esc(x.service + " · " + x.fecha) + ". Sus respuestas quedan guardadas en su reserva.") + '</p>' : '<div class="g2"><label for="gnm">Nombre<input id="gnm" autocomplete="off"></label><label for="gph">WhatsApp<input id="gph" inputmode="tel" autocomplete="off"></label><label for="gig">Instagram <small>(sin @)</small><input id="gig" autocomplete="off"></label><label for="gem">Correo<input id="gem" type="email" autocomplete="off"></label></div>') +
       '<div id="gbox" style="display:grid;gap:12px"></div></section>';
     $("gbk").onclick = function () { gustos(); };
     function texto(n) { return (n ? "¡Hola, " + first(n) + "! 💛" : "¡Hola! 💛") + " Queremos que tu sesión sea tan original como tú ✨\n\n¿Nos ayudas con este formulario cortito? Así conocemos tus gustos y te prepararemos *3 ideas para tus fotos* 👇\n" + link + "\n\n¡Gracias! — Nelson y Charlie · NC Studio"; }
@@ -1564,22 +1599,22 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
   }
   /* ---- moodboard ---- */
   function moodDe(x) {
-    app.innerHTML = '<button class="back" id="ebk">‹ Elegir otro cliente</button><section><h2>Moodboard de ' + esc(x.name) + '</h2><p class="hint">' + esc(x.service + " · " + x.fecha) + '</p>' +
+    app.innerHTML = '<button class="back" id="ebk">‹ Elegir otro cliente</button><section><h2>Moodboard de ' + esc(x.name) + '</h2><p class="hint">' + esc(x.base ? "Contacto sin reserva" : x.service + " · " + x.fecha) + '</p>' +
       '<label for="mlk">Link del moodboard <small>(Canva, Pinterest o Drive)</small><input id="mlk" type="url" placeholder="https://…" autocomplete="off"></label><button class="btn" id="mok">Preparar mensaje</button><p class="err" id="merr"></p><div id="mbox" style="display:grid;gap:12px"></div></section>';
     $("ebk").onclick = function () { enviar("mood"); };
     $("mlk").value = x.moodboard || "";
     $("mok").onclick = function () {
       var lk = $("mlk").value.trim(); if (!/^https?:\/\//i.test(lk)) { $("merr").textContent = "Pega el link completo (empieza con https://)."; return; }
       $("merr").textContent = ""; x.moodboard = lk;
-      call({ action: "moodboard", pin: PIN, id: x.id, link: lk }).catch(function () {});
-      panelMsg("mbox", function () { return x; }, "¡Hola, " + first(x.name) + "! 🎨 Te comparto el *moodboard* de tu sesión de " + x.service.split(" · ")[0] + ": colores, poses y la vibra que vamos a buscar ✨👇\n" + lk + "\n\nDime qué te parece; si quieres cambiar algo, lo ajustamos 💛", "El moodboard de tu sesión · NC Studio");
+      if (x.id) call({ action: "moodboard", pin: PIN, id: x.id, link: lk }).catch(function () {});
+      panelMsg("mbox", function () { return x; }, "¡Hola, " + first(x.name) + "! 🎨 Te comparto el *moodboard* de tu sesión" + (x.base ? "" : " de " + x.service.split(" · ")[0]) + ": colores, poses y la vibra que vamos a buscar ✨👇\n" + lk + "\n\nDime qué te parece; si quieres cambiar algo, lo ajustamos 💛", "El moodboard de tu sesión · NC Studio");
     };
     if (x.moodboard) $("mok").click();
   }
   /* ---- reunión creativa por Meet ---- */
   function meetDe(x) {
     var mt = x.meet || {};
-    app.innerHTML = '<button class="back" id="ebk">‹ Elegir otro cliente</button><section><h2>Reunión creativa con ' + esc(x.name) + '</h2><p class="hint">' + esc(x.service + " · sesión el " + x.fecha) + '</p>' +
+    app.innerHTML = '<button class="back" id="ebk">‹ Elegir otro cliente</button><section><h2>Reunión creativa con ' + esc(x.name) + '</h2><p class="hint">' + esc(x.base ? "Contacto sin reserva" : x.service + " · sesión el " + x.fecha) + '</p>' +
       '<div class="g2"><label for="rdt">Día<input id="rdt" type="date"></label><label for="rhr">Hora<input id="rhr" type="time" step="900"></label></div>' +
       '<label for="rlk">Link de Meet<input id="rlk" type="url" placeholder="https://meet.google.com/…" autocomplete="off"></label>' +
       '<a class="btn2" href="https://meet.google.com/new" target="_blank" rel="noopener" style="text-decoration:none;justify-self:start">Crear un link nuevo en Meet ↗</a><p class="hint" style="margin-top:-6px">Se abre Meet con una reunión nueva: copia el link de arriba y pégalo aquí.</p>' +
@@ -1592,26 +1627,33 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
       if (!f || !h) { $("rerr").textContent = "Elige el día y la hora."; return; }
       if (!/^https?:\/\//i.test(lk)) { $("rerr").textContent = "Pega el link de Meet (empieza con https://)."; return; }
       $("rerr").textContent = ""; var b = $("rok"); b.disabled = true; b.innerHTML = '<span class="spin"></span>Guardando…';
-      call({ action: "reunion", pin: PIN, id: x.id, fecha: f, hora: h, link: lk, cal: $("rcal").checked }).then(function (r) {
+      call({ action: "reunion", pin: PIN, id: x.id, name: x.name, phone: x.phone, email: x.email, fecha: f, hora: h, link: lk, cal: $("rcal").checked }).then(function (r) {
         b.disabled = false; b.textContent = "Guardar y preparar mensaje";
         if (!r.ok) { $("rerr").textContent = r.title; return; }
         x.meet = { fecha: f, hora: h, link: lk };
         $("rbox").innerHTML = '<p class="pos" style="margin:0"><b>✓ Guardada' + (r.agendado ? " y anotada en tu calendario" : "") + '.</b></p><div id="rbox2" style="display:grid;gap:12px"></div>';
-        panelMsg("rbox2", function () { return x; }, "¡Hola, " + first(x.name) + "! 💡 Te espero en nuestra *reunión creativa* para planificar tu sesión de " + x.service.split(" · ")[0] + ".\n\n📅 " + r.fechaTxt + "\n⏰ " + h12(h) + "\n💻 Entra aquí: " + lk + "\n\nSi tienes fotos o ideas que te gusten, tenlas a mano ✨ ¡Nos vemos!", "Nuestra reunión creativa · NC Studio");
+        panelMsg("rbox2", function () { return x; }, "¡Hola, " + first(x.name) + "! 💡 Te espero en nuestra *reunión creativa* para planificar tu sesión" + (x.base ? "" : " de " + x.service.split(" · ")[0]) + ".\n\n📅 " + r.fechaTxt + "\n⏰ " + h12(h) + "\n💻 Entra aquí: " + lk + "\n\nSi tienes fotos o ideas que te gusten, tenlas a mano ✨ ¡Nos vemos!", "Nuestra reunión creativa · NC Studio");
       }).catch(function () { b.disabled = false; b.textContent = "Guardar y preparar mensaje"; $("rerr").textContent = "No pudimos conectar."; });
     };
   }
   // lista de clientes (reservas) con buscador para elegir uno
-  function pickRes(boxId, filtro, alElegir) {
+  function persona(n, t) { var d = String(t || "").replace(/\D/g, ""); return d.length >= 7 ? d.slice(-8) + "|" + (normN(n).split(" ")[0] || "") : ""; }
+  // clientes de tu base que no tienen reserva (para poder mandarles cosas igual)
+  function soloBase() {
+    var con = {}; (LIST || []).forEach(function (x) { con[persona(x.name, x.phone)] = 1; });
+    return (BASE || []).filter(function (c) { return !con[persona(c.name, c.phone)]; }).map(function (c) { return { base: true, cid: c.id, id: "", name: c.name, phone: c.phone, email: c.email || "", instagram: c.instagram || "", service: "Sesión", fecha: "", estado: "Sin reserva", kind: "", ids: c.ids || [] }; });
+  }
+  function pickRes(boxId, filtro, alElegir, conBase) {
     var box = $(boxId);
+    if (conBase && !BASE) { box.innerHTML = '<div class="msg"><span class="spin"></span>Cargando clientes…</div>'; cargaBase(function () { pickRes(boxId, filtro, alElegir, conBase); }); return; }
     function pinta() {
-      var L = (LIST || []).filter(filtro);
+      var L = (LIST || []).filter(filtro).concat(conBase ? soloBase() : []);
       box.innerHTML = '<section><label for="pkq">Buscar cliente<input id="pkq" placeholder="Nombre, teléfono o NC-…" autocomplete="off"></label><div id="pkl" style="display:grid;gap:8px"></div></section>';
       function lst() {
         var t = $("pkq").value.toLowerCase().trim();
         var M = L.filter(function (x) { return !t || (x.name + " " + x.phone + " " + x.id + " " + x.service).toLowerCase().indexOf(t) >= 0; }).slice(0, 40);
         $("pkl").innerHTML = M.length ? "" : '<p class="hint">No hay clientes que coincidan.</p>';
-        M.forEach(function (x) { var b = document.createElement("button"); b.className = "cl"; b.innerHTML = chip(x.estado) + "<b>" + esc(x.name) + "</b><span>" + esc(x.service) + "</span><span>" + esc(x.fecha) + "</span>" + avTag(x.name, x.phone, x.id); b.onclick = function () { alElegir(x); }; $("pkl").appendChild(b); });
+        M.forEach(function (x) { var b = document.createElement("button"); b.className = "cl"; b.innerHTML = (x.base ? '<span class="chip">Contacto sin reserva</span>' : chip(x.estado)) + "<b>" + esc(x.name) + "</b><span>" + esc(x.base ? "📱 " + x.phone : x.service) + "</span>" + (x.fecha ? "<span>" + esc(x.fecha) + "</span>" : "") + avTag(x.name, x.phone, x.id || x.ids); b.onclick = function () { alElegir(x); }; $("pkl").appendChild(b); });
       }
       $("pkq").oninput = lst; lst();
     }
@@ -1664,6 +1706,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     if (!x) t = t.replace(/, (!|\s💛)/, "$1").replace(/¡Hola, ! /, "¡Hola! ").replace(/Hola,  /, "Hola ").replace(/¡,? ?/, "¡");
     return t.replace(/¡Hola, !/g, "¡Hola!").replace(/Hola, 💛/g, "Hola 💛").replace(/¡ ya/g, "¡Ya");
   }
+  function msgLista() { return (LIST || []).filter(function (x) { return x.estado !== "No disponible"; }).concat(BASE ? soloBase() : []); }
   function mensajes(oc) {
     tab("E"); EV2 = "msg";
     if (!oc) {
@@ -1691,15 +1734,15 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     function poner() { m.value = rellenar(oc[2], sel); upd(); }
     m.oninput = upd; $("mph").oninput = upd; poner();
     function llenar() {
-      $("mcs").innerHTML = '<option value="">— Sin cliente / escribirle a alguien nuevo —</option>' + (LIST || []).filter(function (x) { return x.estado !== "No disponible"; }).map(function (x, i) { return '<option value="' + i + '">' + esc(x.name + " · " + x.service + " · " + x.fecha) + '</option>'; }).join("");
+      $("mcs").innerHTML = '<option value="">— Sin cliente / escribirle a alguien nuevo —</option>' + msgLista().map(function (x, i) { return '<option value="' + i + '">' + esc(x.name + " · " + x.service + " · " + x.fecha) + '</option>'; }).join("");
     }
     if (LIST) llenar(); else call({ action: "clientes", pin: PIN }).then(function (r) { LIST = r.list || []; YAPPY = r.yappy || YAPPY; llenar(); poner(); }).catch(function () {});
     $("mcs").onchange = function () {
-      var L = (LIST || []).filter(function (x) { return x.estado !== "No disponible"; }); sel = this.value === "" ? null : L[+this.value];
+      var L = msgLista(); sel = this.value === "" ? null : L[+this.value];
       $("mph").value = sel ? sel.phone : ""; var c = sel && BASE ? BASE.filter(function (z) { return String(z.phone).replace(/\D/g, "").slice(-8) === String(sel.phone).replace(/\D/g, "").slice(-8); })[0] : null; $("mig").value = c && c.instagram ? c.instagram : ""; $("mem").value = sel ? (sel.email || (c && c.email) || "") : "";
       poner();
     };
-    cargaBase(function () {});
+    cargaBase(function () { if ($("mcs") && !sel) llenar(); });
     function copiar(txt, ok) { if (navigator.clipboard) navigator.clipboard.writeText(txt).then(ok, function () { m.select(); document.execCommand("copy"); ok(); }); else { m.select(); document.execCommand("copy"); ok(); } }
     $("mcp").onclick = function () { copiar(m.value, function () { $("mcs2").textContent = "✓ Copiado"; }); };
   }
@@ -1708,7 +1751,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
   function normN(n) { return String(n || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim(); }
   function avTag(name, phone, ids, big) {
     var t = String(phone || "").replace(/\D/g, ""), k = [].concat(ids || []).filter(Boolean).map(function (r) { return "r:" + r; });
-    if (t.length >= 7) k.push("t:" + t.slice(-8)); if (name) k.push("n:" + normN(name));
+    if (t.length >= 7) k.push("p:" + t.slice(-8) + "|" + (normN(name).split(" ")[0] || "")); if (name) k.push("n:" + normN(name));
     return '<span class="avs' + (big ? " big" : "") + '" data-av="' + esc(k.join("|")) + '" hidden></span>';
   }
   function pintaAv(root) {
