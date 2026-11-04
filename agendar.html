@@ -78,7 +78,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 .ig{font:bold 17px Arial,sans-serif;border:0;border-radius:8px;padding:16px;cursor:pointer;color:#fff;background:linear-gradient(45deg,#C13584,#E1306C,#F77737)}
 .fes{display:grid;gap:10px}
 .fe{display:flex;gap:14px;align-items:center;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;cursor:pointer;font:inherit;color:var(--fg);width:100%}
-.fe .fei{font-size:30px;line-height:1}.fe span{display:grid;gap:3px}.fe b{font-size:18px;font-family:Georgia,serif;font-weight:400}.fe small{font-size:13px;color:var(--muted)}
+.fe .fei{font-size:30px;line-height:1;width:48px;flex:none;display:flex;justify-content:center}.fe .fei img{width:48px;height:48px;object-fit:contain}.fe span{display:grid;gap:3px}.fe b{font-size:18px;font-family:Georgia,serif;font-weight:400}.fe small{font-size:13px;color:var(--muted)}
 .seg.sub button{font-size:13px;padding:7px 12px;border-width:1px}
 .chk{display:flex;gap:8px;align-items:center;font-weight:normal;grid-template-columns:none}.chk input{width:20px;height:20px;accent-color:var(--accent)}
 </style>
@@ -402,8 +402,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     var card = function (k, ico, l1, l2) { return '<button class="fe" data-fe="' + k + '"><span class="fei">' + ico + '</span><span><b>' + (k === "global" ? "Finanzas globales" : "Finanzas de " + ENT[k].n) + '</b><small>' + l1 + '</small>' + (l2 ? '<small>' + l2 + '</small>' : '') + '</span></button>'; };
     app.innerHTML = '<section style="gap:6px"><h2>Finanzas · ' + mes + '</h2><p class="hint">Elige de quién quieres ver las finanzas.</p></section><div class="fes">' +
       card("nc", "📸", "Ingresos " + money(s.ingresosNC) + " · gastos " + money(s.gastosNC), n ? '<span class="neg">' + n + ' pendiente' + (n === 1 ? '' : 's') + ' por revisar</span>' : "Todo al día ✓") +
-      card("nelson", "🧑🏻", "Ingresos " + money(s.ingresosNelson || 0) + " · gastos " + money(s.gastosNelson)) +
-      card("charlie", "🧑🏽", "Ingresos " + money(s.ingresosCharlie || 0) + " · gastos " + money(s.gastosCharlie || 0)) +
+      card("nelson", '<img src="img/av-nelson.png" alt="">', "Ingresos " + money(s.ingresosNelson || 0) + " · gastos " + money(s.gastosNelson)) +
+      card("charlie", '<img src="img/av-charlie.png" alt="">', "Ingresos " + money(s.ingresosCharlie || 0) + " · gastos " + money(s.gastosCharlie || 0)) +
       card("global", "🌎", "Todo junto: negocio, Nelson y Charlie") + '</div>';
     bindSeg();
   }
