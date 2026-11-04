@@ -458,8 +458,9 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     }).join("");
     if (conReserva && FD.abiertas.length && m.sentido !== "Enviado") tipos = '<option value="Reserva">Abono o saldo de una reserva</option>' + tipos;
     var personas = unicos([m.persona, "Nelson", "Charlie"].concat(FD.ultimos.map(function (x) { return x.persona; })), 25);
-    var socio = /charlie|nelson|barrera|garc[ií]a/i.test(m.persona || "");
-    var equipo = m.sentido ? '<button type="button" class="btn2" id="' + p + 'eq" style="justify-self:start">📸 ' + (m.sentido === "Enviado" ? (socio ? "Se lo pasé para comprar equipo de NC" : "Pagué equipo de NC") : "Es para comprar equipo de NC") + '</button>' : "";
+    var socio = /charlie|nelson|barrera|garc[ií]a/i.test(m.persona || ""), quien = m.cuenta || (FE === "charlie" ? "Charlie" : "Nelson");
+    var lbl = m.sentido === "Enviado" ? (socio ? "Lo pasé para comprar equipo de NC" : "Pagué equipo de NC") : m.sentido === "Recibido" ? "Es para comprar equipo de NC" : (p === "nv" && (FE === "nelson" || FE === "charlie") ? "Compré equipo para NC" : "");
+    var equipo = lbl ? '<button type="button" class="btn2" id="' + p + 'eq" style="justify-self:start">📸 ' + lbl + '</button><p class="hint" id="' + p + 'eqh" hidden></p>' : "";
     return equipo + '<div class="g2"><label for="' + p + 't">' + (m.sentido === "Enviado" ? "¿Para qué fue?" : m.sentido === "Recibido" ? "¿De qué es?" : "Tipo") + '<select id="' + p + 't"><option value="">Elige…</option>' + tipos + '</select></label>' +
       '<label for="' + p + 'c" id="' + p + 'cl">Categoría<select id="' + p + 'c"></select></label>' +
       '<label for="' + p + 'r" id="' + p + 'rl" hidden>Reserva<select id="' + p + 'r"><option value="">Elige la reserva…</option>' + FD.abiertas.map(function (a) { return '<option value="' + esc(a.id) + '">' + esc(a.name + " · " + a.falta + " " + money(a.monto)) + '</option>'; }).join("") + '</select></label></div>' +
@@ -503,14 +504,20 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     $(p + "m").oninput = function () { delete this.dataset.auto; };
     $(p + "c").onchange = function () { precio(); rubro(); descs(); };
     $(p + "t").onchange = cats; cats(); rubro("ini");
+    var EQ = null;
     if ($(p + "eq")) $(p + "eq").onclick = function () {
-      // el equipo lo compra NC: cuando le pagas a la tienda va a los gastos de NC (Inversión NC · Compra de equipo).
-      // si es plata que se pasan entre ustedes para comprarlo, no es gasto ni ingreso de nadie (así no se cuenta dos veces)
-      var paga = m.sentido === "Enviado" && !/charlie|nelson|barrera|garc[ií]a/i.test(m.persona || "");
-      var t = paga ? "Inversión NC" : "Sin impacto", c = paga ? "Compra de equipo" : "Para comprar equipo";
+      // el equipo lo compra NC (aunque lo paguen ustedes): la compra va a los gastos de NC y NC le queda debiendo a quien puso la plata.
+      // plata que se pasan entre ustedes para eso: la anota quien la recibe (NC le debe a quien la mandó); quien la manda no la cuenta otra vez.
+      var quien = m.cuenta || (FE === "charlie" ? "Charlie" : "Nelson"), otro = quien === "Nelson" ? "Charlie" : "Nelson";
+      var paga = (m.sentido === "Enviado" && !/charlie|nelson|barrera|garc[ií]a/i.test(m.persona || "")) || !m.sentido;
+      var recibe = m.sentido === "Recibido";
+      var t = paga ? "Inversión NC" : recibe ? "Deudas NC" : "Sin impacto", c = paga ? "Compra de equipo" : recibe ? "Préstamo de " + otro + " a NC" : "Para comprar equipo";
+      EQ = paga ? { tipo: t, cat: c, equipo: "compra", quien: quien } : recibe ? { tipo: t, cat: c, equipo: "aporte", de: otro, para: quien } : null;
+      $(p + "eqh").hidden = false;
+      $(p + "eqh").innerHTML = paga ? "Va a los gastos de NC (compra de equipo) y queda anotado que <b>NC le debe a " + quien + "</b> este monto." : recibe ? "Queda anotado que <b>NC le debe a " + otro + "</b> este monto (puso plata para el equipo) y que " + quien + " ya recuperó esa parte." : "No se cuenta aquí: el gasto se anota cuando se le paga a la tienda.";
       if (!Array.prototype.some.call($(p + "t").options, function (o) { return o.value === t; })) { var o = document.createElement("option"); o.textContent = t; $(p + "t").appendChild(o); }
       $(p + "t").value = t; cats(); $(p + "c").value = c; rubro(true); descs();
-      if ($(p + "ds")) { $(p + "ds").value = "__o"; $(p + "d").hidden = false; $(p + "d").value = paga ? "Equipo para NC (pagó " + (m.cuenta || "Nelson") + ")" : "Equipo para NC Studio"; $(p + "d").focus(); }
+      if ($(p + "ds")) { $(p + "ds").value = "__o"; $(p + "d").hidden = false; $(p + "d").value = paga ? "Equipo para NC (pagó " + quien + ")" : "Equipo para NC Studio"; $(p + "d").focus(); }
       this.textContent = "✓ Listo: revisa y toca Guardar";
     };
     var igual = FD.abiertas.filter(function (a) { return Math.abs(Number(a.monto) - Number(m.monto || -1)) < 0.01; });
@@ -518,7 +525,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     $(p + "ok").onclick = function () {
       var t = $(p + "t").value; if (!t) { $(p + "e").textContent = "Elige el tipo."; return; }
       if (t === "Reserva" && !$(p + "r").value) { $(p + "e").textContent = "Elige la reserva."; return; }
-      var mov = { forzar: !!m._forzar, id: m.id || "", tipo: t, cat: $(p + "c").value, reserva: $(p + "r").value, monto: $(p + "m").value, metodo: $(p + "me").value, fecha: $(p + "f").value, desc: valOtro(p + "d"), persona: valOtro(p + "p"), rubro: esGastoT(t) || $(p + "c").value === "Para comprar equipo" ? $(p + "ru").value : "" };
+      var eqOk = EQ && EQ.tipo === t && EQ.cat === $(p + "c").value;
+      var mov = { equipo: eqOk ? EQ.equipo : "", quien: eqOk ? EQ.quien : "", de: eqOk ? EQ.de : "", para: eqOk ? EQ.para : "", forzar: !!m._forzar, id: m.id || "", tipo: t, cat: $(p + "c").value, reserva: $(p + "r").value, monto: $(p + "m").value, metodo: $(p + "me").value, fecha: $(p + "f").value, desc: valOtro(p + "d"), persona: valOtro(p + "p"), rubro: esGastoT(t) || $(p + "c").value === "Para comprar equipo" ? $(p + "ru").value : "" };
       if (t !== "Reserva" && !(Number(mov.monto) > 0)) { $(p + "e").textContent = "Escribe el monto."; return; }
       var b = $(p + "ok"); b.disabled = true; b.innerHTML = '<span class="spin"></span>Guardando…';
       call({ action: "fin_save", pin: PIN, mov: mov }).then(function (r) {
@@ -566,7 +574,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     if (neg) h += '<section><h2>Gastos del negocio</h2>' + (r.gastosNC.length ? filas(r.gastosNC, c.gastosNegocio + c.inversion + (r.gastosNC.some(function (x) { return x[0] === "Viáticos de sesión"; }) ? r.gastosNC.filter(function (x) { return x[0] === "Viáticos de sesión"; })[0][1] : 0)) : '<p class="hint">Sin gastos en este periodo.</p>') + '</section>';
     ["nelson", "charlie"].filter(function (k) { return FE === "global" || FE === k; }).forEach(function (k) {
       var p = r[k], n = k === "nelson" ? "Nelson" : "Charlie";
-      h += '<section><h2>' + n + '</h2><div class="kpis"><div class="kpi"><span>Ingresos</span><b>' + money(p.totalIngresos) + '</b></div><div class="kpi"><span>Gastos personales</span><b>' + money(p.totalGastos) + '</b></div><div class="kpi"><span>Le queda</span><b class="' + (p.neto < 0 ? 'neg' : 'pos') + '">' + money(p.neto) + '</b></div></div>' +
+      h += '<section><h2>' + n + '</h2><div class="kpis"><div class="kpi"><span>Ingresos</span><b>' + money(p.totalIngresos) + '</b></div><div class="kpi"><span>Gastos personales</span><b>' + money(p.totalGastos) + '</b></div><div class="kpi"><span>Le queda</span><b class="' + (p.neto < 0 ? 'neg' : 'pos') + '">' + money(p.neto) + '</b></div><div class="kpi"><span>NC le debe</span><b>' + money(Math.max(0, (r.deudas || {})[k] || 0)) + '</b></div></div>' +
         (p.ingresos.length ? '<h3 style="margin:6px 0 0;font-size:15px">Ingresos</h3>' + filas(p.ingresos) : '') + (p.gastos.length ? '<h3 style="margin:6px 0 0;font-size:15px">Gastos</h3>' + filas(p.gastos) : '') + '</section>';
     });
     if (r.rubros) {
