@@ -406,7 +406,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     var P = (FD && FD.pendientes) || [];
     if (fe === "global") return P;
     if (fe === "nelson" || fe === "charlie") return P.filter(function (m) { return m.origen === "Yappy" && (m.cuenta || "Nelson") === ENT[fe].n; });
-    return P.filter(function (m) { return !(m.origen === "Yappy" && m.cuenta); });
+    return P.filter(function (m) { return m.origen !== "Yappy"; }); // en NC solo quedan los Yappys de sesiones, que se registran solos
   }
   function nPend(fe) { return pendDe(fe).length + (fe === "nc" || fe === "global" ? ((FD && FD.repartos.length) || 0) : 0); }
   function movDe(m) { if (FE === "global" || !FE) return true; var e = ENT[FE]; return m.tipo === "Reparto" ? e.rep.indexOf(m.cat) >= 0 : e.tipos.indexOf(m.tipo) >= 0; }
@@ -447,7 +447,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
   var T_GASTO = ["Gasto NC", "Inversión NC", "Gasto Nelson", "Ahorro Nelson", "Gasto Charlie", "Gasto compartido", "Deudas NC", "Sin impacto"];
   var T_INGRESO = ["Ingreso NC", "Ingreso Nelson", "Ingreso Charlie", "Deudas NC", "Sin impacto"];
   function esGastoT(t) { return /^(Gasto|Inversión|Ahorro|Deudas)/.test(t || ""); }
-  function rubroDe(t, c) { if (!esGastoT(t)) return ""; var r = "Otros"; Object.keys(FD.rubroDe || {}).forEach(function (k) { if (FD.rubroDe[k].indexOf(c) >= 0) r = k; }); return r; }
+  function rubroDe(t, c) { if (c === "Para comprar equipo") return "Equipo y negocio"; if (!esGastoT(t)) return ""; var r = "Otros"; Object.keys(FD.rubroDe || {}).forEach(function (k) { if (FD.rubroDe[k].indexOf(c) >= 0) r = k; }); return r; }
   var RUBRO_ICO = { "Comida": "🍽️", "Gasolina y carro": "⛽", "Transporte y viajes": "🚕", "Casa": "🏠", "Suscripciones": "📱", "Salud": "🩺", "Entretenimiento": "🎉", "Compras": "🛍️", "Regalos y donaciones": "🎁", "Deudas y préstamos": "💳", "Seguros": "🛡️", "Educación": "📚", "Equipo y negocio": "📸", "Ahorro": "🐷", "Otros": "❓" };
   function formMov(p, m, conReserva) {
     m = m || {};
@@ -458,7 +458,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     }).join("");
     if (conReserva && FD.abiertas.length && m.sentido !== "Enviado") tipos = '<option value="Reserva">Abono o saldo de una reserva</option>' + tipos;
     var personas = unicos([m.persona, "Nelson", "Charlie"].concat(FD.ultimos.map(function (x) { return x.persona; })), 25);
-    return '<div class="g2"><label for="' + p + 't">' + (m.sentido === "Enviado" ? "¿Para qué fue?" : m.sentido === "Recibido" ? "¿De qué es?" : "Tipo") + '<select id="' + p + 't"><option value="">Elige…</option>' + tipos + '</select></label>' +
+    var equipo = m.sentido ? '<button type="button" class="btn2" id="' + p + 'eq" style="justify-self:start">📸 ' + (m.sentido === "Enviado" ? "Fue para comprar equipo de NC" : "Es para comprar equipo de NC") + '</button>' : "";
+    return equipo + '<div class="g2"><label for="' + p + 't">' + (m.sentido === "Enviado" ? "¿Para qué fue?" : m.sentido === "Recibido" ? "¿De qué es?" : "Tipo") + '<select id="' + p + 't"><option value="">Elige…</option>' + tipos + '</select></label>' +
       '<label for="' + p + 'c" id="' + p + 'cl">Categoría<select id="' + p + 'c"></select></label>' +
       '<label for="' + p + 'r" id="' + p + 'rl" hidden>Reserva<select id="' + p + 'r"><option value="">Elige la reserva…</option>' + FD.abiertas.map(function (a) { return '<option value="' + esc(a.id) + '">' + esc(a.name + " · " + a.falta + " " + money(a.monto)) + '</option>'; }).join("") + '</select></label></div>' +
       '<label for="' + p + 'ru" id="' + p + 'rul" hidden>¿En qué se gastó?<select id="' + p + 'ru">' + (FD.rubros || []).map(function (x) { return '<option value="' + esc(x) + '">' + (RUBRO_ICO[x] || "") + ' ' + esc(x) + '</option>'; }).join("") + '</select></label>' +
@@ -480,7 +481,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       bindOtro(p + "d", prev);
     }
     function rubro(forzar) {
-      var t = $(p + "t").value, el = $(p + "ru"), g = esGastoT(t);
+      var t = $(p + "t").value, el = $(p + "ru"), g = esGastoT(t) || $(p + "c").value === "Para comprar equipo";
       $(p + "rul").hidden = !g; if (!g) return;
       if (forzar || !el.dataset.manual) el.value = (forzar === "ini" && m.rubro) ? m.rubro : rubroDe(t, $(p + "c").value);
     }
@@ -501,12 +502,20 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     $(p + "m").oninput = function () { delete this.dataset.auto; };
     $(p + "c").onchange = function () { precio(); rubro(); descs(); };
     $(p + "t").onchange = cats; cats(); rubro("ini");
+    if ($(p + "eq")) $(p + "eq").onclick = function () {
+      // recibido: plata que te dieron para comprar equipo (no es ingreso tuyo); enviado: tu aporte para equipo de NC
+      var t = m.sentido === "Enviado" ? "Gasto " + (m.cuenta || "Nelson") : "Sin impacto", c = m.sentido === "Enviado" ? "Aporte para equipo NC" : "Para comprar equipo";
+      if (!Array.prototype.some.call($(p + "t").options, function (o) { return o.value === t; })) { var o = document.createElement("option"); o.textContent = t; $(p + "t").appendChild(o); }
+      $(p + "t").value = t; cats(); $(p + "c").value = c; rubro(true); descs();
+      if ($(p + "ds")) { $(p + "ds").value = "__o"; $(p + "d").hidden = false; $(p + "d").value = "Equipo para NC Studio"; $(p + "d").focus(); }
+      this.textContent = "✓ Listo: revisa y toca Guardar";
+    };
     var igual = FD.abiertas.filter(function (a) { return Math.abs(Number(a.monto) - Number(m.monto || -1)) < 0.01; });
     if (igual.length === 1) $(p + "r").value = igual[0].id;
     $(p + "ok").onclick = function () {
       var t = $(p + "t").value; if (!t) { $(p + "e").textContent = "Elige el tipo."; return; }
       if (t === "Reserva" && !$(p + "r").value) { $(p + "e").textContent = "Elige la reserva."; return; }
-      var mov = { forzar: !!m._forzar, id: m.id || "", tipo: t, cat: $(p + "c").value, reserva: $(p + "r").value, monto: $(p + "m").value, metodo: $(p + "me").value, fecha: $(p + "f").value, desc: valOtro(p + "d"), persona: valOtro(p + "p"), rubro: esGastoT(t) ? $(p + "ru").value : "" };
+      var mov = { forzar: !!m._forzar, id: m.id || "", tipo: t, cat: $(p + "c").value, reserva: $(p + "r").value, monto: $(p + "m").value, metodo: $(p + "me").value, fecha: $(p + "f").value, desc: valOtro(p + "d"), persona: valOtro(p + "p"), rubro: esGastoT(t) || $(p + "c").value === "Para comprar equipo" ? $(p + "ru").value : "" };
       if (t !== "Reserva" && !(Number(mov.monto) > 0)) { $(p + "e").textContent = "Escribe el monto."; return; }
       var b = $(p + "ok"); b.disabled = true; b.innerHTML = '<span class="spin"></span>Guardando…';
       call({ action: "fin_save", pin: PIN, mov: mov }).then(function (r) {
@@ -515,12 +524,13 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       }).catch(function () { b.disabled = false; b.textContent = "Guardar"; $(p + "e").textContent = "No pudimos conectar."; });
     };
   }
-  var FV = "hoy";
+  var FV = "hoy", YV = "rec";
   function segFin(act) {
     if (!FE) FE = "nc";
     var n = nPend(FE), ny = pendDe(FE).length;
-    var top = '<button class="back" data-fe="">‹ Finanzas</button><div class="seg" role="group" aria-label="De quién" style="margin-top:-8px">' + ["nc", "nelson", "charlie", "global"].map(function (k) { return '<button data-fe="' + k + '" aria-pressed="' + (FE === k) + '">' + (k === "global" ? "Globales" : ENT[k].n) + '</button>'; }).join("") + '</div>';
-    return top + '<div class="seg sub" role="group" aria-label="Vista">' + ENT[FE].vistas.map(function (o) { return '<button data-v="' + o[0] + '" aria-pressed="' + (act === o[0]) + '">' + o[1] + (o[0] === "hoy" && n ? " (" + n + ")" : "") + (o[0] === "yap" && ny ? " (" + ny + ")" : "") + '</button>'; }).join("") + '</div>';
+    var ico = FE === "nelson" ? '<img src="img/av-nelson.png" alt="" style="width:34px;height:34px;object-fit:contain">' : FE === "charlie" ? '<img src="img/av-charlie.png" alt="" style="width:34px;height:34px;object-fit:contain">' : FE === "nc" ? "📸" : "🌎";
+    var top = '<button class="back" data-fe="">‹ Atrás</button><div class="row" style="gap:10px;margin-top:-6px"><span style="font-size:28px;line-height:1">' + ico + '</span><h2>' + (FE === "global" ? "Finanzas globales" : "Finanzas de " + ENT[FE].n) + '</h2></div>';
+    return top + '<div class="seg" role="group" aria-label="Vista">' + ENT[FE].vistas.map(function (o) { return '<button data-v="' + o[0] + '" aria-pressed="' + (act === o[0]) + '">' + o[1] + (o[0] === "hoy" && n ? " (" + n + ")" : "") + (o[0] === "yap" && ny ? " (" + ny + ")" : "") + '</button>'; }).join("") + '</div>';
   }
   function irFin() { if (FV === "rep" || FV === "paq") reportes(FV === "paq" ? "paq" : null); else if (FD) { pintaFin(); } else finanzas(); window.scrollTo(0, 0); }
   function bindSeg() {
@@ -603,8 +613,10 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     if (FV === "yap") {
       var rec = [], env = [];
       PEND.forEach(function (m, i) { (m.sentido === "Enviado" ? env : rec).push(tarjPend(m, i)); });
-      h += '<section><h2>📥 Yappys recibidos (' + rec.length + ')</h2><p class="hint">Los que no son de ninguna sesión (los de sesiones se registran solos en NC Studio). Dile al sistema de qué es cada uno.</p>' + (rec.length ? rec.join('<div style="height:10px"></div>') : '<p class="hint">✓ Nada por clasificar.</p>') + '</section>' +
-        '<section><h2>📤 Yappys enviados (' + env.length + ')</h2><p class="hint">Lo que pagaste por Yappy: elige para qué fue y en qué se gastó.</p>' + (env.length ? env.join('<div style="height:10px"></div>') : '<p class="hint">✓ Nada por clasificar.</p>') + '</section>';
+      h += '<div class="seg" role="group" aria-label="Yappys"><button data-yv="rec" aria-pressed="' + (YV === "rec") + '">📥 Recibidos (' + rec.length + ')</button><button data-yv="env" aria-pressed="' + (YV === "env") + '">📤 Enviados (' + env.length + ')</button></div>';
+      h += YV === "rec"
+        ? '<section><h2>Yappys recibidos</h2><p class="hint">Los que no son de ninguna sesión (los de sesiones se registran solos en NC Studio). Dile al sistema de qué es cada uno.</p>' + (rec.length ? rec.join('<div style="height:10px"></div>') : '<p class="hint">✓ Nada por clasificar.</p>') + '</section>'
+        : '<section><h2>Yappys enviados</h2><p class="hint">Lo que pagaste por Yappy: elige para qué fue y en qué se gastó.</p>' + (env.length ? env.join('<div style="height:10px"></div>') : '<p class="hint">✓ Nada por clasificar.</p>') + '</section>';
     }
     if (FV === "nuevo") h += '<section><h2>Registrar · ' + esc(FE === "global" ? "cualquier cuenta" : ENT[FE].n) + '</h2><p class="hint">En efectivo, Yappy, tarjeta o transferencia. También puedes seguir anotándolos en tu calendario: se leen solos cada hora.</p>' + formMov("nv", null, false) + '</section>';
     if (FV === "mov") h += '<section><h2>Movimientos · ' + esc(FE === "global" ? "todos" : ENT[FE].n) + '</h2>' + (ult.length ? '' : '<p class="hint">Todavía no hay movimientos.</p>') + '<div id="ult">' + ult.map(function (m, i) {
@@ -643,7 +655,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       };
     });
     Array.prototype.forEach.call(app.querySelectorAll("[data-x]"), function (b) { b.onclick = function () { var w = $("pcw" + b.getAttribute("data-x")); w.hidden = !w.hidden; b.textContent = w.hidden ? "Clasificar" : "Cerrar"; }; });
-    if (FV === "hoy" || FV === "yap") PEND.forEach(function (m, i) { bindMov("pc" + i, Object.assign({}, m, { tipo: m.estado === "Revisar" ? m.tipo : "", cat: m.estado === "Revisar" ? "" : m.cat })); });
+    Array.prototype.forEach.call(app.querySelectorAll("[data-yv]"), function (b) { b.onclick = function () { YV = b.getAttribute("data-yv"); pintaFin(); }; });
+    if (FV === "hoy" || FV === "yap") PEND.forEach(function (m, i) { if (!$("pc" + i + "t")) return; bindMov("pc" + i, Object.assign({}, m, { tipo: m.estado === "Revisar" ? m.tipo : "", cat: m.estado === "Revisar" ? "" : m.cat })); });
     if (FV === "nuevo") bindMov("nv", null, function () { FV = "mov"; finanzas(); });
     Array.prototype.forEach.call(app.querySelectorAll("[data-e]"), function (b) { b.onclick = function () { var i = +b.getAttribute("data-e"), m = ult[i]; $("ed" + i).innerHTML = '<div class="card2" style="margin-top:8px">' + formMov("ue" + i, m, false) + '</div>'; bindMov("ue" + i, m); }; });
     Array.prototype.forEach.call(app.querySelectorAll("[data-b]"), function (b) { b.onclick = function () {
