@@ -1374,7 +1374,7 @@ Reservar por WhatsApp
 <sc-if value="{{cal.ready}}" hint-placeholder-val="{{false}}">
 <div style="display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 8px; background: #F2E4D2">
 <span style="font-size: 15px">{{cal.summary}}</span>
-<a href="{{cal.wa}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; border-radius: 6px; background: #222020; color: #FEFEFE; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">
+<a href="{{cal.wa}}" onClick="{{cal.dueno}}" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; border-radius: 6px; background: #222020; color: #FEFEFE; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 20.5l1.6-5.4A8.4 8.4 0 1 1 21 11.5z"></path></svg>
 Reservar por WhatsApp
 </a>
@@ -1972,7 +1972,27 @@ function missing(n, ph, em) {
   return m.length ? (m.length > 1 ? m.slice(0, -1).join(", ") + " y " + m[m.length - 1] : m[0]) : "";
 }
 var NC_SCRIPT = "https://script.google.com/macros/s/AKfycbzaT3OjIAFX5CET8Opyjnehye_XOfdI_kwA0DxEDusXzCzesOtffZUwsvE2-IbEp4yvIQ/exec";
+/* modo dueño: la página de dueño abre esta misma página dentro de Agendar (?dueno=1); en vez de WhatsApp, agenda directo */
+var NC_DUENO = (function () { try { return /[?&]dueno=1/.test(location.search) && !!localStorage.getItem("ncPin"); } catch (e) { return false; } })();
+function ncDuenoAgendar(payload) {
+  var pg = document.getElementById("ncdPag"), tt = document.getElementById("ncdTot"), t = tt && parseFloat(tt.value);
+  if (t > 0) { payload.total = t; payload.totalLabel = "$" + (Math.round(t * 100) / 100) + (payload.otherPlace ? " + traslado" : ""); }
+  var pin = ""; try { pin = localStorage.getItem("ncPin") || ""; } catch (e) {}
+  var avisa = function (r) { try { window.parent.postMessage({ nc: "agendado", r: r }, location.origin); } catch (e) {} };
+  fetch(NC_SCRIPT, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "agendar", pin: pin, pagado: !!(pg && pg.checked), data: payload }) })
+    .then(function (r) { return r.json(); }).then(avisa).catch(function () { avisa({ ok: false, title: "No pudimos conectar", html: "Revisa tu internet e inténtalo de nuevo." }); });
+  return true;
+}
+if (NC_DUENO) (function () {
+  var b = document.createElement("div");
+  b.style.cssText = "position:fixed;left:0;right:0;top:0;z-index:2147483000;background:#F99824;color:#222020;font:600 14px Montserrat,Arial,sans-serif;padding:8px 12px;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.2)";
+  b.innerHTML = '<span>🔑 Modo dueño</span><label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" id="ncdPag" style="width:18px;height:18px"> Ya pagó el abono</label><label style="display:flex;gap:6px;align-items:center">Total final $<input id="ncdTot" type="number" min="0" step="0.5" inputmode="decimal" placeholder="opcional" style="width:90px;padding:4px 6px;border:1px solid #222020;border-radius:4px;font:14px Arial"></label>';
+  var pon = function () { if (document.body) { document.body.appendChild(b); document.body.style.paddingTop = b.offsetHeight + "px"; } else setTimeout(pon, 50); }; pon();
+  var cambia = function () { var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT), n; while ((n = w.nextNode())) { if (/^\s*(Reservar|Cotizar) por WhatsApp\s*$/.test(n.nodeValue)) n.nodeValue = " Agendar y enviar "; } };
+  new MutationObserver(function () { cambia(); }).observe(document.documentElement, { childList: true, subtree: true, characterData: true });
+})();
 function ncPost(payload) {
+  if (NC_DUENO && payload && payload.name && !payload.action) return ncDuenoAgendar(payload);
   if (!NC_SCRIPT) return false;
   try { fetch(NC_SCRIPT, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) }).catch(function () {}); return true; } catch (e) { return false; }
 }
@@ -2304,7 +2324,8 @@ class Component extends DCLogic {
           updated: BUSY_UPDATED, hasSel: !!self.state.calSel, selLabel: selLabel, selSlots: selSlots,
           open: !!self.state.calOpen, context: ctx.exp + " · " + ctx.prop + " (" + ctx.price + ")",
           close: function () { self.setState({ calOpen: false }); },
-          ready: ready, summary: summary, wa: WA + encodeURIComponent(waMsg)
+          ready: ready, summary: summary, wa: WA + encodeURIComponent(waMsg),
+          dueno: function (e) { if (!NC_DUENO) return; if (e && e.preventDefault) e.preventDefault(); try { window.parent.postMessage({ nc: "cal", exp: ctx.exp, prop: ctx.prop, price: ctx.price, fecha: self.state.calSel, slot: self.state.calSlot }, location.origin); } catch (x) {} }
         };
       })(),
       toast: self.state.toast || "", hasToast: !!self.state.toast,
@@ -2498,6 +2519,7 @@ class Component extends DCLogic {
             var ml = missingList(nn, pp, ee);
             if (!st.xcSel) ml.push({ key: "date", label: "Fecha del evento", hint: "Elige un día en el paso 4." });
             if (ml.length) { if (e && e.preventDefault) e.preventDefault(); self.setState({ xcErr: true, errPop: ml }); return; }
+            if (NC_DUENO) { if (e && e.preventDefault) e.preventDefault(); xn = nn; xp = pp; xe = ee; ncPost(payload()); self.flash("Agendando…"); return; }
             if (a && a.setAttribute) a.setAttribute("href", WA + encodeURIComponent(build()));
             xn = nn; xp = pp; xe = ee;
             if (ncPost(payload())) self.flash("¡Solicitud enviada! Te confirmamos la disponibilidad por correo y WhatsApp.");
@@ -2707,6 +2729,7 @@ class Component extends DCLogic {
             if (!(st.cotSel && st.cotSlot)) ml.push({ key: "date", label: "Fecha y hora de la sesión", hint: "Elige un día y una hora en el paso 4." });
             if (cumple && !st.cotEnt) ml.push({ key: "ent", label: exp === "bebe" ? "Cumpleaños del bebé" : "Fecha del cumpleaños", hint: "Así te entregamos las fotos a tiempo." });
             if (ml.length) { if (e && e.preventDefault) e.preventDefault(); self.setState({ cotErr: true, errPop: ml }); return; }
+            if (NC_DUENO) { if (e && e.preventDefault) e.preventDefault(); ncPost(payload()); self.flash("Agendando…"); return; }
             if (a && a.setAttribute) a.setAttribute("href", WA + encodeURIComponent(build()));
             if (ncPost(payload())) self.flash("¡Solicitud enviada! Te confirmamos la disponibilidad por correo y WhatsApp.");
           }

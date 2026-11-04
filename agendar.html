@@ -87,9 +87,9 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 .cal7 small{font-size:10px;line-height:1.1}.c-cal{background:var(--accent)}.c-extra{background:#8E24AA}.c-pub{background:#9AA0A6}
 .cmp{background:#fff;border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:10px;padding:14px;display:grid;gap:8px}.cmp.extra{border-left-color:#8E24AA}.cmp.pub{border-left-color:#9AA0A6}
 .cmp .hr{font-size:13px;color:var(--muted);font-weight:bold}.cmp h3{margin:0;font:400 19px Georgia,serif}.cmp .kv{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:14px}.cmp .kv span{color:var(--muted)}
-.cl{position:relative}.cl.cav{padding-right:72px}
-.avi{width:46px;height:46px;border-radius:50%;object-fit:cover;object-position:center 30%;border:2px solid var(--accent);flex:none;display:block;background:var(--soft)}
-.cl .avi{position:absolute;right:14px;top:50%;transform:translateY(-50%)}.avi.big{width:60px;height:60px}.pfh .avi{width:62px;height:62px}
+.cl{position:relative}.cl.cav{padding-left:88px;min-height:86px}
+.avi{width:58px;height:58px;border-radius:50%;object-fit:cover;object-position:center 30%;border:2px solid var(--accent);flex:none;display:block;background:var(--soft)}
+.cl .avi{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:62px;height:62px}.avi.big{width:76px;height:76px}.pfh .avi{width:76px;height:76px}
 .prg{display:grid;gap:4px}.prg .pb{height:10px;border-radius:5px;background:var(--line);overflow:hidden}.prg .pb i{display:block;height:100%;background:var(--accent)}
 .stp{display:flex;gap:10px;align-items:center;padding:7px 2px;border-bottom:1px solid var(--line);font-size:15px}.stp:last-child{border-bottom:0}.stp .o{width:22px;height:22px;flex:none;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13px}.stp.ok .o{background:#12B76A;border-color:#12B76A;color:#fff}.stp small{color:var(--muted);font-size:12px;margin-left:auto}.stp input{width:22px;height:22px;accent-color:#12B76A;flex:none;margin:0}.stp.ok span{color:var(--muted)}
 .pfh{background:var(--fg);color:#FEFEFE;border-radius:14px;padding:20px;display:grid;gap:14px}
@@ -175,7 +175,34 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
   }
 
   var manual = false;
+  /* Agendar: la misma página de reservas de los clientes, en modo dueño (agenda directo en vez de WhatsApp) */
   function form() {
+    salir.hidden = false; tab("A"); window.scrollTo(0, 0);
+    app.innerHTML = (NUEVO_CONTRATO ? '<div class="msg" style="padding:14px 16px">📄 Agenda al cliente nuevo; al terminar te aparece el botón para generar su contrato.</div>' : '') +
+      '<div class="row" style="justify-content:space-between;gap:8px"><small class="hint" style="flex:1">Igual que tus clientes: elige la experiencia, la propuesta, los extras y el día. Arriba marcas si ya pagó el abono.</small><button class="btn2" id="frap">Formulario rápido</button></div>' +
+      '<iframe id="fagenda" title="Agendar como cliente" src="index.html?dueno=1#portafolio" style="width:100%;border:0;border-radius:10px;background:#fff;display:block"></iframe>';
+    $("frap").onclick = function () { formRapido(); };
+    var f = $("fagenda"), alto = function () { if (!document.body.contains(f)) { window.removeEventListener("resize", alto); return; } f.style.height = Math.max(480, window.innerHeight - f.getBoundingClientRect().top - 12) + "px"; };
+    alto(); window.addEventListener("resize", alto);
+  }
+  window.addEventListener("message", function (e) {
+    if (e.origin !== location.origin || !e.data || !e.data.nc) return;
+    if (e.data.nc === "agendado") { var r = e.data.r || {}; if (r.title === "PIN incorrecto") { setPin(""); pinView("El PIN cambió. Escríbelo de nuevo."); return; } if (!r.ok) { var f = $("fagenda"); if (f) f.insertAdjacentHTML("beforebegin", '<p class="err">' + esc(r.title || "Error") + '. ' + (r.html || "") + '</p>'); return; } mostrarAgendado(r); }
+    if (e.data.nc === "cal") formRapido({ exp: e.data.exp, prop: e.data.prop, fecha: e.data.fecha, slot: e.data.slot });
+  });
+  function mostrarAgendado(r) {
+    LIST = null; BASE = null;
+    app.innerHTML = '<div class="msg"><h2></h2><div id="rh"></div><p><button class="btn" id="otra">Agendar otra reserva</button></p></div>';
+    app.querySelector("h2").textContent = r.title || "Listo"; $("rh").innerHTML = r.html || ""; window.scrollTo(0, 0);
+    $("otra").onclick = function () { form(); };
+    var ver = document.createElement("button"); ver.className = "btn2"; ver.textContent = "Ver en Clientes"; ver.style.marginLeft = "10px";
+    ver.onclick = function () { clientes(r.id); }; $("otra").after(ver);
+    var con = document.createElement("button"); con.className = "btn"; con.textContent = "📄 Generar su contrato"; con.style.marginLeft = "10px";
+    con.onclick = function () { LIST = null; call({ action: "clientes", pin: PIN }).then(function (q) { LIST = q.list || []; var x = LIST.filter(function (z) { return z.id === r.id; })[0]; if (x) contratoDe(x); }); };
+    if (NUEVO_CONTRATO) { NUEVO_CONTRATO = false; ver.after(con); }
+  }
+  // formulario rápido (para personalizados, descuentos o las experiencias que en la página se reservan por WhatsApp)
+  function formRapido(pre) {
     if (NUEVO_CONTRATO) setTimeout(function () { var s0 = app.querySelector("section"); if (s0) s0.insertAdjacentHTML("beforebegin", '<div class="msg" style="padding:14px 16px">📄 Llena los datos del cliente nuevo y toca «Agendar y enviar». Al terminar te aparece el botón para generar su contrato.</div>'); }, 0);
     salir.hidden = false; manual = false; tab("A");
     var hoy = new Date(); hoy.setMinutes(hoy.getMinutes() - hoy.getTimezoneOffset());
@@ -208,6 +235,12 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     $("addEx").onclick = function () { addEx(); };
     $("go").onclick = enviarReserva;
     pasosForm();
+    if (pre) {
+      if (pre.exp) { var o = OPTS.filter(function (x) { return x.title === pre.exp && (!pre.prop || x.nm === pre.prop); })[0]; if (o) { $("pk").value = o.key; $("pk").onchange(); } }
+      if (pre.fecha) { $("dt").value = pre.fecha; }
+      if (pre.slot) { var m = String(pre.slot).match(/(\d+):(\d+) (a|p)/); if (m) $("tm").value = ("0" + ((+m[1] % 12) + (m[3] === "p" ? 12 : 0))).slice(-2) + ":" + m[2]; if (/estudio/i.test(pre.slot)) { $("tr").value = "0"; $("tr").onchange(); } }
+      calc(); irPaso(pre.exp && pre.fecha ? (esCumpleId(expSel()) ? 2 : 3) : 0);
+    }
     calc();
   }
 
@@ -262,9 +295,10 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
   function irPaso(n) {
     PASO = n;
     Array.prototype.forEach.call(app.querySelectorAll("[data-paso]"), function (x) { x.hidden = +x.getAttribute("data-paso") !== n; });
-    $("pstop").innerHTML = '<div class="row" style="justify-content:space-between;flex-wrap:nowrap">' + (n ? '<button class="back" id="pback" type="button">‹ ' + PASOS[n - 1][0] + '</button>' : '<span></span>') + '<small class="hint">Paso ' + (n + 1) + ' de ' + PASOS.length + '</small></div>' +
+    $("pstop").innerHTML = '<div class="row" style="justify-content:space-between;flex-wrap:nowrap">' + (n ? '<button class="back" id="pback" type="button">‹ ' + PASOS[n - 1][0] + '</button>' : '<button class="back" id="pback0" type="button">‹ Agendar como cliente</button>') + '<small class="hint">Paso ' + (n + 1) + ' de ' + PASOS.length + '</small></div>' +
       '<div class="pasos">' + PASOS.map(function (p, i) { return '<i class="' + (i <= n ? "on" : "") + '"></i>'; }).join("") + '</div><h2 style="margin:4px 0 0">' + PASOS[n][0] + '</h2><p class="hint" style="margin:0">' + PASOS[n][1] + '</p>';
     if ($("pback")) $("pback").onclick = function () { irPaso(n - 1); };
+    if ($("pback0")) $("pback0").onclick = function () { form(); };
     var go = $("go"); go.textContent = n === PASOS.length - 1 ? "Agendar y enviar" : "Siguiente ›";
     go.onclick = n === PASOS.length - 1 ? enviarReserva : function () { var e = faltaPaso(n); if (e) { avisoPaso(e); return; } irPaso(n + 1); };
     if (n === 2) calAgendar();
@@ -392,14 +426,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     call({ action: "agendar", pin: PIN, pagado: pag, data: data }).then(function (r) {
       if (r.title === "PIN incorrecto") { setPin(""); pinView("El PIN cambió. Escríbelo de nuevo."); return; }
       if (!r.ok) { go.disabled = false; go.textContent = "Agendar y enviar"; $("ferr").innerHTML = esc(r.title || "Error") + ". " + (r.html || ""); return; }
-      app.innerHTML = '<div class="msg"><h2></h2><div id="rh"></div><p><button class="btn" id="otra">Agendar otra reserva</button></p></div>';
-      app.querySelector("h2").textContent = r.title || "Listo"; $("rh").innerHTML = r.html || ""; window.scrollTo(0, 0);
-      $("otra").onclick = form;
-      var ver = document.createElement("button"); ver.className = "btn2"; ver.textContent = "Ver en Clientes"; ver.style.marginLeft = "10px";
-      ver.onclick = function () { clientes(r.id); }; $("otra").after(ver);
-      var con = document.createElement("button"); con.className = "btn"; con.textContent = "📄 Generar su contrato"; con.style.marginLeft = "10px";
-      con.onclick = function () { LIST = null; call({ action: "clientes", pin: PIN }).then(function (q) { LIST = q.list || []; var x = LIST.filter(function (z) { return z.id === r.id; })[0]; if (x) contratoDe(x); }); };
-      if (NUEVO_CONTRATO) { NUEVO_CONTRATO = false; ver.after(con); }
+      mostrarAgendado(r);
     }).catch(function () { go.disabled = false; go.textContent = "Agendar y enviar"; $("ferr").textContent = "No pudimos conectar. Revisa tu internet e inténtalo de nuevo."; });
   }
   /* ---------- Clientes: mensajes por WhatsApp ---------- */
@@ -1032,7 +1059,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     h += '<a class="btn2" style="text-decoration:none;justify-self:start" href="https://calendar.google.com/calendar/r/day/' + k.replace(/-/g, "/") + '" target="_blank" rel="noopener">Abrir este día en Google Calendar ↗</a>';
     $("kdia").innerHTML = '<div style="display:grid;gap:10px">' + h + '</div>';
     Array.prototype.forEach.call($("kdia").querySelectorAll("[data-kres]"), function (b) { b.onclick = function () { clientes(b.getAttribute("data-kres")); }; });
-    if ($("kag")) $("kag").onclick = function () { form(); setTimeout(function () { if ($("dt")) { $("dt").value = k; calc(); $("dt").scrollIntoView({ block: "center" }); } }, 30); };
+    if ($("kag")) $("kag").onclick = function () { formRapido({ fecha: k }); };
   }
   /* ===================== INTERESADOS ===================== */
   var INT = null, INT_EST = ["Nuevo", "Le envié la info", "Seguimiento enviado", "Reservó", "No le interesó"], INT_FUENTES = ["Instagram", "WhatsApp", "Facebook", "TikTok", "Referido", "Página web", "En persona"];
