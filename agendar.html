@@ -198,10 +198,34 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
   function expSel() { var o = sel(); return o && o !== "otro" ? o.exp.id : ""; }
   function preguntaEntrega() {
     var cu = esCumpleId(expSel()), bebe = expSel() === "bebe";
-    $("ceT").innerHTML = cu ? (bebe ? "¿Cuándo cumple años el bebé?" : "¿Cuándo cumple años?") + " <small>(el cumpleaños que se celebra)</small>" : "¿Para cuándo quiere las fotos? <small>(opcional)</small>";
+    $("ceT").innerHTML = cu ? (bebe ? "¿Cuándo nació el bebé?" : "¿Cuándo cumple años?") + " <small>(día, mes y año de nacimiento)</small>" : "¿Para cuándo quiere las fotos? <small>(opcional)</small>";
+    if (cu) fechaNac($("ce")); else sinFechaNac($("ce"));
     $("ceH").textContent = cu ? "Se agenda el cumpleaños y la entrega de las fotos un día antes, con avisos 1 semana, 3 días, 1 día antes y el mismo día." : "Se agenda la entrega un día antes, con avisos 1 semana, 3 días, 1 día antes y el mismo día.";
   }
-  function sel() { var v = $("pk").value; return v === "otro" ? "otro" : OPTS.filter(function (o) { return o.key === v; })[0] || null; }
+/* fecha de nacimiento fácil: día, mes y año en tres listas (el año se elige de una lista, sin pasar mes por mes) */
+  function fechaNac(inp) {
+    if (!inp || inp._fn) return;
+    var M = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"], hoy = new Date().getFullYear();
+    var w = document.createElement("div"); w.className = "fnac"; w.style.cssText = "display:grid;grid-template-columns:1fr 1.6fr 1.2fr;gap:8px";
+    var st = "min-height:46px;padding:0 10px;border:1.5px solid #D9CDBE;border-radius:6px;background:#FEFEFE;color:#222020;font:16px Arial,Helvetica,sans-serif;width:100%;box-sizing:border-box";
+    var op = function (v, t) { return '<option value="' + v + '">' + t + '</option>'; }, d = "", m = "", y = "";
+    for (var i = 1; i <= 31; i++) d += op(i, i);
+    M.forEach(function (n, i) { m += op(i + 1, n); });
+    for (var a = hoy; a >= 1930; a--) y += op(a, a);
+    w.innerHTML = '<select aria-label="Día" style="' + st + '">' + op("", "Día") + d + '</select><select aria-label="Mes" style="' + st + '">' + op("", "Mes") + m + '</select><select aria-label="Año" style="' + st + '">' + op("", "Año") + y + '</select>';
+    var S = w.querySelectorAll("select");
+    function leer() { var v = String(inp.value || "").match(/^(\d{4})-(\d\d)-(\d\d)$/); S[0].value = v ? String(+v[3]) : ""; S[1].value = v ? String(+v[2]) : ""; S[2].value = v ? v[1] : ""; }
+    function poner() {
+      var dd = +S[0].value, mm = +S[1].value, yy = +S[2].value;
+      if (dd && mm && yy) { var max = new Date(yy, mm, 0).getDate(); if (dd > max) { dd = max; S[0].value = String(dd); } inp.value = yy + "-" + ("0" + mm).slice(-2) + "-" + ("0" + dd).slice(-2); }
+      else inp.value = "";
+      try { inp.dispatchEvent(new Event("input", { bubbles: true })); inp.dispatchEvent(new Event("change", { bubbles: true })); } catch (e) {}
+    }
+    Array.prototype.forEach.call(S, function (s) { s.onchange = poner; });
+    leer(); inp._fn = w; inp._fnLeer = leer; inp.style.display = "none"; inp.parentNode.insertBefore(w, inp.nextSibling);
+  }
+  function sinFechaNac(inp) { if (inp && inp._fn) { inp._fn.remove(); inp._fn = null; inp.style.display = ""; } }
+    function sel() { var v = $("pk").value; return v === "otro" ? "otro" : OPTS.filter(function (o) { return o.key === v; })[0] || null; }
   function addEx(name, price) {
     var row = document.createElement("div"); row.className = "ex";
     var n = "ex" + Date.now() + Math.floor(Math.random() * 999);
@@ -349,9 +373,10 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
       ["gus", "📝 Gustos e ideas", !!x.gid]].filter(function (a) { return a[2]; });
     app.innerHTML = '<button class="back" id="bk">‹ Todos los clientes</button><section>' + chip(x.estado) + '<h2>' + esc(x.name) + '</h2>' +
       '<p class="hint" style="font-size:15px;line-height:1.6">' + esc(x.id) + " · " + esc(x.service) + "<br>" + esc(x.fecha) + " · " + esc(x.place) + "<br>📱 " + esc(x.phone) + " · ✉️ " + esc(x.email) + "<br>Total " + esc(x.total) + " · abono " + esc(x.abono) + (x.contrato ? (x.firmado ? " · ✅ contrato firmado" : " · contrato pendiente de firma") : "") + '</p>' +
-      (x.estado !== "No disponible" ? '<div class="card2" style="gap:8px"><label for="dce">' + (x.esCumple ? "🎂 ¿Cuándo cumple años?" : "🗓️ ¿Para cuándo quiere las fotos?") + '<input id="dce" type="date" value="' + esc(x.cumple || x.entregaPara || "") + '"></label><div class="row"><button class="btn2" id="dceok">Guardar fecha</button><span class="hint" id="dces">' + (x.cumple || x.entregaPara ? (x.entregaLista ? "✓ Entrega agendada en tu calendario" : x.estado === "Confirmado" ? "" : "Se agenda al recibir el abono") : "") + '</span></div></div>' : "") +
+      (x.estado !== "No disponible" ? '<div class="card2" style="gap:8px"><label for="dce">' + (x.esCumple ? "🎂 ¿Cuándo cumple años? <small>(fecha de nacimiento)</small>" : "🗓️ ¿Para cuándo quiere las fotos?") + '<input id="dce" type="date" value="' + esc(x.cumple || x.entregaPara || "") + '"></label><div class="row"><button class="btn2" id="dceok">Guardar fecha</button><span class="hint" id="dces">' + (x.cumple || x.entregaPara ? (x.entregaLista ? "✓ Entrega agendada en tu calendario" : x.estado === "Confirmado" ? "" : "Se agenda al recibir el abono") : "") + '</span></div></div>' : "") +
       '<div class="acts">' + acts.map(function (a) { return '<button class="act" data-k="' + a[0] + '" aria-pressed="' + (a[0] === cual) + '">' + a[1] + '</button>'; }).join("") + '</div></section><div id="cmp"></div>';
     $("bk").onclick = function () { lista(""); };
+    if ($("dce") && x.esCumple) fechaNac($("dce"));
     if ($("dceok")) $("dceok").onclick = function () {
       var b = this; b.disabled = true; b.innerHTML = '<span class="spin"></span>Guardando…';
       call({ action: "entrega", pin: PIN, id: x.id, fecha: $("dce").value }).then(function (r) {
@@ -877,7 +902,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
       if (!r.ok) { app.innerHTML = '<button class="back" id="pbk">‹ Volver</button><div class="msg">No pudimos armar el perfil. ¿Ya pegaste el código nuevo?</div>'; $("pbk").onclick = function () { fichaCli(x); }; return; }
       var conf = r.reservas.filter(function (y) { return y.estado === "Confirmado"; });
       var ig = x.instagram || r.instagram, ini = String(x.name || "?").split(/\s+/).map(function (w) { return w.charAt(0); }).slice(0, 2).join("").toUpperCase();
-      var chips = [x.phone ? '<a href="https://wa.me/' + wnum(x.phone) + '" target="_blank" rel="noopener">💬 ' + esc(x.phone) + '</a>' : "", ig ? '<a href="https://instagram.com/' + esc(ig) + '" target="_blank" rel="noopener">📷 @' + esc(ig) + '</a>' : "", x.email ? '<span>✉️ ' + esc(x.email) + '</span>' : "", r.cumple ? '<span>🎂 ' + esc(fechaBonita(r.cumple).replace(/^\S+ /, "")) + '</span>' : ""].join("");
+      var chips = [x.phone ? '<a href="https://wa.me/' + wnum(x.phone) + '" target="_blank" rel="noopener">💬 ' + esc(x.phone) + '</a>' : "", ig ? '<a href="https://instagram.com/' + esc(ig) + '" target="_blank" rel="noopener">📷 @' + esc(ig) + '</a>' : "", x.email ? '<span>✉️ ' + esc(x.email) + '</span>' : "", r.cumple ? '<span>🎂 ' + esc(fechaBonita(r.cumple).replace(/^\S+ /, "")) + (+r.cumple.slice(0, 4) > 1900 && +r.cumple.slice(0, 4) < new Date().getFullYear() ? " · " + (new Date().getFullYear() - +r.cumple.slice(0, 4) - (new Date().toISOString().slice(5, 10) < r.cumple.slice(5) ? 1 : 0)) + " años" : "") + '</span>' : ""].join("");
       var G = [["hobbies", "🎨", "Hobbies"], ["pelis", "🎬", "Películas y series"], ["comida", "🍣", "Comida favorita"], ["musica", "🎵", "Música y artistas"], ["colores", "🌈", "Colores"], ["lugares", "📍", "Lugares"], ["palabras", "✨", "En tres palabras"], ["nogusta", "🚫", "No le gusta en fotos"]].filter(function (q) { return r.gustos[q[0]]; });
       var h = '<button class="back" id="pbk">‹ ' + esc(first(x.name)) + '</button>' +
         '<div class="pfh"><div class="who"><div class="av">' + esc(ini) + '</div><div><h2>' + esc(x.name) + '</h2><div class="sub">Cliente desde ' + esc(/^\d{4}-\d\d/.test(x.desde || "") ? ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"][+x.desde.slice(5, 7) - 1] + " de " + x.desde.slice(0, 4) : (x.desde || "—")) + (r.formularios ? " · llenó " + r.formularios + " formulario" + (r.formularios === 1 ? "" : "s") : "") + '</div></div></div>' +
@@ -1394,7 +1419,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
       (x ? '<p class="hint">' + esc(x.service + " · " + x.fecha) + '. Sus respuestas quedan guardadas en su reserva.</p>' : '<div class="g2"><label for="gnm">Nombre<input id="gnm" autocomplete="off"></label><label for="gph">WhatsApp<input id="gph" inputmode="tel" autocomplete="off"></label><label for="gig">Instagram <small>(sin @)</small><input id="gig" autocomplete="off"></label><label for="gem">Correo<input id="gem" type="email" autocomplete="off"></label></div>') +
       '<div id="gbox" style="display:grid;gap:12px"></div></section>';
     $("gbk").onclick = function () { gustos(); };
-    function texto(n) { return (n ? "¡Hola, " + first(n) + "! 💛" : "¡Hola! 💛") + " Queremos que tu sesión sea tan original como tú ✨\n\n¿Nos ayudas con este formulario cortito? Así conocemos tus gustos y te preparamos *3 ideas para tus fotos* 👇\n" + link + "\n\n¡Gracias! — Nelson y Charlie · NC Studio"; }
+    function texto(n) { return (n ? "¡Hola, " + first(n) + "! 💛" : "¡Hola! 💛") + " Queremos que tu sesión sea tan original como tú ✨\n\n¿Nos ayudas con este formulario cortito? Así conocemos tus gustos y te prepararemos *3 ideas para tus fotos* 👇\n" + link + "\n\n¡Gracias! — Nelson y Charlie · NC Studio"; }
     var pm = panelMsg("gbox", dest, texto(x ? x.name : ""), "Queremos conocerte · NC Studio"), tocado = false;
     $("gm").addEventListener("input", function () { tocado = true; });
     if (!x) ["gnm", "gph", "gig", "gem"].forEach(function (k) { $(k).oninput = function () { if (k === "gnm" && !tocado) pm.set(texto($("gnm").value.trim())); else pm.upd(); }; });

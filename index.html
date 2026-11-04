@@ -610,7 +610,7 @@ Calcula tu paquete aquí
 </div>
 
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">{{cot.entLabel}}
-<input type="date" data-field="ent" value="{{cot.ent}}" onInput="{{cot.setEnt}}" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{cot.bEnt}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+<input type="date" data-field="ent" data-nac="{{cot.entNac}}" value="{{cot.ent}}" onInput="{{cot.setEnt}}" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{cot.bEnt}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
 <span style="font-weight: 400; font-size: 12px; color: #6B6466; margin-top: -2px">{{cot.entHint}}</span>
 </label>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tu idea o temática
@@ -1788,6 +1788,35 @@ var TABNAME = {
   gran: ["Gran Logro", "Graduación"], granext: ["Gran Logro exteriores", "Graduación en exteriores"], gameon: ["Game On", "Retrato deportivo"], limitless: ["Limitless", "Carreras"]
 };
 
+/* fecha de nacimiento fácil: día, mes y año en tres listas (el año se elige de una lista, sin pasar mes por mes) */
+function fechaNac(inp) {
+  if (!inp || inp._fn) return;
+  var M = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"], hoy = new Date().getFullYear();
+  var w = document.createElement("div"); w.className = "fnac"; w.style.cssText = "display:grid;grid-template-columns:1fr 1.6fr 1.2fr;gap:8px";
+  var st = "min-height:46px;padding:0 10px;border:1.5px solid #D9CDBE;border-radius:6px;background:#FEFEFE;color:#222020;font:16px Arial,Helvetica,sans-serif;width:100%;box-sizing:border-box";
+  var op = function (v, t) { return '<option value="' + v + '">' + t + '</option>'; }, d = "", m = "", y = "";
+  for (var i = 1; i <= 31; i++) d += op(i, i);
+  M.forEach(function (n, i) { m += op(i + 1, n); });
+  for (var a = hoy; a >= 1930; a--) y += op(a, a);
+  w.innerHTML = '<select aria-label="Día" style="' + st + '">' + op("", "Día") + d + '</select><select aria-label="Mes" style="' + st + '">' + op("", "Mes") + m + '</select><select aria-label="Año" style="' + st + '">' + op("", "Año") + y + '</select>';
+  var S = w.querySelectorAll("select");
+  function leer() { var v = String(inp.value || "").match(/^(\d{4})-(\d\d)-(\d\d)$/); S[0].value = v ? String(+v[3]) : ""; S[1].value = v ? String(+v[2]) : ""; S[2].value = v ? v[1] : ""; }
+  function poner() {
+    var dd = +S[0].value, mm = +S[1].value, yy = +S[2].value;
+    if (dd && mm && yy) { var max = new Date(yy, mm, 0).getDate(); if (dd > max) { dd = max; S[0].value = String(dd); } inp.value = yy + "-" + ("0" + mm).slice(-2) + "-" + ("0" + dd).slice(-2); }
+    else inp.value = "";
+    try { inp.dispatchEvent(new Event("input", { bubbles: true })); inp.dispatchEvent(new Event("change", { bubbles: true })); } catch (e) {}
+  }
+  Array.prototype.forEach.call(S, function (s) { s.onchange = poner; });
+  leer(); inp._fn = w; inp._fnLeer = leer; inp.style.display = "none"; inp.parentNode.insertBefore(w, inp.nextSibling);
+}
+function sinFechaNac(inp) { if (inp && inp._fn) { inp._fn.remove(); inp._fn = null; inp.style.display = ""; } }
+if (window.MutationObserver) new MutationObserver(function () {
+  Array.prototype.forEach.call(document.querySelectorAll('input[data-nac]'), function (i) {
+    if (i.getAttribute('data-nac') === '1') { if (!i._fn) fechaNac(i); else if (i._fnLeer && document.activeElement && document.activeElement.parentNode !== i._fn) i._fnLeer(); }
+    else sinFechaNac(i);
+  });
+}).observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-nac'] });
 var BUSY = ["2026-11-05","2026-11-07","2026-11-08","2026-11-20","2026-11-21","2026-11-22","2026-11-27","2026-11-28","2026-11-29","2026-12-13","2026-12-17","2026-12-20"];
 var BUSY_UPDATED = "4 de noviembre de 2026, 12:28 p. m.";
 var HERO_D = [
@@ -2634,7 +2663,8 @@ class Component extends DCLogic {
           }),
           name: st.cotName, phone: st.cotPhone, email: st.cotEmail, date: st.cotDate, idea: st.cotIdea,
           ent: st.cotEnt, bEnt: st.cotErr && cumple && !st.cotEnt ? "#B42318" : "#D9CDBE",
-          entLabel: cumple ? (exp === "bebe" ? "¿Cuándo cumple años tu bebé?" : "¿Cuándo es el cumpleaños?") : "¿Para cuándo quieres las fotos? (opcional)",
+          entNac: cumple ? "1" : "0",
+          entLabel: cumple ? (exp === "bebe" ? "¿Cuándo nació tu bebé?" : "¿Cuándo es el cumpleaños? (día, mes y año de nacimiento)") : "¿Para cuándo quieres las fotos? (opcional)",
           entHint: cumple ? "Te entregamos las fotos un día antes del cumpleaños." : "Si las necesitas para una fecha especial, te las entregamos un día antes.",
           setEnt: function (e) { st.cotEnt = e && e.target ? e.target.value : ""; },
           setPhone: function (e) { st.cotPhone = e && e.target ? e.target.value : ""; },

@@ -50,7 +50,6 @@ input:focus,textarea:focus{outline:2px solid #F99824;outline-offset:1px;border-c
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (m) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]; }); }
   function call(body) { return fetch(SCRIPT, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) }).then(function (r) { return r.json(); }); }
   var P = [
-    ["quien", "¿Quién sale en las fotos?", "Tú, tu pareja, tu familia, tu bebé… y sus edades si quieres"],
     ["hobbies", "Hobbies", "¿Qué te encanta hacer en tu tiempo libre?"],
     ["pelis", "Películas y series favoritas", "Las que ves una y otra vez"],
     ["comida", "Comida favorita", ""],
@@ -64,16 +63,16 @@ input:focus,textarea:focus{outline:2px solid #F99824;outline-offset:1px;border-c
   function pinta(info) {
     var nuevo = !!info.nuevo, ant = info.prev || info.deAntes, pr = ant ? ant.r : {};
     // lo que ya sabemos no se pregunta otra vez (queda escondido, pero se puede ver o cambiar)
-    var SIEMPRE = { quien: 1, ideas: 1 }, oculto = {};
+    var SIEMPRE = { ideas: 1 }, oculto = {};
     if (!nuevo && info.name) oculto.nm = 1;
     if (!nuevo && (info.phone || info.email)) { oculto.ph = 1; oculto.em = 1; }
     if (info.instagram) oculto.ig = 1;
     if (info.cumple) oculto.cu = 1;
     if (info.deAntes) P.forEach(function (p) { if (!SIEMPRE[p[0]] && pr[p[0]]) oculto["q_" + p[0]] = 1; });
     var nOc = Object.keys(oculto).length, todoDatos = oculto.nm && oculto.ph && oculto.ig && oculto.cu;
-    var cumpleLbl = info.esCumple ? (info.bebe ? "¿Cuándo cumple años tu bebé?" : "¿Cuándo es tu cumpleaños?") : "¿Cuándo es tu cumpleaños? <small>(opcional, para saludarte ese día)</small>";
+    var cumpleLbl = info.esCumple ? (info.bebe ? "¿Cuándo nació tu bebé?" : "¿Cuándo es tu cumpleaños? <small>(día, mes y año en que naciste)</small>") : "¿Cuándo es tu cumpleaños? <small>(opcional, para saludarte ese día)</small>";
     app.innerHTML = '<div class="paper"><p class="kick">¡VAMOS A HACER UNA SESIÓN<br>CREATIVA TAN ORIGINAL COMO TÚ!</p><div class="band"><b>GUSTOS E IDEAS </b><i>DEL CLIENTE</i></div>' +
-      '<p class="intro">' + (info.name ? '¡Hola, ' + esc(String(info.name).split(" ")[0]) + '! ' : '¡Hola! ') + 'Cuéntanos un poquito de ti. Con tus respuestas te preparamos <b>3 ideas para tu sesión' + (info.service ? ' de ' + esc(info.service) : '') + '</b>. No hay respuestas correctas: escribe lo que se te venga a la mente 💛</p>' +
+      '<p class="intro">' + (info.name ? '¡Hola, ' + esc(String(info.name).split(" ")[0]) + '! ' : '¡Hola! ') + 'Cuéntanos un poquito de ti. Con tus respuestas te prepararemos <b>3 ideas para tu sesión' + (info.service ? ' de ' + esc(info.service) : '') + '</b>. No hay respuestas correctas: escribe lo que se te venga a la mente 💛</p>' +
       (nOc && !info.prev ? '<p class="ya">Ya tenemos ' + (info.deAntes ? 'tus datos y lo que nos contaste la vez pasada' : 'tus datos') + ' 💛 Solo te preguntamos lo que nos falta. <button class="lnk" id="vermas" type="button">Ver o cambiar lo que ya nos contaste</button></p>' : '') +
       '<h2 data-sec="d">Tus datos</h2>' +
       '<label for="nm" data-o="nm">Nombre<input id="nm" autocomplete="name"></label>' +
@@ -83,7 +82,7 @@ input:focus,textarea:focus{outline:2px solid #F99824;outline-offset:1px;border-c
       P.map(function (p) { return '<label for="q_' + p[0] + '" data-o="q_' + p[0] + '">' + p[1] + (p[2] ? ' <small>' + p[2] + '</small>' : '') + '<textarea id="q_' + p[0] + '"></textarea></label>'; }).join("") +
       '<p class="err" id="err"></p><button class="btn" id="go">Enviar mis respuestas</button></div>';
     $("nm").value = info.name || (ant && ant.name) || ""; $("ph").value = info.phone || ""; $("em").value = info.email || "";
-    $("cu").value = info.cumple || (ant && ant.cumple) || ""; $("ig").value = info.instagram || (ant && ant.instagram) || "";
+    $("cu").value = info.cumple || (ant && ant.cumple) || ""; fechaNac($("cu")); $("ig").value = info.instagram || (ant && ant.instagram) || "";
     function esconder(si) { Array.prototype.forEach.call(app.querySelectorAll("[data-o]"), function (el) { el.hidden = si && !!oculto[el.getAttribute("data-o")]; }); app.querySelector('[data-sec="d"]').hidden = si && todoDatos; }
     if (!info.prev) esconder(true);
     if ($("vermas")) $("vermas").onclick = function () { esconder(false); this.parentNode.removeChild(this); };
@@ -100,11 +99,34 @@ input:focus,textarea:focus{outline:2px solid #F99824;outline-offset:1px;border-c
       var b = $("go"); b.disabled = true; b.innerHTML = '<span class="spin"></span>Enviando…';
       call({ action: "gustos", id: id, c: c, r: r }).then(function (x) {
         if (!x.ok) { b.disabled = false; b.textContent = "Enviar mis respuestas"; $("err").textContent = x.title || "No se pudo enviar."; return; }
-        app.innerHTML = '<div class="msg"><h2>¡Gracias, ' + esc(x.nombre) + '! ✨</h2><p>Ya recibimos tus respuestas. Con ellas te preparamos 3 ideas para tu sesión y te las mandamos muy pronto.</p><p style="margin:0">— Nelson y Charlie · NC Studio</p></div>';
+        app.innerHTML = '<div class="msg"><h2>¡Gracias, ' + esc(x.nombre) + '! ✨</h2><p>Ya recibimos tus respuestas. Con ellas te prepararemos 3 ideas para tu sesión y te las mandaremos muy pronto.</p><p style="margin:0">— Nelson y Charlie · NC Studio</p></div>';
         window.scrollTo(0, 0);
       }).catch(function () { b.disabled = false; b.textContent = "Enviar mis respuestas"; $("err").textContent = "No pudimos conectar. Revisa tu internet e inténtalo otra vez."; });
     };
   }
+/* fecha de nacimiento fácil: día, mes y año en tres listas (el año se elige de una lista, sin pasar mes por mes) */
+function fechaNac(inp) {
+  if (!inp || inp._fn) return;
+  var M = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"], hoy = new Date().getFullYear();
+  var w = document.createElement("div"); w.className = "fnac"; w.style.cssText = "display:grid;grid-template-columns:1fr 1.6fr 1.2fr;gap:8px";
+  var st = "min-height:46px;padding:0 10px;border:1.5px solid #D9CDBE;border-radius:6px;background:#FEFEFE;color:#222020;font:16px Arial,Helvetica,sans-serif;width:100%;box-sizing:border-box";
+  var op = function (v, t) { return '<option value="' + v + '">' + t + '</option>'; }, d = "", m = "", y = "";
+  for (var i = 1; i <= 31; i++) d += op(i, i);
+  M.forEach(function (n, i) { m += op(i + 1, n); });
+  for (var a = hoy; a >= 1930; a--) y += op(a, a);
+  w.innerHTML = '<select aria-label="Día" style="' + st + '">' + op("", "Día") + d + '</select><select aria-label="Mes" style="' + st + '">' + op("", "Mes") + m + '</select><select aria-label="Año" style="' + st + '">' + op("", "Año") + y + '</select>';
+  var S = w.querySelectorAll("select");
+  function leer() { var v = String(inp.value || "").match(/^(\d{4})-(\d\d)-(\d\d)$/); S[0].value = v ? String(+v[3]) : ""; S[1].value = v ? String(+v[2]) : ""; S[2].value = v ? v[1] : ""; }
+  function poner() {
+    var dd = +S[0].value, mm = +S[1].value, yy = +S[2].value;
+    if (dd && mm && yy) { var max = new Date(yy, mm, 0).getDate(); if (dd > max) { dd = max; S[0].value = String(dd); } inp.value = yy + "-" + ("0" + mm).slice(-2) + "-" + ("0" + dd).slice(-2); }
+    else inp.value = "";
+    try { inp.dispatchEvent(new Event("input", { bubbles: true })); inp.dispatchEvent(new Event("change", { bubbles: true })); } catch (e) {}
+  }
+  Array.prototype.forEach.call(S, function (s) { s.onchange = poner; });
+  leer(); inp._fn = w; inp._fnLeer = leer; inp.style.display = "none"; inp.parentNode.insertBefore(w, inp.nextSibling);
+}
+function sinFechaNac(inp) { if (inp && inp._fn) { inp._fn.remove(); inp._fn = null; inp.style.display = ""; } }
   if (!id) { pinta({ nuevo: true }); return; }
   call({ action: "gustos_ver", id: id, c: c }).then(function (r) {
     if (!r.ok) { app.innerHTML = '<div class="msg"><h2>Ups</h2><p>' + esc(r.title) + '. Pídenos el enlace otra vez por WhatsApp.</p></div>'; return; }
