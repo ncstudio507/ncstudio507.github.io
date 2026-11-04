@@ -27,17 +27,21 @@ jobs:
           KP: ${{ secrets.NC_KEY_PASS }}
         run: |
           if [ -n "$KS" ] && [ -n "$KP" ]; then
-            printf "%s" "$KS" | tr -cd "A-Za-z0-9+/=" | base64 -d > "$RUNNER_TEMP/nc.jks"; echo "Llave: $(printf "%s" "$KS" | tr -cd "A-Za-z0-9+/=" | wc -c) caracteres (deben ser 3608 aprox.)"; echo "NC_KEY_PASS=$KP" >> "$GITHUB_ENV"
+            printf "%s" "$KS" | tr -cd "A-Za-z0-9+/=" | base64 -d > "$RUNNER_TEMP/nc.jks"
+            printf "%s" "$KP" | tr -d " \r\n\t" > "$RUNNER_TEMP/nc.pass"
+            echo "Usando la llave guardada"
           else
             # sin llave guardada: se firma con una llave temporal (para actualizar habrá que reinstalar)
             P=$(openssl rand -hex 16); echo "::add-mask::$P"
             keytool -genkeypair -keystore "$RUNNER_TEMP/nc.jks" -storetype PKCS12 -alias ncstudio -keyalg RSA -keysize 2048 -validity 10000 -storepass "$P" -keypass "$P" -dname "CN=NC Studio, C=PA"
-            echo "NC_KEY_PASS=$P" >> "$GITHUB_ENV"
+            printf "%s" "$P" > "$RUNNER_TEMP/nc.pass"
           fi
       - name: Compilar
         env:
           NC_KEYSTORE: ${{ runner.temp }}/nc.jks
-        run: gradle -p app-android assembleRelease -PversionCode=${{ github.run_number }} --no-daemon --stacktrace
+        run: |
+          export NC_KEY_PASS="$(cat "$RUNNER_TEMP/nc.pass")"
+          gradle -p app-android assembleRelease -PversionCode=${{ github.run_number }} --no-daemon --stacktrace
       - name: Publicar el APK
         env:
           GH_TOKEN: ${{ github.token }}
