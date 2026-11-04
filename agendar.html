@@ -76,6 +76,10 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 .xc .xall{display:flex;align-items:center;justify-content:center;color:var(--accent);font:400 34px Georgia,serif}
 .xc span{display:grid;gap:2px;padding:10px 12px 12px}.xc b{font-size:15px}.xc small{font-size:12px;color:var(--muted)}
 .ig{font:bold 17px Arial,sans-serif;border:0;border-radius:8px;padding:16px;cursor:pointer;color:#fff;background:linear-gradient(45deg,#C13584,#E1306C,#F77737)}
+.fes{display:grid;gap:10px}
+.fe{display:flex;gap:14px;align-items:center;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;cursor:pointer;font:inherit;color:var(--fg);width:100%}
+.fe .fei{font-size:30px;line-height:1}.fe span{display:grid;gap:3px}.fe b{font-size:18px;font-family:Georgia,serif;font-weight:400}.fe small{font-size:13px;color:var(--muted)}
+.seg.sub button{font-size:13px;padding:7px 12px;border-width:1px}
 .chk{display:flex;gap:8px;align-items:center;font-weight:normal;grid-template-columns:none}.chk input{width:20px;height:20px;accent-color:var(--accent)}
 </style>
 </head>
@@ -110,7 +114,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
   function tab(w) { $("tabs").hidden = false; ["A", "C", "F", "P", "E"].forEach(function (k) { $("t" + k).setAttribute("aria-pressed", w === k); }); var b = $("t" + w); if (b && b.scrollIntoView) try { b.scrollIntoView({ block: "nearest", inline: "nearest" }); } catch (e) {} }
   $("tA").onclick = function () { form(); };
   $("tC").onclick = function () { clientes(); };
-  $("tF").onclick = function () { finanzas(); };
+  $("tF").onclick = function () { FE = null; finanzas(); };
   $("tP").onclick = function () { publicar(); };
   $("tE").onclick = function () { experiencias(); };
   var QS = new URLSearchParams(location.search), REPARTO = QS.get("reparto"), PUBQ = QS.get("pub");
@@ -373,8 +377,16 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
   }
   /* ---------- Finanzas ---------- */
   var FD = null;
-  var GRUPOS = [["Negocio (NC Studio)", ["Ingreso NC", "Gasto NC", "Inversión NC", "Deudas NC"]], ["Nelson", ["Ingreso Nelson", "Gasto Nelson", "Ahorro Nelson"]], ["Charlie", ["Ingreso Charlie", "Gasto Charlie"]], ["Otros", ["Sin impacto"]]];
-  var ENTRA = { "Ingreso NC": 1, "Ingreso Nelson": 1, "Ingreso Charlie": 1 };
+  var GRUPOS = [["Negocio (NC Studio)", ["Ingreso NC", "Gasto NC", "Inversión NC", "Deudas NC"]], ["Nelson", ["Ingreso Nelson", "Gasto Nelson", "Ahorro Nelson"]], ["Charlie", ["Ingreso Charlie", "Gasto Charlie"]], ["Nelson y Charlie", ["Gasto compartido"]], ["Otros", ["Sin impacto"]]];
+  // de quién son las finanzas que estás viendo
+  var FE = null, ENT = {
+    nc: { n: "NC Studio", g: ["Negocio (NC Studio)", "Otros"], tipos: ["Ingreso NC", "Gasto NC", "Inversión NC", "Deudas NC", "Sin impacto"], rep: ["NC Studio", "Viáticos"], vistas: [["hoy", "Pendientes"], ["nuevo", "+ Registrar"], ["mov", "Movimientos"], ["rep", "Reporte"], ["paq", "Costos por paquete"]] },
+    nelson: { n: "Nelson", g: ["Nelson", "Nelson y Charlie"], tipos: ["Ingreso Nelson", "Gasto Nelson", "Ahorro Nelson"], rep: ["Nelson"], vistas: [["rep", "Resumen"], ["nuevo", "+ Registrar"], ["mov", "Movimientos"]] },
+    charlie: { n: "Charlie", g: ["Charlie", "Nelson y Charlie"], tipos: ["Ingreso Charlie", "Gasto Charlie"], rep: ["Charlie"], vistas: [["rep", "Resumen"], ["nuevo", "+ Registrar"], ["mov", "Movimientos"]] },
+    global: { n: "Globales", g: null, tipos: null, rep: null, vistas: [["rep", "Resumen"], ["hoy", "Pendientes"], ["nuevo", "+ Registrar"], ["mov", "Movimientos"]] }
+  };
+  function movDe(m) { if (FE === "global" || !FE) return true; var e = ENT[FE]; return m.tipo === "Reparto" ? e.rep.indexOf(m.cat) >= 0 : e.tipos.indexOf(m.tipo) >= 0; }
+  var ENTRA = { "Ingreso NC": 1, "Ingreso Nelson": 1, "Ingreso Charlie": 1, "Reparto": 1 };
   function hoyIso() { var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
   function finanzas(foco) {
     tab("F"); salir.hidden = false;
@@ -382,12 +394,22 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     call({ action: "fin_list", pin: PIN }).then(function (r) {
       if (r.title === "PIN incorrecto") { setPin(""); pinView("El PIN cambió. Escríbelo de nuevo."); return; }
       if (!r.ok) { app.innerHTML = '<div class="msg">No pudimos cargar tus finanzas. ¿Ya pegaste el código nuevo en Apps Script y ejecutaste <b>configurar</b>?</div>'; return; }
-      FD = r; pintaFin(foco);
+      FD = r; if (foco) { FE = "nc"; FV = "hoy"; } if (!FE) inicioFin(); else if (FV === "rep" || FV === "paq") reportes(FV === "paq" ? "paq" : null); else pintaFin(foco);
     }).catch(function () { app.innerHTML = '<div class="msg">No pudimos conectar. Revisa tu internet.</div>'; });
+  }
+  function inicioFin() {
+    var s = FD.resumen, n = FD.repartos.length + FD.pendientes.length, mes = esc(s.mes.charAt(0) + s.mes.slice(1).toLowerCase());
+    var card = function (k, ico, l1, l2) { return '<button class="fe" data-fe="' + k + '"><span class="fei">' + ico + '</span><span><b>' + (k === "global" ? "Finanzas globales" : "Finanzas de " + ENT[k].n) + '</b><small>' + l1 + '</small>' + (l2 ? '<small>' + l2 + '</small>' : '') + '</span></button>'; };
+    app.innerHTML = '<section style="gap:6px"><h2>Finanzas · ' + mes + '</h2><p class="hint">Elige de quién quieres ver las finanzas.</p></section><div class="fes">' +
+      card("nc", "📸", "Ingresos " + money(s.ingresosNC) + " · gastos " + money(s.gastosNC), n ? '<span class="neg">' + n + ' pendiente' + (n === 1 ? '' : 's') + ' por revisar</span>' : "Todo al día ✓") +
+      card("nelson", "🧑🏻", "Ingresos " + money(s.ingresosNelson || 0) + " · gastos " + money(s.gastosNelson)) +
+      card("charlie", "🧑🏽", "Ingresos " + money(s.ingresosCharlie || 0) + " · gastos " + money(s.gastosCharlie || 0)) +
+      card("global", "🌎", "Todo junto: negocio, Nelson y Charlie") + '</div>';
+    bindSeg();
   }
   function formMov(p, m, conReserva) {
     m = m || {};
-    var tipos = GRUPOS.map(function (g) { return '<optgroup label="' + esc(g[0]) + '">' + g[1].map(function (t) { return '<option' + (m.tipo === t ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join("") + '</optgroup>'; }).join("");
+    var tipos = GRUPOS.filter(function (g) { return p !== "nv" || !FE || !ENT[FE].g || ENT[FE].g.indexOf(g[0]) >= 0; }).map(function (g) { return '<optgroup label="' + esc(g[0]) + '">' + g[1].map(function (t) { return '<option' + (m.tipo === t ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join("") + '</optgroup>'; }).join("");
     if (conReserva && FD.abiertas.length) tipos = '<option value="Reserva">Abono o saldo de una reserva</option>' + tipos;
     return '<div class="g2"><label for="' + p + 't">Tipo<select id="' + p + 't"><option value="">Elige…</option>' + tipos + '</select></label>' +
       '<label for="' + p + 'c" id="' + p + 'cl">Categoría<select id="' + p + 'c"></select></label>' +
@@ -433,11 +455,16 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
   }
   var FV = "hoy";
   function segFin(act) {
+    if (!FE) FE = "nc";
     var n = FD ? FD.repartos.length + FD.pendientes.length : 0;
-    var op = [["hoy", "Pendientes" + (n ? " (" + n + ")" : "")], ["nuevo", "+ Registrar"], ["mov", "Movimientos"], ["rep", "Reportes"], ["paq", "Costos por paquete"]];
-    return '<div class="seg" role="group" aria-label="Vista de finanzas">' + op.map(function (o) { return '<button data-v="' + o[0] + '" aria-pressed="' + (act === o[0]) + '">' + o[1] + '</button>'; }).join("") + '</div>';
+    var top = '<button class="back" data-fe="">‹ Finanzas</button><div class="seg" role="group" aria-label="De quién" style="margin-top:-8px">' + ["nc", "nelson", "charlie", "global"].map(function (k) { return '<button data-fe="' + k + '" aria-pressed="' + (FE === k) + '">' + (k === "global" ? "Globales" : ENT[k].n) + '</button>'; }).join("") + '</div>';
+    return top + '<div class="seg sub" role="group" aria-label="Vista">' + ENT[FE].vistas.map(function (o) { return '<button data-v="' + o[0] + '" aria-pressed="' + (act === o[0]) + '">' + o[1] + (o[0] === "hoy" && n ? " (" + n + ")" : "") + '</button>'; }).join("") + '</div>';
   }
-  function bindSeg() { Array.prototype.forEach.call(app.querySelectorAll("[data-v]"), function (b) { b.onclick = function () { var v = b.getAttribute("data-v"); if (v === "rep" || v === "paq") { reportes(v === "paq" ? "paq" : null); return; } FV = v; if (FD) { pintaFin(); window.scrollTo(0, 0); } else finanzas(); }; }); }
+  function irFin() { if (FV === "rep" || FV === "paq") reportes(FV === "paq" ? "paq" : null); else if (FD) { pintaFin(); } else finanzas(); window.scrollTo(0, 0); }
+  function bindSeg() {
+    Array.prototype.forEach.call(app.querySelectorAll("[data-fe]"), function (b) { b.onclick = function () { var k = b.getAttribute("data-fe"); if (!k) { FE = null; if (FD) inicioFin(); else finanzas(); return; } FE = k; FV = ENT[k].vistas[0][0]; irFin(); }; });
+    Array.prototype.forEach.call(app.querySelectorAll("[data-v]"), function (b) { b.onclick = function () { FV = b.getAttribute("data-v"); irFin(); }; });
+  }
   var REP = { mes: new Date().getMonth() + 1, anio: new Date().getFullYear() };
   function reportes(vista) {
     tab("F"); salir.hidden = false;
@@ -452,22 +479,22 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     return '<table class="tb">' + arr.map(function (x) { return '<tr><td>' + esc(x[0]) + '<div class="bar" style="width:' + Math.round(x[1] / max * 100) + '%;margin-top:4px;opacity:.6"></div></td><td>' + money(x[1]) + '</td></tr>'; }).join("") + (total !== undefined ? '<tr class="tot"><td>Total</td><td>' + money(total) + '</td></tr>' : '') + '</table>';
   }
   function pintaRep(r) {
-    var c = r.conclusiones, h = segFin("rep");
+    var c = r.conclusiones, h = segFin("rep"), neg = FE === "nc" || FE === "global";
     var mesesOpt = '<option value="0">Todo el año</option>' + ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"].map(function (m, i) { return '<option value="' + (i + 1) + '"' + (REP.mes === i + 1 ? ' selected' : '') + '>' + m + '</option>'; }).join("");
     h += '<section><div class="g2"><label for="rm">Mes<select id="rm">' + mesesOpt + '</select></label><label for="ra">Año<input id="ra" type="number" value="' + REP.anio + '" inputmode="numeric"></label></div>' +
-      '<div class="kpis"><div class="kpi"><span>Cobrado a clientes</span><b>' + money(c.cobrado) + '</b></div><div class="kpi"><span>Ganancia de NC</span><b class="' + (c.gananciaNC < 0 ? 'neg' : '') + '">' + money(c.gananciaNC) + '</b></div><div class="kpi"><span>Para Nelson</span><b>' + money(c.nelson) + '</b></div><div class="kpi"><span>Para Charlie</span><b>' + money(c.charlie) + '</b></div></div>' +
+      (neg ? '<div class="kpis"><div class="kpi"><span>Cobrado a clientes</span><b>' + money(c.cobrado) + '</b></div><div class="kpi"><span>Ganancia de NC</span><b class="' + (c.gananciaNC < 0 ? 'neg' : '') + '">' + money(c.gananciaNC) + '</b></div><div class="kpi"><span>Para Nelson</span><b>' + money(c.nelson) + '</b></div><div class="kpi"><span>Para Charlie</span><b>' + money(c.charlie) + '</b></div></div>' : '') +
       '<a class="btn2" href="' + esc(r.url) + '" target="_blank" rel="noopener" style="text-decoration:none;justify-self:start">Abrir hoja de finanzas ↗</a></section>';
-    h += '<section><h2>Conclusiones · ' + esc(r.nombreMes.charAt(0) + r.nombreMes.slice(1).toLowerCase()) + '</h2><table class="tb">' +
+    if (neg) h += '<section><h2>Conclusiones · ' + esc(r.nombreMes.charAt(0) + r.nombreMes.slice(1).toLowerCase()) + '</h2><table class="tb">' +
       [["Cobrado a clientes", c.cobrado], ["− Pagado a Nelson", -c.nelson], ["− Pagado a Charlie", -c.charlie], ["− Viáticos de sesiones", -c.viaticos], ["− Gastos del negocio", -c.gastosNegocio], ["− Inversión en equipo", -c.inversion]].map(function (x) { return '<tr><td>' + x[0] + '</td><td>' + money(Math.abs(x[1])) + '</td></tr>'; }).join("") +
       '<tr class="tot"><td>Ganancia de NC</td><td class="' + (c.gananciaNC < 0 ? 'neg' : 'pos') + '">' + money(c.gananciaNC) + '</td></tr><tr><td>Deuda de NC con Nelson</td><td>' + money(r.deudas.nelson) + '</td></tr><tr><td>Deuda de NC con Charlie</td><td>' + money(r.deudas.charlie) + '</td></tr></table></section>';
-    if (r.meses.length) { var mx = Math.max.apply(null, r.meses.map(function (m) { return m.cobrado; }).concat([1])); h += '<section><h2>Mes a mes</h2><table class="tb"><tr><th>Mes</th><th>Cobrado</th><th>Ganancia NC</th></tr>' + r.meses.map(function (m) { return '<tr><td>' + m.mes.charAt(0) + m.mes.slice(1).toLowerCase() + '<div class="bar" style="width:' + Math.round(m.cobrado / mx * 100) + '%;margin-top:4px"></div></td><td>' + money(m.cobrado) + '</td><td class="' + (m.ganancia < 0 ? 'neg' : '') + '">' + money(m.ganancia) + '</td></tr>'; }).join("") + '</table></section>'; }
-    h += '<section><h2>Gastos del negocio</h2>' + (r.gastosNC.length ? filas(r.gastosNC, c.gastosNegocio + c.inversion + (r.gastosNC.some(function (x) { return x[0] === "Viáticos de sesión"; }) ? r.gastosNC.filter(function (x) { return x[0] === "Viáticos de sesión"; })[0][1] : 0)) : '<p class="hint">Sin gastos en este periodo.</p>') + '</section>';
-    ["nelson", "charlie"].forEach(function (k) {
+    if (neg && r.meses.length) { var mx = Math.max.apply(null, r.meses.map(function (m) { return m.cobrado; }).concat([1])); h += '<section><h2>Mes a mes</h2><table class="tb"><tr><th>Mes</th><th>Cobrado</th><th>Ganancia NC</th></tr>' + r.meses.map(function (m) { return '<tr><td>' + m.mes.charAt(0) + m.mes.slice(1).toLowerCase() + '<div class="bar" style="width:' + Math.round(m.cobrado / mx * 100) + '%;margin-top:4px"></div></td><td>' + money(m.cobrado) + '</td><td class="' + (m.ganancia < 0 ? 'neg' : '') + '">' + money(m.ganancia) + '</td></tr>'; }).join("") + '</table></section>'; }
+    if (neg) h += '<section><h2>Gastos del negocio</h2>' + (r.gastosNC.length ? filas(r.gastosNC, c.gastosNegocio + c.inversion + (r.gastosNC.some(function (x) { return x[0] === "Viáticos de sesión"; }) ? r.gastosNC.filter(function (x) { return x[0] === "Viáticos de sesión"; })[0][1] : 0)) : '<p class="hint">Sin gastos en este periodo.</p>') + '</section>';
+    ["nelson", "charlie"].filter(function (k) { return FE === "global" || FE === k; }).forEach(function (k) {
       var p = r[k], n = k === "nelson" ? "Nelson" : "Charlie";
       h += '<section><h2>' + n + '</h2><div class="kpis"><div class="kpi"><span>Ingresos</span><b>' + money(p.totalIngresos) + '</b></div><div class="kpi"><span>Gastos personales</span><b>' + money(p.totalGastos) + '</b></div><div class="kpi"><span>Le queda</span><b class="' + (p.neto < 0 ? 'neg' : 'pos') + '">' + money(p.neto) + '</b></div></div>' +
         (p.ingresos.length ? '<h3 style="margin:6px 0 0;font-size:15px">Ingresos</h3>' + filas(p.ingresos) : '') + (p.gastos.length ? '<h3 style="margin:6px 0 0;font-size:15px">Gastos</h3>' + filas(p.gastos) : '') + '</section>';
     });
-    h += '<section><h2>Trabajos (' + r.trabajos.length + ')</h2><div class="scx"><table class="tb"><tr><th>Cliente</th><th>Cobrado</th><th>Nelson</th><th>Charlie</th><th>NC</th><th>Viáticos</th></tr>' + r.trabajos.map(function (t) {
+    if (neg) h += '<section><h2>Trabajos (' + r.trabajos.length + ')</h2><div class="scx"><table class="tb"><tr><th>Cliente</th><th>Cobrado</th><th>Nelson</th><th>Charlie</th><th>NC</th><th>Viáticos</th></tr>' + r.trabajos.map(function (t) {
       return '<tr><td><b>' + esc(t.cliente) + '</b><br><small class="hint">' + esc(t.fecha + (t.desc ? " · " + t.desc : "")) + (t.pendiente ? ' · <span class="neg">pendiente de pago</span>' : '') + '</small></td><td>' + money(t.cobrado) + '</td><td>' + money(t.nelson) + '</td><td>' + money(t.charlie) + '</td><td>' + money(t.nc) + '</td><td>' + money(t.viaticos) + '</td></tr>';
     }).join("") + '</table></div></section>';
     app.innerHTML = h; bindSeg();
@@ -484,9 +511,9 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     app.innerHTML = h; bindSeg();
   }
   function pintaFin(foco) {
-    if (foco) FV = "hoy"; var r = FD, s = r.resumen, h = segFin(FV);
+    if (foco) { FE = "nc"; FV = "hoy"; } var r = FD, s = r.resumen, h = segFin(FV), ult = r.ultimos.filter(movDe);
     if (FV === "hoy") h += '<section><div class="row" style="justify-content:space-between"><h2>Finanzas · ' + esc(s.mes.charAt(0) + s.mes.slice(1).toLowerCase()) + '</h2><a class="btn2" href="' + esc(r.url) + '" target="_blank" rel="noopener" style="text-decoration:none">Abrir hoja de finanzas ↗</a></div>' +
-      '<div class="kpis"><div class="kpi"><span>Ingresos NC</span><b>' + money(s.ingresosNC) + '</b></div><div class="kpi"><span>Gastos NC</span><b>' + money(s.gastosNC) + '</b></div><div class="kpi"><span>Gastos Nelson</span><b>' + money(s.gastosNelson) + '</b></div><div class="kpi"><span>Por revisar</span><b>' + r.pendientes.length + '</b></div></div></section>';
+      '<div class="kpis"><div class="kpi"><span>Ingresos NC</span><b>' + money(s.ingresosNC) + '</b></div><div class="kpi"><span>Gastos NC</span><b>' + money(s.gastosNC) + '</b></div>' + (FE === "global" ? '<div class="kpi"><span>Gastos Nelson</span><b>' + money(s.gastosNelson) + '</b></div><div class="kpi"><span>Gastos Charlie</span><b>' + money(s.gastosCharlie || 0) + '</b></div>' : '') + '<div class="kpi"><span>Por revisar</span><b>' + r.pendientes.length + '</b></div></div></section>';
     if (FV === "hoy" && r.repartos.length) h += '<section><h2>Repartos pendientes</h2><p class="hint">Trabajos ya pagados completos. Ya viene llenada la sugerencia según los costos del paquete (Charlie y Nelson ganan lo mismo, la gasolina según el destino y NC nunca más que un socio); cámbiala si repartieron distinto.</p>' + r.repartos.map(function (x, i) {
       var g = x.sug || {};
       return '<div class="card2" id="rp-' + esc(x.id) + '"><div class="top2"><span><b style="font-size:16px">' + esc(x.name) + '</b><br><small class="hint">' + esc(x.service + " · " + x.fecha) + '</small></span><b>' + money(x.total) + '</b></div>' +
@@ -501,11 +528,11 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     if (FV === "hoy" && r.pendientes.length) h += '<section><h2>Por revisar (' + r.pendientes.length + ')</h2><p class="hint">Yappys que no son de una reserva y entradas del calendario que conviene revisar.</p>' + r.pendientes.map(function (m, i) {
       return '<div class="card2"><div class="top2"><span><b style="font-size:16px">' + esc(m.persona || m.desc || "Movimiento") + '</b><br><small class="hint">' + esc([m.fecha, m.metodo, m.ref && m.origen === "Yappy" ? m.ref : "", m.estado === "Revisar" ? "del calendario: " + m.tipo + " / " + m.cat : ""].filter(Boolean).join(" · ")) + '</small></span><b>' + money(m.monto) + '</b></div><button class="btn2" data-x="' + i + '">Clasificar</button><div id="pcw' + i + '" hidden>' + formMov("pc" + i, m, m.origen === "Yappy") + '</div></div>';
     }).join('<div style="height:10px"></div>') + '</section>';
-    if (FV === "nuevo") h += '<section><h2>Registrar gasto o ingreso</h2><p class="hint">En efectivo, Yappy, tarjeta o transferencia. También puedes seguir anotándolos en tu calendario: se leen solos cada hora.</p>' + formMov("nv", null, false) + '</section>';
-    if (FV === "mov") h += '<section><h2>Últimos movimientos</h2><div id="ult">' + r.ultimos.map(function (m, i) {
+    if (FV === "nuevo") h += '<section><h2>Registrar · ' + esc(FE === "global" ? "cualquier cuenta" : ENT[FE].n) + '</h2><p class="hint">En efectivo, Yappy, tarjeta o transferencia. También puedes seguir anotándolos en tu calendario: se leen solos cada hora.</p>' + formMov("nv", null, false) + '</section>';
+    if (FV === "mov") h += '<section><h2>Movimientos · ' + esc(FE === "global" ? "todos" : ENT[FE].n) + '</h2>' + (ult.length ? '' : '<p class="hint">Todavía no hay movimientos.</p>') + '<div id="ult">' + ult.map(function (m, i) {
       var entra = ENTRA[m.tipo];
       return '<div class="mv"><span><b>' + esc(m.cat || m.tipo) + '</b> · ' + esc(m.desc || m.persona || "") + '</span><span class="m' + (entra ? ' in' : '') + '">' + (entra ? '+' : '−') + money(m.monto) + '</span><small>' + esc(m.fecha + " · " + m.tipo + (m.metodo ? " · " + m.metodo : "") + " · " + m.origen) + '</small>' +
-        (m.origen === "Reserva" ? '' : '<div class="ac"><button data-e="' + i + '">Editar</button><button data-b="' + i + '">Borrar</button></div><div id="ed' + i + '"></div>') + '</div>';
+        (m.origen === "Reserva" || m.origen === "Reparto" ? '' : '<div class="ac"><button data-e="' + i + '">Editar</button><button data-b="' + i + '">Borrar</button></div><div id="ed' + i + '"></div>') + '</div>';
     }).join("") + '</div></section>';
     app.innerHTML = h; bindSeg();
     if (FV === "hoy") r.repartos.forEach(function (x, i) {
@@ -540,10 +567,10 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     Array.prototype.forEach.call(app.querySelectorAll("[data-x]"), function (b) { b.onclick = function () { var w = $("pcw" + b.getAttribute("data-x")); w.hidden = !w.hidden; b.textContent = w.hidden ? "Clasificar" : "Cerrar"; }; });
     if (FV === "hoy") r.pendientes.forEach(function (m, i) { bindMov("pc" + i, Object.assign({}, m, { tipo: m.estado === "Revisar" ? m.tipo : "", cat: m.estado === "Revisar" ? "" : m.cat })); });
     if (FV === "nuevo") bindMov("nv", null, function () { FV = "mov"; finanzas(); });
-    Array.prototype.forEach.call(app.querySelectorAll("[data-e]"), function (b) { b.onclick = function () { var i = +b.getAttribute("data-e"), m = r.ultimos[i]; $("ed" + i).innerHTML = '<div class="card2" style="margin-top:8px">' + formMov("ue" + i, m, false) + '</div>'; bindMov("ue" + i, m); }; });
+    Array.prototype.forEach.call(app.querySelectorAll("[data-e]"), function (b) { b.onclick = function () { var i = +b.getAttribute("data-e"), m = ult[i]; $("ed" + i).innerHTML = '<div class="card2" style="margin-top:8px">' + formMov("ue" + i, m, false) + '</div>'; bindMov("ue" + i, m); }; });
     Array.prototype.forEach.call(app.querySelectorAll("[data-b]"), function (b) { b.onclick = function () {
       if (!b.dataset.ok) { b.dataset.ok = 1; b.textContent = "¿Seguro? Toca otra vez"; return; }
-      b.disabled = true; call({ action: "fin_del", pin: PIN, id: r.ultimos[+b.getAttribute("data-b")].id }).then(function () { finanzas(); });
+      b.disabled = true; call({ action: "fin_del", pin: PIN, id: ult[+b.getAttribute("data-b")].id }).then(function () { finanzas(); });
     }; });
     if (foco) { var el = $("rp-" + foco); if (el) el.scrollIntoView({ block: "start", behavior: "smooth" }); }
   }
