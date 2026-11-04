@@ -1,0 +1,30 @@
+plugins { id 'com.android.application' }
+
+android {
+    namespace 'com.ncstudio.app'
+    compileSdk 34
+    defaultConfig {
+        applicationId 'com.ncstudio.app'
+        minSdk 24
+        targetSdk 34
+        versionCode (project.findProperty('versionCode') ?: '1') as int
+        versionName '1.' + ((project.findProperty('versionCode') ?: '1') as String)
+    }
+    signingConfigs {
+        release {
+            storeFile file(System.getenv('NC_KEYSTORE') ?: 'nc.jks')
+            storePassword System.getenv('NC_KEY_PASS')
+            keyAlias 'ncstudio'
+            keyPassword System.getenv('NC_KEY_PASS')
+        }
+    }
+    buildTypes {
+        release { minifyEnabled false; signingConfig signingConfigs.release }
+    }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.biometric:biometric:1.1.0'
+}

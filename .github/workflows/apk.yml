@@ -1,0 +1,48 @@
+name: App de NC Studio (APK)
+
+on:
+  push:
+    branches: [main]
+    paths: ['app-android/**', '.github/workflows/apk.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Llave de firma
+        env:
+          KS: ${{ secrets.NC_KEYSTORE_B64 }}
+          KP: ${{ secrets.NC_KEY_PASS }}
+        run: |
+          if [ -n "$KS" ] && [ -n "$KP" ]; then
+            echo "$KS" | base64 -d > "$RUNNER_TEMP/nc.jks"; echo "NC_KEY_PASS=$KP" >> "$GITHUB_ENV"
+          else
+            # sin llave guardada: se firma con una llave temporal (para actualizar habrá que reinstalar)
+            P=$(openssl rand -hex 16); echo "::add-mask::$P"
+            keytool -genkeypair -keystore "$RUNNER_TEMP/nc.jks" -storetype PKCS12 -alias ncstudio -keyalg RSA -keysize 2048 -validity 10000 -storepass "$P" -keypass "$P" -dname "CN=NC Studio, C=PA"
+            echo "NC_KEY_PASS=$P" >> "$GITHUB_ENV"
+          fi
+      - name: Compilar
+        env:
+          NC_KEYSTORE: ${{ runner.temp }}/nc.jks
+        run: gradle -p app-android assembleRelease -PversionCode=${{ github.run_number }} --no-daemon
+      - name: Publicar el APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp app-android/app/build/outputs/apk/release/app-release.apk NCStudio.apk
+          gh release view app >/dev/null 2>&1 || gh release create app --title "App NC Studio" --notes "Descarga NCStudio.apk desde tu teléfono e instálala."
+          gh release upload app NCStudio.apk --clobber
+          gh release edit app --notes "Versión 1.${{ github.run_number }} · $(date -u +%Y-%m-%d). Descarga NCStudio.apk desde tu teléfono e instálala."
