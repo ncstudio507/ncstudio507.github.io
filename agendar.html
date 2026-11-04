@@ -77,6 +77,16 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 .xc span{display:grid;gap:2px;padding:10px 12px 12px}.xc b{font-size:15px}.xc small{font-size:12px;color:var(--muted)}
 .ig{font:bold 17px Arial,sans-serif;border:0;border-radius:8px;padding:16px;cursor:pointer;color:#fff;background:linear-gradient(45deg,#C13584,#E1306C,#F77737)}
 .fes{display:grid;gap:10px}
+.pasos{display:flex;gap:4px;align-items:center}.pasos i{flex:1;height:6px;border-radius:3px;background:var(--line)}.pasos i.on{background:var(--accent)}
+.slots{display:flex;flex-wrap:wrap;gap:8px}.slots button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:10px 14px;font:bold 14px Arial,sans-serif;cursor:pointer;color:var(--fg)}.slots button[aria-pressed="true"]{background:var(--fg);color:#fff;border-color:var(--fg)}.slots button.ocu{text-decoration:line-through;opacity:.55}
+.cal7{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}.cal7 .dw{font-size:11px;color:var(--muted);text-align:center;font-weight:bold;padding:2px 0}
+.cal7 button{min-height:62px;border:1px solid var(--line);border-radius:8px;background:#fff;padding:5px 3px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;font:inherit;color:var(--fg)}
+.cal7 button b{font-size:15px}.cal7 button.hoy b{background:var(--fg);color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center}
+.cal7 button[aria-pressed="true"]{border:2px solid var(--accent);background:#FDF1E2}.cal7 button.pas{opacity:.5}.cal7 .vac{visibility:hidden}
+.cal7 .dots{display:flex;gap:2px;flex-wrap:wrap;justify-content:center}.cal7 .dots i{width:7px;height:7px;border-radius:50%;display:block}
+.cal7 small{font-size:10px;line-height:1.1}.c-cal{background:var(--accent)}.c-extra{background:#8E24AA}.c-pub{background:#9AA0A6}
+.cmp{background:#fff;border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:10px;padding:14px;display:grid;gap:8px}.cmp.extra{border-left-color:#8E24AA}.cmp.pub{border-left-color:#9AA0A6}
+.cmp .hr{font-size:13px;color:var(--muted);font-weight:bold}.cmp h3{margin:0;font:400 19px Georgia,serif}.cmp .kv{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:14px}.cmp .kv span{color:var(--muted)}
 .cl{position:relative}.cl.cav{padding-right:72px}
 .avi{width:46px;height:46px;border-radius:50%;object-fit:cover;object-position:center 30%;border:2px solid var(--accent);flex:none;display:block;background:var(--soft)}
 .cl .avi{position:absolute;right:14px;top:50%;transform:translateY(-50%)}.avi.big{width:60px;height:60px}.pfh .avi{width:62px;height:62px}
@@ -115,7 +125,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 </head>
 <body>
 <div class="top"><img src="logo.png" alt="NC Studio"><span>Agendar reserva</span><a href="#" id="salir" hidden>Cambiar PIN</a></div>
-<nav class="tabs" id="tabs" hidden><button id="tA" aria-pressed="true">Agendar</button><button id="tC" aria-pressed="false">Clientes</button><button id="tF" aria-pressed="false">Finanzas</button><button id="tP" aria-pressed="false">Publicar</button><button id="tE" aria-pressed="false">Enviar</button></nav>
+<nav class="tabs" id="tabs" hidden><button id="tA" aria-pressed="true">Agendar</button><button id="tK" aria-pressed="false">Compromisos</button><button id="tC" aria-pressed="false">Clientes</button><button id="tF" aria-pressed="false">Finanzas</button><button id="tP" aria-pressed="false">Publicar</button><button id="tE" aria-pressed="false">Enviar</button></nav>
 <div class="bar"></div>
 <main id="app"></main>
 <script>
@@ -141,9 +151,10 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     });
   });
 
-  function tab(w) { $("tabs").hidden = false; ["A", "C", "F", "P", "E"].forEach(function (k) { $("t" + k).setAttribute("aria-pressed", w === k); }); var b = $("t" + w); if (b && b.scrollIntoView) try { b.scrollIntoView({ block: "nearest", inline: "nearest" }); } catch (e) {} }
+  function tab(w) { $("tabs").hidden = false; ["A", "K", "C", "F", "P", "E"].forEach(function (k) { $("t" + k).setAttribute("aria-pressed", w === k); }); var b = $("t" + w); if (b && b.scrollIntoView) try { b.scrollIntoView({ block: "nearest", inline: "nearest" }); } catch (e) {} }
   $("tA").onclick = function () { form(); };
   $("tC").onclick = function () { clientes(); };
+  $("tK").onclick = function () { compromisos(); };
   $("tF").onclick = function () { FE = null; finanzas(); };
   $("tP").onclick = function () { PV = null; publicar(); };
   $("tE").onclick = function () { enviar(); };
@@ -196,6 +207,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     $("tt").oninput = function () { manual = $("tt").value !== ""; calc(); };
     $("addEx").onclick = function () { addEx(); };
     $("go").onclick = enviarReserva;
+    pasosForm();
     calc();
   }
 
@@ -231,7 +243,80 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     leer(); inp._fn = w; inp._fnLeer = leer; inp.style.display = "none"; inp.parentNode.insertBefore(w, inp.nextSibling);
   }
   function sinFechaNac(inp) { if (inp && inp._fn) { inp._fn.remove(); inp._fn = null; inp.style.display = ""; } }
-    function sel() { var v = $("pk").value; return v === "otro" ? "otro" : OPTS.filter(function (o) { return o.key === v; })[0] || null; }
+    /* ---- agendar por pasos, igual que la página de clientes ---- */
+  var PASO = 0, PASOS = [["Paquete", "¿Qué experiencia y propuesta?"], ["Extras", "¿Algo más?"], ["Fecha y lugar", "Elige el día en el calendario"], ["Cliente", "¿Para quién es?"], ["Confirmar", "Revisa el total y envía"]];
+  function pasosForm() {
+    var secs = Array.prototype.slice.call(app.querySelectorAll(":scope > section")), por = {};
+    secs.forEach(function (x) { var h = x.querySelector("h2"); por[h ? h.textContent : ""] = x; });
+    var orden = [por["Paquete"], por["Extras"], por["Lugar y fecha"], por["Cliente"], por["Total y estado"]];
+    var top = document.createElement("section"); top.id = "pstop"; top.style.gap = "8px";
+    app.insertBefore(top, app.firstChild);
+    orden.forEach(function (x, i) { if (x) { x.setAttribute("data-paso", i); var h = x.querySelector("h2"); if (h) h.hidden = true; app.appendChild(x); } });
+    var foot = app.querySelector(".foot"); if (foot) app.appendChild(foot);
+    // calendario de disponibilidad en lugar del campo de fecha
+    var dt = $("dt"), lab = dt.closest("label"); lab.hidden = true;
+    var tml = $("tm").closest("label"); var g = lab.parentNode; g.insertAdjacentHTML("beforebegin", '<div id="fcal"></div><div id="fslots" style="display:grid;gap:8px"></div>');
+    tml.querySelector("input").setAttribute("aria-label", "Hora");
+    PASO = 0; irPaso(0);
+  }
+  function irPaso(n) {
+    PASO = n;
+    Array.prototype.forEach.call(app.querySelectorAll("[data-paso]"), function (x) { x.hidden = +x.getAttribute("data-paso") !== n; });
+    $("pstop").innerHTML = '<div class="row" style="justify-content:space-between;flex-wrap:nowrap">' + (n ? '<button class="back" id="pback" type="button">‹ ' + PASOS[n - 1][0] + '</button>' : '<span></span>') + '<small class="hint">Paso ' + (n + 1) + ' de ' + PASOS.length + '</small></div>' +
+      '<div class="pasos">' + PASOS.map(function (p, i) { return '<i class="' + (i <= n ? "on" : "") + '"></i>'; }).join("") + '</div><h2 style="margin:4px 0 0">' + PASOS[n][0] + '</h2><p class="hint" style="margin:0">' + PASOS[n][1] + '</p>';
+    if ($("pback")) $("pback").onclick = function () { irPaso(n - 1); };
+    var go = $("go"); go.textContent = n === PASOS.length - 1 ? "Agendar y enviar" : "Siguiente ›";
+    go.onclick = n === PASOS.length - 1 ? enviarReserva : function () { var e = faltaPaso(n); if (e) { avisoPaso(e); return; } irPaso(n + 1); };
+    if (n === 2) calAgendar();
+    window.scrollTo(0, 0);
+  }
+  function avisoPaso(t) { var sec = app.querySelector('[data-paso="' + PASO + '"]'), e = sec.querySelector(".perr"); if (!e) { e = document.createElement("p"); e.className = "err perr"; sec.appendChild(e); } e.textContent = t; e.scrollIntoView({ block: "center" }); }
+  function faltaPaso(n) {
+    var o = sel();
+    if (n === 0) { if (!o) return "Elige un paquete."; if (o === "otro" && (!$("on").value.trim() || !(num($("op").value) > 0))) return "Escribe el nombre del servicio y su precio."; }
+    if (n === 2) { if (!$("dt").value) return "Elige el día en el calendario."; if (esCumpleId(expSel()) && !$("ce").value) return "Falta la fecha de nacimiento del cumpleañero."; }
+    if (n === 3) {
+      var f = []; if (!$("nm").value.trim()) f.push("nombre"); if ($("ph").value.replace(/\D/g, "").length < 7) f.push("teléfono"); if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($("em").value.trim())) f.push("correo válido");
+      if (f.length) return "Falta: " + f.join(", ") + ".";
+    }
+    var sec = app.querySelector('[data-paso="' + n + '"] .perr'); if (sec) sec.textContent = "";
+    return "";
+  }
+  var CALF = null, CALFM = null;
+  function calAgendar(mes) {
+    var hoy = isoD(new Date()); mes = mes || CALFM || ($("dt").value || hoy).slice(0, 7); CALFM = mes;
+    $("fcal").innerHTML = '<div class="msg" style="padding:12px"><span class="spin"></span>Revisando tu agenda…</div>';
+    call({ action: "agenda", pin: PIN, mes: mes }).then(function (r) {
+      if (!r.ok) { $("fcal").innerHTML = '<p class="hint">No pudimos leer el calendario; escribe la fecha a mano.</p>'; $("dt").closest("label").hidden = false; return; }
+      CALF = {}; r.eventos.forEach(function (e) { diasDe(e).forEach(function (k) { (CALF[k] = CALF[k] || []).push(e); }); });
+      pintaCalF();
+    }).catch(function () { $("fcal").innerHTML = '<p class="hint">Sin conexión; escribe la fecha a mano.</p>'; $("dt").closest("label").hidden = false; });
+  }
+  function pintaCalF() {
+    var y = +CALFM.slice(0, 4), m = +CALFM.slice(5, 7) - 1, d1 = new Date(y, m, 1), nd = new Date(y, m + 1, 0).getDate(), hoy = isoD(new Date()), sel0 = $("dt").value;
+    var ant = isoD(new Date(y, m - 1, 1)).slice(0, 7), sig = isoD(new Date(y, m + 1, 1)).slice(0, 7);
+    var h = '<div class="row" style="justify-content:space-between;flex-wrap:nowrap"><button class="btn2" id="fprev" type="button" aria-label="Mes anterior"' + (CALFM <= hoy.slice(0, 7) ? " disabled" : "") + '>‹</button><b style="font:400 19px Georgia,serif">' + MESN[m].charAt(0).toUpperCase() + MESN[m].slice(1) + ' ' + y + '</b><button class="btn2" id="fnext" type="button" aria-label="Mes siguiente">›</button></div><div class="cal7" style="margin-top:8px">' + ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sá"].map(function (x) { return '<div class="dw">' + x + '</div>'; }).join("");
+    for (var i = 0; i < d1.getDay(); i++) h += '<button class="vac" type="button" tabindex="-1" aria-hidden="true"></button>';
+    for (var dd = 1; dd <= nd; dd++) {
+      var k = CALFM + "-" + ("0" + dd).slice(-2), L = (CALF[k] || []).filter(function (e) { return e.tipo === "cal"; }), sl = slotsDia(new Date(k + "T12:00:00")), usados = L.some(function (e) { return e.todoDia; }) ? sl.length : Math.min(sl.length, L.length), pas = k < hoy;
+      var est = pas ? "" : !L.length ? '<small class="pos">Libre</small>' : usados < sl.length ? '<small>' + (sl.length - usados) + ' libre</small>' : '<small class="neg">Ocupado</small>';
+      h += '<button type="button" data-fd="' + k + '" class="' + (k === hoy ? "hoy " : "") + (pas ? "pas" : "") + '"' + (pas ? " disabled" : "") + ' aria-pressed="' + (k === sel0) + '"><b>' + dd + '</b><span class="dots">' + (CALF[k] || []).slice(0, 4).map(function (e) { return '<i class="c-' + e.tipo + '"></i>'; }).join("") + '</span>' + est + '</button>';
+    }
+    $("fcal").innerHTML = h + '</div><p class="hint" style="margin:6px 0 0">Verde = libre · los días ocupados se pueden elegir igual si tú decides.</p>';
+    $("fprev").onclick = function () { calAgendar(ant); }; $("fnext").onclick = function () { calAgendar(sig); };
+    Array.prototype.forEach.call($("fcal").querySelectorAll("[data-fd]"), function (b) { b.onclick = function () { $("dt").value = b.getAttribute("data-fd"); calc(); pintaCalF(); }; });
+    pintaSlots();
+  }
+  function pintaSlots() {
+    var k = $("dt").value; if (!k) { $("fslots").innerHTML = ""; return; }
+    var d = new Date(k + "T12:00:00"), L = (CALF && CALF[k]) || [], ses = L.filter(function (e) { return e.tipo === "cal"; });
+    var sl = slotsDia(d).map(function (t) { var m = t.match(/(\d+):(\d+) (a|p)/), H = (+m[1] % 12) + (m[3] === "p" ? 12 : 0), hh = ("0" + H).slice(-2) + ":" + m[2]; var ocu = ses.some(function (e) { if (e.todoDia) return true; var a = e.ini.slice(0, 10) === k ? e.ini.slice(11) : "00:00", b = e.fin.slice(0, 10) === k ? e.fin.slice(11) : "23:59"; return hh >= a && hh < b; }); return { t: t, hh: hh, ocu: ocu }; });
+    $("fslots").innerHTML = '<b>' + DIAN[d.getDay()].charAt(0).toUpperCase() + DIAN[d.getDay()].slice(1) + ' ' + d.getDate() + ' de ' + MESN[d.getMonth()] + '</b>' +
+      (L.length ? '<div class="card2" style="gap:4px;padding:10px 12px"><small class="hint">Ese día ya tienes:</small>' + L.map(function (e) { return '<span style="font-size:14px">' + (e.todoDia ? "Todo el día" : hora12(e.ini)) + ' · ' + esc(e.titulo) + '</span>'; }).join("") + '</div>' : '<span class="pos" style="font-size:14px">✓ No tienes nada ese día.</span>') +
+      '<small class="hint">Horario</small><div class="slots">' + sl.map(function (x) { return '<button type="button" data-hh="' + x.hh + '" class="' + (x.ocu ? "ocu" : "") + '" aria-pressed="' + ($("tm").value === x.hh) + '">' + esc(x.t) + (x.ocu ? " · ocupado" : "") + '</button>'; }).join("") + '</div><small class="hint">¿Otra hora? Escríbela abajo.</small>';
+    Array.prototype.forEach.call($("fslots").querySelectorAll("[data-hh]"), function (b) { b.onclick = function () { $("tm").value = b.getAttribute("data-hh"); if (/estudio/.test(b.textContent) && $("tr").value === "0") { } calc(); pintaSlots(); }; });
+  }
+  function sel() { var v = $("pk").value; return v === "otro" ? "otro" : OPTS.filter(function (o) { return o.key === v; })[0] || null; }
   function addEx(name, price) {
     var row = document.createElement("div"); row.className = "ex";
     var n = "ex" + Date.now() + Math.floor(Math.random() * 999);
@@ -875,6 +960,80 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
   var BASE = null, PEOPLE = false;
   function segCli(act) { return '<div class="seg" role="group" aria-label="Vista de clientes"><button data-cv="res" aria-pressed="' + (act === "res") + '">Reservas</button><button data-cv="base" aria-pressed="' + (act === "base") + '">Base de clientes</button><button data-cv="int" aria-pressed="' + (act === "int") + '">Interesados</button></div>'; }
   function bindCli() { Array.prototype.forEach.call(app.querySelectorAll("[data-cv]"), function (b) { b.onclick = function () { var v = b.getAttribute("data-cv"); if (v === "base") baseCli(); else if (v === "int") interesados(); else clientes(); }; }); }
+  /* ===================== COMPROMISOS: calendario del mes con cupos y detalles ===================== */
+  var AG = null, AGMES = null, AGDIA = null, MESN = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"], DIAN = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+  function isoD(d) { return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
+  function slotsDia(d) { var w = d.getDay(); return w === 0 || w === 6 ? ["10:00 a. m. (estudio)", "4:30 p. m. (exteriores)"] : ["7:00 p. m. (estudio)"]; }
+  function diasDe(e) {
+    var a = new Date(e.ini.slice(0, 10) + "T12:00:00"), b = new Date(e.fin.slice(0, 10) + "T12:00:00"), out = [];
+    if (e.todoDia || e.fin.slice(11) === "00:00") b = new Date(b.getTime() - 864e5);
+    if (b < a) b = a;
+    for (var d = a; d <= b; d = new Date(d.getTime() + 864e5)) out.push(isoD(d));
+    return out;
+  }
+  function compromisos(mes) {
+    tab("K"); salir.hidden = false; window.scrollTo(0, 0);
+    mes = mes || AGMES || isoD(new Date()).slice(0, 7); AGMES = mes;
+    app.innerHTML = '<div class="msg"><span class="spin"></span>Leyendo tu calendario…</div>';
+    call({ action: "agenda", pin: PIN, mes: mes }).then(function (r) {
+      if (!r.ok) { app.innerHTML = '<div class="msg">No pudimos leer tu calendario. ¿Ya pegaste el código nuevo?</div>'; return; }
+      AG = {}; r.eventos.forEach(function (e) { diasDe(e).forEach(function (k) { (AG[k] = AG[k] || []).push(e); }); });
+      var hoy = isoD(new Date()); if (!AGDIA || AGDIA.slice(0, 7) !== mes) AGDIA = hoy.slice(0, 7) === mes ? hoy : mes + "-01";
+      pintaComp();
+    }).catch(function () { app.innerHTML = '<div class="msg">No pudimos conectar. Revisa tu internet.</div>'; });
+  }
+  function cuposDe(k) {
+    var d = new Date(k + "T12:00:00"), L = (AG[k] || []).filter(function (e) { return e.tipo === "cal"; }), sl = slotsDia(d);
+    var lleno = L.some(function (e) { return e.todoDia; }) ? sl.length : L.length;
+    return { total: sl.length, usados: Math.min(sl.length, lleno), libres: Math.max(0, sl.length - lleno), slots: sl };
+  }
+  function pintaComp() {
+    var y = +AGMES.slice(0, 4), m = +AGMES.slice(5, 7) - 1, d1 = new Date(y, m, 1), nd = new Date(y, m + 1, 0).getDate(), hoy = isoD(new Date());
+    var ant = isoD(new Date(y, m - 1, 1)).slice(0, 7), sig = isoD(new Date(y, m + 1, 1)).slice(0, 7);
+    var h = '<section style="gap:10px"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><button class="btn2" id="kprev" aria-label="Mes anterior">‹</button><h2 style="margin:0;text-align:center">' + MESN[m].charAt(0).toUpperCase() + MESN[m].slice(1) + ' ' + y + '</h2><button class="btn2" id="knext" aria-label="Mes siguiente">›</button></div>' +
+      '<div class="cal7">' + ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sá"].map(function (x) { return '<div class="dw">' + x + '</div>'; }).join("");
+    for (var i = 0; i < d1.getDay(); i++) h += '<button class="vac" tabindex="-1" aria-hidden="true"></button>';
+    for (var dd = 1; dd <= nd; dd++) {
+      var k = AGMES + "-" + ("0" + dd).slice(-2), L = AG[k] || [], c = cuposDe(k), pas = k < hoy;
+      var est = pas ? "" : !L.filter(function (e) { return e.tipo === "cal"; }).length ? '<small class="pos">Libre</small>' : c.libres ? '<small>' + c.libres + ' libre</small>' : '<small class="neg">Lleno</small>';
+      h += '<button data-kd="' + k + '" class="' + (k === hoy ? "hoy " : "") + (pas ? "pas" : "") + '" aria-pressed="' + (k === AGDIA) + '" aria-label="' + dd + ' de ' + MESN[m] + ', ' + L.length + ' compromisos"><b>' + dd + '</b><span class="dots">' + L.slice(0, 4).map(function (e) { return '<i class="c-' + e.tipo + '"></i>'; }).join("") + '</span>' + est + '</button>';
+    }
+    h += '</div><p class="hint" style="margin:0;display:flex;gap:12px;flex-wrap:wrap"><span><i class="c-cal" style="display:inline-block;width:9px;height:9px;border-radius:50%"></i> Sesiones y eventos</span><span><i class="c-extra" style="display:inline-block;width:9px;height:9px;border-radius:50%"></i> Entregas, cumpleaños y reuniones</span><span><i class="c-pub" style="display:inline-block;width:9px;height:9px;border-radius:50%"></i> Publicaciones</span></p>' +
+      (AGMES !== hoy.slice(0, 7) ? '<button class="btn2" id="khoy" style="justify-self:start">Ir a hoy</button>' : '') + '</section><div id="kdia"></div>';
+    app.innerHTML = h;
+    $("kprev").onclick = function () { compromisos(ant); }; $("knext").onclick = function () { compromisos(sig); };
+    if ($("khoy")) $("khoy").onclick = function () { AGDIA = null; compromisos(hoy.slice(0, 7)); };
+    Array.prototype.forEach.call(app.querySelectorAll("[data-kd]"), function (b) { b.onclick = function () { AGDIA = b.getAttribute("data-kd"); Array.prototype.forEach.call(app.querySelectorAll("[data-kd]"), function (x) { x.setAttribute("aria-pressed", x === b); }); pintaDia(); $("kdia").scrollIntoView({ behavior: "smooth", block: "start" }); }; });
+    pintaDia();
+  }
+  function hora12(iso) { var m = iso.slice(11, 16).split(":"), H = +m[0]; return ((H % 12) || 12) + ":" + m[1] + (H < 12 ? " a. m." : " p. m."); }
+  function pintaDia() {
+    var k = AGDIA, d = new Date(k + "T12:00:00"), L = AG[k] || [], c = cuposDe(k), hoy = isoD(new Date()), fut = k >= hoy;
+    var h = '<section><h2 style="margin:0">' + DIAN[d.getDay()].charAt(0).toUpperCase() + DIAN[d.getDay()].slice(1) + ' ' + d.getDate() + ' de ' + MESN[d.getMonth()] + '</h2>' +
+      '<p class="hint" style="margin:0">' + (fut ? (c.libres ? '<b class="pos">' + c.libres + (c.libres === 1 ? " cupo libre" : " cupos libres") + '</b>' : '<b class="neg">Sin cupos</b>') + ' · horarios del día: ' + c.slots.join(" y ") : "Día pasado") + '</p>' +
+      (fut && c.libres ? '<button class="btn" id="kag" style="justify-self:start;padding:11px 18px">+ Agendar en este día</button>' : '') + '</section>';
+    if (!L.length) h += '<div class="msg">No tienes compromisos este día.</div>';
+    L.forEach(function (e, i) {
+      var r = e.res, mismo = e.ini.slice(0, 10) === k;
+      var hr = e.todoDia ? "Todo el día" : (mismo ? hora12(e.ini) : "Desde el " + fechaBonita(e.ini).replace(/ ·.*/, "")) + " – " + (e.fin.slice(0, 10) === k || !mismo ? hora12(e.fin) : fechaBonita(e.fin));
+      h += '<div class="cmp ' + e.tipo + '"><span class="hr">' + esc(hr) + (e.tipo === "extra" ? " · Entregas y cumpleaños" : e.tipo === "pub" ? " · Publicaciones" : "") + '</span><h3>' + esc(e.titulo) + '</h3>' + (e.lugar ? '<span>📍 ' + esc(e.lugar) + '</span>' : '');
+      if (r) {
+        h += '<div class="row" style="gap:10px;flex-wrap:nowrap;align-items:center">' + avTag(r.name, r.phone, r.id, 1) + '<div><b>' + esc(r.name) + '</b> ' + chip(r.estado) + '<br><small class="hint">' + esc(r.id + " · " + r.service) + '</small></div></div>' +
+          '<div class="kv"><span>Total</span><b>' + esc(r.total) + '</b><span>Abono</span><b>' + esc(r.abono) + (r.estado === "Confirmado" ? " ✓" : " (pendiente)") + '</b><span>Saldo</span><b>' + esc(r.saldo) + (r.saldoPagado ? " ✓ pagado" : "") + '</b>' +
+          '<span>Contrato</span><b>' + (r.firmado ? "✓ Firmado" : "Pendiente") + '</b>' + (r.duracion ? '<span>Duración</span><b>' + esc(r.duracion) + '</b>' : '') + (r.fotos ? '<span>Fotos</span><b>' + esc(r.fotos) + '</b>' : '') +
+          '<span>Teléfono</span><b>' + esc(r.phone) + '</b></div>' +
+          (r.incluye.length ? '<details><summary class="hint" style="cursor:pointer">Lo que incluye (' + r.incluye.length + ')</summary><ul style="margin:6px 0 0;padding-left:20px;font-size:14px">' + r.incluye.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join("") + '</ul></details>' : '') +
+          (r.extras.length ? '<span style="font-size:14px">➕ ' + esc(r.extras.join(", ")) + '</span>' : '') + (r.notas ? '<span style="font-size:14px">💡 ' + esc(r.notas) + '</span>' : '') +
+          '<div class="row"><button class="btn2" data-kres="' + esc(r.id) + '">Ver su ficha</button><a class="btn2" style="text-decoration:none" href="https://wa.me/' + wnum(r.phone) + '" target="_blank" rel="noopener">💬 WhatsApp</a></div>';
+      }
+      if (e.desc) h += '<details' + (r ? '' : ' open') + '><summary class="hint" style="cursor:pointer">Todos los detalles del calendario</summary><p style="white-space:pre-line;margin:6px 0 0;font-size:14px;line-height:1.5">' + esc(e.desc) + '</p></details>';
+      h += '</div>';
+    });
+    h += '<a class="btn2" style="text-decoration:none;justify-self:start" href="https://calendar.google.com/calendar/r/day/' + k.replace(/-/g, "/") + '" target="_blank" rel="noopener">Abrir este día en Google Calendar ↗</a>';
+    $("kdia").innerHTML = '<div style="display:grid;gap:10px">' + h + '</div>';
+    Array.prototype.forEach.call($("kdia").querySelectorAll("[data-kres]"), function (b) { b.onclick = function () { clientes(b.getAttribute("data-kres")); }; });
+    if ($("kag")) $("kag").onclick = function () { form(); setTimeout(function () { if ($("dt")) { $("dt").value = k; calc(); $("dt").scrollIntoView({ block: "center" }); } }, 30); };
+  }
   /* ===================== INTERESADOS ===================== */
   var INT = null, INT_EST = ["Nuevo", "Le envié la info", "Seguimiento enviado", "Reservó", "No le interesó"], INT_FUENTES = ["Instagram", "WhatsApp", "Facebook", "TikTok", "Referido", "Página web", "En persona"];
   function hoyStr() { var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
