@@ -917,6 +917,25 @@ Calcula tu paquete aquí
 <div style="display: {{xc.v1}}; flex-direction: column; gap: 22px">
 <div style="display: flex; flex-direction: column; gap: 10px">
 <span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">1. {{xc.baseTitle}}</span>
+<sc-if value="{{xc.isRun}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Corredores inscritos (aproximado)
+<input type="text" inputmode="numeric" data-field="runners" value="{{xc.R}}" onInput="{{xc.setR}}" placeholder="Ej.: 250" style="min-height: 52px; padding: 0 14px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 22px">
+</label>
+<div role="group" aria-label="Cantidades rápidas" style="display: flex; flex-wrap: wrap; gap: 8px">
+<sc-for list="{{xc.runChips}}" as="c" hint-placeholder-count="5">
+<button type="button" aria-pressed="{{c.pressed}}" onClick="{{c.pick}}" style="min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1.5px solid #222020; background: {{c.bg}}; color: {{c.fg}}; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 14px; cursor: pointer">{{c.label}}</button>
+</sc-for>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; border-radius: 8px; background: #222020; color: #FEFEFE">
+<span style="font-family: Montserrat, sans-serif; font-weight: 600; font-size: 13px; color: #F2E4D2">Valor de la alianza</span>
+<span style="font-family: 'EB Garamond', Georgia, serif; font-size: 40px; line-height: 1">{{xc.runTotal}}</span>
+<span style="font-size: 14px; color: #F2E4D2">{{xc.R}} corredores × {{xc.runPer}} · unas {{xc.runFotos}} fotos (mínimo 3 por corredor)</span>
+</div>
+<span style="font-size: 14px; line-height: 1.5; color: #3D3B3E">Así funciona: la organización suma <b>{{xc.runPer}}</b> al valor de la inscripción y cada corredor recibe sus fotos <b>gratis</b> en la galería en línea. Cubrimos salida, recorrido, llegada y premiación; los patrocinadores salen en las fotos y promovemos la carrera en nuestro Instagram antes y después.</span>
+</div>
+</sc-if>
+<sc-if value="{{xc.showBases}}" hint-placeholder-val="{{true}}">
 <div role="radiogroup" aria-label="Tiempo de cobertura" style="display: flex; flex-direction: column; gap: 8px">
 <sc-for list="{{xc.bases}}" as="b" hint-placeholder-count="3">
 <button type="button" role="radio" aria-checked="{{b.checked}}" onClick="{{b.pick}}" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 8px; border: 1.5px solid #222020; background: {{b.bg}}; color: {{b.fg}}; text-align: left; cursor: pointer; width: 100%">
@@ -931,6 +950,20 @@ Calcula tu paquete aquí
 </button>
 </sc-for>
 </div>
+</sc-if>
+<sc-if value="{{xc.showH}}" hint-placeholder-val="{{false}}">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-radius: 8px; background: #FDF1E2">
+<div style="display: flex; flex-direction: column; min-width: 0">
+<span style="font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">¿Cuántas horas?</span>
+<span style="font-size: 13px; color: #3D3B3E">{{xc.hNote}}</span>
+</div>
+<div style="flex: none; display: flex; align-items: center; gap: 6px">
+<button type="button" onClick="{{xc.hDec}}" aria-label="Una hora menos" style="width: 40px; height: 40px; border-radius: 6px; border: 1.5px solid #222020; background: #FEFEFE; color: #222020; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 20px; cursor: pointer; opacity: {{xc.hDecOp}}">−</button>
+<span aria-live="polite" style="min-width: 28px; text-align: center; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 16px">{{xc.H}}</span>
+<button type="button" onClick="{{xc.hInc}}" aria-label="Una hora más" style="width: 40px; height: 40px; border-radius: 6px; border: 0; background: #222020; color: #FEFEFE; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 20px; cursor: pointer">+</button>
+</div>
+</div>
+</sc-if>
 </div>
 
 <div style="display: flex; flex-direction: column; gap: 4px">
@@ -1080,7 +1113,7 @@ Calcula tu paquete aquí
 <sc-if value="{{xc.hasDate}}" hint-placeholder-val="{{false}}">
 <span class="nc-chosen" style="padding: 10px 12px; border-radius: 6px; background: #F2E4D2; font-size: 14px">Fecha elegida: {{xc.fecha}}</span>
 </sc-if>
-<label class="nc-side" style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Hora de inicio del evento
+<label class="nc-side" style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">{{xc.timeLabel}}
 <input type="time" data-field="time" value="{{xc.time}}" onInput="{{xc.setTime}}" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
 </label>
 </div>
@@ -1096,11 +1129,11 @@ Calcula tu paquete aquí
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Correo electrónico
 <input type="email" inputmode="email" autocomplete="email" value="{{xc.email}}" data-field="email" onInput="{{xc.setEmail}}" placeholder="tucorreo@ejemplo.com" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{xc.bEmail}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
 </label>
-<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Tipo de evento
-<input type="text" data-field="type" value="{{xc.type}}" onInput="{{xc.setType}}" placeholder="Cumpleaños, bautizo, boda, aniversario, empresa…" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">{{xc.typeLabel}}
+<input type="text" data-field="type" value="{{xc.type}}" onInput="{{xc.setType}}" placeholder="{{xc.typePh}}" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
 </label>
-<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Detalles de tu evento
-<textarea rows="3" data-field="xidea" onInput="{{xc.setIdea}}" placeholder="Cantidad de invitados, momentos importantes, temática…" style="padding: 10px 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px; resize: vertical">{{xc.idea}}</textarea>
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">{{xc.ideaLabel}}
+<textarea rows="3" data-field="xidea" onInput="{{xc.setIdea}}" placeholder="{{xc.ideaPh}}" style="padding: 10px 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px; resize: vertical">{{xc.idea}}</textarea>
 </label>
 <sc-if value="{{xc.showErr}}" hint-placeholder-val="{{false}}">
 <div role="alert" style="padding: 12px 14px; border-radius: 6px; border: 1.5px solid #B42318; background: #FEF3F2; color: #7A271A; font-size: 14px; line-height: 1.45">{{xc.errText}}</div>
@@ -1782,10 +1815,18 @@ var XC = {
     bases: [
       { id: "h1", label: "1 hora de cobertura", note: "Aprox. 75 a 100 fotos editadas", price: 95, h: 1, f: [75, 100] },
       { id: "h2", label: "2 horas de cobertura", note: "Aprox. 125 a 200 fotos editadas", price: 170, h: 2, f: [125, 200] },
-      { id: "h3", label: "3 horas de cobertura", note: "Aprox. 225 a 300 fotos editadas", price: 250, h: 3, f: [225, 300] }
+      { id: "h3", label: "3 horas de cobertura", note: "Aprox. 225 a 300 fotos editadas", price: 250, h: 3, f: [225, 300] },
+      { id: "hmas", label: "Más de 3 horas", note: "Tú eliges cuántas: cada hora extra suma $60 y 40 fotos editadas", price: 310, h: 4, f: [265, 340], more: true }
     ],
     defBase: "h2",
-    blurb: "Tenemos extras que te pueden interesar: video resumen o video para redes, photo booth con fotos impresas al instante, horas extra, álbum, impresiones y mucho más. ¿Deseas revisarlos?"
+    blurb: "Tenemos extras que te pueden interesar: video resumen o video para redes, photo booth con fotos impresas al instante, álbum, impresiones y mucho más. ¿Deseas revisarlos?"
+  },
+  limitless: {
+    title: "Limitless", kind: "Alianza para carreras", runners: true, perRunner: 1.5, fotosPorCorredor: 3,
+    baseTitle: "¿Cuántos corredores esperan?",
+    bases: [{ id: "run", label: "Alianza con la organización", note: "$1.50 por corredor inscrito", price: 1.5, h: 5, f: [3, 3] }],
+    defBase: "run",
+    blurb: "Podemos sumar a la alianza video para redes, video resumen y fotos impresas para la premiación. ¿Deseas revisarlos?"
   }
 };
 
@@ -1823,13 +1864,22 @@ var COT_GROUPS = [
 ];
 COT_GROUPS[4].items[0].price = 60; COT_GROUPS[4].items[1].price = 25; COT_GROUPS[4].items[2].price = 90; COT_GROUPS[4].items[3].price = 70;
 var XC_GROUPS = {};
+XC_GROUPS.limitless = [
+  { title: "Video", items: [
+    cc("vvert", "Video vertical de 1 min para redes (Full HD 1080p)", 75),
+    cc("vhor", "Video resumen horizontal de 10 min (Full HD 1080p)", 150)
+  ] },
+  { title: "Premiación", items: [
+    cq("pw8", "Fotos impresas 8×10 para los ganadores", 8, { note: "Se entregan a la organización después de la carrera" }),
+    cq("pw11", "Fotos impresas 11×17 para los ganadores", 12)
+  ] }
+];
 var COT_PRINTS = [
   cq("p46", "Fotos 4×6", 3.5), cq("p57", "Fotos 5×7", 5), cq("p810", "Fotos 8×10", 8), cq("p1117", "Fotos 11×17", 12),
   cq("cart", "Juegos de 6 fotos tamaño cartera", 5)
 ];
 XC_GROUPS.infantil = [
   { title: "Más tiempo y más fotos", items: [
-    cq("hx", "Horas extra de cobertura", 60, { note: "Cada hora suma 40 fotos editadas", fotos: 40, h: 1 }),
     cq("fx", "Fotos editadas extra", 2, { step: 10, note: "Se agregan de 10 en 10", fotos: 1 }),
     cq("lib", "Fotos sin editar (liberación de galería)", 1, { step: 50, note: "Se agregan de 50 en 50" })
   ] },
@@ -2024,7 +2074,7 @@ class Component extends DCLogic {
     var cur = PACKAGES.filter(function (p) { return p.id === sel; })[0] || PACKAGES[0];
     function openXC(id, baseId, step) {
       self.navPush();
-      self.setState({ upOpen: false, cotOpen: false, xcPr: null, xcId: id, xcStep: step, xcBase: baseId, xcQ: {}, xcC: {}, xcL: {}, xcOff: 0, xcSel: null, xcSlot: null });
+      self.setState({ upOpen: false, cotOpen: false, xcPr: null, xcId: id, xcStep: step, xcBase: baseId, xcH: null, xcQ: {}, xcC: {}, xcL: {}, xcOff: 0, xcSel: null, xcSlot: null });
     }
     var current = {
       title: cur.title, kind: cur.kind, intro: cur.intro, img: cur.img, imgAlt: cur.imgAlt,
@@ -2211,7 +2261,13 @@ class Component extends DCLogic {
         var xn = st.xcName != null ? st.xcName : st.cotName, xp = st.xcPhone != null ? st.xcPhone : st.cotPhone, xe = st.xcEmail != null ? st.xcEmail : st.cotEmail;
         var xmiss = missing(xn, xp, xe);
         var base = cfg.bases.filter(function (b) { return b.id === st.xcBase; })[0] || cfg.bases[0];
-        var total = base.price, hours = base.h, fAdd = 0, lines = [], printLines = [];
+        var run = !!cfg.runners, more = !!base.more;
+        var R = run ? Math.max(0, Math.round(Number(st.xcR == null ? 200 : st.xcR) || 0)) : 0;
+        var H = more ? Math.max(4, Math.min(16, st.xcH || 4)) : base.h;
+        var bPrice = run ? Math.round(R * cfg.perRunner * 100) / 100 : more ? 250 + 60 * (H - 3) : base.price;
+        var bLabel = run ? "Alianza para " + R + " corredores" : more ? H + " horas de cobertura" : base.label;
+        var bF = run ? [R * cfg.fotosPorCorredor, R * cfg.fotosPorCorredor] : more ? [225 + 40 * (H - 3), 300 + 40 * (H - 3)] : base.f;
+        var total = bPrice, hours = H, fAdd = 0, lines = [], printLines = [];
         var groups = XC_GROUPS[id] || [];
         function tally(it, out) {
           if (it.kind === "q") {
@@ -2241,11 +2297,12 @@ class Component extends DCLogic {
           return { isQty: false, isChk: true, name: it.name, on: on, checked: on ? "true" : "false", boxBg: on ? accent : "#FEFEFE", hasInNote: false,
             toggle: function () { var nc = Object.assign({}, c); nc[it.id] = !on; if (!on && it.excl) it.excl.forEach(function (k) { nc[k] = false; }); self.setState({ xcC: nc }); } };
         }
-        var fMin = base.f[0] + fAdd, fMax = base.f[1] + fAdd;
+        var fMin = bF[0] + fAdd, fMax = bF[1] + fAdd;
         function build() {
           var nombre = String((st.xcName != null ? st.xcName : st.cotName) || "").trim() || "un cliente";
-          var que = "una cobertura de " + cfg.title + (st.xcType.trim() ? " para un " + st.xcType.trim().toLowerCase() : "") + " con el paquete de " + base.label + " (" + money(base.price) + ")";
-          var extra = total !== base.price ? " (con lo que elegí me sale en " + money(total) + (other ? " + traslado" : "") + ")" : "";
+          var que = run ? "la alianza " + cfg.title + (st.xcType.trim() ? " para la carrera " + st.xcType.trim() : " para nuestra carrera") + ", con unos " + R + " corredores (" + money(cfg.perRunner) + " por corredor = " + money(bPrice) + ")"
+            : "una cobertura de " + cfg.title + (st.xcType.trim() ? " para un " + st.xcType.trim().toLowerCase() : "") + " con el paquete de " + bLabel + " (" + money(bPrice) + ")";
+          var extra = total !== bPrice ? " (con lo que elegí me sale en " + money(total) + (other ? " + traslado" : "") + ")" : "";
           var m = "Hola, NC Studio. Soy " + nombre + " y estoy cotizando con ustedes " + que + extra + ".";
           if (st.xcIdea.trim()) m += "\n\nMi idea es: " + st.xcIdea.trim();
           return m;
@@ -2254,20 +2311,20 @@ class Component extends DCLogic {
           var pkg = PACKAGES.filter(function (p) { return p.id === id; })[0];
           var pr = pkg ? pkg.proposals.filter(function (x) { return num(x.price) === base.price; })[0] : null;
           return {
-            v: 1, kind: "evento", service: cfg.title + " · " + base.label,
-            baseLabel: cfg.title + ", " + base.label.toLowerCase(), basePrice: base.price,
-            includes: pr ? pr.items : [base.label, base.note, "Galería online privada"], extras: parseLines(lines), prints: parseLines(printLines), notNeeded: [],
+            v: 1, kind: "evento", service: cfg.title + " · " + bLabel,
+            baseLabel: cfg.title + ", " + bLabel.toLowerCase(), basePrice: bPrice,
+            includes: pr ? pr.items : [bLabel, "Aprox. " + bF[0] + " a " + bF[1] + " fotos editadas", "Galería online privada"], extras: parseLines(lines), prints: parseLines(printLines), notNeeded: [],
             name: String(xn || "").trim(), phone: String(xp || "").trim(), email: String(xe || "").trim(),
             place: lugares, otherPlace: other, dateIso: st.xcSel || "", dateLabel: fecha || "",
-            time: st.xcTime.trim(), venue: "", durationMin: hours * 60, photos: "aprox. " + fMin + " a " + fMax, tests: 0, eventType: st.xcType.trim(),
+            time: st.xcTime.trim(), venue: "", durationMin: hours * 60, photos: run ? "mínimo " + cfg.fotosPorCorredor + " por corredor (aprox. " + fMin + ")" : "aprox. " + fMin + " a " + fMax, tests: 0, eventType: st.xcType.trim(), runners: run ? R : undefined,
             total: total, totalLabel: money(total) + (other ? " + traslado" : ""), notes: st.xcIdea.trim(), whatsappText: build()
           };
         }
         return {
           open: true, step: step, title: cfg.title, kind: cfg.kind,
-          subtitle: ["", "Elige tu cobertura y tus extras", "Elige tus fotos impresas", "¿Dónde será tu evento?", "Elige la fecha y la hora de inicio", "Último paso: tus datos"][step],
+          subtitle: (run ? ["", "Calcula la alianza para tu carrera", "", "¿Dónde es la carrera?", "Elige la fecha y la hora de salida", "Último paso: datos de la organización"] : ["", "Elige tu cobertura y tus extras", "Elige tus fotos impresas", "¿Dónde será tu evento?", "Elige la fecha y la hora de inicio", "Último paso: tus datos"])[step],
           prog: [1, 2, 3, 4, 5].map(function (i) { return { bg: i <= step ? accent : "#3D3B3E" }; }),
-          sumTitle: cfg.title + " · " + cfg.kind, sumBaseLabel: base.label, sumBase: money(base.price),
+          sumTitle: cfg.title + " · " + cfg.kind, sumBaseLabel: bLabel, sumBase: money(bPrice),
           sumLines: parseLines(lines.concat(printLines)),
           sumPlace: lugares, sumDate: fecha ? fecha + (st.xcTime ? " · " + st.xcTime : "") : "Por elegir",
           v1: step === 1 ? "flex" : "none", vP: step === 2 ? "flex" : "none", vL: step === 3 ? "flex" : "none", vF: step === 4 ? "flex" : "none", vD: step === 5 ? "flex" : "none",
@@ -2278,17 +2335,27 @@ class Component extends DCLogic {
           prYes: function () { self.setState({ xcPr: true }); setTimeout(function () { var e = document.querySelector("[data-prguide]"); if (e && e.scrollIntoView) e.scrollIntoView({ behavior: "smooth", block: "start" }); }, 90); },
           prNo: function () { var nq = Object.assign({}, q); COT_PRINTS.forEach(function (it) { delete nq[it.id]; }); self.setState({ xcPr: false, xcQ: nq, xcStep: 3 }); },
           backLabel: "Atrás",
-          goNext: function () { if (step === 1) { self.setState({ prAsk: "xc" }); return; } if (step < 5) { self.setState({ xcStep: step + 1 }); self.navPush(); } },
-          goBack: function () { if (step > 1) self.setState({ xcStep: step - 1 }); },
+          goNext: function () { if (step === 1 && run) { if (!R) return; self.setState({ xcStep: 3 }); self.navPush(); return; } if (step === 1) { self.setState({ prAsk: "xc" }); return; } if (step < 5) { self.setState({ xcStep: step + 1 }); self.navPush(); } },
+          goBack: function () { if (step > 1) self.setState({ xcStep: run && step === 3 ? 1 : step - 1 }); },
           showErr: !!st.xcErr && !!xmiss, errText: xmiss ? "Para enviar tu reserva completa: " + xmiss + "." : "",
           bName: st.xcErr && !String(xn || "").trim() ? "#B42318" : "#D9CDBE",
           bPhone: st.xcErr && !okPhone(xp) ? "#B42318" : "#D9CDBE",
           bEmail: st.xcErr && !okEmail(xe) ? "#B42318" : "#D9CDBE",
           close: function () { self.setState({ xcId: null }); },
-          baseTitle: cfg.baseTitle,
+          baseTitle: cfg.baseTitle, showBases: !run, isRun: run, showH: more,
+          H: H, hDecOp: H > 4 ? 1 : 0.35, hNote: "Aprox. " + bF[0] + " a " + bF[1] + " fotos editadas",
+          hDec: function () { if (H > 4) self.setState({ xcH: H - 1 }); }, hInc: function () { if (H < 16) self.setState({ xcH: H + 1 }); },
+          R: R ? String(R) : "", runTotal: money(bPrice), runPer: money(cfg.perRunner || 0), runFotos: String(R * (cfg.fotosPorCorredor || 0)),
+          setR: function (e) { var v = e && e.target ? String(e.target.value).replace(/\D/g, "").slice(0, 5) : ""; self.setState({ xcR: v === "" ? 0 : +v }); },
+          runChips: [100, 200, 300, 500, 1000].map(function (n) { var on = n === R; return { label: String(n), bg: on ? "#222020" : "#FEFEFE", fg: on ? "#FEFEFE" : "#222020", pressed: on ? "true" : "false", pick: function () { self.setState({ xcR: n }); } }; }),
+          typeLabel: run ? "Nombre de la carrera y organización" : "Tipo de evento",
+          typePh: run ? "Ej.: Beach Run 2027 · Club de corredores…" : "Cumpleaños, bautizo, boda, aniversario, empresa…",
+          ideaLabel: run ? "Detalles de la carrera" : "Detalles de tu evento",
+          ideaPh: run ? "Distancias (5K, 10K…), recorrido, hora de premiación, patrocinadores…" : "Cantidad de invitados, momentos importantes, temática…",
+          timeLabel: run ? "Hora de salida" : "Hora de inicio del evento",
           bases: cfg.bases.map(function (b) {
             var on = b.id === base.id;
-            return { label: b.label, note: b.note, price: money(b.price), checked: on ? "true" : "false", bg: on ? "#222020" : "#FEFEFE", fg: on ? "#FEFEFE" : "#222020", sub: on ? "#F2E4D2" : "#3D3B3E", dot: on ? accent : "#FEFEFE",
+            return { label: b.more && on ? H + " horas de cobertura" : b.label, note: b.note, price: b.more ? (on ? money(bPrice) : "desde " + money(b.price)) : money(b.price), checked: on ? "true" : "false", bg: on ? "#222020" : "#FEFEFE", fg: on ? "#FEFEFE" : "#222020", sub: on ? "#F2E4D2" : "#3D3B3E", dot: on ? accent : "#FEFEFE",
               pick: function () { self.setState({ xcBase: b.id }); } };
           }),
           groups: groups.map(function (g) { return { title: g.title, items: g.items.map(view) }; }),
@@ -2308,7 +2375,7 @@ class Component extends DCLogic {
           setTime: function (e) { st.xcTime = e && e.target ? e.target.value : ""; },
           setIdea: function (e) { st.xcIdea = e && e.target ? e.target.value : ""; },
           total: money(total) + (other ? " + traslado" : ""),
-          meta: hours + (hours === 1 ? " hora" : " horas") + " de cobertura · aprox. " + fMin + " a " + fMax + " fotos editadas",
+          meta: run ? R + " corredores × " + money(cfg.perRunner) + " · mínimo " + cfg.fotosPorCorredor + " fotos por corredor" : hours + (hours === 1 ? " hora" : " horas") + " de cobertura · aprox. " + fMin + " a " + fMax + " fotos editadas",
           wa: WA + encodeURIComponent(build()),
           send: function (e) {
             var a = e && e.currentTarget;
