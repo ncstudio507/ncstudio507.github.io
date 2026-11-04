@@ -7,15 +7,15 @@ android {
         applicationId 'com.ncstudio.app'
         minSdk 24
         targetSdk 34
-        versionCode (project.findProperty('versionCode') ?: '1') as int
-        versionName '1.' + ((project.findProperty('versionCode') ?: '1') as String)
+        versionCode Integer.parseInt(String.valueOf(project.findProperty('versionCode') ?: '1'))
+        versionName '1.' + String.valueOf(project.findProperty('versionCode') ?: '1')
     }
     signingConfigs {
         release {
             storeFile file(System.getenv('NC_KEYSTORE') ?: 'nc.jks')
-            storePassword System.getenv('NC_KEY_PASS')
+            storePassword System.getenv('NC_KEY_PASS') ?: ''
             keyAlias 'ncstudio'
-            keyPassword System.getenv('NC_KEY_PASS')
+            keyPassword System.getenv('NC_KEY_PASS') ?: ''
         }
     }
     buildTypes {

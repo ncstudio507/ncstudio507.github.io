@@ -37,7 +37,7 @@ jobs:
       - name: Compilar
         env:
           NC_KEYSTORE: ${{ runner.temp }}/nc.jks
-        run: gradle -p app-android assembleRelease -PversionCode=${{ github.run_number }} --no-daemon
+        run: gradle -p app-android assembleRelease -PversionCode=${{ github.run_number }} --no-daemon --stacktrace
       - name: Publicar el APK
         env:
           GH_TOKEN: ${{ github.token }}
