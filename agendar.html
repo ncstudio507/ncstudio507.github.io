@@ -404,8 +404,18 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     function cats() {
       var t = $(p + "t").value, res = t === "Reserva";
       $(p + "rl").hidden = !res; $(p + "cl").hidden = res;
-      $(p + "c").innerHTML = (FD.tipos[t] || []).map(function (c) { return '<option' + (m.cat === c ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join("");
+      var all = FD.tipos[t] || [], pl = ((FD.plataformas || {})[t] || []).filter(function (c) { return all.indexOf(c) >= 0; });
+      var op = function (c) { return '<option' + (m.cat === c ? ' selected' : '') + '>' + esc(c) + '</option>'; };
+      $(p + "c").innerHTML = pl.length ? '<optgroup label="' + (t === "Gasto NC" ? "💻 Plataformas del negocio" : "📺 Streaming y suscripciones") + '">' + pl.map(op).join("") + '</optgroup><optgroup label="Otros">' + all.filter(function (c) { return pl.indexOf(c) < 0; }).map(op).join("") + '</optgroup>' : all.map(op).join("");
+      precio();
     }
+    function precio() {
+      var v = (FD.precios || {})[$(p + "c").value], el = $(p + "m");
+      if (m.id || m.monto || (el.value && !el.dataset.auto)) return;
+      if (v) { el.value = v; el.dataset.auto = 1; } else if (el.dataset.auto) { el.value = ""; delete el.dataset.auto; }
+    }
+    $(p + "m").oninput = function () { delete this.dataset.auto; };
+    $(p + "c").onchange = precio;
     $(p + "t").onchange = cats; cats();
     var igual = FD.abiertas.filter(function (a) { return Math.abs(Number(a.monto) - Number(m.monto || -1)) < 0.01; });
     if (igual.length === 1) $(p + "r").value = igual[0].id;
@@ -421,10 +431,13 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       }).catch(function () { b.disabled = false; b.textContent = "Guardar"; $(p + "e").textContent = "No pudimos conectar."; });
     };
   }
+  var FV = "hoy";
   function segFin(act) {
-    return '<div class="seg" role="group" aria-label="Vista de finanzas"><button data-v="hoy" aria-pressed="' + (act === "hoy") + '">Resumen</button><button data-v="rep" aria-pressed="' + (act === "rep") + '">Reportes</button><button data-v="paq" aria-pressed="' + (act === "paq") + '">Costos por paquete</button></div>';
+    var n = FD ? FD.repartos.length + FD.pendientes.length : 0;
+    var op = [["hoy", "Pendientes" + (n ? " (" + n + ")" : "")], ["nuevo", "+ Registrar"], ["mov", "Movimientos"], ["rep", "Reportes"], ["paq", "Costos por paquete"]];
+    return '<div class="seg" role="group" aria-label="Vista de finanzas">' + op.map(function (o) { return '<button data-v="' + o[0] + '" aria-pressed="' + (act === o[0]) + '">' + o[1] + '</button>'; }).join("") + '</div>';
   }
-  function bindSeg() { Array.prototype.forEach.call(app.querySelectorAll("[data-v]"), function (b) { b.onclick = function () { var v = b.getAttribute("data-v"); if (v === "hoy") finanzas(); else reportes(v === "paq" ? "paq" : null); }; }); }
+  function bindSeg() { Array.prototype.forEach.call(app.querySelectorAll("[data-v]"), function (b) { b.onclick = function () { var v = b.getAttribute("data-v"); if (v === "rep" || v === "paq") { reportes(v === "paq" ? "paq" : null); return; } FV = v; if (FD) { pintaFin(); window.scrollTo(0, 0); } else finanzas(); }; }); }
   var REP = { mes: new Date().getMonth() + 1, anio: new Date().getFullYear() };
   function reportes(vista) {
     tab("F"); salir.hidden = false;
@@ -471,10 +484,10 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     app.innerHTML = h; bindSeg();
   }
   function pintaFin(foco) {
-    var r = FD, s = r.resumen, h = segFin("hoy");
-    h += '<section><div class="row" style="justify-content:space-between"><h2>Finanzas · ' + esc(s.mes.charAt(0) + s.mes.slice(1).toLowerCase()) + '</h2><a class="btn2" href="' + esc(r.url) + '" target="_blank" rel="noopener" style="text-decoration:none">Abrir hoja de finanzas ↗</a></div>' +
+    if (foco) FV = "hoy"; var r = FD, s = r.resumen, h = segFin(FV);
+    if (FV === "hoy") h += '<section><div class="row" style="justify-content:space-between"><h2>Finanzas · ' + esc(s.mes.charAt(0) + s.mes.slice(1).toLowerCase()) + '</h2><a class="btn2" href="' + esc(r.url) + '" target="_blank" rel="noopener" style="text-decoration:none">Abrir hoja de finanzas ↗</a></div>' +
       '<div class="kpis"><div class="kpi"><span>Ingresos NC</span><b>' + money(s.ingresosNC) + '</b></div><div class="kpi"><span>Gastos NC</span><b>' + money(s.gastosNC) + '</b></div><div class="kpi"><span>Gastos Nelson</span><b>' + money(s.gastosNelson) + '</b></div><div class="kpi"><span>Por revisar</span><b>' + r.pendientes.length + '</b></div></div></section>';
-    if (r.repartos.length) h += '<section><h2>Repartos pendientes</h2><p class="hint">Trabajos ya pagados completos. Ya viene llenada la sugerencia según los costos del paquete (Charlie y Nelson ganan lo mismo, la gasolina según el destino y NC nunca más que un socio); cámbiala si repartieron distinto.</p>' + r.repartos.map(function (x, i) {
+    if (FV === "hoy" && r.repartos.length) h += '<section><h2>Repartos pendientes</h2><p class="hint">Trabajos ya pagados completos. Ya viene llenada la sugerencia según los costos del paquete (Charlie y Nelson ganan lo mismo, la gasolina según el destino y NC nunca más que un socio); cámbiala si repartieron distinto.</p>' + r.repartos.map(function (x, i) {
       var g = x.sug || {};
       return '<div class="card2" id="rp-' + esc(x.id) + '"><div class="top2"><span><b style="font-size:16px">' + esc(x.name) + '</b><br><small class="hint">' + esc(x.service + " · " + x.fecha) + '</small></span><b>' + money(x.total) + '</b></div>' +
         '<p class="hint" style="margin:0">Sugerencia: Charlie ' + money(g.charlie || 0) + ' · Nelson ' + money(g.nelson || 0) + ' · NC ' + money(g.nc || 0) + ' · Viáticos ' + money(g.viaticos || 0) + '</p>' +
@@ -484,17 +497,18 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
         '<label for="rx' + i + '">NC Studio ($)<input id="rx' + i + '" type="number" min="0" step="0.5" inputmode="decimal"></label><label for="rw' + i + '">Viáticos ($) <small>(estudio, gasolina, maquillaje…)</small><input id="rw' + i + '" type="number" min="0" step="0.5" inputmode="decimal"></label></div>' +
         '<div class="row"><button class="btn" id="rok' + i + '">Guardar repartición</button><span class="hint" id="rv' + i + '"></span></div><div id="rm' + i + '"></div></div>';
     }).join('<div style="height:10px"></div>') + '</section>';
-    if (r.pendientes.length) h += '<section><h2>Por revisar (' + r.pendientes.length + ')</h2><p class="hint">Yappys que no son de una reserva y entradas del calendario que conviene revisar.</p>' + r.pendientes.map(function (m, i) {
+    if (FV === "hoy" && !r.repartos.length && !r.pendientes.length) h += '<div class="msg">✓ Todo al día: no hay repartos ni movimientos por revisar.</div>';
+    if (FV === "hoy" && r.pendientes.length) h += '<section><h2>Por revisar (' + r.pendientes.length + ')</h2><p class="hint">Yappys que no son de una reserva y entradas del calendario que conviene revisar.</p>' + r.pendientes.map(function (m, i) {
       return '<div class="card2"><div class="top2"><span><b style="font-size:16px">' + esc(m.persona || m.desc || "Movimiento") + '</b><br><small class="hint">' + esc([m.fecha, m.metodo, m.ref && m.origen === "Yappy" ? m.ref : "", m.estado === "Revisar" ? "del calendario: " + m.tipo + " / " + m.cat : ""].filter(Boolean).join(" · ")) + '</small></span><b>' + money(m.monto) + '</b></div><button class="btn2" data-x="' + i + '">Clasificar</button><div id="pcw' + i + '" hidden>' + formMov("pc" + i, m, m.origen === "Yappy") + '</div></div>';
     }).join('<div style="height:10px"></div>') + '</section>';
-    h += '<section><h2>Registrar gasto o ingreso</h2><p class="hint">En efectivo, Yappy, tarjeta o transferencia. También puedes seguir anotándolos en tu calendario: se leen solos cada hora.</p>' + formMov("nv", null, false) + '</section>';
-    h += '<section><h2>Últimos movimientos</h2><div id="ult">' + r.ultimos.map(function (m, i) {
+    if (FV === "nuevo") h += '<section><h2>Registrar gasto o ingreso</h2><p class="hint">En efectivo, Yappy, tarjeta o transferencia. También puedes seguir anotándolos en tu calendario: se leen solos cada hora.</p>' + formMov("nv", null, false) + '</section>';
+    if (FV === "mov") h += '<section><h2>Últimos movimientos</h2><div id="ult">' + r.ultimos.map(function (m, i) {
       var entra = ENTRA[m.tipo];
       return '<div class="mv"><span><b>' + esc(m.cat || m.tipo) + '</b> · ' + esc(m.desc || m.persona || "") + '</span><span class="m' + (entra ? ' in' : '') + '">' + (entra ? '+' : '−') + money(m.monto) + '</span><small>' + esc(m.fecha + " · " + m.tipo + (m.metodo ? " · " + m.metodo : "") + " · " + m.origen) + '</small>' +
         (m.origen === "Reserva" ? '' : '<div class="ac"><button data-e="' + i + '">Editar</button><button data-b="' + i + '">Borrar</button></div><div id="ed' + i + '"></div>') + '</div>';
     }).join("") + '</div></section>';
     app.innerHTML = h; bindSeg();
-    r.repartos.forEach(function (x, i) {
+    if (FV === "hoy") r.repartos.forEach(function (x, i) {
       var g = x.sug || {};
       $("rc" + i).value = g.charlie != null ? g.charlie : ""; $("rn" + i).value = g.nelson != null ? g.nelson : ""; $("rx" + i).value = g.nc != null ? g.nc : ""; $("rw" + i).value = g.viaticos != null ? g.viaticos : "";
       function upd() {
@@ -524,8 +538,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       };
     });
     Array.prototype.forEach.call(app.querySelectorAll("[data-x]"), function (b) { b.onclick = function () { var w = $("pcw" + b.getAttribute("data-x")); w.hidden = !w.hidden; b.textContent = w.hidden ? "Clasificar" : "Cerrar"; }; });
-    r.pendientes.forEach(function (m, i) { bindMov("pc" + i, Object.assign({}, m, { tipo: m.estado === "Revisar" ? m.tipo : "", cat: m.estado === "Revisar" ? "" : m.cat })); });
-    bindMov("nv", null);
+    if (FV === "hoy") r.pendientes.forEach(function (m, i) { bindMov("pc" + i, Object.assign({}, m, { tipo: m.estado === "Revisar" ? m.tipo : "", cat: m.estado === "Revisar" ? "" : m.cat })); });
+    if (FV === "nuevo") bindMov("nv", null, function () { FV = "mov"; finanzas(); });
     Array.prototype.forEach.call(app.querySelectorAll("[data-e]"), function (b) { b.onclick = function () { var i = +b.getAttribute("data-e"), m = r.ultimos[i]; $("ed" + i).innerHTML = '<div class="card2" style="margin-top:8px">' + formMov("ue" + i, m, false) + '</div>'; bindMov("ue" + i, m); }; });
     Array.prototype.forEach.call(app.querySelectorAll("[data-b]"), function (b) { b.onclick = function () {
       if (!b.dataset.ok) { b.dataset.ok = 1; b.textContent = "¿Seguro? Toca otra vez"; return; }
@@ -613,23 +627,27 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       PUB = r.list; pintaPub(foco);
     }).catch(function () { app.innerHTML = '<div class="msg">No pudimos conectar. Revisa tu internet.</div>'; });
   }
+  var PV = "pend", PUB_OPEN = {};
   function pintaPub(foco) {
+    if (foco) { PV = "pend"; PUB_OPEN[foco] = 1; }
     var pend = PUB.filter(function (x) { return x.estado === "Por publicar"; }), listas = PUB.filter(function (x) { return x.estado !== "Por publicar"; });
-    var prox = [], hoy = isoLocal(new Date()).slice(0, 10), mes = hoy.slice(0, 7), pubMes = 0;
-    PUB.forEach(function (x) { Object.keys(TIPOS).forEach(function (k) { var it = x.plan[k]; if (it.estado === "programado" && it.fecha) prox.push({ x: x, k: k, f: it.fecha }); if (it.estado === "publicado" && String(it.fecha).slice(0, 7) === mes) pubMes++; }); });
+    var prox = [], hoy = isoLocal(new Date()).slice(0, 10);
+    PUB.forEach(function (x) { Object.keys(TIPOS).forEach(function (k) { var it = x.plan[k]; if (it.estado === "programado" && it.fecha) prox.push({ x: x, k: k, f: it.fecha }); }); });
     prox.sort(function (a, b) { return a.f < b.f ? -1 : 1; });
-    var h = '<section><h2>Fotos por publicar</h2><p class="hint">Cada vez que entregas las fotos finales, la sesión aparece aquí. Ponle fecha al reel, al carrusel y a las historias: se guardan en tu calendario «NC Studio · Publicaciones» con aviso 1 hora antes (no bloquean tu disponibilidad).</p>' +
-      '<div class="kpis"><div class="kpi"><span>Sesiones por publicar</span><b>' + pend.length + '</b></div><div class="kpi"><span>Programadas</span><b>' + prox.length + '</b></div><div class="kpi"><span>Publicadas este mes</span><b>' + pubMes + '</b></div></div></section>';
-    h += '<section><h2>Calendario de publicaciones</h2>' + (prox.length ? prox.map(function (p) {
+    if (foco) { var fx = PUB.filter(function (y) { return y.id === foco; })[0]; if (fx && fx.estado !== "Por publicar") PV = "hechas"; }
+    var op = [["pend", "Por publicar (" + pend.length + ")"], ["cal", "Calendario (" + prox.length + ")"], ["hechas", "Publicadas (" + listas.length + ")"], ["nueva", "+ Agregar"]];
+    var h = '<div class="seg" role="group" aria-label="Vista de publicaciones">' + op.map(function (o) { return '<button data-pv="' + o[0] + '" aria-pressed="' + (PV === o[0]) + '">' + o[1] + '</button>'; }).join("") + '</div>';
+    if (PV === "pend") h += pend.length ? '<p class="hint" style="margin:0 2px">Toca «Planificar» en una sesión para ponerle fecha al reel, al carrusel y a las historias. Se guardan en tu calendario «NC Studio · Publicaciones» con aviso 1 hora antes.</p>' + pend.map(function (x, i) { return tarjetaPub(x, "p" + i); }).join("") : '<div class="msg">✓ No tienes sesiones por publicar.</div>';
+    if (PV === "cal") h += '<section><h2>Calendario de publicaciones</h2>' + (prox.length ? prox.map(function (p) {
       return '<div class="mv"><span><b>' + esc(TIPOS[p.k]) + '</b> · ' + esc(p.x.cliente) + '</span><span class="m' + (p.f.slice(0, 10) < hoy ? ' neg' : '') + '">' + esc(fechaBonita(p.f)) + '</span><small>' + esc(p.x.servicio || "") + (p.f.slice(0, 10) < hoy ? " · ya pasó la fecha, ¿lo publicaste?" : "") + '</small></div>';
-    }).join("") : '<p class="hint">Todavía no tienes publicaciones programadas. Usa «Sugerir fechas» en una sesión y guarda.</p>') + '</section>';
-    h += pend.map(function (x, i) { return tarjetaPub(x, "p" + i); }).join("");
-    h += '<section><h2>Agregar otra sesión</h2><p class="hint">Para sesiones que no pasaron por el sistema (por ejemplo, las que tenías antes).</p><div class="g2"><label for="nc0">Cliente<input id="nc0" autocomplete="off"></label><label for="ns0">Sesión o servicio<input id="ns0" autocomplete="off" placeholder="Ej.: Dulce Espera"></label><label for="nl0">Link de las fotos finales <small>(opcional)</small><input id="nl0" type="url" placeholder="https://…"></label><label for="nf0">Fecha de la sesión <small>(opcional)</small><input id="nf0" type="date"></label></div><div class="row"><button class="btn" id="nok0">Agregar a por publicar</button><span class="err" id="ner0"></span></div></section>';
-    if (listas.length) h += '<section><details><summary style="cursor:pointer;font:bold 16px Arial,sans-serif">Ya publicadas o que no van (' + listas.length + ')</summary><div style="display:grid;gap:10px;margin-top:12px">' + listas.map(function (x, i) { return tarjetaPub(x, "l" + i, true); }).join("") + '</div></details></section>';
+    }).join("") : '<p class="hint">Todavía no tienes publicaciones programadas. En «Por publicar», abre una sesión, toca «Sugerir fechas» y guarda.</p>') + '</section>';
+    if (PV === "hechas") h += listas.length ? listas.map(function (x, i) { return tarjetaPub(x, "l" + i); }).join("") : '<div class="msg">Aquí aparecen las sesiones ya publicadas o que no van.</div>';
+    if (PV === "nueva") h += '<section><h2>Agregar otra sesión</h2><p class="hint">Para sesiones que no pasaron por el sistema (por ejemplo, las que tenías antes).</p><div class="g2"><label for="nc0">Cliente<input id="nc0" autocomplete="off"></label><label for="ns0">Sesión o servicio<input id="ns0" autocomplete="off" placeholder="Ej.: Dulce Espera"></label><label for="nl0">Link de las fotos finales <small>(opcional)</small><input id="nl0" type="url" placeholder="https://…"></label><label for="nf0">Fecha de la sesión <small>(opcional)</small><input id="nf0" type="date"></label></div><div class="row"><button class="btn" id="nok0">Agregar a por publicar</button><span class="err" id="ner0"></span></div></section>';
     app.innerHTML = h;
-    pend.forEach(function (x, i) { bindPub(x, "p" + i); });
-    listas.forEach(function (x, i) { bindPub(x, "l" + i); });
-    $("nok0").onclick = function () {
+    Array.prototype.forEach.call(app.querySelectorAll("[data-pv]"), function (b) { b.onclick = function () { PV = b.getAttribute("data-pv"); pintaPub(); window.scrollTo(0, 0); }; });
+    if (PV === "pend") pend.forEach(function (x, i) { bindPub(x, "p" + i); });
+    if (PV === "hechas") listas.forEach(function (x, i) { bindPub(x, "l" + i); });
+    if (PV === "nueva") $("nok0").onclick = function () {
       var c = $("nc0").value.trim(); if (!c) { $("ner0").textContent = "Escribe el nombre del cliente."; return; }
       var b = $("nok0"); b.disabled = true; b.innerHTML = '<span class="spin"></span>Agregando…';
       call({ action: "pub_save", pin: PIN, p: { cliente: c, servicio: $("ns0").value.trim(), link: $("nl0").value.trim(), fecha: $("nf0").value } }).then(function (r) { if (r.ok) publicar(r.id); else { b.disabled = false; b.textContent = "Agregar a por publicar"; $("ner0").textContent = r.title; } })
@@ -637,10 +655,18 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     };
     if (foco) { var el = $("pb-" + foco); if (el) setTimeout(function () { el.scrollIntoView({ block: "start", behavior: "smooth" }); }, 50); }
   }
-  function tarjetaPub(x, s, cerrada) {
-    var est = x.estado === "Publicado" ? "ok" : x.estado === "No se publica" ? "no" : "wait";
-    return '<section class="' + (cerrada ? "card2" : "") + '" id="pb-' + esc(x.id) + '"><div class="top2" style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><span><span class="chip ' + est + '">' + esc(x.estado) + '</span><h2 style="margin-top:6px">' + esc(x.cliente) + '</h2><small class="hint">' + esc([x.servicio, x.fecha ? "sesión " + fechaBonita(x.fecha) : "", x.entregado ? "entregada " + fechaBonita(x.entregado) : ""].filter(Boolean).join(" · ")) + '</small></span>' +
+  function resumenPlan(x) {
+    return Object.keys(TIPOS).map(function (k) {
+      var it = x.plan[k], t = it.estado === "programado" && it.fecha ? fechaBonita(it.fecha).replace(/ ·.*/, "") : it.estado === "publicado" ? "✓" : it.estado === "no" ? "no va" : "pendiente";
+      return '<span class="chip ' + (it.estado === "publicado" ? "ok" : it.estado === "programado" ? "wait" : it.estado === "no" ? "no" : "") + '">' + TIPOS[k] + ': ' + esc(t) + '</span>';
+    }).join(" ");
+  }
+  function tarjetaPub(x, s) {
+    var est = x.estado === "Publicado" ? "ok" : x.estado === "No se publica" ? "no" : "wait", abierta = !!PUB_OPEN[x.id];
+    return '<section id="pb-' + esc(x.id) + '"><div class="top2" style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap"><span><span class="chip ' + est + '">' + esc(x.estado) + '</span><h2 style="margin-top:6px">' + esc(x.cliente) + '</h2><small class="hint">' + esc([x.servicio, x.fecha ? "sesión " + fechaBonita(x.fecha) : "", x.entregado ? "entregada " + fechaBonita(x.entregado) : ""].filter(Boolean).join(" · ")) + '</small></span>' +
       (x.link ? '<a class="btn2" href="' + esc(x.link) + '" target="_blank" rel="noopener" style="text-decoration:none;align-self:start">Abrir fotos ↗</a>' : "") + '</div>' +
+      '<div class="row" style="gap:6px">' + resumenPlan(x) + '</div>' +
+      '<button class="btn2" id="' + s + 'tg" aria-expanded="' + abierta + '">' + (abierta ? "Cerrar ▴" : "Planificar ▾") + '</button><div id="' + s + 'bd" style="display:grid;gap:12px"' + (abierta ? "" : " hidden") + '>' +
       Object.keys(TIPOS).map(function (k) {
         var it = x.plan[k];
         return '<div class="card2" style="gap:8px"><div class="row" style="justify-content:space-between"><b>' + TIPOS[k] + '</b><span class="chip ' + (it.estado === "publicado" ? "ok" : it.estado === "programado" ? "wait" : it.estado === "no" ? "no" : "") + '" id="' + s + k + 'c">' + EST[it.estado] + (it.estado === "publicado" && it.fecha ? " · " + esc(fechaBonita(it.fecha).replace(/ ·.*/, "")) : "") + '</span></div>' +
@@ -650,10 +676,11 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       }).join("") +
       '<label for="' + s + 'n">Idea para el contenido <small>(canción, fotos favoritas, texto…)</small><textarea id="' + s + 'n" style="min-height:60px"></textarea></label>' +
       '<div class="row"><button class="btn" id="' + s + 'ok">Guardar y poner en el calendario</button><button class="btn2" id="' + s + 'sg">Sugerir fechas</button><span class="hint" id="' + s + 'st"></span></div>' +
-      '<div class="row"><button class="btn2" id="' + s + 'del" style="border-color:var(--err);color:var(--err)">Quitar de la lista</button></div></section>';
+      '<div class="row"><button class="btn2" id="' + s + 'del" style="border-color:var(--err);color:var(--err)">Quitar de la lista</button></div></div></section>';
   }
   function bindPub(x, s) {
     $(s + "n").value = x.notas || "";
+    $(s + "tg").onclick = function () { var bd = $(s + "bd"), ab = bd.hidden; bd.hidden = !ab; if (ab) PUB_OPEN[x.id] = 1; else delete PUB_OPEN[x.id]; this.textContent = ab ? "Cerrar ▴" : "Planificar ▾"; this.setAttribute("aria-expanded", ab); };
     Object.keys(TIPOS).forEach(function (k) {
       $(s + k + "f").onchange = function () { if (this.value && ($(s + k + "e").value === "pendiente")) $(s + k + "e").value = "programado"; };
     });
@@ -663,7 +690,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       call({ action: "pub_save", pin: PIN, p: p }).then(function (r) {
         if (!r.ok) { b.disabled = false; b.textContent = lb; $(s + "st").textContent = r.title; return; }
         PUB = PUB.map(function (y) { return y.id === x.id ? Object.assign({}, y, { plan: r.plan, estado: r.estado, notas: p.notas }) : y; });
-        pintaPub(r.estado === "Por publicar" ? x.id : null);
+        PUB_OPEN[x.id] = 1; pintaPub(r.estado === "Por publicar" ? x.id : null);
       }).catch(function () { b.disabled = false; b.textContent = lb; $(s + "st").textContent = "No pudimos conectar."; });
     }
     $(s + "ok").onclick = function () {
@@ -703,17 +730,24 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     return "• *" + q.price + "*" + (q.note && !/^USD$/i.test(q.note) ? " " + q.note.replace(/^USD\s*·?\s*/i, "") : "") + " — " + (partes.length ? partes.join(" · ") : q.name);
   }
   function linkExp(p) { return p ? SITE + "#" + p.id : SITE + "#portafolio"; }
-  function msgExp(p, tipo, nombre) {
-    var hola = nombre ? "¡Hola, " + first(nombre) + "!" : "¡Hola!", firma = "\n\n— Nelson · NC Studio 📸", lib = LIBRE ? "Actualmente estamos reservando fechas desde el *" + LIBRE + "*, así que si ves algo que te encanta, avísame para guardar tu espacio. 🗓️\n\n" : "";
-    var tit = p ? p.title : "nuestras experiencias";
-    if (tipo === "seg") return "Hola" + (nombre ? ", " + first(nombre) : "") + " 💛 Solo quería dar seguimiento al mensaje anterior sobre *" + tit + "* y saber si tuviste oportunidad de revisar la información.\n\n¿Tienes alguna duda o algo que te gustaría adaptar del paquete?\n\nSi te interesa, puedo ofrecerte una reunión virtual de 15 minutos para aclarar cualquier detalle o ayudarte a elegir la mejor opción para ti.\n\nTe dejo el link otra vez 👇\n" + linkExp(p) + "\n\n¡Espero poder tenerte pronto frente a nuestro lente! ✨" + firma;
-    if (tipo === "link") return (p ? "✨ *" + p.title + "* · NC Studio\n" + (p.intro || "") + "\n\n" : "✨ Experiencias de NC Studio\n\n") + "Mira todo lo que incluye, arma tu paquete y reserva aquí 👇\n" + linkExp(p);
-    if (!p) return hola + " 💛\n\nTe escribe Nelson de NC Studio. ¡Qué alegría que estés pensando en hacer tus fotos con nosotros! ✨\n\nTe comparto aquí todas nuestras experiencias: sesiones de cumpleaños, XV años, embarazo, el primer año de tu bebé, graduaciones y coberturas de eventos. En cada una puedes ver los precios, lo que incluye cada paquete y armar el tuyo 👇\n" + linkExp(null) + "\n\n" + lib + "Y si después de revisarlas te queda alguna duda, aquí estoy para ayudarte 😊" + firma;
-    var props = p.props.slice().sort(function (a, b) { return precioN(a.price) - precioN(b.price); });
-    return hola + " 💛\n\nTe escribe Nelson de NC Studio. ¡Qué alegría que estés pensando en hacer tus fotos con nosotros! ✨\n\nTe comparto *" + p.title + "*" + (p.kind ? ", " + p.kind.charAt(0).toLowerCase() + p.kind.slice(1) : "") + ":\n" + (p.intro || "") +
-      "\n\n📸 Nuestras propuestas:\n" + props.map(lineaProp).join("\n") +
-      (props.length > 1 ? "\n\nAquí puedes ver todo lo que incluye cada una, compararlas, armar tu paquete y reservar tu fecha 👇\n" : "\n\nAquí puedes ver todo lo que incluye y cómo reservar 👇\n") + linkExp(p) + "\n\n" + lib + "Y si después de revisarlas te queda alguna duda, aquí estoy para ayudarte 😊" + firma;
+  // Mensajes cortos: Instagram acepta hasta 1000 caracteres por mensaje directo; los dejamos muy por debajo para que se lean de un vistazo.
+  var LIM_IG = 1000;
+  function lineaCorta(q) {
+    var it = (q.items || []).join(" | "), h = it.match(/(\d+(?:[.,]\d+)?)\s*horas?\s+de\s+(sesión|cobertura)/i), f = it.match(/(\d+)\s+fotos?\s+editadas(\s+por sesión)?/i);
+    var partes = []; if (h) partes.push(h[1] + " h"); if (f) partes.push(f[1] + " fotos editadas" + (f[2] ? " por sesión" : ""));
+    return "• *" + q.price + "*" + (q.note && !/^USD$/i.test(q.note) ? " " + q.note.replace(/^USD\s*·?\s*/i, "") : "") + (partes.length ? " — " + partes.join(" · ") : (q.name && !/^Propuesta/.test(q.name) ? " — " + q.name.toLowerCase() : ""));
   }
+  function msgExp(p, tipo, nombre) {
+    var n = nombre ? first(nombre) : "", hola = n ? "¡Hola, " + n + "! 💛" : "¡Hola! 💛";
+    var lib = LIBRE ? "Tenemos fechas desde el *" + LIBRE + "*. " : "";
+    if (tipo === "seg") return "Hola" + (n ? ", " + n : "") + " 💛 ¿Pudiste ver la información de *" + (p ? p.title : "nuestras experiencias") + "*? Si tienes alguna duda o quieres adaptar algo, con gusto te ayudo; también podemos hacer una llamada de 15 minutos. 😊\n\n" + linkExp(p) + "\n\n— Nelson · NC Studio";
+    if (tipo === "link") return "✨ *" + (p ? p.title : "Experiencias NC Studio") + "*" + (p && p.kind ? " · " + p.kind : "") + "\nMira lo que incluye y reserva aquí 👇\n" + linkExp(p);
+    if (!p) return hola + " Soy Nelson de NC Studio. ¡Qué alegría que quieras hacer tus fotos con nosotros! ✨\n\nAquí están todas nuestras experiencias: cumpleaños, XV años, embarazo, bebés, graduaciones y eventos, con precios y lo que incluye cada una 👇\n" + linkExp(null) + "\n\n" + lib + "¿Te ayudo a elegir? 😊";
+    var props = p.props.slice().sort(function (a, b) { return precioN(a.price) - precioN(b.price); });
+    return hola + " Soy Nelson de NC Studio. ¡Qué alegría que quieras hacer tus fotos con nosotros! ✨\n\nTe comparto *" + p.title + "*" + (p.kind ? " (" + p.kind.charAt(0).toLowerCase() + p.kind.slice(1) + ")" : "") + ":\n" + props.map(lineaCorta).join("\n") +
+      "\n\nAquí ves todo lo que incluye y reservas tu fecha 👇\n" + linkExp(p) + "\n\n" + lib + "¿Te ayudo con alguna duda? 😊";
+  }
+  function paraIG(t) { return t.replace(/\*([^*\n]+)\*/g, "$1"); } // Instagram no usa *negritas*
   function primeraLibre(cb) {
     if (LIBRE !== null) { cb(); return; }
     call({ action: "ocupado" }).then(function (r) {
@@ -723,50 +757,60 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       LIBRE = DL[d.getDay()] + " " + d.getDate() + " de " + ML[d.getMonth()]; cb();
     }).catch(function () { LIBRE = ""; cb(); });
   }
-  var PARA = { name: "", phone: "", instagram: "" };
+  var PARA = { name: "", phone: "", instagram: "" }, XCAT = "ses";
+  var XGRUPOS = { ses: ["Sesiones", ["levelup", "suenos", "dulce", "bebe", "estudio", "folklore", "granext", "gameon"]], ev: ["Eventos y carreras", ["infantil", "limitless"]], grad: ["Graduaciones", ["primer", "gran", "granext"]], todo: ["Todas", null] };
+  function paraTxt() { return PARA.name || PARA.phone ? esc(PARA.name || "Sin nombre") + (PARA.phone ? " · " + esc(PARA.phone) : "") + (PARA.instagram ? " · @" + esc(PARA.instagram) : "") : "nadie elegido (eliges el chat al enviar)"; }
   function experiencias(cli) {
     tab("E"); salir.hidden = false;
     if (cli) PARA = { name: cli.name || "", phone: cli.phone || "", instagram: cli.instagram || "" };
-    var h = '<section><h2>Enviar una experiencia</h2><p class="hint">Elige para quién es (opcional) y toca una experiencia. Te preparo el mensaje bonito con su link para WhatsApp o Instagram.</p>' +
-      '<label for="xq">Cliente <small>(escribe para buscar en tu base, o déjalo vacío)</small><input id="xq" list="xql" autocomplete="off" placeholder="Nombre"></label><datalist id="xql"></datalist>' +
-      '<div class="g2"><label for="xph">WhatsApp <small>(vacío = eliges el chat al abrir)</small><input id="xph" inputmode="tel" autocomplete="off"></label><label for="xig">Instagram <small>(sin @, opcional)</small><input id="xig" autocomplete="off"></label></div></section>' +
-      '<div class="xg">' + [null].concat(DATA.X).map(function (p, i) {
+    var L = XCAT === "todo" ? [null].concat(DATA.X) : DATA.X.filter(function (p) { return XGRUPOS[XCAT][1].indexOf(p.id) >= 0; });
+    app.innerHTML = '<section style="gap:8px"><div class="row" style="justify-content:space-between"><span><small class="hint">Para:</small><br><b id="xpt">' + paraTxt() + '</b></span><button class="btn2" id="xpb">' + (PARA.name || PARA.phone ? "Cambiar" : "Elegir cliente") + '</button></div>' +
+      '<div id="xpf" hidden style="display:grid;gap:10px"><label for="xq">Cliente <small>(busca en tu base o escribe un nombre)</small><input id="xq" list="xql" autocomplete="off" placeholder="Nombre"></label><datalist id="xql"></datalist>' +
+      '<div class="g2"><label for="xph">WhatsApp<input id="xph" inputmode="tel" autocomplete="off"></label><label for="xig">Instagram <small>(sin @)</small><input id="xig" autocomplete="off"></label></div><button class="btn2" id="xpl">Listo</button></div></section>' +
+      '<div class="seg" role="group" aria-label="Tipo de experiencia">' + Object.keys(XGRUPOS).map(function (k) { return '<button data-xg="' + k + '" aria-pressed="' + (XCAT === k) + '">' + XGRUPOS[k][0] + '</button>'; }).join("") + '</div>' +
+      '<div class="xg">' + L.map(function (p) {
+        var i = p ? DATA.X.indexOf(p) + 1 : 0;
         return '<button class="xc" data-xi="' + i + '">' + (p && p.img ? '<img src="' + esc(p.img) + '" alt="" loading="lazy">' : '<div class="xall">NC</div>') + '<span><b>' + esc(p ? p.title : "Todas las experiencias") + '</b><small>' + esc(p ? p.kind || "" : "El portafolio completo") + '</small>' +
           (p ? '<small>desde ' + esc(p.props.map(function (q) { return q.price; }).sort(function (a, b) { return precioN(a) - precioN(b); })[0]) + '</small>' : "") + '</span></button>';
-      }).join("") + '</div><div id="xbox"></div>';
-    app.innerHTML = h;
+      }).join("") + '</div>';
     $("xq").value = PARA.name; $("xph").value = PARA.phone; $("xig").value = PARA.instagram;
-    cargaBase(function () {
-      if (!BASE) return;
-      $("xql").innerHTML = BASE.map(function (c) { return '<option value="' + esc(c.name) + '">' + esc(c.phone) + '</option>'; }).join("");
-    });
+    function toggle(open) { $("xpf").hidden = !open; $("xpb").hidden = open; $("xpt").innerHTML = paraTxt(); }
+    $("xpb").onclick = function () { toggle(true); $("xq").focus(); };
+    $("xpl").onclick = function () { toggle(false); $("xpb").textContent = PARA.name || PARA.phone ? "Cambiar" : "Elegir cliente"; };
+    cargaBase(function () { if (BASE && $("xql")) $("xql").innerHTML = BASE.map(function (c) { return '<option value="' + esc(c.name) + '">' + esc(c.phone) + '</option>'; }).join(""); });
     $("xq").oninput = function () {
       PARA.name = this.value; var v = this.value.trim().toLowerCase(), c = BASE && BASE.filter(function (z) { return z.name.toLowerCase() === v; })[0];
       if (c) { $("xph").value = PARA.phone = c.phone || ""; $("xig").value = PARA.instagram = c.instagram || ""; }
     };
     $("xph").oninput = function () { PARA.phone = this.value; }; $("xig").oninput = function () { PARA.instagram = this.value.replace(/^@/, ""); };
+    Array.prototype.forEach.call(app.querySelectorAll("[data-xg]"), function (b) { b.onclick = function () { XCAT = b.getAttribute("data-xg"); experiencias(); }; });
     Array.prototype.forEach.call(app.querySelectorAll("[data-xi]"), function (b) { b.onclick = function () { var i = +b.getAttribute("data-xi"); primeraLibre(function () { enviarExp(i ? DATA.X[i - 1] : null, "pri"); }); }; });
   }
   function enviarExp(p, tipo) {
-    var box = $("xbox");
-    box.innerHTML = '<section><h2>' + esc(p ? p.title : "Todas las experiencias") + '</h2>' +
+    tab("E"); window.scrollTo(0, 0);
+    app.innerHTML = '<button class="back" id="xbk">‹ Experiencias</button><section><h2>' + esc(p ? p.title : "Todas las experiencias") + '</h2><p class="hint" style="margin-top:-6px">Para: ' + paraTxt() + '</p>' +
       '<div class="seg" role="group" aria-label="Tipo de mensaje"><button data-xt="pri" aria-pressed="' + (tipo === "pri") + '">Primer contacto</button><button data-xt="seg" aria-pressed="' + (tipo === "seg") + '">Seguimiento</button><button data-xt="link" aria-pressed="' + (tipo === "link") + '">Solo el link</button></div>' +
-      '<label for="xm">Puedes editarlo antes de enviar<textarea id="xm" style="min-height:320px"></textarea></label>' +
+      '<label for="xm">Puedes editarlo antes de enviar<textarea id="xm" style="min-height:250px"></textarea></label><p class="hint" id="xlen" style="text-align:right;margin-top:-6px"></p>' +
       '<a class="wa" id="xwa" target="_blank" rel="noopener">Enviar por WhatsApp</a>' +
-      '<button class="ig" id="xig2">Copiar y abrir Instagram</button><p class="hint" id="xigs">Instagram no deja escribir el mensaje solo: lo copio, se abre el chat y lo pegas (mantén presionado → Pegar).</p>' +
+      '<button class="ig" id="xig2">Copiar y abrir Instagram</button><p class="hint" id="xigs">Instagram no deja escribir el mensaje solo: lo copio sin los asteriscos, se abre el chat y lo pegas (mantén presionado → Pegar).</p>' +
       '<div class="row"><button class="btn2" id="xcp">Copiar mensaje</button><a class="btn2" href="' + esc(linkExp(p)) + '" target="_blank" rel="noopener" style="text-decoration:none">Ver la página ↗</a><span class="hint" id="xcs"></span></div></section>';
+    $("xbk").onclick = function () { experiencias(); };
     var m = $("xm"); m.value = msgExp(p, tipo, PARA.name.trim());
-    function wa() { var n = String(PARA.phone || "").replace(/\D/g, ""); $("xwa").href = "https://wa.me/" + (n.length >= 7 ? wnum(n) : "") + "?text=" + encodeURIComponent(m.value); $("xwa").textContent = n.length >= 7 ? "Enviar por WhatsApp a " + (first(PARA.name) || PARA.phone) : "Enviar por WhatsApp (eliges el chat)"; }
-    m.oninput = wa; wa();
-    function copiar(ok) { if (navigator.clipboard) navigator.clipboard.writeText(m.value).then(ok, function () { m.select(); document.execCommand("copy"); ok(); }); else { m.select(); document.execCommand("copy"); ok(); } }
-    $("xcp").onclick = function () { copiar(function () { $("xcs").textContent = "✓ Copiado"; }); };
+    function upd() {
+      var n = String(PARA.phone || "").replace(/\D/g, ""), L = paraIG(m.value).length;
+      $("xwa").href = "https://wa.me/" + (n.length >= 7 ? wnum(n) : "") + "?text=" + encodeURIComponent(m.value);
+      $("xwa").textContent = n.length >= 7 ? "Enviar por WhatsApp a " + (first(PARA.name) || PARA.phone) : "Enviar por WhatsApp (eliges el chat)";
+      $("xlen").innerHTML = L > LIM_IG ? '<span class="neg">' + L + ' / ' + LIM_IG + ' caracteres: muy largo para Instagram, acórtalo</span>' : L + ' / ' + LIM_IG + ' caracteres (límite de Instagram)';
+    }
+    m.oninput = upd; upd();
+    function copiar(txt, ok) { if (navigator.clipboard) navigator.clipboard.writeText(txt).then(ok, function () { m.select(); document.execCommand("copy"); ok(); }); else { m.select(); document.execCommand("copy"); ok(); } }
+    $("xcp").onclick = function () { copiar(m.value, function () { $("xcs").textContent = "✓ Copiado"; }); };
     $("xig2").onclick = function () {
       var u = String(PARA.instagram || "").replace(/^@/, "").trim(), url = u ? "https://ig.me/m/" + encodeURIComponent(u) : "https://www.instagram.com/direct/inbox/";
-      var w = window.open(url, "_blank", "noopener"); copiar(function () { $("xigs").innerHTML = '<span class="pos">✓ Mensaje copiado.</span> En el chat de Instagram, mantén presionado y toca «Pegar».'; });
+      var w = window.open(url, "_blank", "noopener"); copiar(paraIG(m.value), function () { $("xigs").innerHTML = '<span class="pos">✓ Mensaje copiado.</span> En el chat de Instagram, mantén presionado y toca «Pegar».'; });
       if (!w) location.href = url;
     };
-    Array.prototype.forEach.call(box.querySelectorAll("[data-xt]"), function (b) { b.onclick = function () { enviarExp(p, b.getAttribute("data-xt")); }; });
-    box.scrollIntoView({ block: "start", behavior: "smooth" });
+    Array.prototype.forEach.call(app.querySelectorAll("[data-xt]"), function (b) { b.onclick = function () { enviarExp(p, b.getAttribute("data-xt")); }; });
   }
   salir.onclick = function (e) { e.preventDefault(); setPin(""); PIN = ""; pinView(); };
   if (PIN) inicio(); else pinView();
