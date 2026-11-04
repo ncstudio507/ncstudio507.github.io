@@ -458,7 +458,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     }).join("");
     if (conReserva && FD.abiertas.length && m.sentido !== "Enviado") tipos = '<option value="Reserva">Abono o saldo de una reserva</option>' + tipos;
     var personas = unicos([m.persona, "Nelson", "Charlie"].concat(FD.ultimos.map(function (x) { return x.persona; })), 25);
-    var equipo = m.sentido ? '<button type="button" class="btn2" id="' + p + 'eq" style="justify-self:start">📸 ' + (m.sentido === "Enviado" ? "Fue para comprar equipo de NC" : "Es para comprar equipo de NC") + '</button>' : "";
+    var socio = /charlie|nelson|barrera|garc[ií]a/i.test(m.persona || "");
+    var equipo = m.sentido ? '<button type="button" class="btn2" id="' + p + 'eq" style="justify-self:start">📸 ' + (m.sentido === "Enviado" ? (socio ? "Se lo pasé para comprar equipo de NC" : "Pagué equipo de NC") : "Es para comprar equipo de NC") + '</button>' : "";
     return equipo + '<div class="g2"><label for="' + p + 't">' + (m.sentido === "Enviado" ? "¿Para qué fue?" : m.sentido === "Recibido" ? "¿De qué es?" : "Tipo") + '<select id="' + p + 't"><option value="">Elige…</option>' + tipos + '</select></label>' +
       '<label for="' + p + 'c" id="' + p + 'cl">Categoría<select id="' + p + 'c"></select></label>' +
       '<label for="' + p + 'r" id="' + p + 'rl" hidden>Reserva<select id="' + p + 'r"><option value="">Elige la reserva…</option>' + FD.abiertas.map(function (a) { return '<option value="' + esc(a.id) + '">' + esc(a.name + " · " + a.falta + " " + money(a.monto)) + '</option>'; }).join("") + '</select></label></div>' +
@@ -503,11 +504,13 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     $(p + "c").onchange = function () { precio(); rubro(); descs(); };
     $(p + "t").onchange = cats; cats(); rubro("ini");
     if ($(p + "eq")) $(p + "eq").onclick = function () {
-      // recibido: plata que te dieron para comprar equipo (no es ingreso tuyo); enviado: tu aporte para equipo de NC
-      var t = m.sentido === "Enviado" ? "Gasto " + (m.cuenta || "Nelson") : "Sin impacto", c = m.sentido === "Enviado" ? "Aporte para equipo NC" : "Para comprar equipo";
+      // el equipo lo compra NC: cuando le pagas a la tienda va a los gastos de NC (Inversión NC · Compra de equipo).
+      // si es plata que se pasan entre ustedes para comprarlo, no es gasto ni ingreso de nadie (así no se cuenta dos veces)
+      var paga = m.sentido === "Enviado" && !/charlie|nelson|barrera|garc[ií]a/i.test(m.persona || "");
+      var t = paga ? "Inversión NC" : "Sin impacto", c = paga ? "Compra de equipo" : "Para comprar equipo";
       if (!Array.prototype.some.call($(p + "t").options, function (o) { return o.value === t; })) { var o = document.createElement("option"); o.textContent = t; $(p + "t").appendChild(o); }
       $(p + "t").value = t; cats(); $(p + "c").value = c; rubro(true); descs();
-      if ($(p + "ds")) { $(p + "ds").value = "__o"; $(p + "d").hidden = false; $(p + "d").value = "Equipo para NC Studio"; $(p + "d").focus(); }
+      if ($(p + "ds")) { $(p + "ds").value = "__o"; $(p + "d").hidden = false; $(p + "d").value = paga ? "Equipo para NC (pagó " + (m.cuenta || "Nelson") + ")" : "Equipo para NC Studio"; $(p + "d").focus(); }
       this.textContent = "✓ Listo: revisa y toca Guardar";
     };
     var igual = FD.abiertas.filter(function (a) { return Math.abs(Number(a.monto) - Number(m.monto || -1)) < 0.01; });
