@@ -77,6 +77,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 .xc span{display:grid;gap:2px;padding:10px 12px 12px}.xc b{font-size:15px}.xc small{font-size:12px;color:var(--muted)}
 .ig{font:bold 17px Arial,sans-serif;border:0;border-radius:8px;padding:16px;cursor:pointer;color:#fff;background:linear-gradient(45deg,#C13584,#E1306C,#F77737)}
 .fes{display:grid;gap:10px}
+.prg{display:grid;gap:4px}.prg .pb{height:10px;border-radius:5px;background:var(--line);overflow:hidden}.prg .pb i{display:block;height:100%;background:var(--accent)}
+.stp{display:flex;gap:10px;align-items:center;padding:7px 2px;border-bottom:1px solid var(--line);font-size:15px}.stp:last-child{border-bottom:0}.stp .o{width:22px;height:22px;flex:none;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13px}.stp.ok .o{background:#12B76A;border-color:#12B76A;color:#fff}.stp small{color:var(--muted);font-size:12px;margin-left:auto}.stp input{width:22px;height:22px;accent-color:#12B76A;flex:none;margin:0}.stp.ok span{color:var(--muted)}
 .pfh{background:var(--fg);color:#FEFEFE;border-radius:14px;padding:20px;display:grid;gap:14px}
 .pfh .who{display:flex;gap:14px;align-items:center}.pfh .av{width:62px;height:62px;border-radius:50%;background:var(--accent);color:var(--fg);display:flex;align-items:center;justify-content:center;font:400 26px Georgia,serif;flex:none}
 .pfh h2{color:#FEFEFE;margin:0;font-size:24px}.pfh .sub{color:#F2E4D2;font-size:13px;margin-top:3px}
@@ -169,7 +171,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     var tras = DATA.T.map(function (t, i) { return '<option value="' + i + '">' + esc((i === 0 ? "Estudio o Las Tablas" : t[0]) + (t[2] ? " (aprox. " + t[2] + " km)" : "") + " · " + (num(t[1]) ? "+" + money(num(t[1])) : "sin costo")) + '</option>'; }).join("") + '<option value="otro">Otro lugar</option>';
     app.innerHTML =
       '<section><h2>Cliente</h2><label for="nm">Nombre completo<input id="nm" autocomplete="off"></label>' +
-      '<div class="g2"><label for="ph">Teléfono / WhatsApp<input id="ph" inputmode="tel" autocomplete="off"></label><label for="em">Correo <small>(ahí le llega la cotización y el contrato)</small><input id="em" type="email" autocomplete="off"></label></div></section>' +
+      '<div class="g2"><label for="ph">Teléfono / WhatsApp<input id="ph" inputmode="tel" autocomplete="off"></label><label for="em">Correo <small>(ahí le llega la cotización y el contrato)</small><input id="em" type="email" autocomplete="off"></label></div>' +
+      '<div class="g2"><label for="fi">¿Quién firma el contrato? <small>(si es otra persona, ej. mamá o papá)</small><input id="fi" autocomplete="off"></label><label for="ced">Cédula de quien firma <small>(opcional; si no, se la pedimos al firmar)</small><input id="ced" autocomplete="off"></label></div></section>' +
       '<section><h2>Paquete</h2><label for="pk">Paquete<select id="pk">' + opts + '</select></label>' +
       '<div id="otroBox" class="g2" hidden><label for="on">Nombre del servicio<input id="on" placeholder="Ej.: Sesión de pareja"></label><label for="op">Precio base ($)<input id="op" type="number" min="0" step="0.5" inputmode="decimal"></label><label for="of">Fotos editadas<input id="of" type="number" min="0" inputmode="numeric"></label><label for="oh">Duración (horas)<input id="oh" type="number" min="0" step="0.5" inputmode="decimal" value="1"></label></div>' +
       '<ul class="inc" id="inc" hidden></ul></section>' +
@@ -293,6 +296,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
       name: nm, phone: ph, email: em, place: $("pl").value.trim() || "Por definir", otherPlace: $("tr").value === "otro",
       dateIso: dt, dateLabel: DIAS[f.getDay()] + " " + f.getDate() + " de " + MESES[f.getMonth()], time: $("tm").value, venue: "",
       durationMin: b.mins, photos: String(b.fotos || ""), tests: b.tests, eventType: "", total: c.total, totalLabel: money(c.total) + ($("tr").value === "otro" ? " + traslado" : ""), notes: $("nt").value.trim(),
+      firmante: $("fi").value.trim(), cedula: $("ced").value.trim(),
       expId: expSel(), cumple: esCumpleId(expSel()) ? $("ce").value : "", entregaPara: esCumpleId(expSel()) ? "" : $("ce").value
     };
     var pag = $("st2").checked;
@@ -343,21 +347,47 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     }
     $("bq").oninput = pinta; $("rf").onclick = function () { clientes(); }; bindCli(); pinta();
   }
+  function precioExtra(x) { var p = DATA.P.filter(function (e) { return e.id === x.expId; })[0] || DATA.P.filter(function (e) { return String(x.service || "").indexOf(e.title) === 0; })[0], m = p && (p.extras || []).filter(function (e) { return /foto editada extra/i.test(e[0]); })[0]; return m ? String(m[1]).replace(/\s*c\/u/, "") : "$10"; }
   function msgs(x) {
     var n = first(x.name), ev = x.kind === "evento", firma = "\n\n— Nelson y Charlie · NC Studio";
     function acc(g) { return g ? "\n\n🔗 " + g.link + (g.clave ? "\n🔑 Contraseña: " + g.clave : "") + (g.pin ? "\n📥 PIN de descarga: " + g.pin : "") : ""; }
     return {
       cot: "¡Hola, " + n + "! 💛 Muchas gracias por tu preferencia. ¡Tenemos disponible tu fecha: " + x.fecha + "! 🙌🏼\n\nTu cotización de *" + x.service + "*:\n• Total: " + x.total + "\n• Abono para reservar (50 %): *" + x.abono + "*\n• Saldo el día de la " + (ev ? "cobertura" : "sesión") + ": " + x.saldo +
         "\n\nPara bloquear tu fecha, envía el abono por *Yappy al " + YAPPY + "* en un plazo máximo de 48 horas y mándanos la captura por aquí. 📲\n\nTambién te enviamos la cotización en PDF a tu correo (" + x.email + "). ¡Cualquier duda, quedamos a la orden!" + firma,
-      con: "¡Hola, " + n + "! 💛 Ya recibimos tu abono de " + x.abono + ". ¡Tu fecha está oficialmente reservada! 🙌🏼\n\nSolo falta un paso: lee y firma tu contrato en línea aquí 👇\n" + x.contrato + "\n\nMarca la casilla «Acepto» y presiona «Enviar confirmación». Te llegará una copia en PDF a tu correo.\n\n¡Gracias por confiar en nosotros! ✨" + firma,
+      con: "¡Hola, " + n + "! 💛 Ya recibimos tu abono de " + x.abono + ". ¡Tu fecha está oficialmente reservada! 🙌🏼\n\nSolo falta un paso: lee y firma tu contrato en línea aquí 👇\n" + x.contrato + "\n\nMarca la casilla «Acepto» y presiona «Enviar confirmación». Te llegará una copia en PDF a tu correo." + (x.tips ? "\n\n📋 Y aquí tienes tu guía para prepararte para la sesión:\n" + x.tips : "") + "\n\n¡Gracias por confiar en nosotros! ✨" + firma,
       rec: "¡Hola, " + n + "! ✨ ¡Ya casi llega el gran día!\n\n📅 " + x.fecha + "\n📍 " + x.place + "\n📸 " + x.service + "\n💵 Saldo a pagar ese día: " + x.saldo + "\n\nPara que todo salga increíble:\n" +
         (ev ? "• Cuéntanos los momentos clave que no nos podemos perder (brindis, pastel, entradas).\n• Compártenos la hora exacta y la dirección del lugar.\n" : "• Prepara tus looks y accesorios con tiempo; déjalos listos la noche anterior.\n• Descansa bien y mantente hidratada.\n") +
-        "• Llega puntual para aprovechar al máximo la luz y el tiempo.\n\n" + (ev ? "Tus fotos editadas te llegan en tu galería en línea 10 días después del evento." : "Las pruebas te llegan de 48 a 72 horas hábiles después de la sesión.") + " ¿Nos confirmas que recibiste este mensaje? 💛" + firma,
+        "• Llega puntual para aprovechar al máximo la luz y el tiempo.\n\n" + (ev ? "Tus fotos editadas te llegan en tu galería en línea 10 días después del evento." : "Las pruebas te llegan de 48 a 72 horas hábiles después de la sesión y tendrás 2 días para elegir tus favoritas.") + " ¿Nos confirmas que recibiste este mensaje? 💛" + firma,
       pru: "¡Hola, " + n + "! 📸 ¡Tus fotos de prueba ya están listas!" + acc(x.gp) +
-        "\n\n*Cómo elegir tus fotos:*\n1. Entra al link y toca el corazón ♡ en tus favoritas (la primera vez te pide tu correo).\n2. Revisa tu selección en «Favorites», arriba a la derecha.\n3. Puedes elegir *" + (x.photos || "las") + " fotos* incluidas en tu paquete. Fotos extra: $10 c/u. Liberación de galería (todas sin editar): $60.\n4. Cuando termines, escríbenos por aquí: «Ya elegí mis fotos» ✅\n\nTus fotos finales te llegan en máximo 2 semanas después de recibir tu selección. 💛" + firma,
+        "\n\n*Cómo elegir tus fotos:*\n1. Entra al link y toca el corazón ♡ en tus favoritas (la primera vez te pide tu correo).\n2. Revisa tu selección en «Favorites», arriba a la derecha.\n3. Puedes elegir *" + (x.photos || "las") + " fotos* incluidas en tu paquete. Fotos extra: " + precioExtra(x) + " c/u. Liberación de galería (todas sin editar): $60.\n4. Cuando termines, toca «Send to Photographer» en tus favoritas y escríbenos por aquí: «Ya elegí mis fotos» ✅\n\n⏳ Tienes *2 días* para elegir; si no recibimos tu selección, las elegimos nosotros.\n\nTus fotos finales te llegan en máximo 2 semanas después de recibir tu selección. 💛" + firma,
       fin: "¡Hola, " + n + "! 🎁 ¡Llegaron tus fotos finales!" + acc(x.gf) +
         "\n\nPuedes descargarlas y compartirlas con quien quieras. Gracias por permitirnos vivir esta experiencia contigo; esperamos volver a verte pronto frente a la cámara. 💛\n\nSi te gustó, nos ayudaría muchísimo que nos dejes un testimonio cortito. ¡Gracias! ✨" + firma
     };
+  }
+  // pasos de cada sesión: los automáticos los sabe el sistema; los demás los marcas tú
+  function pasosDe(x) {
+    var ev = x.kind === "evento", hoy = new Date().toISOString().slice(0, 10), ck = x.check || {}, P = [];
+    var A = function (k, t, ok) { P.push({ k: k, t: t, ok: !!ok, auto: true }); }, M = function (k, t) { P.push({ k: k, t: t, ok: !!ck[k], auto: false, f: ck[k] }); };
+    A("cot", "Cotización enviada", x.estado !== "Pendiente"); A("abono", "Abono recibido", x.estado === "Confirmado"); A("firma", "Contrato firmado", x.firmado);
+    A("gus", "Formulario de gustos", !!x.gid); if (!ev) { A("meet", "Reunión creativa", x.meet && x.meet.fecha); A("mood", "Moodboard enviado", !!x.moodboard); }
+    M("locacion", "Locación confirmada"); M("listo", "Todo listo (1½ semanas antes)"); M("regalo", "Regalo del cliente preparado");
+    A("sesion", ev ? "Evento realizado" : "Sesión realizada", x.dateIso && x.dateIso < hoy); M("memoria", "Fotos en su carpeta y memoria guardada");
+    if (!ev) { A("pru", "Pruebas enviadas", !!x.fp); M("eligio", "Eligió sus fotos"); }
+    A("fin", "Fotos finales enviadas", !!x.ff); A("saldo", "Saldo cobrado", x.saldoPagado);
+    if (x.productos) M("productos", "Impresiones o álbum entregados");
+    M("publicado", "Publicado (créditos y colaboración en IG)");
+    return P;
+  }
+  function pintaProg(x) {
+    var P = pasosDe(x), n = P.filter(function (p) { return p.ok; }).length, sig = P.filter(function (p) { return !p.ok; })[0];
+    $("prog").innerHTML = '<div class="prg"><div class="row" style="justify-content:space-between"><h2 style="margin:0">Progreso</h2><b>' + n + ' de ' + P.length + '</b></div><div class="pb"><i style="width:' + Math.round(n / P.length * 100) + '%"></i></div>' + (sig ? '<small class="hint">Lo que sigue: <b>' + esc(sig.t) + '</b></small>' : '<small class="pos"><b>✓ ¡Sesión completa!</b></small>') + '</div><div>' +
+      P.map(function (p) { return '<label class="stp' + (p.ok ? ' ok' : '') + '">' + (p.auto ? '<span class="o">' + (p.ok ? "✓" : "") + '</span>' : '<input type="checkbox" data-ck="' + p.k + '"' + (p.ok ? " checked" : "") + '>') + '<span>' + esc(p.t) + '</span><small>' + (p.auto ? "automático" : p.f ? esc(fechaBonita(p.f)) : "márcalo tú") + '</small></label>'; }).join("") + '</div>';
+    Array.prototype.forEach.call($("prog").querySelectorAll("[data-ck]"), function (c) {
+      c.onchange = function () {
+        var k = c.getAttribute("data-ck"), v = c.checked; c.disabled = true; x.check = x.check || {};
+        call({ action: "check", pin: PIN, id: x.id, k: k, v: v }).then(function (r) { if (r.ok) x.check = r.check; pintaProg(x); }).catch(function () { c.checked = !v; c.disabled = false; });
+      };
+    });
   }
   function detalle(x, cual) {
     tab("C");
@@ -374,8 +404,9 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     app.innerHTML = '<button class="back" id="bk">‹ Todos los clientes</button><section>' + chip(x.estado) + '<h2>' + esc(x.name) + '</h2>' +
       '<p class="hint" style="font-size:15px;line-height:1.6">' + esc(x.id) + " · " + esc(x.service) + "<br>" + esc(x.fecha) + " · " + esc(x.place) + "<br>📱 " + esc(x.phone) + " · ✉️ " + esc(x.email) + "<br>Total " + esc(x.total) + " · abono " + esc(x.abono) + (x.contrato ? (x.firmado ? " · ✅ contrato firmado" : " · contrato pendiente de firma") : "") + '</p>' +
       (x.estado !== "No disponible" ? '<div class="card2" style="gap:8px"><label for="dce">' + (x.esCumple ? "🎂 ¿Cuándo cumple años? <small>(fecha de nacimiento)</small>" : "🗓️ ¿Para cuándo quiere las fotos?") + '<input id="dce" type="date" value="' + esc(x.cumple || x.entregaPara || "") + '"></label><div class="row"><button class="btn2" id="dceok">Guardar fecha</button><span class="hint" id="dces">' + (x.cumple || x.entregaPara ? (x.entregaLista ? "✓ Entrega agendada en tu calendario" : x.estado === "Confirmado" ? "" : "Se agenda al recibir el abono") : "") + '</span></div></div>' : "") +
-      '<div class="acts">' + acts.map(function (a) { return '<button class="act" data-k="' + a[0] + '" aria-pressed="' + (a[0] === cual) + '">' + a[1] + '</button>'; }).join("") + '</div></section><div id="cmp"></div>';
+      '<div class="acts">' + acts.map(function (a) { return '<button class="act" data-k="' + a[0] + '" aria-pressed="' + (a[0] === cual) + '">' + a[1] + '</button>'; }).join("") + '</div></section>' + (x.estado !== "No disponible" ? '<section id="prog"></section>' : '') + '<div id="cmp"></div>';
     $("bk").onclick = function () { lista(""); };
+    if ($("prog")) pintaProg(x);
     if ($("dce") && x.esCumple) fechaNac($("dce"));
     if ($("dceok")) $("dceok").onclick = function () {
       var b = this; b.disabled = true; b.innerHTML = '<span class="spin"></span>Guardando…';
@@ -828,8 +859,81 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
   }
   /* ===================== BASE DE CLIENTES ===================== */
   var BASE = null, PEOPLE = false;
-  function segCli(act) { return '<div class="seg" role="group" aria-label="Vista de clientes"><button data-cv="res" aria-pressed="' + (act === "res") + '">Reservas</button><button data-cv="base" aria-pressed="' + (act === "base") + '">Base de clientes</button></div>'; }
-  function bindCli() { Array.prototype.forEach.call(app.querySelectorAll("[data-cv]"), function (b) { b.onclick = function () { if (b.getAttribute("data-cv") === "base") baseCli(); else clientes(); }; }); }
+  function segCli(act) { return '<div class="seg" role="group" aria-label="Vista de clientes"><button data-cv="res" aria-pressed="' + (act === "res") + '">Reservas</button><button data-cv="base" aria-pressed="' + (act === "base") + '">Base de clientes</button><button data-cv="int" aria-pressed="' + (act === "int") + '">Interesados</button></div>'; }
+  function bindCli() { Array.prototype.forEach.call(app.querySelectorAll("[data-cv]"), function (b) { b.onclick = function () { var v = b.getAttribute("data-cv"); if (v === "base") baseCli(); else if (v === "int") interesados(); else clientes(); }; }); }
+  /* ===================== INTERESADOS ===================== */
+  var INT = null, INT_EST = ["Nuevo", "Le envié la info", "Seguimiento enviado", "Reservó", "No le interesó"], INT_FUENTES = ["Instagram", "WhatsApp", "Facebook", "TikTok", "Referido", "Página web", "En persona"];
+  function hoyStr() { var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
+  function intToca(i) { return i.seguimiento && i.seguimiento <= hoyStr() && ["Reservó", "No le interesó"].indexOf(i.estado) < 0; }
+  function interesados() {
+    tab("C"); app.innerHTML = segCli("int") + '<div class="msg"><span class="spin"></span>Cargando interesados…</div>'; bindCli();
+    call({ action: "int_lista", pin: PIN }).then(function (r) {
+      if (!r.ok) { app.innerHTML = segCli("int") + '<div class="msg">No pudimos cargar los interesados. ¿Ya pegaste el código nuevo?</div>'; bindCli(); return; }
+      INT = r.list; pintaInt();
+    }).catch(function () { app.innerHTML = segCli("int") + '<div class="msg">No pudimos conectar.</div>'; bindCli(); });
+  }
+  function pintaInt() {
+    var act = INT.filter(function (i) { return ["Reservó", "No le interesó"].indexOf(i.estado) < 0; }), cer = INT.filter(function (i) { return ["Reservó", "No le interesó"].indexOf(i.estado) >= 0; });
+    act.sort(function (a, b) { var ta = intToca(a) ? 0 : 1, tb = intToca(b) ? 0 : 1; return ta - tb || String(a.seguimiento || "9").localeCompare(String(b.seguimiento || "9")); });
+    var hoyN = act.filter(intToca).length;
+    function card(i) { var t = intToca(i); return '<button class="cl" data-in="' + esc(i.id) + '"><span class="chip ' + (i.estado === "Reservó" ? "ok" : t ? "no" : "wait") + '">' + esc(t ? "Toca escribirle hoy" : i.estado) + '</span><b>' + esc(i.name) + '</b><span>' + esc([i.interes, i.fuente].filter(Boolean).join(" · ")) + '</span>' + (i.notas ? '<span>' + esc(String(i.notas).slice(0, 70)) + '</span>' : '') + '</button>'; }
+    app.innerHTML = segCli("int") + '<section><div class="row" style="justify-content:space-between"><h2>Interesados (' + act.length + ')</h2><button class="btn" id="inew" style="padding:11px 16px">+ Interesado</button></div>' +
+      '<p class="hint">Gente que preguntó pero todavía no reserva. Los de la página entran solos; a los que te escriben por WhatsApp o Instagram agrégalos con «+ Interesado». ' + (hoyN ? '<b class="neg">Hoy toca escribirle a ' + hoyN + '.</b>' : '') + '</p></section>' +
+      '<div style="display:grid;gap:8px">' + (act.length ? act.map(card).join("") : '<div class="msg">No tienes interesados pendientes.</div>') + '</div>' +
+      (cer.length ? '<details style="margin-top:6px"><summary class="hint" style="cursor:pointer;padding:8px 2px">Cerrados: reservaron o no les interesó (' + cer.length + ')</summary><div style="display:grid;gap:8px">' + cer.map(card).join("") + '</div></details>' : "");
+    bindCli();
+    $("inew").onclick = function () { intDet(null); };
+    Array.prototype.forEach.call(app.querySelectorAll("[data-in]"), function (b) { b.onclick = function () { var id = b.getAttribute("data-in"); intDet(INT.filter(function (y) { return y.id === id; })[0]); }; });
+  }
+  function expPorTitulo(t) { t = String(t || "").toLowerCase(); return DATA.X.filter(function (p) { return t && (t.indexOf(p.title.toLowerCase()) >= 0 || p.title.toLowerCase().indexOf(t) >= 0); })[0] || null; }
+  function msgInt(i) {
+    var n = first(i.name || ""), hola = n ? "¡Hola, " + n + "!" : "¡Hola!", p = expPorTitulo(i.interes), firma = "\n\n— Nelson y Charlie · NC Studio";
+    if (i.auto && i.estado === "Esperando abono") return hola + " 💛 Te escribo para recordarte que tu fecha del *" + i.fechaSesion + "* aún no está bloqueada: falta el abono de *" + i.abono + "* por Yappy al " + YAPPY + ". Como tenemos pocas fechas, solo podemos guardarla unos días más. ¿Te ayudo con algo? 😊" + firma;
+    if (i.auto) return hola + " 💛 Recibimos tu solicitud de *" + String(i.interes || "").split(" · ")[0] + "* para el " + i.fechaSesion + ". Ya estamos revisando la disponibilidad y te confirmamos muy pronto. ¡Gracias por escribirnos! ✨" + firma;
+    if (i.estado === "Nuevo") return hola + " 💛 Soy Nelson de NC Studio. ¡Qué alegría que quieras hacer tus fotos con nosotros! ✨\n\nAquí ves " + (p ? "todo sobre *" + p.title + "*" : "todas nuestras experiencias") + ", con precios y lo que incluye 👇\n" + linkExp(p) + "\n\nTenemos fechas desde el *" + (LIBRE || "próximas semanas") + "*. ¿Te ayudo a elegir? 😊";
+    if (i.estado === "Le envié la info") return "Hola, " + (n || "") + " 💛 ¿Pudiste ver la información que te envié" + (p ? " de *" + p.title + "*" : "") + "? Si tienes alguna duda o quieres adaptar algo del paquete, con gusto te ayudo. También podemos hacer una llamada de 15 minutos. ¡Espero tenerte pronto frente a nuestro lente! 📸";
+    return "Hola, " + (n || "") + " 💛 Paso por aquí una última vez por si quieres separar tu fecha" + (p ? " para *" + p.title + "*" : "") + ". Tenemos espacio desde el *" + (LIBRE || "próximas semanas") + "* y las fechas se van llenando rápido. Si ahora no es el momento, ¡no hay problema! Aquí estaremos cuando lo necesites ✨" + firma;
+  }
+  function intDet(i) {
+    var nuevo = !i; i = i || { name: "", phone: "", instagram: "", interes: "", fuente: "", estado: "Nuevo", notas: "", seguimiento: hoyStr(), veces: 0 };
+    tab("C"); window.scrollTo(0, 0);
+    var h = '<button class="back" id="ibk">‹ Interesados</button><section><h2>' + (nuevo ? "Nuevo interesado" : esc(i.name)) + '</h2>';
+    if (i.auto) h += '<p class="hint">' + esc(i.fuente + " · " + i.interes + " · " + i.fechaSesion) + '<br>' + esc(i.estado) + '. Cuando pague el abono pasa sola a tus clientes.</p><button class="btn2" id="iver">Ver su solicitud</button>';
+    else h += '<div class="g2"><label for="inm">Nombre<input id="inm" autocomplete="off"></label><label for="iph">WhatsApp<input id="iph" inputmode="tel" autocomplete="off"></label>' +
+      '<label for="iig">Instagram <small>(sin @)</small><input id="iig" autocomplete="off"></label><label for="iins">¿Qué le interesa?' + opcOtro("iin", DATA.X.map(function (x) { return x.title; }), "Ej.: sesión de pareja") + '</label>' +
+      '<label for="ifus">¿De dónde llegó?' + opcOtro("ifu", INT_FUENTES, "Ej.: una feria") + '</label><label for="ies">¿En qué va?<select id="ies">' + INT_EST.map(function (e) { return '<option>' + e + '</option>'; }).join("") + '</select></label>' +
+      '<label for="ise">Próximo seguimiento <small>(vacío = ya no)</small><input id="ise" type="date"></label></div>' +
+      '<label for="ino">Notas <small>(ej.: su hija cumple en 6 meses)</small><textarea id="ino"></textarea></label>' +
+      '<div class="row"><button class="btn" id="iok">' + (nuevo ? "Guardar interesado" : "Guardar cambios") + '</button>' + (nuevo ? "" : '<button class="btn2" id="idel">Borrar</button>') + '<span class="hint" id="ist"></span></div><p class="err" id="ierr2"></p>';
+    h += '</section>' + (nuevo ? "" : '<section><h2>' + (intToca(i) ? "Mensaje para hoy" : "Mensaje") + '</h2><p class="hint">Te lo dejo escrito; tú lo mandas. Al mandarlo, toca «Ya se lo mandé» y te aviso cuándo toca el siguiente.</p><div id="ibox" style="display:grid;gap:12px"></div>' + (i.auto ? "" : '<button class="btn" id="imand">✓ Ya se lo mandé</button>') + '</section>');
+    app.innerHTML = h;
+    $("ibk").onclick = function () { pintaInt(); };
+    if (i.auto) { $("iver").onclick = function () { clientes(i.reserva); }; }
+    else {
+      $("inm").value = i.name || ""; $("iph").value = i.phone || ""; $("iig").value = i.instagram || ""; $("ino").value = i.notas || ""; $("ise").value = i.seguimiento || ""; $("ies").value = i.estado || "Nuevo";
+      bindOtro("iin", i.interes || ""); bindOtro("ifu", i.fuente || "");
+      var guardar = function (extra, ok) {
+        var it = { id: i.id, name: $("inm").value.trim(), phone: $("iph").value.trim(), instagram: $("iig").value.trim(), interes: valOtro("iin"), fuente: valOtro("ifu"), estado: $("ies").value, notas: $("ino").value, seguimiento: $("ise").value, veces: i.veces || 0 };
+        Object.keys(extra || {}).forEach(function (k) { it[k] = extra[k]; });
+        if (!it.name) { $("ierr2").textContent = "Escribe el nombre."; return; }
+        $("ist").innerHTML = '<span class="spin"></span>';
+        call({ action: "int_save", pin: PIN, it: it }).then(function (r) {
+          if (!r.ok) { $("ist").textContent = ""; $("ierr2").textContent = r.title; return; }
+          var j = INT.map(function (y) { return y.id; }).indexOf(r.it.id); if (j >= 0) INT[j] = r.it; else INT.unshift(r.it);
+          if (ok) ok(r.it); else { $("ist").innerHTML = '<span class="pos">✓ Guardado</span>'; if (nuevo) intDet(r.it); }
+        }).catch(function () { $("ist").textContent = ""; $("ierr2").textContent = "No pudimos conectar."; });
+      };
+      $("iok").onclick = function () { guardar(); };
+      if ($("idel")) $("idel").onclick = function () { if (!confirmar("¿Borrar a " + i.name + " de interesados?")) return; call({ action: "int_del", pin: PIN, id: i.id }).then(function () { INT = INT.filter(function (y) { return y.id !== i.id; }); pintaInt(); }); };
+      if ($("imand")) $("imand").onclick = function () {
+        var sig = i.estado === "Nuevo" ? { estado: "Le envié la info", seguimiento: diasDesdeHoy(3) } : i.estado === "Le envié la info" ? { estado: "Seguimiento enviado", seguimiento: diasDesdeHoy(5), veces: 1 } : { estado: "Seguimiento enviado", seguimiento: "", veces: (i.veces || 0) + 1 };
+        guardar(sig, function (it) { intDet(it); $("ist").innerHTML = '<span class="pos">✓ Anotado' + (it.seguimiento ? ". Próximo seguimiento: " + esc(fechaBonita(it.seguimiento)) : ". Ya no hay más seguimientos.") + '</span>'; });
+      };
+    }
+    if (!nuevo) primeraLibre(function () { panelMsg("ibox", function () { return { name: i.name, phone: i.phone, instagram: i.instagram }; }, msgInt(i), "NC Studio"); });
+  }
+  function diasDesdeHoy(n) { var d = new Date(Date.now() + n * 864e5); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
+  function confirmar(t) { try { return window.confirm(t); } catch (e) { return true; } }
   function cargaBase(cb) {
     if (BASE) { cb(); return; }
     call({ action: "base", pin: PIN }).then(function (r) { if (r.ok) { BASE = r.list; PEOPLE = r.people; } cb(); }).catch(function () { cb(); });
@@ -1342,8 +1446,11 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
   function segEnv(act) { return act ? '<button class="back" data-ev="">‹ Atrás</button>' : ""; }
   function menuEnv() {
     app.innerHTML = '<section style="gap:6px"><h2>Enviar</h2><p class="hint">¿Qué quieres mandar? Todo sale por WhatsApp, Instagram o correo.</p></section><div class="fes">' +
-      ENV_OP.map(function (o) { return '<button class="fe" data-ev="' + o[0] + '"><span class="fei">' + o[1] + '</span><span><b>' + o[2] + '</b><small>' + o[3] + '</small></span></button>'; }).join("") + '</div>';
+      ENV_OP.map(function (o) { return '<button class="fe" data-ev="' + o[0] + '"><span class="fei">' + o[1] + '</span><span><b>' + o[2] + '</b><small>' + o[3] + '</small></span></button>'; }).join("") + '</div>' +
+      '<section><h2>🎬 Video de bienvenida</h2><p class="hint">Sale en la guía «Cómo prepararte» que le llega sola al cliente cuando paga el abono. Súbelo a YouTube (oculto) o a Drive y pega el link.</p><label for="vbl">Link del video<input id="vbl" type="url" placeholder="https://youtu.be/…" autocomplete="off"></label><div class="row"><button class="btn2" id="vbok">Guardar video</button><span class="hint" id="vbst"></span></div></section>';
     bindEnv();
+    call({ action: "config", pin: PIN }).then(function (r) { if (r.ok && $("vbl")) $("vbl").value = r.video || ""; }).catch(function () {});
+    $("vbok").onclick = function () { $("vbst").innerHTML = '<span class="spin"></span>'; call({ action: "config", pin: PIN, video: $("vbl").value.trim() }).then(function (r) { $("vbst").innerHTML = r.ok ? '<span class="pos">✓ Guardado</span>' : '<span class="neg">' + esc(r.title) + '</span>'; }).catch(function () { $("vbst").textContent = "No pudimos conectar."; }); };
   }
   function bindEnv() { Array.prototype.forEach.call(app.querySelectorAll("[data-ev]"), function (b) { b.onclick = function () { enviar(b.getAttribute("data-ev")); }; }); }
   function enviar(v) {

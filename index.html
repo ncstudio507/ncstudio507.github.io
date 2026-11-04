@@ -520,10 +520,20 @@ Calcula tu paquete aquí
 <input id="nombre" type="text" placeholder="Tu nombre" style="min-height: 48px; padding: 0 14px; border-radius: 6px; border: 1px solid #F2E4D2; background: #222020; color: #FEFEFE; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
 </div>
 <div style="display: flex; flex-direction: column; gap: 6px">
+<label for="ltel" style="font-family: Montserrat, sans-serif; font-size: 14px; font-weight: 600; color: #F2E4D2">Tu WhatsApp</label>
+<input id="ltel" type="tel" inputmode="tel" autocomplete="tel" placeholder="6000-0000" style="min-height: 48px; padding: 0 14px; border-radius: 6px; border: 1px solid #F2E4D2; background: #222020; color: #FEFEFE; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<label for="linteres" style="font-family: Montserrat, sans-serif; font-size: 14px; font-weight: 600; color: #F2E4D2">¿Qué te interesa?</label>
+<select id="linteres" style="min-height: 48px; padding: 0 14px; border-radius: 6px; border: 1px solid #F2E4D2; background: #222020; color: #FEFEFE; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px"><option value="">Elige una opción</option><option>Level Up (cumpleaños)</option><option>Level Up en estudio</option><option>Sueños de 15</option><option>Dulce Espera</option><option>12 Meses de Amor</option><option>Folklore</option><option>Momentos (cumpleaños infantil)</option><option>Primer Logro</option><option>Gran Logro</option><option>Game On</option><option>Limitless (carreras)</option><option>Otra cosa</option></select>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
 <label for="mensaje" style="font-family: Montserrat, sans-serif; font-size: 14px; font-weight: 600; color: #F2E4D2">Tu pregunta</label>
 <textarea id="mensaje" rows="4" placeholder="Escribe aquí tu duda o tu idea…" style="padding: 12px 14px; border-radius: 6px; border: 1px solid #F2E4D2; background: #222020; color: #FEFEFE; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px; resize: vertical"></textarea>
 </div>
 <a href="{{waDuda}}" onClick="{{dudaSend}}" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; justify-content: center; min-height: 52px; border-radius: 999px; background: {{accent}}; color: #222020; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px">Enviar pregunta por WhatsApp</a>
+<button type="button" onClick="{{leadSend}}" style="min-height: 50px; border-radius: 999px; border: 1.5px solid #F2E4D2; background: transparent; color: #FEFEFE; font-family: Montserrat, sans-serif; font-weight: 700; font-size: 15px; cursor: pointer">Prefiero que ustedes me escriban</button>
+<p style="margin: 0; font-size: 13px; color: #F2E4D2; text-align: center">Déjanos tu nombre y tu WhatsApp y te mandamos toda la información.</p>
 </form>
 </div>
 </section>
@@ -606,6 +616,12 @@ Calcula tu paquete aquí
 </label>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Correo electrónico
 <input type="email" inputmode="email" autocomplete="email" value="{{cot.email}}" data-field="email" onInput="{{cot.setEmail}}" placeholder="tucorreo@ejemplo.com" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{cot.bEmail}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">¿Quién firma el contrato? (opcional, si es otra persona)
+<input type="text" autocomplete="off" data-field="firmante" value="{{cot.fi}}" onInput="{{cot.setFi}}" placeholder="Ej.: la mamá o el papá" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Cédula de quien firma (para tu contrato)
+<input type="text" autocomplete="off" data-field="cedula" value="{{cot.ce}}" onInput="{{cot.setCe}}" placeholder="Ej.: 7-123-456" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
 </label>
 </div>
 
@@ -1132,6 +1148,12 @@ Calcula tu paquete aquí
 </label>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Correo electrónico
 <input type="email" inputmode="email" autocomplete="email" value="{{xc.email}}" data-field="email" onInput="{{xc.setEmail}}" placeholder="tucorreo@ejemplo.com" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid {{xc.bEmail}}; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">¿Quién firma el contrato? (opcional, si es otra persona)
+<input type="text" autocomplete="off" data-field="firmante" value="{{xc.fi}}" onInput="{{xc.setFi}}" placeholder="Ej.: la mamá o el papá" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
+</label>
+<label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">Cédula de quien firma (para tu contrato)
+<input type="text" autocomplete="off" data-field="cedula" value="{{xc.ce}}" onInput="{{xc.setCe}}" placeholder="Ej.: 7-123-456" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
 </label>
 <label style="display: flex; flex-direction: column; gap: 6px; font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #3D3B3E">{{xc.typeLabel}}
 <input type="text" data-field="type" value="{{xc.type}}" onInput="{{xc.setType}}" placeholder="{{xc.typePh}}" style="min-height: 46px; padding: 0 12px; border-radius: 6px; border: 1.5px solid #D9CDBE; background: #FEFEFE; color: #222020; font-family: 'Tenor Sans', Georgia, serif; font-size: 16px">
@@ -2407,6 +2429,7 @@ class Component extends DCLogic {
             place: lugares, otherPlace: other, dateIso: st.xcSel || "", dateLabel: fecha || "",
             time: st.xcTime.trim(), venue: "", durationMin: hours * 60, photos: run ? "mínimo " + cfg.fotosPorCorredor + " por corredor (aprox. " + fMin + ")" : "aprox. " + fMin + " a " + fMax, tests: 0, eventType: st.xcType.trim(), runners: run ? R : undefined,
             total: total, totalLabel: money(total) + (other ? " + traslado" : ""), notes: st.xcIdea.trim(), whatsappText: build(),
+            firmante: String(st.ncFi || "").trim(), cedula: String(st.ncCe || "").trim(),
             expId: st.xcId || "", entregaPara: st.xcEnt || ""
           };
         }
@@ -2465,6 +2488,7 @@ class Component extends DCLogic {
           setType: function (e) { st.xcType = e && e.target ? e.target.value : ""; },
           setTime: function (e) { st.xcTime = e && e.target ? e.target.value : ""; },
           setIdea: function (e) { st.xcIdea = e && e.target ? e.target.value : ""; },
+          fi: st.ncFi || "", ce: st.ncCe || "", setFi: function (e) { st.ncFi = e && e.target ? e.target.value : ""; }, setCe: function (e) { st.ncCe = e && e.target ? e.target.value : ""; },
           total: money(total) + (other ? " + traslado" : ""),
           meta: run ? R + " corredores × " + money(cfg.perRunner) + " · mínimo " + cfg.fotosPorCorredor + " fotos por corredor" : hours + (hours === 1 ? " hora" : " horas") + " de cobertura · aprox. " + fMin + " a " + fMax + " fotos editadas",
           wa: WA + encodeURIComponent(build()),
@@ -2596,6 +2620,7 @@ class Component extends DCLogic {
             time: slot.split(" · ")[0] || "", venue: slot.split(" · ")[1] || "",
             durationMin: mins, photos: String(fotos), tests: pruebas, eventType: "",
             total: total, totalLabel: money(total) + (other ? " + traslado" : ""), notes: st.cotIdea.trim(), whatsappText: build(),
+            firmante: String(st.ncFi || "").trim(), cedula: String(st.ncCe || "").trim(),
             expId: exp || "", cumple: cumple ? st.cotEnt || "" : "", entregaPara: cumple ? "" : st.cotEnt || ""
           };
         }
@@ -2672,6 +2697,7 @@ class Component extends DCLogic {
           setName: function (e) { st.cotName = e && e.target ? e.target.value : ""; },
           setDate: function (e) { st.cotDate = e && e.target ? e.target.value : ""; },
           setIdea: function (e) { st.cotIdea = e && e.target ? e.target.value : ""; },
+          fi: st.ncFi || "", ce: st.ncCe || "", setFi: function (e) { st.ncFi = e && e.target ? e.target.value : ""; }, setCe: function (e) { st.ncCe = e && e.target ? e.target.value : ""; },
           total: money(total) + (other ? " + traslado" : ""),
           meta: mins + " min de sesión · " + fotos + (fotos === 1 ? " foto editada" : " fotos editadas"),
           wa: WA + encodeURIComponent(build()),
@@ -2697,8 +2723,18 @@ class Component extends DCLogic {
       waDuda: WA + encodeURIComponent("Hola, NC Studio. Tengo una consulta."),
       dudaSend: function (e) {
         var a = e && e.currentTarget, g = function (id) { var el = document.getElementById(id); return el ? String(el.value || "").trim() : ""; };
-        var n = g("nombre"), m = g("mensaje");
-        if (a && a.setAttribute) a.setAttribute("href", WA + encodeURIComponent("Hola, NC Studio." + (n ? " Soy " + n + "." : "") + (m ? "\n\n" + m : " Tengo una consulta.")));
+        var n = g("nombre"), m = g("mensaje"), t = g("ltel"), it = g("linteres");
+        if (a && a.setAttribute) a.setAttribute("href", WA + encodeURIComponent("Hola, NC Studio." + (n ? " Soy " + n + "." : "") + (it ? " Me interesa: " + it + "." : "") + (m ? "\n\n" + m : " Tengo una consulta.")));
+        if (n && t.replace(/\D/g, "").length >= 7) ncPost({ action: "interesado", name: n, phone: t, interes: it, notas: m });
+      },
+      leadSend: function () {
+        var g = function (id) { var el = document.getElementById(id); return el ? String(el.value || "").trim() : ""; };
+        var n = g("nombre"), t = g("ltel"), it = g("linteres"), m = g("mensaje");
+        if (!n || t.replace(/\D/g, "").length < 7) { self.flash("Escribe tu nombre y tu WhatsApp para poder escribirte."); var el = document.getElementById(n ? "ltel" : "nombre"); if (el) el.focus(); return; }
+        if (ncPost({ action: "interesado", name: n, phone: t, interes: it, notas: m })) {
+          self.flash("¡Listo, " + n.split(" ")[0] + "! Te escribimos muy pronto por WhatsApp.");
+          ["nombre", "ltel", "mensaje"].forEach(function (id) { var el = document.getElementById(id); if (el) el.value = ""; }); var sl = document.getElementById("linteres"); if (sl) sl.value = "";
+        }
       },
       portfolio: portfolio,
       pfTabs: [["", "Todas"], ["ses", "Sesiones de fotos"], ["ev", "Coberturas de eventos"]].map(function (t) {

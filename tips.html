@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Cómo prepararte · NC Studio</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<style>
+body{margin:0;background:#F2E4D2;font-family:Arial,Helvetica,sans-serif;color:#222020}
+.top{background:#222020;padding:16px 20px;display:flex;align-items:center;gap:14px}
+.top img{height:38px;display:block}
+.top span{color:#F2E4D2;font-family:Georgia,serif;font-size:18px}
+.bar{height:5px;background:#F99824}
+.wrap{max-width:720px;margin:0 auto;padding:24px 16px 48px;display:grid;gap:18px}
+.hero{background:#222020;color:#FEFEFE;border-radius:14px;padding:24px 22px;display:grid;gap:10px}
+.hero h1{font:400 30px Georgia,serif;margin:0}.hero p{margin:0;color:#F2E4D2;line-height:1.55;font-size:16px}
+.dat{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:6px}
+.dat div{background:rgba(255,255,255,.08);border-radius:10px;padding:10px 12px}.dat small{display:block;color:#F2E4D2;font-size:12px}.dat b{font-size:15px}
+.card{background:#FEFEFE;border-radius:12px;padding:22px;display:grid;gap:10px}
+.card h2{font:400 22px Georgia,serif;margin:0;border-bottom:2px solid #F99824;padding-bottom:6px}
+.card ul{margin:0;padding-left:0;list-style:none;display:grid;gap:10px}
+.card li{display:flex;gap:12px;line-height:1.5;font-size:15.5px}.card li span{font-size:22px;line-height:1.2;flex:none;width:28px;text-align:center}
+.vid{position:relative;padding-top:177%;border-radius:12px;overflow:hidden;background:#000}.vid.h{padding-top:56.25%}
+.vid iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.tl{display:grid;gap:0}.tl div{display:grid;grid-template-columns:26px 1fr;gap:12px;padding-bottom:14px;position:relative}
+.tl div:before{content:"";position:absolute;left:12px;top:24px;bottom:0;width:2px;background:#E8DCCB}.tl div:last-child:before{display:none}
+.tl i{width:26px;height:26px;border-radius:50%;background:#F99824;color:#222020;font:bold 13px Arial;display:flex;align-items:center;justify-content:center;font-style:normal}
+.tl b{display:block;font-size:15.5px}.tl small{color:#6B6466;font-size:14px;line-height:1.45}
+.btn{display:flex;align-items:center;justify-content:center;min-height:52px;border-radius:8px;background:#F99824;color:#222020;font-weight:bold;font-size:16px;text-decoration:none;padding:0 18px;text-align:center}
+.btn.w{background:#25D366;color:#fff}
+.msg{background:#FEFEFE;border-radius:10px;padding:26px;font-size:17px;line-height:1.6}
+.spin{width:22px;height:22px;border:3px solid #F2E4D2;border-top-color:#F99824;border-radius:50%;animation:s 1s linear infinite;display:inline-block;vertical-align:middle;margin-right:10px}
+@keyframes s{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="top"><img src="logo.png" alt="NC Studio"><span>Cómo prepararte</span></div>
+<div class="bar"></div>
+<div class="wrap" id="app"><div class="msg"><span class="spin" aria-hidden="true"></span>Cargando tu guía…</div></div>
+<script>
+(function () {
+  var SCRIPT = "https://script.google.com/macros/s/AKfycbzaT3OjIAFX5CET8Opyjnehye_XOfdI_kwA0DxEDusXzCzesOtffZUwsvE2-IbEp4yvIQ/exec";
+  var q = new URLSearchParams(location.search), id = q.get("id") || "", c = q.get("c") || "", app = document.getElementById("app");
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (m) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]; }); }
+  function li(e, t) { return '<li><span aria-hidden="true">' + e + '</span><div>' + t + '</div></li>'; }
+  function video(u) {
+    var m = String(u).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([\w-]{6,})/), d = String(u).match(/drive\.google\.com\/file\/d\/([\w-]+)/);
+    if (m) return '<div class="vid' + (/shorts/.test(u) ? '' : ' h') + '"><iframe src="https://www.youtube.com/embed/' + m[1] + '" title="Video de bienvenida" allow="encrypted-media; picture-in-picture" allowfullscreen></iframe></div>';
+    if (d) return '<div class="vid"><iframe src="https://drive.google.com/file/d/' + d[1] + '/preview" title="Video de bienvenida" allow="autoplay" allowfullscreen></iframe></div>';
+    return '<a class="btn" href="' + esc(u) + '" target="_blank" rel="noopener">▶ Ver el video de bienvenida</a>';
+  }
+  function pinta(r) {
+    var ev = r.evento, h = '<div class="hero"><h1>¡Hola, ' + esc(r.name) + '! ✨</h1><p>Qué alegría que ya confirmaste tu ' + (ev ? 'cobertura' : 'sesión') + '. A partir de ahora preparamos todo para que vivas una experiencia increíble. Aquí tienes lo más importante para que llegues sin estrés.</p>' +
+      '<div class="dat"><div><small>Experiencia</small><b>' + esc(r.service) + '</b></div><div><small>Fecha</small><b>' + esc(r.fecha) + '</b></div>' + (r.lugar ? '<div><small>Lugar</small><b>' + esc(r.lugar) + '</b></div>' : '') + '<div><small>Saldo el día de la ' + (ev ? 'cobertura' : 'sesión') + '</small><b>' + esc(r.saldo) + '</b></div></div></div>';
+    if (r.video) h += '<div class="card"><h2>Un mensaje para ti 🎬</h2>' + video(r.video) + '</div>';
+    if (ev) {
+      h += '<div class="card"><h2>Antes del evento</h2><ul>' +
+        li("📝", "<b>Cuéntanos los momentos clave</b> que no nos podemos perder: entradas, brindis, pastel, velitas, juegos o sorpresas.") +
+        li("🕒", "<b>Compártenos el horario</b> del evento y la dirección exacta del lugar.") +
+        li("👨‍👩‍👧", "<b>Dinos quiénes son las personas importantes</b> (abuelos, padrinos, tíos) para no dejar a nadie sin foto.") +
+        li("💡", "Si el lugar es oscuro o tiene una decoración especial, avísanos para llevar la iluminación adecuada.") + '</ul></div>';
+    } else {
+      h += '<div class="card"><h2>Antes de tu sesión</h2><ul>' +
+        li("👗", "<b>Prepara tus looks con tiempo:</b> déjalos listos desde la noche anterior, planchados y completos. Los colores lisos y suaves se ven mejor que los estampados muy cargados o los logos grandes.") +
+        li("💍", "<b>Accesorios especiales:</b> si quieres llevar algo tuyo (flores, un libro, una mascota, un objeto con historia), cuéntanoslo antes para incluirlo en la planificación.") +
+        li("😴", "<b>Cuídate los días previos:</b> dormir bien y mantenerte hidratado te hace sentir y verte mejor.") +
+        (r.maquillaje ? li("💄", "<b>Maquillaje y peinado:</b> llega con el rostro limpio, sin crema pesada, y con el cabello seco.") : li("💄", "<b>Maquillaje:</b> si te maquillas tú, que sea un poco más marcado que el de todos los días; la cámara lo suaviza.")) +
+        li("📸", "<b>Inspírate:</b> si tienes fotos o ideas que te gusten, guárdalas y compártelas con nosotros.") + '</ul></div>';
+      h += '<div class="card"><h2>El día de la sesión</h2><ul>' +
+        li("⏰", "<b>Llega puntual.</b> Así aprovechamos al máximo la luz y el tiempo; si llegas tarde, ese tiempo se descuenta de la sesión.") +
+        li("👨‍👩‍👧", "<b>Acompañantes:</b> puedes venir con quien quieras a verla. En las fotos salen las personas incluidas en tu paquete.") +
+        li("💵", "<b>Saldo:</b> se paga antes de comenzar, por Yappy al " + esc(r.yappy) + " o en efectivo.") +
+        li("🌧️", "<b>Si llueve</b>, nos vamos al estudio o reprogramamos, como prefieras.") +
+        li("😊", "<b>Relájate y disfruta.</b> Nosotros te guiamos con las poses; tú solo sé tú.") + '</ul></div>';
+    }
+    h += '<div class="card"><h2>Después</h2><div class="tl">' + (ev
+      ? '<div><i>1</i><span><b>Tus fotos editadas</b><small>Te llegan en tu galería en línea 10 días después del evento.</small></span></div><div><i>2</i><span><b>Descárgalas y compártelas</b><small>Son tuyas para guardar y compartir con tu familia.</small></span></div>'
+      : '<div><i>1</i><span><b>Fotos de prueba</b><small>Te llegan de 48 a 72 horas hábiles después de la sesión.</small></span></div>' +
+        '<div><i>2</i><span><b>Eliges tus favoritas en 2 días</b><small>Toca el corazón en las que más te gusten y luego «Send to Photographer». Si no recibimos tu selección en 2 días, las elegimos nosotros.</small></span></div>' +
+        '<div><i>3</i><span><b>Fotos finales</b><small>Te llegan editadas en un máximo de 2 semanas después de recibir tu selección.</small></span></div>') + '</div></div>';
+    if (r.gustos) h += '<div class="card"><h2>Queremos conocerte 💛</h2><p style="margin:0;line-height:1.55">Cuéntanos tus gustos en un formulario cortito y te prepararemos 3 ideas para tu ' + (ev ? 'evento' : 'sesión') + '.</p><a class="btn" href="' + esc(r.gustos) + '">Llenar mi formulario</a></div>';
+    h += '<div class="card"><h2>¿Tienes dudas?</h2><p style="margin:0;line-height:1.55">Escríbenos cuando quieras; con gusto te ayudamos. ¡Confía en el proceso: cada paso está pensado para que disfrutes y el resultado refleje lo mejor de ti!</p><a class="btn w" href="https://wa.me/' + esc(r.whatsapp) + '" target="_blank" rel="noopener">Escribirnos por WhatsApp</a><p style="margin:4px 0 0;text-align:center;color:#6B6466">Con cariño, Nelson y Charlie · NC Studio</p></div>';
+    app.innerHTML = h;
+  }
+  if (!id) { app.innerHTML = '<div class="msg">Abre tu guía desde el enlace que te enviamos.</div>'; return; }
+  fetch(SCRIPT, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "tips_ver", id: id, c: c }) }).then(function (r) { return r.json(); }).then(function (r) {
+    if (!r.ok) { app.innerHTML = '<div class="msg"><b>Ups.</b> ' + esc(r.title) + '. Pídenos el enlace otra vez por WhatsApp.</div>'; return; }
+    pinta(r);
+  }).catch(function () { app.innerHTML = '<div class="msg">No pudimos cargar tu guía. Revisa tu internet y recarga la página.</div>'; });
+})();
+</script>
+</body>
+</html>
