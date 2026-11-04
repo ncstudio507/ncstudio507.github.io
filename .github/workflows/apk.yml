@@ -28,7 +28,13 @@ jobs:
         run: |
           if [ -n "$KS" ] && [ -n "$KP" ]; then
             printf "%s" "$KS" | tr -cd "A-Za-z0-9+/=" | base64 -d > "$RUNNER_TEMP/nc.jks"
-            printf "%s" "$KP" | tr -d " \r\n\t" > "$RUNNER_TEMP/nc.pass"
+            # prueba cada palabra de lo que se pegó, por si se coló una etiqueta o un salto de línea
+            OK=""
+            for c in $(printf "%s" "$KP" | tr "\r\t" "  "); do
+              if keytool -list -keystore "$RUNNER_TEMP/nc.jks" -storepass "$c" >/dev/null 2>&1; then OK="$c"; break; fi
+            done
+            if [ -z "$OK" ]; then echo "::error::La contraseña NC_KEY_PASS no coincide con la llave. Pégala de nuevo (solo la línea debajo de Secreto 1)."; exit 1; fi
+            printf "%s" "$OK" > "$RUNNER_TEMP/nc.pass"
             echo "Usando la llave guardada"
           else
             # sin llave guardada: se firma con una llave temporal (para actualizar habrá que reinstalar)
