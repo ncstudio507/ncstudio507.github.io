@@ -77,6 +77,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 .xc span{display:grid;gap:2px;padding:10px 12px 12px}.xc b{font-size:15px}.xc small{font-size:12px;color:var(--muted)}
 .ig{font:bold 17px Arial,sans-serif;border:0;border-radius:8px;padding:16px;cursor:pointer;color:#fff;background:linear-gradient(45deg,#C13584,#E1306C,#F77737)}
 .fes{display:grid;gap:10px}
+.mail{display:block;text-align:center;font:bold 17px Arial,sans-serif;border-radius:8px;padding:16px;text-decoration:none;color:#fff;background:#3b5b7a}
 .fe{display:flex;gap:14px;align-items:center;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;cursor:pointer;font:inherit;color:var(--fg);width:100%}
 .fe .fei{font-size:30px;line-height:1;width:48px;flex:none;display:flex;justify-content:center}.fe .fei img{width:48px;height:48px;object-fit:contain}.fe span{display:grid;gap:3px}.fe b{font-size:18px;font-family:Georgia,serif;font-weight:400}.fe small{font-size:13px;color:var(--muted)}
 .seg.sub button{font-size:13px;padding:7px 12px;border-width:1px}
@@ -368,11 +369,12 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     var txt = msgs(x)[k];
     box.innerHTML = '<section><h2>Mensaje</h2>' + (gkey ? '<button class="btn2" id="cg">Cambiar link de la galería</button>' : "") +
       '<label for="mt">Puedes editarlo antes de enviar<textarea id="mt" style="min-height:300px"></textarea></label>' +
-      '<a class="wa" id="wa" target="_blank" rel="noopener">Abrir en WhatsApp</a><div class="row"><button class="btn2" id="cp">Copiar mensaje</button><span class="hint" id="cps"></span></div>' +
-      '<p class="hint">Se abre el chat de ' + esc(x.name) + ' (' + esc(x.phone) + ') con el mensaje escrito. Solo presiona enviar ➤ en WhatsApp.</p></section>';
+      '<a class="wa" id="wa" target="_blank" rel="noopener">Abrir en WhatsApp</a><p class="hint" style="margin-top:-6px">Se abre el chat de ' + esc(x.name) + ' (' + esc(x.phone) + ') con el mensaje escrito. Solo presiona enviar ➤.</p>' + extraHtml("c") +
+      '<div class="row"><button class="btn2" id="cp">Copiar mensaje</button><span class="hint" id="cps"></span></div></section>';
     var mt = $("mt"); mt.value = txt;
-    function link() { $("wa").href = "https://wa.me/" + wnum(x.phone) + "?text=" + encodeURIComponent(mt.value); }
-    mt.oninput = link; link();
+    var upx = extraBind("c", function () { return mt.value; }, function () { return deBase(x.phone, "instagram"); }, function () { return x.email || deBase(x.phone, "email"); }, k === "fin" ? "Tus fotos finales · NC Studio" : k === "pru" ? "Tus fotos de prueba · NC Studio" : "NC Studio · " + (x.service || ""));
+    function link() { $("wa").href = "https://wa.me/" + wnum(x.phone) + "?text=" + encodeURIComponent(mt.value); upx(); }
+    mt.oninput = link; link(); cargaBase(link);
     $("cp").onclick = function () { var ok = function () { $("cps").textContent = "✓ Copiado"; }; if (navigator.clipboard) navigator.clipboard.writeText(mt.value).then(ok, function () { mt.select(); }); else { mt.select(); document.execCommand("copy"); ok(); } };
     if ($("cg")) $("cg").onclick = function () { galForm(x, k, gkey); };
     box.scrollIntoView({ block: "start", behavior: "smooth" });
@@ -422,7 +424,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     call({ action: "fin_list", pin: PIN }).then(function (r) {
       if (r.title === "PIN incorrecto") { setPin(""); pinView("El PIN cambió. Escríbelo de nuevo."); return; }
       if (!r.ok) { app.innerHTML = '<div class="msg">No pudimos cargar tus finanzas. ¿Ya pegaste el código nuevo en Apps Script y ejecutaste <b>configurar</b>?</div>'; return; }
-      FD = r; if (foco) { FE = "nc"; FV = "hoy"; } if (!FE) inicioFin(); else if (FV === "rep" || FV === "paq") reportes(FV === "paq" ? "paq" : null); else if (FV === "edo") pintaEdo(); else pintaFin(foco);
+      FD = r; if (foco) { FE = "nc"; FV = "hoy"; }  if (!FE) inicioFin(); else if (!FV) menuFin(); else if (FV === "rep" || FV === "paq") reportes(FV === "paq" ? "paq" : null); else if (FV === "edo") pintaEdo(); else pintaFin(foco);
     }).catch(function () { app.innerHTML = '<div class="msg">No pudimos conectar. Revisa tu internet.</div>'; });
   }
   function inicioFin() {
@@ -566,7 +568,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     return '<select id="' + id + '"><option value="">— Ninguna (efectivo o tarjeta)</option>' + ["Cuenta NC", "BG Nelson", "BG Charlie"].map(function (b) { return '<option value="' + b + '"' + (b === val ? " selected" : "") + '>' + BANCO_NOM[b] + '</option>'; }).join("") + '</select>';
   }
   function pintaEdo(set) {
-    var b = BANCO_DE[FE]; if (!b) { FV = ENT[FE].vistas[0][0]; irFin(); return; }
+    var b = BANCO_DE[FE]; if (!b) { FV = null; irFin(); return; }
     app.innerHTML = segFin("edo") + '<div class="msg"><span class="spin"></span>Calculando el estado de cuenta…</div>'; bindSeg();
     call({ action: "fin_cuenta", pin: PIN, banco: b, set: set || null }).then(function (r) {
       if (!r.ok) { app.innerHTML = segFin("edo") + '<div class="msg">No pudimos calcularlo. ¿Ya pegaste el código nuevo?</div>'; bindSeg(); return; }
@@ -611,18 +613,30 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       };
     }).catch(function () { app.innerHTML = segFin("edo") + '<div class="msg">No pudimos conectar.</div>'; bindSeg(); });
   }
-  var FV = "hoy", YV = "rec", REP_EXTRA = null;
+  var FV = null, YV = "rec", REP_EXTRA = null;
+  var VINFO = { hoy: ["⏳", "Lo que falta revisar o repartir"], repa: ["🤝", "Repartir lo cobrado de una sesión"], nuevo: ["➕", "Anotar un ingreso, gasto o compra"], mov: ["📋", "Todo lo registrado, para buscar o corregir"], edo: ["🏦", "Saldo del banco y mover plata entre cuentas"], rep: ["📊", "Totales del mes y en qué se gasta"], paq: ["📦", "Cuánto deja cada paquete"], yap: ["📲", "Yappys enviados y recibidos"] };
+  function icoFE(t) { return FE === "nelson" ? '<img src="img/av-nelson.png" alt="" style="width:' + t + 'px;height:' + t + 'px;object-fit:contain">' : FE === "charlie" ? '<img src="img/av-charlie.png" alt="" style="width:' + t + 'px;height:' + t + 'px;object-fit:contain">' : FE === "nc" ? "📸" : "🌎"; }
+  function nomFE() { return FE === "global" ? "Finanzas globales" : "Finanzas de " + ENT[FE].n; }
   function segFin(act) {
     if (!FE) FE = "nc";
-    var n = nPend(FE), ny = pendDe(FE).length;
-    var ico = FE === "nelson" ? '<img src="img/av-nelson.png" alt="" style="width:34px;height:34px;object-fit:contain">' : FE === "charlie" ? '<img src="img/av-charlie.png" alt="" style="width:34px;height:34px;object-fit:contain">' : FE === "nc" ? "📸" : "🌎";
-    var top = '<button class="back" data-fe="">‹ Atrás</button><div class="row" style="gap:10px;margin-top:-6px"><span style="font-size:28px;line-height:1">' + ico + '</span><h2>' + (FE === "global" ? "Finanzas globales" : "Finanzas de " + ENT[FE].n) + '</h2></div>';
-    return top + '<div class="seg" role="group" aria-label="Vista">' + ENT[FE].vistas.map(function (o) { return '<button data-v="' + o[0] + '" aria-pressed="' + (act === o[0]) + '">' + o[1] + (o[0] === "hoy" && n ? " (" + n + ")" : "") + (o[0] === "yap" && ny ? " (" + ny + ")" : "") + '</button>'; }).join("") + '</div>';
+    var v = ENT[FE].vistas.filter(function (o) { return o[0] === act; })[0];
+    return '<button class="back" data-v="">‹ Atrás</button><div class="row" style="gap:10px;margin-top:-6px"><span style="font-size:28px;line-height:1">' + icoFE(34) + '</span><h2>' + (v ? esc(v[1].replace(/^\+ /, "")) : nomFE()) + '<br><small class="hint" style="font:13px Arial,sans-serif">' + nomFE() + '</small></h2></div>';
   }
-  function irFin() { if (FV === "rep" || FV === "paq") reportes(FV === "paq" ? "paq" : null); else if (FV === "edo") pintaEdo(); else if (FD) { pintaFin(); } else finanzas(); window.scrollTo(0, 0); }
+  // menú de la cuenta elegida: botones grandes para entrar a cada parte
+  function menuFin() {
+    tab("F"); salir.hidden = false; if (!FE) FE = "nc";
+    var n = nPend(FE), ny = pendDe(FE).length;
+    app.innerHTML = '<button class="back" data-fe="">‹ Atrás</button><div class="row" style="gap:10px;margin-top:-6px"><span style="font-size:28px;line-height:1">' + icoFE(34) + '</span><h2>' + nomFE() + '</h2></div><p class="hint" style="margin-top:-8px">¿A dónde quieres entrar?</p><div class="fes">' +
+      ENT[FE].vistas.map(function (o) {
+        var i = VINFO[o[0]] || ["•", ""], extra = o[0] === "hoy" && n ? '<small class="neg">' + n + ' por revisar</small>' : o[0] === "yap" && ny ? '<small class="neg">' + ny + ' por clasificar</small>' : o[0] === "repa" && FD && FD.repartos.length ? '<small class="neg">' + FD.repartos.length + ' por repartir</small>' : "";
+        return '<button class="fe" data-v="' + o[0] + '"><span class="fei">' + i[0] + '</span><span><b>' + esc(o[1].replace(/^\+ /, "")) + '</b><small>' + i[1] + '</small>' + extra + '</span></button>';
+      }).join("") + '</div>';
+    bindSeg(); window.scrollTo(0, 0);
+  }
+  function irFin() { if (!FV) { if (FD) menuFin(); else finanzas(); return; } if (FV === "rep" || FV === "paq") reportes(FV === "paq" ? "paq" : null); else if (FV === "edo") pintaEdo(); else if (FD) { pintaFin(); } else finanzas(); window.scrollTo(0, 0); }
   function bindSeg() {
-    Array.prototype.forEach.call(app.querySelectorAll("[data-fe]"), function (b) { b.onclick = function () { var k = b.getAttribute("data-fe"); if (!k) { FE = null; if (FD) inicioFin(); else finanzas(); return; } FE = k; FV = ENT[k].vistas[0][0]; irFin(); }; });
-    Array.prototype.forEach.call(app.querySelectorAll("[data-v]"), function (b) { b.onclick = function () { FV = b.getAttribute("data-v"); irFin(); }; });
+    Array.prototype.forEach.call(app.querySelectorAll("[data-fe]"), function (b) { b.onclick = function () { var k = b.getAttribute("data-fe"); if (!k) { FE = null; if (FD) inicioFin(); else finanzas(); return; } FE = k; FV = null; irFin(); }; });
+    Array.prototype.forEach.call(app.querySelectorAll("[data-v]"), function (b) { b.onclick = function () { FV = b.getAttribute("data-v") || null; irFin(); }; });
   }
   var REP = { mes: new Date().getMonth() + 1, anio: new Date().getFullYear() };
   function reportes(vista) {
@@ -1136,6 +1150,23 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
   function linkExp(p) { return p ? SITE + "#" + p.id : SITE + "#portafolio"; }
   // Mensajes cortos: Instagram acepta hasta 1000 caracteres por mensaje directo; los dejamos muy por debajo para que se lean de un vistazo.
   var LIM_IG = 1000;
+  function copiaT(txt, ok) { var f = function () { var t = document.createElement("textarea"); t.value = txt; document.body.appendChild(t); t.select(); try { document.execCommand("copy"); } catch (e) { } t.remove(); ok(); }; if (navigator.clipboard) navigator.clipboard.writeText(txt).then(ok, f); else f(); }
+  function abrir(url) { var w = window.open(url, "_blank"); if (w) { try { w.opener = null; } catch (e) { } } else location.href = url; }
+  function deBase(phone, campo) { var p = String(phone || "").replace(/\D/g, "").slice(-8), c = p && BASE ? BASE.filter(function (z) { return String(z.phone).replace(/\D/g, "").slice(-8) === p; })[0] : null; return c && c[campo] ? c[campo] : ""; }
+  // botones de Instagram y correo debajo del de WhatsApp
+  function extraHtml(pre, sinCorreo) {
+    return '<button class="ig" id="' + pre + 'ig">Copiar y abrir Instagram</button><p class="hint" id="' + pre + 'igs" style="margin-top:-6px">Instagram no deja escribir el mensaje solo: lo copio sin asteriscos y lo pegas en el chat.</p>' + (sinCorreo ? "" : '<a class="mail" id="' + pre + 'ml">✉️ Enviar por correo</a>');
+  }
+  function extraBind(pre, txt, ig, mail, asunto) {
+    var a = $(pre + "ml");
+    function up() { if (!a) return; var m = String(mail() || "").trim(); a.href = "mailto:" + encodeURI(m) + "?subject=" + encodeURIComponent(asunto) + "&body=" + encodeURIComponent(paraIG(txt())); a.textContent = "✉️ Enviar por correo" + (m ? " a " + m : " (escribes el correo)"); }
+    if (a) { a.onclick = up; up(); }
+    $(pre + "ig").onclick = function () {
+      var u = String(ig() || "").replace(/^@/, "").trim(); abrir(u ? "https://ig.me/m/" + encodeURIComponent(u) : "https://www.instagram.com/direct/inbox/");
+      copiaT(paraIG(txt()), function () { $(pre + "igs").innerHTML = '<span class="pos">✓ Mensaje copiado.</span> En el chat de Instagram, mantén presionado y toca «Pegar».'; });
+    };
+    return up;
+  }
   function lineaCorta(q) {
     var it = (q.items || []).join(" | "), h = it.match(/(\d+(?:[.,]\d+)?)\s*horas?\s+de\s+(sesión|cobertura)/i), f = it.match(/(\d+)\s+fotos?\s+editadas(\s+por sesión)?/i);
     var partes = []; if (h) partes.push(h[1] + " h"); if (f) partes.push(f[1] + " fotos editadas" + (f[2] ? " por sesión" : ""));
@@ -1161,33 +1192,33 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       LIBRE = DL[d.getDay()] + " " + d.getDate() + " de " + ML[d.getMonth()]; cb();
     }).catch(function () { LIBRE = ""; cb(); });
   }
-  var PARA = { name: "", phone: "", instagram: "" }, XCAT = "ses";
+  var PARA = { name: "", phone: "", instagram: "", email: "" }, XCAT = "ses";
   var XGRUPOS = { ses: ["Sesiones", ["levelup", "suenos", "dulce", "bebe", "estudio", "folklore", "granext", "gameon"]], ev: ["Eventos y carreras", ["infantil", "limitless"]], grad: ["Graduaciones", ["primer", "gran", "granext"]], todo: ["Todas", null] };
   function paraTxt() { return PARA.name || PARA.phone ? esc(PARA.name || "Sin nombre") + (PARA.phone ? " · " + esc(PARA.phone) : "") + (PARA.instagram ? " · @" + esc(PARA.instagram) : "") : "nadie elegido (eliges el chat al enviar)"; }
   function experiencias(cli) {
     tab("E"); salir.hidden = false;
-    if (cli) PARA = { name: cli.name || "", phone: cli.phone || "", instagram: cli.instagram || "" };
+    if (cli) PARA = { name: cli.name || "", phone: cli.phone || "", instagram: cli.instagram || "", email: cli.email || "" };
     var L = XCAT === "todo" ? [null].concat(DATA.X) : DATA.X.filter(function (p) { return XGRUPOS[XCAT][1].indexOf(p.id) >= 0; });
     EV2 = "exp";
     app.innerHTML = segEnv("exp") + '<section style="gap:8px"><div class="row" style="justify-content:space-between"><span><small class="hint">Para:</small><br><b id="xpt">' + paraTxt() + '</b></span><button class="btn2" id="xpb">' + (PARA.name || PARA.phone ? "Cambiar" : "Elegir cliente") + '</button></div>' +
       '<div id="xpf" hidden style="display:grid;gap:10px"><label for="xq">Cliente <small>(busca en tu base o escribe un nombre)</small><input id="xq" list="xql" autocomplete="off" placeholder="Nombre"></label><datalist id="xql"></datalist>' +
-      '<div class="g2"><label for="xph">WhatsApp<input id="xph" inputmode="tel" autocomplete="off"></label><label for="xig">Instagram <small>(sin @)</small><input id="xig" autocomplete="off"></label></div><button class="btn2" id="xpl">Listo</button></div></section>' +
+      '<div class="g2"><label for="xph">WhatsApp<input id="xph" inputmode="tel" autocomplete="off"></label><label for="xig">Instagram <small>(sin @)</small><input id="xig" autocomplete="off"></label></div><label for="xem">Correo <small>(opcional)</small><input id="xem" type="email" autocomplete="off"></label><button class="btn2" id="xpl">Listo</button></div></section>' +
       '<div class="seg" role="group" aria-label="Tipo de experiencia">' + Object.keys(XGRUPOS).map(function (k) { return '<button data-xg="' + k + '" aria-pressed="' + (XCAT === k) + '">' + XGRUPOS[k][0] + '</button>'; }).join("") + '</div>' +
       '<div class="xg">' + L.map(function (p) {
         var i = p ? DATA.X.indexOf(p) + 1 : 0;
         return '<button class="xc" data-xi="' + i + '">' + (p && p.img ? '<img src="' + esc(p.img) + '" alt="" loading="lazy">' : '<div class="xall">NC</div>') + '<span><b>' + esc(p ? p.title : "Todas las experiencias") + '</b><small>' + esc(p ? p.kind || "" : "El portafolio completo") + '</small>' +
           (p ? '<small>desde ' + esc(p.props.map(function (q) { return q.price; }).sort(function (a, b) { return precioN(a) - precioN(b); })[0]) + '</small>' : "") + '</span></button>';
       }).join("") + '</div>';
-    $("xq").value = PARA.name; $("xph").value = PARA.phone; $("xig").value = PARA.instagram;
+    $("xq").value = PARA.name; $("xph").value = PARA.phone; $("xig").value = PARA.instagram; $("xem").value = PARA.email || "";
     function toggle(open) { $("xpf").hidden = !open; $("xpb").hidden = open; $("xpt").innerHTML = paraTxt(); }
     $("xpb").onclick = function () { toggle(true); $("xq").focus(); };
     $("xpl").onclick = function () { toggle(false); $("xpb").textContent = PARA.name || PARA.phone ? "Cambiar" : "Elegir cliente"; };
     cargaBase(function () { if (BASE && $("xql")) $("xql").innerHTML = BASE.map(function (c) { return '<option value="' + esc(c.name) + '">' + esc(c.phone) + '</option>'; }).join(""); });
     $("xq").oninput = function () {
       PARA.name = this.value; var v = this.value.trim().toLowerCase(), c = BASE && BASE.filter(function (z) { return z.name.toLowerCase() === v; })[0];
-      if (c) { $("xph").value = PARA.phone = c.phone || ""; $("xig").value = PARA.instagram = c.instagram || ""; }
+      if (c) { $("xph").value = PARA.phone = c.phone || ""; $("xig").value = PARA.instagram = c.instagram || ""; $("xem").value = PARA.email = c.email || ""; }
     };
-    $("xph").oninput = function () { PARA.phone = this.value; }; $("xig").oninput = function () { PARA.instagram = this.value.replace(/^@/, ""); };
+    $("xph").oninput = function () { PARA.phone = this.value; }; $("xig").oninput = function () { PARA.instagram = this.value.replace(/^@/, ""); }; $("xem").oninput = function () { PARA.email = this.value.trim(); };
     bindEnv();
     Array.prototype.forEach.call(app.querySelectorAll("[data-xg]"), function (b) { b.onclick = function () { XCAT = b.getAttribute("data-xg"); experiencias(); }; });
     Array.prototype.forEach.call(app.querySelectorAll("[data-xi]"), function (b) { b.onclick = function () { var i = +b.getAttribute("data-xi"); primeraLibre(function () { enviarExp(i ? DATA.X[i - 1] : null, "pri"); }); }; });
@@ -1198,11 +1229,12 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       '<div class="seg" role="group" aria-label="Tipo de mensaje"><button data-xt="pri" aria-pressed="' + (tipo === "pri") + '">Primer contacto</button><button data-xt="seg" aria-pressed="' + (tipo === "seg") + '">Seguimiento</button><button data-xt="link" aria-pressed="' + (tipo === "link") + '">Solo el link</button></div>' +
       '<label for="xm">Puedes editarlo antes de enviar<textarea id="xm" style="min-height:250px"></textarea></label><p class="hint" id="xlen" style="text-align:right;margin-top:-6px"></p>' +
       '<a class="wa" id="xwa" target="_blank" rel="noopener">Enviar por WhatsApp</a>' +
-      '<button class="ig" id="xig2">Copiar y abrir Instagram</button><p class="hint" id="xigs">Instagram no deja escribir el mensaje solo: lo copio sin los asteriscos, se abre el chat y lo pegas (mantén presionado → Pegar).</p>' +
+      extraHtml("xx") +
       '<div class="row"><button class="btn2" id="xcp">Copiar mensaje</button><a class="btn2" href="' + esc(linkExp(p)) + '" target="_blank" rel="noopener" style="text-decoration:none">Ver la página ↗</a><span class="hint" id="xcs"></span></div></section>';
     $("xbk").onclick = function () { experiencias(); };
     var m = $("xm"); m.value = msgExp(p, tipo, PARA.name.trim());
-    function upd() {
+    var upx = extraBind("xx", function () { return m.value; }, function () { return PARA.instagram; }, function () { return PARA.email; }, (p ? p.title : "Nuestras experiencias") + " · NC Studio");
+    function upd() { upx();
       var n = String(PARA.phone || "").replace(/\D/g, ""), L = paraIG(m.value).length;
       $("xwa").href = "https://wa.me/" + (n.length >= 7 ? wnum(n) : "") + "?text=" + encodeURIComponent(m.value);
       $("xwa").textContent = n.length >= 7 ? "Enviar por WhatsApp a " + (first(PARA.name) || PARA.phone) : "Enviar por WhatsApp (eliges el chat)";
@@ -1211,22 +1243,21 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     m.oninput = upd; upd();
     function copiar(txt, ok) { if (navigator.clipboard) navigator.clipboard.writeText(txt).then(ok, function () { m.select(); document.execCommand("copy"); ok(); }); else { m.select(); document.execCommand("copy"); ok(); } }
     $("xcp").onclick = function () { copiar(m.value, function () { $("xcs").textContent = "✓ Copiado"; }); };
-    $("xig2").onclick = function () {
-      var u = String(PARA.instagram || "").replace(/^@/, "").trim(), url = u ? "https://ig.me/m/" + encodeURIComponent(u) : "https://www.instagram.com/direct/inbox/";
-      var w = window.open(url, "_blank", "noopener"); copiar(paraIG(m.value), function () { $("xigs").innerHTML = '<span class="pos">✓ Mensaje copiado.</span> En el chat de Instagram, mantén presionado y toca «Pegar».'; });
-      if (!w) location.href = url;
-    };
     Array.prototype.forEach.call(app.querySelectorAll("[data-xt]"), function (b) { b.onclick = function () { enviarExp(p, b.getAttribute("data-xt")); }; });
   }
   /* ===================== ENVIAR: contrato, pruebas, fotos finales, mensajes y experiencias ===================== */
-  var EV2 = "contrato";
-  function segEnv(act) {
-    var op = [["contrato", "📄 Contrato"], ["pru", "📷 Pruebas"], ["fin", "🎁 Fotos finales"], ["msg", "💬 Mensajes"], ["exp", "✨ Experiencias"]];
-    return '<div class="seg" role="group" aria-label="Qué enviar">' + op.map(function (o) { return '<button data-ev="' + o[0] + '" aria-pressed="' + (act === o[0]) + '">' + o[1] + '</button>'; }).join("") + '</div>';
+  var EV2 = "";
+  var ENV_OP = [["contrato", "📄", "Contrato", "Genera el PDF y mándalo para firmar"], ["pru", "📷", "Fotos de prueba", "La galería para que elija sus favoritas"], ["fin", "🎁", "Fotos finales", "La galería final ya editada"], ["msg", "💬", "Mensajes", "Recordatorios, saldos, gracias y más"], ["exp", "✨", "Experiencias", "Enviarle a alguien una experiencia"]];
+  function segEnv(act) { return act ? '<button class="back" data-ev="">‹ Atrás</button>' : ""; }
+  function menuEnv() {
+    app.innerHTML = '<section style="gap:6px"><h2>Enviar</h2><p class="hint">¿Qué quieres mandar? Todo sale por WhatsApp, Instagram o correo.</p></section><div class="fes">' +
+      ENV_OP.map(function (o) { return '<button class="fe" data-ev="' + o[0] + '"><span class="fei">' + o[1] + '</span><span><b>' + o[2] + '</b><small>' + o[3] + '</small></span></button>'; }).join("") + '</div>';
+    bindEnv();
   }
   function bindEnv() { Array.prototype.forEach.call(app.querySelectorAll("[data-ev]"), function (b) { b.onclick = function () { enviar(b.getAttribute("data-ev")); }; }); }
   function enviar(v) {
-    EV2 = v || EV2; tab("E"); salir.hidden = false; window.scrollTo(0, 0);
+    EV2 = v || ""; tab("E"); salir.hidden = false; window.scrollTo(0, 0);
+    if (!EV2) { menuEnv(); return; }
     if (EV2 === "exp") { experiencias(); return; }
     if (EV2 === "msg") { mensajes(); return; }
     if (EV2 === "contrato") {
@@ -1240,7 +1271,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     app.innerHTML = segEnv(EV2) + '<section><h2>' + (fin ? "Enviar fotos finales" : "Enviar fotos de prueba") + '</h2><p class="hint">Elige el cliente; pegas el link de la galería y lo mandas por correo, WhatsApp o los dos.</p></section><div id="ebox"></div>';
     bindEnv();
     pickRes("ebox", function (x) { return x.estado === "Confirmado" && (fin || x.kind !== "evento"); }, function (x) {
-      app.innerHTML = segEnv(EV2) + '<button class="back" id="ebk">‹ Elegir otro cliente</button><section><h2>' + esc(x.name) + '</h2><p class="hint">' + esc(x.service + " · " + x.fecha) + '</p></section><div id="cmp"></div>';
+      app.innerHTML = '<button class="back" id="ebk">‹ Elegir otro cliente</button><section><h2>' + esc(x.name) + '</h2><p class="hint">' + esc(x.service + " · " + x.fecha) + '</p></section><div id="cmp"></div>';
       bindEnv(); $("ebk").onclick = function () { enviar(EV2); };
       componer(x, fin ? "fin" : "pru");
     });
@@ -1266,7 +1297,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
   var NUEVO_CONTRATO = false;
   function contratoDe(x) {
     tab("E"); EV2 = "contrato";
-    app.innerHTML = segEnv("contrato") + '<button class="back" id="ebk">‹ Elegir otro cliente</button><section><h2>Contrato de ' + esc(x.name) + '</h2><p class="hint">' + esc(x.id + " · " + x.service + " · " + x.fecha + " · total " + x.total) + (x.firmado ? '<br><b class="pos">✓ Ya firmó su contrato.</b>' : '') + '</p>' +
+    app.innerHTML = '<button class="back" id="ebk">‹ Elegir otro cliente</button><section><h2>Contrato de ' + esc(x.name) + '</h2><p class="hint">' + esc(x.id + " · " + x.service + " · " + x.fecha + " · total " + x.total) + (x.firmado ? '<br><b class="pos">✓ Ya firmó su contrato.</b>' : '') + '</p>' +
       '<div class="acts"><button class="act" id="cpdf">📄 Generar el PDF</button><button class="act" id="cmail">✉️ Enviárselo por correo</button></div><div id="cres"></div></section>';
     bindEnv(); $("ebk").onclick = function () { enviar("contrato"); };
     function gen(mail) {
@@ -1276,8 +1307,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
         if (!r.ok) { $("cres").innerHTML = '<p class="err">' + esc(r.title) + '</p>'; return; }
         var txt = "¡Hola, " + first(x.name) + "! ✍️ Te comparto tu contrato de *" + x.service + "* (" + x.fecha + ").\n\n" + (r.firmado ? "Aquí tienes tu copia firmada 👇\n" + r.url : "Léelo y fírmalo aquí: marca «Acepto» y presiona «Enviar confirmación» 👇\n" + r.link + "\n\nSi prefieres verlo en PDF: " + r.url) + "\n\n¡Cualquier duda, quedamos a la orden! — Nelson y Charlie · NC Studio";
         $("cres").innerHTML = '<div class="card2"><b class="pos">✓ ' + esc(r.title) + (mail ? " a " + esc(x.email) : "") + '</b><a class="btn2" href="' + esc(r.url) + '" target="_blank" rel="noopener" style="text-decoration:none">Abrir el PDF ↗</a>' +
-          '<label for="cmt">Mensaje para WhatsApp<textarea id="cmt" style="min-height:180px"></textarea></label><a class="wa" id="cwa" target="_blank" rel="noopener">Enviar por WhatsApp a ' + esc(first(x.name)) + '</a></div>';
-        $("cmt").value = txt; var up = function () { $("cwa").href = "https://wa.me/" + wnum(x.phone) + "?text=" + encodeURIComponent($("cmt").value); }; $("cmt").oninput = up; up();
+          '<label for="cmt">Mensaje para WhatsApp<textarea id="cmt" style="min-height:180px"></textarea></label><a class="wa" id="cwa" target="_blank" rel="noopener">Enviar por WhatsApp a ' + esc(first(x.name)) + '</a>' + extraHtml("k", true) + '</div>';
+        $("cmt").value = txt; cargaBase(function () {}); extraBind("k", function () { return $("cmt").value; }, function () { return deBase(x.phone, "instagram"); }, function () { return ""; }, ""); var up = function () { $("cwa").href = "https://wa.me/" + wnum(x.phone) + "?text=" + encodeURIComponent($("cmt").value); }; $("cmt").oninput = up; up();
       }).catch(function () { b.disabled = false; b.textContent = lb; $("cres").innerHTML = '<p class="err">No pudimos conectar.</p>'; });
     }
     $("cpdf").onclick = function () { gen(false); }; $("cmail").onclick = function () { gen(true); };
@@ -1316,15 +1347,17 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       Array.prototype.forEach.call(app.querySelectorAll("[data-oc]"), function (b) { b.onclick = function () { primeraLibre(function () { mensajes(OCASIONES[+b.getAttribute("data-oc")]); }); }; });
       return;
     }
-    app.innerHTML = segEnv("msg") + '<button class="back" id="mbk">‹ Todos los mensajes</button><section><h2>' + esc(oc[1]) + '</h2>' +
+    app.innerHTML = '<button class="back" id="mbk">‹ Todos los mensajes</button><section><h2>' + esc(oc[1]) + '</h2>' +
       '<label for="mcs">Cliente <small>(opcional: llena nombre, fecha y montos)</small><select id="mcs"><option value="">— Sin cliente / escribirle a alguien nuevo —</option></select></label>' +
-      '<div class="g2"><label for="mph">WhatsApp <small>(vacío = eliges el chat)</small><input id="mph" inputmode="tel" autocomplete="off"></label><label for="mig">Instagram <small>(sin @, opcional)</small><input id="mig" autocomplete="off"></label></div>' +
+      '<div class="g2"><label for="mph">WhatsApp <small>(vacío = eliges el chat)</small><input id="mph" inputmode="tel" autocomplete="off"></label><label for="mig">Instagram <small>(sin @, opcional)</small><input id="mig" autocomplete="off"></label></div><label for="mem">Correo <small>(opcional)</small><input id="mem" type="email" autocomplete="off"></label>' +
       '<label for="mm">Puedes editarlo antes de enviar<textarea id="mm" style="min-height:220px"></textarea></label><p class="hint" id="mlen" style="text-align:right;margin-top:-6px"></p>' +
-      '<a class="wa" id="mwa" target="_blank" rel="noopener">Enviar por WhatsApp</a><button class="ig" id="mig2">Copiar y abrir Instagram</button><p class="hint" id="migs">Instagram no deja escribir el mensaje solo: lo copio sin asteriscos y lo pegas en el chat.</p>' +
+      '<a class="wa" id="mwa" target="_blank" rel="noopener">Enviar por WhatsApp</a>' + extraHtml("mx") +
       '<div class="row"><button class="btn2" id="mcp">Copiar mensaje</button><span class="hint" id="mcs2"></span></div></section>';
     bindEnv(); $("mbk").onclick = function () { mensajes(); };
     var m = $("mm"), sel = null;
-    function upd() {
+    var upx = extraBind("mx", function () { return m.value; }, function () { return $("mig").value; }, function () { return $("mem").value; }, (oc[1].replace(/^\S+\s/, "")) + " · NC Studio");
+    $("mem").oninput = function () { upx(); };
+    function upd() { upx();
       var n = String($("mph").value || "").replace(/\D/g, ""), L = paraIG(m.value).length;
       $("mwa").href = "https://wa.me/" + (n.length >= 7 ? wnum(n) : "") + "?text=" + encodeURIComponent(m.value);
       $("mwa").textContent = n.length >= 7 ? "Enviar por WhatsApp" + (sel ? " a " + first(sel.name) : "") : "Enviar por WhatsApp (eliges el chat)";
@@ -1338,17 +1371,12 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     if (LIST) llenar(); else call({ action: "clientes", pin: PIN }).then(function (r) { LIST = r.list || []; YAPPY = r.yappy || YAPPY; llenar(); poner(); }).catch(function () {});
     $("mcs").onchange = function () {
       var L = (LIST || []).filter(function (x) { return x.estado !== "No disponible"; }); sel = this.value === "" ? null : L[+this.value];
-      $("mph").value = sel ? sel.phone : ""; var c = sel && BASE ? BASE.filter(function (z) { return String(z.phone).replace(/\D/g, "").slice(-8) === String(sel.phone).replace(/\D/g, "").slice(-8); })[0] : null; $("mig").value = c && c.instagram ? c.instagram : "";
+      $("mph").value = sel ? sel.phone : ""; var c = sel && BASE ? BASE.filter(function (z) { return String(z.phone).replace(/\D/g, "").slice(-8) === String(sel.phone).replace(/\D/g, "").slice(-8); })[0] : null; $("mig").value = c && c.instagram ? c.instagram : ""; $("mem").value = sel ? (sel.email || (c && c.email) || "") : "";
       poner();
     };
     cargaBase(function () {});
     function copiar(txt, ok) { if (navigator.clipboard) navigator.clipboard.writeText(txt).then(ok, function () { m.select(); document.execCommand("copy"); ok(); }); else { m.select(); document.execCommand("copy"); ok(); } }
     $("mcp").onclick = function () { copiar(m.value, function () { $("mcs2").textContent = "✓ Copiado"; }); };
-    $("mig2").onclick = function () {
-      var u = String($("mig").value || "").replace(/^@/, "").trim(), url = u ? "https://ig.me/m/" + encodeURIComponent(u) : "https://www.instagram.com/direct/inbox/";
-      var w = window.open(url, "_blank", "noopener"); copiar(paraIG(m.value), function () { $("migs").innerHTML = '<span class="pos">✓ Mensaje copiado.</span> En el chat de Instagram, mantén presionado y toca «Pegar».'; });
-      if (!w) location.href = url;
-    };
   }
   salir.onclick = function (e) { e.preventDefault(); setPin(""); PIN = ""; pinView(); };
   if (PIN) inicio(); else pinView();
