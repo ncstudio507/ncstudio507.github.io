@@ -26,6 +26,9 @@ input:focus,textarea:focus{outline:2px solid #F99824;outline-offset:1px;border-c
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .btn{min-height:54px;border-radius:6px;border:0;background:#F99824;color:#222020;font-weight:bold;font-size:17px;cursor:pointer}
 .btn[disabled]{opacity:.5}
+.ya{background:#F2E4D2;border-radius:8px;padding:12px 14px;font-size:15px;line-height:1.5;color:#3A3735;margin:0}
+.lnk{background:none;border:0;padding:0;color:#B4610E;font:bold 15px Arial,sans-serif;text-decoration:underline;cursor:pointer}
+[hidden]{display:none!important}
 .err{color:#B42318;font-size:14px;margin:0;min-height:1em}
 .msg{max-width:720px;margin:24px auto;background:#FEFEFE;border-radius:10px;padding:26px;font-size:17px;line-height:1.6}
 .msg h2{border:0;font-size:28px;margin:0 0 10px}
@@ -59,19 +62,31 @@ input:focus,textarea:focus{outline:2px solid #F99824;outline-offset:1px;border-c
     ["nogusta", "¿Algo que no te guste en fotos?", "Un ángulo, una pose, algo que prefieras evitar"]
   ];
   function pinta(info) {
-    var nuevo = !!info.nuevo, pr = info.prev ? info.prev.r : {};
+    var nuevo = !!info.nuevo, ant = info.prev || info.deAntes, pr = ant ? ant.r : {};
+    // lo que ya sabemos no se pregunta otra vez (queda escondido, pero se puede ver o cambiar)
+    var SIEMPRE = { quien: 1, ideas: 1 }, oculto = {};
+    if (!nuevo && info.name) oculto.nm = 1;
+    if (!nuevo && (info.phone || info.email)) { oculto.ph = 1; oculto.em = 1; }
+    if (info.instagram) oculto.ig = 1;
+    if (info.cumple) oculto.cu = 1;
+    if (info.deAntes) P.forEach(function (p) { if (!SIEMPRE[p[0]] && pr[p[0]]) oculto["q_" + p[0]] = 1; });
+    var nOc = Object.keys(oculto).length, todoDatos = oculto.nm && oculto.ph && oculto.ig && oculto.cu;
     var cumpleLbl = info.esCumple ? (info.bebe ? "¿Cuándo cumple años tu bebé?" : "¿Cuándo es tu cumpleaños?") : "¿Cuándo es tu cumpleaños? <small>(opcional, para saludarte ese día)</small>";
     app.innerHTML = '<div class="paper"><p class="kick">¡VAMOS A HACER UNA SESIÓN<br>CREATIVA TAN ORIGINAL COMO TÚ!</p><div class="band"><b>GUSTOS E IDEAS </b><i>DEL CLIENTE</i></div>' +
       '<p class="intro">' + (info.name ? '¡Hola, ' + esc(String(info.name).split(" ")[0]) + '! ' : '¡Hola! ') + 'Cuéntanos un poquito de ti. Con tus respuestas te preparamos <b>3 ideas para tu sesión' + (info.service ? ' de ' + esc(info.service) : '') + '</b>. No hay respuestas correctas: escribe lo que se te venga a la mente 💛</p>' +
-      '<h2>Tus datos</h2>' +
-      '<label for="nm">Nombre<input id="nm" autocomplete="name"></label>' +
-      '<div class="g2"><label for="ph">WhatsApp<input id="ph" inputmode="tel" autocomplete="tel"></label><label for="em">Correo<input id="em" type="email" autocomplete="email"></label></div>' +
-      '<div class="g2"><label for="ig">Instagram <small>(opcional)</small><input id="ig" placeholder="@tuusuario" autocomplete="off"></label><label for="cu">' + cumpleLbl + '<input id="cu" type="date"></label></div>' +
-      '<h2>Tus gustos</h2>' +
-      P.map(function (p) { return '<label for="q_' + p[0] + '">' + p[1] + (p[2] ? ' <small>' + p[2] + '</small>' : '') + '<textarea id="q_' + p[0] + '"></textarea></label>'; }).join("") +
+      (nOc && !info.prev ? '<p class="ya">Ya tenemos ' + (info.deAntes ? 'tus datos y lo que nos contaste la vez pasada' : 'tus datos') + ' 💛 Solo te preguntamos lo que nos falta. <button class="lnk" id="vermas" type="button">Ver o cambiar lo que ya nos contaste</button></p>' : '') +
+      '<h2 data-sec="d">Tus datos</h2>' +
+      '<label for="nm" data-o="nm">Nombre<input id="nm" autocomplete="name"></label>' +
+      '<label for="ph" data-o="ph">WhatsApp<input id="ph" inputmode="tel" autocomplete="tel"></label><label for="em" data-o="em">Correo<input id="em" type="email" autocomplete="email"></label>' +
+      '<label for="ig" data-o="ig">Instagram <small>(opcional)</small><input id="ig" placeholder="@tuusuario" autocomplete="off"></label><label for="cu" data-o="cu">' + cumpleLbl + '<input id="cu" type="date"></label>' +
+      '<h2>' + (info.deAntes ? 'Para esta sesión' : 'Tus gustos') + '</h2>' +
+      P.map(function (p) { return '<label for="q_' + p[0] + '" data-o="q_' + p[0] + '">' + p[1] + (p[2] ? ' <small>' + p[2] + '</small>' : '') + '<textarea id="q_' + p[0] + '"></textarea></label>'; }).join("") +
       '<p class="err" id="err"></p><button class="btn" id="go">Enviar mis respuestas</button></div>';
-    $("nm").value = info.name || (info.prev && info.prev.name) || ""; $("ph").value = info.phone || ""; $("em").value = info.email || "";
-    $("cu").value = info.cumple || (info.prev && info.prev.cumple) || ""; if (info.prev) $("ig").value = info.prev.instagram || "";
+    $("nm").value = info.name || (ant && ant.name) || ""; $("ph").value = info.phone || ""; $("em").value = info.email || "";
+    $("cu").value = info.cumple || (ant && ant.cumple) || ""; $("ig").value = info.instagram || (ant && ant.instagram) || "";
+    function esconder(si) { Array.prototype.forEach.call(app.querySelectorAll("[data-o]"), function (el) { el.hidden = si && !!oculto[el.getAttribute("data-o")]; }); app.querySelector('[data-sec="d"]').hidden = si && todoDatos; }
+    if (!info.prev) esconder(true);
+    if ($("vermas")) $("vermas").onclick = function () { esconder(false); this.parentNode.removeChild(this); };
     P.forEach(function (p) { $("q_" + p[0]).value = pr[p[0]] || ""; });
     $("go").onclick = function () {
       var r = { name: $("nm").value.trim(), phone: $("ph").value.trim(), email: $("em").value.trim(), instagram: $("ig").value.trim(), cumple: $("cu").value };
