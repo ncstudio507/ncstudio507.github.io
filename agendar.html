@@ -101,7 +101,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 </head>
 <body>
 <div class="top"><img src="logo.png" alt="NC Studio"><span>Agendar reserva</span><a href="#" id="salir" hidden>Cambiar PIN</a></div>
-<nav class="tabs" id="tabs" hidden><button id="tA" aria-pressed="true">Agendar</button><button id="tC" aria-pressed="false">Clientes</button><button id="tF" aria-pressed="false">Finanzas</button><button id="tP" aria-pressed="false">Publicar</button><button id="tE" aria-pressed="false">Experiencias</button></nav>
+<nav class="tabs" id="tabs" hidden><button id="tA" aria-pressed="true">Agendar</button><button id="tC" aria-pressed="false">Clientes</button><button id="tF" aria-pressed="false">Finanzas</button><button id="tP" aria-pressed="false">Publicar</button><button id="tE" aria-pressed="false">Enviar</button></nav>
 <div class="bar"></div>
 <main id="app"></main>
 <script>
@@ -132,7 +132,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
   $("tC").onclick = function () { clientes(); };
   $("tF").onclick = function () { FE = null; finanzas(); };
   $("tP").onclick = function () { publicar(); };
-  $("tE").onclick = function () { experiencias(); };
+  $("tE").onclick = function () { enviar(); };
   var QS = new URLSearchParams(location.search), REPARTO = QS.get("reparto"), PUBQ = QS.get("pub");
   function inicio() { if (REPARTO) { var r = REPARTO; REPARTO = null; finanzas(r); } else if (PUBQ) { var q = PUBQ; PUBQ = null; publicar(q); } else form(); }
   function pinView(msg) {
@@ -151,6 +151,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 
   var manual = false;
   function form() {
+    if (NUEVO_CONTRATO) setTimeout(function () { var s0 = app.querySelector("section"); if (s0) s0.insertAdjacentHTML("beforebegin", '<div class="msg" style="padding:14px 16px">📄 Llena los datos del cliente nuevo y toca «Agendar y enviar». Al terminar te aparece el botón para generar su contrato.</div>'); }, 0);
     salir.hidden = false; manual = false; tab("A");
     var hoy = new Date(); hoy.setMinutes(hoy.getMinutes() - hoy.getTimezoneOffset());
     var opts = '<option value="">Elige…</option>' + DATA.P.map(function (p) {
@@ -259,6 +260,9 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       $("otra").onclick = form;
       var ver = document.createElement("button"); ver.className = "btn2"; ver.textContent = "Ver en Clientes"; ver.style.marginLeft = "10px";
       ver.onclick = function () { clientes(r.id); }; $("otra").after(ver);
+      var con = document.createElement("button"); con.className = "btn"; con.textContent = "📄 Generar su contrato"; con.style.marginLeft = "10px";
+      con.onclick = function () { LIST = null; call({ action: "clientes", pin: PIN }).then(function (q) { LIST = q.list || []; var x = LIST.filter(function (z) { return z.id === r.id; })[0]; if (x) contratoDe(x); }); };
+      if (NUEVO_CONTRATO) { NUEVO_CONTRATO = false; ver.after(con); }
     }).catch(function () { go.disabled = false; go.textContent = "Agendar y enviar"; $("ferr").textContent = "No pudimos conectar. Revisa tu internet e inténtalo de nuevo."; });
   }
   /* ---------- Clientes: mensajes por WhatsApp ---------- */
@@ -396,7 +400,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
   var GRUPOS = [["Negocio (NC Studio)", ["Ingreso NC", "Gasto NC", "Inversión NC", "Deudas NC"]], ["Nelson", ["Ingreso Nelson", "Gasto Nelson", "Ahorro Nelson"]], ["Charlie", ["Ingreso Charlie", "Gasto Charlie"]], ["Nelson y Charlie", ["Gasto compartido"]], ["Otros", ["Sin impacto"]]];
   // de quién son las finanzas que estás viendo
   var FE = null, ENT = {
-    nc: { n: "NC Studio", g: ["Negocio (NC Studio)", "Otros"], tipos: ["Ingreso NC", "Gasto NC", "Inversión NC", "Deudas NC", "Sin impacto"], rep: ["NC Studio", "Viáticos"], vistas: [["hoy", "Pendientes"], ["nuevo", "+ Registrar"], ["mov", "Movimientos"], ["edo", "Estado de cuenta"], ["rep", "Reporte"], ["paq", "Costos por paquete"]] },
+    nc: { n: "NC Studio", g: ["Negocio (NC Studio)", "Otros"], tipos: ["Ingreso NC", "Gasto NC", "Inversión NC", "Deudas NC", "Sin impacto"], rep: ["NC Studio", "Viáticos"], vistas: [["hoy", "Pendientes"], ["repa", "Repartición"], ["nuevo", "+ Registrar"], ["mov", "Movimientos"], ["edo", "Estado de cuenta"], ["rep", "Reporte"], ["paq", "Costos por paquete"]] },
     nelson: { n: "Nelson", g: ["Nelson", "Nelson y Charlie"], tipos: ["Ingreso Nelson", "Gasto Nelson", "Ahorro Nelson"], rep: ["Nelson"], vistas: [["rep", "Resumen"], ["yap", "Yappys"], ["nuevo", "+ Registrar"], ["mov", "Movimientos"], ["edo", "Estado de cuenta"]] },
     charlie: { n: "Charlie", g: ["Charlie", "Nelson y Charlie"], tipos: ["Ingreso Charlie", "Gasto Charlie"], rep: ["Charlie"], vistas: [["rep", "Resumen"], ["yap", "Yappys"], ["nuevo", "+ Registrar"], ["mov", "Movimientos"], ["edo", "Estado de cuenta"]] },
     global: { n: "Globales", g: null, tipos: null, rep: null, vistas: [["rep", "Resumen"], ["hoy", "Pendientes"], ["nuevo", "+ Registrar"], ["mov", "Movimientos"]] }
@@ -607,7 +611,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       };
     }).catch(function () { app.innerHTML = segFin("edo") + '<div class="msg">No pudimos conectar.</div>'; bindSeg(); });
   }
-  var FV = "hoy", YV = "rec";
+  var FV = "hoy", YV = "rec", REP_EXTRA = null;
   function segFin(act) {
     if (!FE) FE = "nc";
     var n = nPend(FE), ny = pendDe(FE).length;
@@ -677,7 +681,9 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     if (foco) { FE = "nc"; FV = "hoy"; } var r = FD, s = r.resumen, h = segFin(FV), ult = r.ultimos.filter(movDe);
     if (FV === "hoy") h += '<section><div class="row" style="justify-content:space-between"><h2>Finanzas · ' + esc(s.mes.charAt(0) + s.mes.slice(1).toLowerCase()) + '</h2><a class="btn2" href="' + esc(r.url) + '" target="_blank" rel="noopener" style="text-decoration:none">Abrir hoja de finanzas ↗</a></div>' +
       '<div class="kpis"><div class="kpi"><span>Ingresos NC</span><b>' + money(s.ingresosNC) + '</b></div><div class="kpi"><span>Gastos NC</span><b>' + money(s.gastosNC) + '</b></div>' + (FE === "global" ? '<div class="kpi"><span>Gastos Nelson</span><b>' + money(s.gastosNelson) + '</b></div><div class="kpi"><span>Gastos Charlie</span><b>' + money(s.gastosCharlie || 0) + '</b></div>' : '') + '<div class="kpi"><span>Por revisar</span><b>' + r.pendientes.length + '</b></div></div></section>';
-    if (FV === "hoy" && r.repartos.length) h += '<section><h2>Repartos pendientes</h2><p class="hint">Trabajos ya pagados completos. Ya viene llenada la sugerencia según los costos del paquete (Charlie y Nelson ganan lo mismo, la gasolina según el destino y NC nunca más que un socio); cámbiala si repartieron distinto.</p>' + r.repartos.map(function (x, i) {
+    var REPL = FV === "hoy" ? r.repartos : FV === "repa" ? r.repartos.concat(REP_EXTRA ? [REP_EXTRA] : []) : [];
+    if (FV === "repa") h += '<section><h2>Repartir una sesión</h2><p class="hint">Aquí repartes sin esperar el correo. Las sesiones ya pagadas completas salen solas abajo; si quieres repartir otra (aunque falte el saldo), elígela aquí.</p><label for="rxs">Otra sesión confirmada<select id="rxs"><option value="">— Elige —</option>' + (r.otrasRep || []).map(function (x, i) { return '<option value="' + i + '"' + (REP_EXTRA && REP_EXTRA.id === x.id ? " selected" : "") + '>' + esc(x.name + " · " + x.service + " · " + x.fecha + " (falta " + x.falta + ")") + '</option>'; }).join("") + '</select></label>' + (!REPL.length ? '<p class="hint">✓ No hay sesiones pagadas completas pendientes de repartir.</p>' : '') + '</section>';
+    if (REPL.length) h += '<section><h2>Repartos pendientes</h2><p class="hint">Trabajos ya pagados completos. Ya viene llenada la sugerencia según los costos del paquete (Charlie y Nelson ganan lo mismo, la gasolina según el destino y NC nunca más que un socio); cámbiala si repartieron distinto.</p>' + REPL.map(function (x, i) {
       var g = x.sug || {};
       return '<div class="card2" id="rp-' + esc(x.id) + '"><div class="top2"><span><b style="font-size:16px">' + esc(x.name) + '</b><br><small class="hint">' + esc(x.service + " · " + x.fecha) + '</small></span><b>' + money(x.total) + '</b></div>' +
         '<p class="hint" style="margin:0">Sugerencia: Charlie ' + money(g.charlie || 0) + ' · Nelson ' + money(g.nelson || 0) + ' · NC ' + money(g.nc || 0) + ' · Viáticos ' + money(g.viaticos || 0) + '</p>' +
@@ -708,7 +714,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
         (m.origen === "Reserva" || m.origen === "Reparto" ? '' : '<div class="ac"><button data-e="' + i + '">Editar</button><button data-b="' + i + '">Borrar</button></div><div id="ed' + i + '"></div>') + '</div>';
     }).join("") + '</div></section>';
     app.innerHTML = h; bindSeg();
-    if (FV === "hoy") r.repartos.forEach(function (x, i) {
+    if ($("rxs")) $("rxs").onchange = function () { REP_EXTRA = this.value === "" ? null : r.otrasRep[+this.value]; pintaFin(); };
+    REPL.forEach(function (x, i) {
       var g = x.sug || {};
       $("rc" + i).value = g.charlie != null ? g.charlie : ""; $("rn" + i).value = g.nelson != null ? g.nelson : ""; $("rx" + i).value = g.nc != null ? g.nc : ""; $("rw" + i).value = g.viaticos != null ? g.viaticos : "";
       function upd() {
@@ -1161,7 +1168,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     tab("E"); salir.hidden = false;
     if (cli) PARA = { name: cli.name || "", phone: cli.phone || "", instagram: cli.instagram || "" };
     var L = XCAT === "todo" ? [null].concat(DATA.X) : DATA.X.filter(function (p) { return XGRUPOS[XCAT][1].indexOf(p.id) >= 0; });
-    app.innerHTML = '<section style="gap:8px"><div class="row" style="justify-content:space-between"><span><small class="hint">Para:</small><br><b id="xpt">' + paraTxt() + '</b></span><button class="btn2" id="xpb">' + (PARA.name || PARA.phone ? "Cambiar" : "Elegir cliente") + '</button></div>' +
+    EV2 = "exp";
+    app.innerHTML = segEnv("exp") + '<section style="gap:8px"><div class="row" style="justify-content:space-between"><span><small class="hint">Para:</small><br><b id="xpt">' + paraTxt() + '</b></span><button class="btn2" id="xpb">' + (PARA.name || PARA.phone ? "Cambiar" : "Elegir cliente") + '</button></div>' +
       '<div id="xpf" hidden style="display:grid;gap:10px"><label for="xq">Cliente <small>(busca en tu base o escribe un nombre)</small><input id="xq" list="xql" autocomplete="off" placeholder="Nombre"></label><datalist id="xql"></datalist>' +
       '<div class="g2"><label for="xph">WhatsApp<input id="xph" inputmode="tel" autocomplete="off"></label><label for="xig">Instagram <small>(sin @)</small><input id="xig" autocomplete="off"></label></div><button class="btn2" id="xpl">Listo</button></div></section>' +
       '<div class="seg" role="group" aria-label="Tipo de experiencia">' + Object.keys(XGRUPOS).map(function (k) { return '<button data-xg="' + k + '" aria-pressed="' + (XCAT === k) + '">' + XGRUPOS[k][0] + '</button>'; }).join("") + '</div>' +
@@ -1180,6 +1188,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       if (c) { $("xph").value = PARA.phone = c.phone || ""; $("xig").value = PARA.instagram = c.instagram || ""; }
     };
     $("xph").oninput = function () { PARA.phone = this.value; }; $("xig").oninput = function () { PARA.instagram = this.value.replace(/^@/, ""); };
+    bindEnv();
     Array.prototype.forEach.call(app.querySelectorAll("[data-xg]"), function (b) { b.onclick = function () { XCAT = b.getAttribute("data-xg"); experiencias(); }; });
     Array.prototype.forEach.call(app.querySelectorAll("[data-xi]"), function (b) { b.onclick = function () { var i = +b.getAttribute("data-xi"); primeraLibre(function () { enviarExp(i ? DATA.X[i - 1] : null, "pri"); }); }; });
   }
@@ -1208,6 +1217,138 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       if (!w) location.href = url;
     };
     Array.prototype.forEach.call(app.querySelectorAll("[data-xt]"), function (b) { b.onclick = function () { enviarExp(p, b.getAttribute("data-xt")); }; });
+  }
+  /* ===================== ENVIAR: contrato, pruebas, fotos finales, mensajes y experiencias ===================== */
+  var EV2 = "contrato";
+  function segEnv(act) {
+    var op = [["contrato", "📄 Contrato"], ["pru", "📷 Pruebas"], ["fin", "🎁 Fotos finales"], ["msg", "💬 Mensajes"], ["exp", "✨ Experiencias"]];
+    return '<div class="seg" role="group" aria-label="Qué enviar">' + op.map(function (o) { return '<button data-ev="' + o[0] + '" aria-pressed="' + (act === o[0]) + '">' + o[1] + '</button>'; }).join("") + '</div>';
+  }
+  function bindEnv() { Array.prototype.forEach.call(app.querySelectorAll("[data-ev]"), function (b) { b.onclick = function () { enviar(b.getAttribute("data-ev")); }; }); }
+  function enviar(v) {
+    EV2 = v || EV2; tab("E"); salir.hidden = false; window.scrollTo(0, 0);
+    if (EV2 === "exp") { experiencias(); return; }
+    if (EV2 === "msg") { mensajes(); return; }
+    if (EV2 === "contrato") {
+      app.innerHTML = segEnv("contrato") + '<section><h2>Contrato en PDF</h2><p class="hint">¿Para quién es el contrato?</p><div class="acts"><button class="act" id="ecx">👤 Cliente existente</button><button class="act" id="ecn">➕ Cliente nuevo</button></div></section><div id="ebox"></div>';
+      bindEnv();
+      $("ecn").onclick = function () { NUEVO_CONTRATO = true; form(); };
+      $("ecx").onclick = function () { pickRes("ebox", function (x) { return x.estado !== "No disponible"; }, contratoDe); };
+      return;
+    }
+    var fin = EV2 === "fin";
+    app.innerHTML = segEnv(EV2) + '<section><h2>' + (fin ? "Enviar fotos finales" : "Enviar fotos de prueba") + '</h2><p class="hint">Elige el cliente; pegas el link de la galería y lo mandas por correo, WhatsApp o los dos.</p></section><div id="ebox"></div>';
+    bindEnv();
+    pickRes("ebox", function (x) { return x.estado === "Confirmado" && (fin || x.kind !== "evento"); }, function (x) {
+      app.innerHTML = segEnv(EV2) + '<button class="back" id="ebk">‹ Elegir otro cliente</button><section><h2>' + esc(x.name) + '</h2><p class="hint">' + esc(x.service + " · " + x.fecha) + '</p></section><div id="cmp"></div>';
+      bindEnv(); $("ebk").onclick = function () { enviar(EV2); };
+      componer(x, fin ? "fin" : "pru");
+    });
+  }
+  // lista de clientes (reservas) con buscador para elegir uno
+  function pickRes(boxId, filtro, alElegir) {
+    var box = $(boxId);
+    function pinta() {
+      var L = (LIST || []).filter(filtro);
+      box.innerHTML = '<section><label for="pkq">Buscar cliente<input id="pkq" placeholder="Nombre, teléfono o NC-…" autocomplete="off"></label><div id="pkl" style="display:grid;gap:8px"></div></section>';
+      function lst() {
+        var t = $("pkq").value.toLowerCase().trim();
+        var M = L.filter(function (x) { return !t || (x.name + " " + x.phone + " " + x.id + " " + x.service).toLowerCase().indexOf(t) >= 0; }).slice(0, 40);
+        $("pkl").innerHTML = M.length ? "" : '<p class="hint">No hay clientes que coincidan.</p>';
+        M.forEach(function (x) { var b = document.createElement("button"); b.className = "cl"; b.innerHTML = chip(x.estado) + "<b>" + esc(x.name) + "</b><span>" + esc(x.service) + "</span><span>" + esc(x.fecha) + "</span>"; b.onclick = function () { alElegir(x); }; $("pkl").appendChild(b); });
+      }
+      $("pkq").oninput = lst; lst();
+    }
+    if (LIST) { pinta(); return; }
+    box.innerHTML = '<div class="msg"><span class="spin"></span>Cargando clientes…</div>';
+    call({ action: "clientes", pin: PIN }).then(function (r) { LIST = r.list || []; YAPPY = r.yappy || YAPPY; pinta(); }).catch(function () { box.innerHTML = '<div class="msg">No pudimos conectar.</div>'; });
+  }
+  var NUEVO_CONTRATO = false;
+  function contratoDe(x) {
+    tab("E"); EV2 = "contrato";
+    app.innerHTML = segEnv("contrato") + '<button class="back" id="ebk">‹ Elegir otro cliente</button><section><h2>Contrato de ' + esc(x.name) + '</h2><p class="hint">' + esc(x.id + " · " + x.service + " · " + x.fecha + " · total " + x.total) + (x.firmado ? '<br><b class="pos">✓ Ya firmó su contrato.</b>' : '') + '</p>' +
+      '<div class="acts"><button class="act" id="cpdf">📄 Generar el PDF</button><button class="act" id="cmail">✉️ Enviárselo por correo</button></div><div id="cres"></div></section>';
+    bindEnv(); $("ebk").onclick = function () { enviar("contrato"); };
+    function gen(mail) {
+      var b = $(mail ? "cmail" : "cpdf"), lb = b.textContent; b.disabled = true; b.innerHTML = '<span class="spin"></span>' + (mail ? "Enviando…" : "Generando…");
+      call({ action: "contrato_pdf", pin: PIN, id: x.id, enviar: !!mail }).then(function (r) {
+        b.disabled = false; b.textContent = lb;
+        if (!r.ok) { $("cres").innerHTML = '<p class="err">' + esc(r.title) + '</p>'; return; }
+        var txt = "¡Hola, " + first(x.name) + "! ✍️ Te comparto tu contrato de *" + x.service + "* (" + x.fecha + ").\n\n" + (r.firmado ? "Aquí tienes tu copia firmada 👇\n" + r.url : "Léelo y fírmalo aquí: marca «Acepto» y presiona «Enviar confirmación» 👇\n" + r.link + "\n\nSi prefieres verlo en PDF: " + r.url) + "\n\n¡Cualquier duda, quedamos a la orden! — Nelson y Charlie · NC Studio";
+        $("cres").innerHTML = '<div class="card2"><b class="pos">✓ ' + esc(r.title) + (mail ? " a " + esc(x.email) : "") + '</b><a class="btn2" href="' + esc(r.url) + '" target="_blank" rel="noopener" style="text-decoration:none">Abrir el PDF ↗</a>' +
+          '<label for="cmt">Mensaje para WhatsApp<textarea id="cmt" style="min-height:180px"></textarea></label><a class="wa" id="cwa" target="_blank" rel="noopener">Enviar por WhatsApp a ' + esc(first(x.name)) + '</a></div>';
+        $("cmt").value = txt; var up = function () { $("cwa").href = "https://wa.me/" + wnum(x.phone) + "?text=" + encodeURIComponent($("cmt").value); }; $("cmt").oninput = up; up();
+      }).catch(function () { b.disabled = false; b.textContent = lb; $("cres").innerHTML = '<p class="err">No pudimos conectar.</p>'; });
+    }
+    $("cpdf").onclick = function () { gen(false); }; $("cmail").onclick = function () { gen(true); };
+  }
+
+  /* mensajes para distintas ocasiones (cortos: caben en Instagram) */
+  var OCASIONES = [
+    ["primer", "👋 Primer contacto", "¡Hola, {nombre}! 💛 Soy Nelson de NC Studio. ¡Qué alegría que quieras hacer tus fotos con nosotros! ✨\n\nAquí ves todas nuestras experiencias, con precios y lo que incluye cada una 👇\n{pagina}\n\nTenemos fechas desde el *{libre}*. ¿Te ayudo a elegir? 😊"],
+    ["seguimiento", "🔁 Seguimiento", "Hola, {nombre} 💛 ¿Pudiste ver la información que te envié? Si tienes alguna duda o quieres adaptar algo del paquete, con gusto te ayudo. También podemos hacer una llamada de 15 minutos. ¡Espero tenerte pronto frente a nuestro lente! 📸"],
+    ["reservar", "🗓️ Cómo reservar", "¡Qué emoción, {nombre}! 🙌🏼 Así reservas tu fecha:\n\n1️⃣ Eliges tu experiencia y tu fecha en la página 👇\n{pagina}\n2️⃣ Te llega la cotización a tu correo.\n3️⃣ Abonas el 50 % por *Yappy al {yappy}* para bloquear la fecha.\n4️⃣ Firmas tu contrato en línea.\n\nEl otro 50 % se paga el día de la sesión. ¡Cualquier duda, aquí estoy! 💛"],
+    ["abono_pend", "⏳ Abono pendiente", "Hola, {nombre} 💛 Te escribo para recordarte que tu fecha del *{fecha}* aún no está bloqueada: falta el abono de *{abono}* por Yappy al {yappy}. Como tenemos pocas fechas disponibles, solo podemos guardarla unos días más. ¿Te ayudo con algo? 😊"],
+    ["liberar", "🔓 Liberar la fecha", "Hola, {nombre}. Como no recibimos el abono, liberamos la fecha del {fecha} para otras personas. Si más adelante quieres reservar, con gusto revisamos la disponibilidad. ¡Gracias por pensar en nosotros! 💛"],
+    ["bienvenida", "✅ Abono recibido", "¡{nombre}, ya recibimos tu abono! 🙌🏼 Tu fecha del *{fecha}* está oficialmente reservada para tu *{servicio}*. Desde ya empezamos a planificar todo. Te escribimos pronto con los detalles. ¡Gracias por confiar en NC Studio! 💛"],
+    ["recordatorio", "⏰ Recordatorio de la sesión", "¡Hola, {nombre}! ✨ ¡Ya casi llega el día!\n\n📅 {fecha}\n📸 {servicio}\n💵 Saldo ese día: {saldo}\n\nDeja tus looks listos desde la noche anterior, descansa bien y llega puntual para aprovechar la luz. ¿Nos confirmas que recibiste este mensaje? 😊"],
+    ["saldo", "💵 Saldo pendiente", "Hola, {nombre} 💛 Te recuerdo que queda pendiente el saldo de *{saldo}* de tu {servicio}. Puedes enviarlo por *Yappy al {yappy}* y mandarnos la captura por aquí. ¡Gracias! 🙌🏼"],
+    ["elegir", "♡ Recordar elegir fotos", "¡Hola, {nombre}! 📸 Te recuerdo elegir tus fotos favoritas en tu galería (toca el corazón ♡ en cada una). Cuando termines, avísanos por aquí y empezamos a editarlas. ¡Ya queremos que veas el resultado! ✨"],
+    ["gracias", "💛 Gracias por la sesión", "¡{nombre}, gracias por una sesión tan bonita! 💛 Fue un placer acompañarte. Muy pronto te llegan tus fotos de prueba para que elijas tus favoritas. ✨"],
+    ["testimonio", "⭐ Pedir testimonio", "¡Hola, {nombre}! 💛 Esperamos que estés disfrutando tus fotos. Nos ayudaría muchísimo que nos cuentes en un par de líneas cómo te sentiste con la experiencia; así más personas se animan a vivirla. ¡Gracias de corazón! ✨"],
+    ["reagendar", "🌧️ Reagendar", "Hola, {nombre} 💛 Por el clima (o un imprevisto) te proponemos mover tu sesión del {fecha}. Tenemos disponible desde el *{libre}*. Dinos qué día te queda mejor y lo dejamos listo; tu abono queda guardado para la nueva fecha. 🙌🏼"],
+    ["no_disp", "🚫 Fecha no disponible", "¡Hola, {nombre}! Gracias por escribirnos 💛 Lamentablemente ya tenemos ocupada esa fecha, pero tenemos disponible desde el *{libre}*. ¿Te gustaría alguna de esas? Puedes ver los días libres aquí 👇\n{pagina}"],
+    ["cumple", "🎂 Feliz cumpleaños", "¡Feliz cumpleaños, {nombre}! 🎂✨ Que este nuevo año venga lleno de momentos que valga la pena recordar. Si quieres celebrarlo con una sesión Level Up, te esperamos 😉 — Nelson y Charlie · NC Studio"],
+    ["promo", "🎄 Promoción o temporada", "¡Hola, {nombre}! ✨ Abrimos fechas especiales de temporada en NC Studio. Si quieres tus fotos para regalar o para recordar este momento, reserva tu espacio aquí 👇\n{pagina}\n\nTenemos fechas desde el *{libre}*. ¡Los espacios vuelan! 📸"]
+  ];
+  var MSGS_CLI = null;
+  function rellenar(t, x) {
+    var v = { nombre: x ? first(x.name) : "", fecha: x ? x.fecha : "tu fecha", servicio: x ? x.service : "tu sesión", saldo: x ? x.saldo : "", abono: x ? x.abono : "", yappy: YAPPY, pagina: SITE, libre: LIBRE || "próximas semanas" };
+    t = t.replace(/\{(\w+)\}/g, function (m, k) { return v[k] !== undefined ? v[k] : m; });
+    if (!x) t = t.replace(/, (!|\s💛)/, "$1").replace(/¡Hola, ! /, "¡Hola! ").replace(/Hola,  /, "Hola ").replace(/¡,? ?/, "¡");
+    return t.replace(/¡Hola, !/g, "¡Hola!").replace(/Hola, 💛/g, "Hola 💛").replace(/¡ ya/g, "¡Ya");
+  }
+  function mensajes(oc) {
+    tab("E"); EV2 = "msg";
+    if (!oc) {
+      app.innerHTML = segEnv("msg") + '<section><h2>Mensajes para cada ocasión</h2><p class="hint">Elige uno: te lo preparo con los datos del cliente, cortito para que quepa en Instagram.</p><div class="acts">' + OCASIONES.map(function (o, i) { return '<button class="act" data-oc="' + i + '">' + o[1] + '</button>'; }).join("") + '</div></section>';
+      bindEnv();
+      Array.prototype.forEach.call(app.querySelectorAll("[data-oc]"), function (b) { b.onclick = function () { primeraLibre(function () { mensajes(OCASIONES[+b.getAttribute("data-oc")]); }); }; });
+      return;
+    }
+    app.innerHTML = segEnv("msg") + '<button class="back" id="mbk">‹ Todos los mensajes</button><section><h2>' + esc(oc[1]) + '</h2>' +
+      '<label for="mcs">Cliente <small>(opcional: llena nombre, fecha y montos)</small><select id="mcs"><option value="">— Sin cliente / escribirle a alguien nuevo —</option></select></label>' +
+      '<div class="g2"><label for="mph">WhatsApp <small>(vacío = eliges el chat)</small><input id="mph" inputmode="tel" autocomplete="off"></label><label for="mig">Instagram <small>(sin @, opcional)</small><input id="mig" autocomplete="off"></label></div>' +
+      '<label for="mm">Puedes editarlo antes de enviar<textarea id="mm" style="min-height:220px"></textarea></label><p class="hint" id="mlen" style="text-align:right;margin-top:-6px"></p>' +
+      '<a class="wa" id="mwa" target="_blank" rel="noopener">Enviar por WhatsApp</a><button class="ig" id="mig2">Copiar y abrir Instagram</button><p class="hint" id="migs">Instagram no deja escribir el mensaje solo: lo copio sin asteriscos y lo pegas en el chat.</p>' +
+      '<div class="row"><button class="btn2" id="mcp">Copiar mensaje</button><span class="hint" id="mcs2"></span></div></section>';
+    bindEnv(); $("mbk").onclick = function () { mensajes(); };
+    var m = $("mm"), sel = null;
+    function upd() {
+      var n = String($("mph").value || "").replace(/\D/g, ""), L = paraIG(m.value).length;
+      $("mwa").href = "https://wa.me/" + (n.length >= 7 ? wnum(n) : "") + "?text=" + encodeURIComponent(m.value);
+      $("mwa").textContent = n.length >= 7 ? "Enviar por WhatsApp" + (sel ? " a " + first(sel.name) : "") : "Enviar por WhatsApp (eliges el chat)";
+      $("mlen").innerHTML = L > LIM_IG ? '<span class="neg">' + L + ' / ' + LIM_IG + ' caracteres: muy largo para Instagram</span>' : L + ' / ' + LIM_IG + ' caracteres (límite de Instagram)';
+    }
+    function poner() { m.value = rellenar(oc[2], sel); upd(); }
+    m.oninput = upd; $("mph").oninput = upd; poner();
+    function llenar() {
+      $("mcs").innerHTML = '<option value="">— Sin cliente / escribirle a alguien nuevo —</option>' + (LIST || []).filter(function (x) { return x.estado !== "No disponible"; }).map(function (x, i) { return '<option value="' + i + '">' + esc(x.name + " · " + x.service + " · " + x.fecha) + '</option>'; }).join("");
+    }
+    if (LIST) llenar(); else call({ action: "clientes", pin: PIN }).then(function (r) { LIST = r.list || []; YAPPY = r.yappy || YAPPY; llenar(); poner(); }).catch(function () {});
+    $("mcs").onchange = function () {
+      var L = (LIST || []).filter(function (x) { return x.estado !== "No disponible"; }); sel = this.value === "" ? null : L[+this.value];
+      $("mph").value = sel ? sel.phone : ""; var c = sel && BASE ? BASE.filter(function (z) { return String(z.phone).replace(/\D/g, "").slice(-8) === String(sel.phone).replace(/\D/g, "").slice(-8); })[0] : null; $("mig").value = c && c.instagram ? c.instagram : "";
+      poner();
+    };
+    cargaBase(function () {});
+    function copiar(txt, ok) { if (navigator.clipboard) navigator.clipboard.writeText(txt).then(ok, function () { m.select(); document.execCommand("copy"); ok(); }); else { m.select(); document.execCommand("copy"); ok(); } }
+    $("mcp").onclick = function () { copiar(m.value, function () { $("mcs2").textContent = "✓ Copiado"; }); };
+    $("mig2").onclick = function () {
+      var u = String($("mig").value || "").replace(/^@/, "").trim(), url = u ? "https://ig.me/m/" + encodeURIComponent(u) : "https://www.instagram.com/direct/inbox/";
+      var w = window.open(url, "_blank", "noopener"); copiar(paraIG(m.value), function () { $("migs").innerHTML = '<span class="pos">✓ Mensaje copiado.</span> En el chat de Instagram, mantén presionado y toca «Pegar».'; });
+      if (!w) location.href = url;
+    };
   }
   salir.onclick = function (e) { e.preventDefault(); setPin(""); PIN = ""; pinView(); };
   if (PIN) inicio(); else pinView();
