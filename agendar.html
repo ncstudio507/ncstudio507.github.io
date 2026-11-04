@@ -77,6 +77,9 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 .xc span{display:grid;gap:2px;padding:10px 12px 12px}.xc b{font-size:15px}.xc small{font-size:12px;color:var(--muted)}
 .ig{font:bold 17px Arial,sans-serif;border:0;border-radius:8px;padding:16px;cursor:pointer;color:#fff;background:linear-gradient(45deg,#C13584,#E1306C,#F77737)}
 .fes{display:grid;gap:10px}
+.cl{position:relative}.cl.cav{padding-right:72px}
+.avi{width:46px;height:46px;border-radius:50%;object-fit:cover;object-position:center 30%;border:2px solid var(--accent);flex:none;display:block;background:var(--soft)}
+.cl .avi{position:absolute;right:14px;top:50%;transform:translateY(-50%)}.avi.big{width:60px;height:60px}.pfh .avi{width:62px;height:62px}
 .prg{display:grid;gap:4px}.prg .pb{height:10px;border-radius:5px;background:var(--line);overflow:hidden}.prg .pb i{display:block;height:100%;background:var(--accent)}
 .stp{display:flex;gap:10px;align-items:center;padding:7px 2px;border-bottom:1px solid var(--line);font-size:15px}.stp:last-child{border-bottom:0}.stp .o{width:22px;height:22px;flex:none;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:13px}.stp.ok .o{background:#12B76A;border-color:#12B76A;color:#fff}.stp small{color:var(--muted);font-size:12px;margin-left:auto}.stp input{width:22px;height:22px;accent-color:#12B76A;flex:none;margin:0}.stp.ok span{color:var(--muted)}
 .pfh{background:var(--fg);color:#FEFEFE;border-radius:14px;padding:20px;display:grid;gap:14px}
@@ -154,7 +157,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       var v = $("pin").value.trim(); if (!v) return;
       $("pok").disabled = true; $("pok").innerHTML = '<span class="spin"></span>Revisando…';
       call({ action: "pin", pin: v }).then(function (r) {
-        if (r.ok) { PIN = v; setPin(v); inicio(); } else pinView("PIN incorrecto.");
+        if (r.ok) { PIN = v; setPin(v); inicio(); cargaAv(); } else pinView("PIN incorrecto.");
       }).catch(function () { pinView("No pudimos conectar. Revisa tu internet."); });
     };
     $("pin").onkeydown = function (e) { if (e.key === "Enter") $("pok").click(); };
@@ -341,7 +344,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
       $("ls").innerHTML = L.length ? "" : '<div class="msg">No hay clientes que coincidan.</div>';
       L.forEach(function (x) {
         var b = document.createElement("button"); b.className = "cl";
-        b.innerHTML = chip(x.estado) + "<b>" + esc(x.name) + "</b><span>" + esc(x.service) + "</span><span>" + esc(x.fecha) + " · " + esc(x.phone) + "</span>";
+        b.innerHTML = chip(x.estado) + "<b>" + esc(x.name) + "</b><span>" + esc(x.service) + "</span><span>" + esc(x.fecha) + " · " + esc(x.phone) + "</span>" + avTag(x.name, x.phone, x.id);
         b.onclick = function () { detalle(x); }; $("ls").appendChild(b);
       });
     }
@@ -401,7 +404,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
       ["saldo", "💵 Saldo cobrado", x.estado === "Confirmado" && !x.saldoPagado],
       ["rep", "🧮 Anotar repartición", !!x.saldoPagado && !x.reparto],
       ["gus", "📝 Gustos e ideas", !!x.gid]].filter(function (a) { return a[2]; });
-    app.innerHTML = '<button class="back" id="bk">‹ Todos los clientes</button><section>' + chip(x.estado) + '<h2>' + esc(x.name) + '</h2>' +
+    app.innerHTML = '<button class="back" id="bk">‹ Todos los clientes</button><section>' + chip(x.estado) + '<div class="row" style="gap:12px;align-items:center;flex-wrap:nowrap">' + avTag(x.name, x.phone, x.id, 1) + '<h2 style="margin:0">' + esc(x.name) + '</h2></div>' +
       '<p class="hint" style="font-size:15px;line-height:1.6">' + esc(x.id) + " · " + esc(x.service) + "<br>" + esc(x.fecha) + " · " + esc(x.place) + "<br>📱 " + esc(x.phone) + " · ✉️ " + esc(x.email) + "<br>Total " + esc(x.total) + " · abono " + esc(x.abono) + (x.contrato ? (x.firmado ? " · ✅ contrato firmado" : " · contrato pendiente de firma") : "") + '</p>' +
       (x.estado !== "No disponible" ? '<div class="card2" style="gap:8px"><label for="dce">' + (x.esCumple ? "🎂 ¿Cuándo cumple años? <small>(fecha de nacimiento)</small>" : "🗓️ ¿Para cuándo quiere las fotos?") + '<input id="dce" type="date" value="' + esc(x.cumple || x.entregaPara || "") + '"></label><div class="row"><button class="btn2" id="dceok">Guardar fecha</button><span class="hint" id="dces">' + (x.cumple || x.entregaPara ? (x.entregaLista ? "✓ Entrega agendada en tu calendario" : x.estado === "Confirmado" ? "" : "Se agenda al recibir el abono") : "") + '</span></div></div>' : "") +
       '<div class="acts">' + acts.map(function (a) { return '<button class="act" data-k="' + a[0] + '" aria-pressed="' + (a[0] === cual) + '">' + a[1] + '</button>'; }).join("") + '</div></section>' + (x.estado !== "No disponible" ? '<section id="prog"></section>' : '') + '<div id="cmp"></div>';
@@ -787,7 +790,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     if (FV === "repa") h += '<section><h2>Repartir una sesión</h2><p class="hint">Aquí repartes sin esperar el correo. Las sesiones ya pagadas completas salen solas abajo; si quieres repartir otra (aunque falte el saldo), elígela aquí.</p><label for="rxs">Otra sesión confirmada<select id="rxs"><option value="">— Elige —</option>' + (r.otrasRep || []).map(function (x, i) { return '<option value="' + i + '"' + (REP_EXTRA && REP_EXTRA.id === x.id ? " selected" : "") + '>' + esc(x.name + " · " + x.service + " · " + x.fecha + " (falta " + x.falta + ")") + '</option>'; }).join("") + '</select></label>' + (!REPL.length ? '<p class="hint">✓ No hay sesiones pagadas completas pendientes de repartir.</p>' : '') + '</section>';
     if (REPL.length) h += '<section><h2>Repartos pendientes</h2><p class="hint">Trabajos ya pagados completos. Ya viene llenada la sugerencia según los costos del paquete (Charlie y Nelson ganan lo mismo, la gasolina es lo mismo que se le cobró de traslado y NC nunca más que un socio); cámbiala si repartieron distinto.</p>' + REPL.map(function (x, i) {
       var g = x.sug || {};
-      return '<div class="card2" id="rp-' + esc(x.id) + '"><div class="top2"><span><b style="font-size:16px">' + esc(x.name) + '</b><br><small class="hint">' + esc(x.service + " · " + x.fecha) + '</small></span><b>' + money(x.total) + '</b></div>' +
+      return '<div class="card2" id="rp-' + esc(x.id) + '"><div class="top2"><span class="row" style="gap:10px;flex-wrap:nowrap;align-items:center">' + avTag(x.name, "", x.id) + '<span><b style="font-size:16px">' + esc(x.name) + '</b><br><small class="hint">' + esc(x.service + " · " + x.fecha) + '</small></span></span><b>' + money(x.total) + '</b></div>' +
         '<p class="hint" style="margin:0">Sugerencia: Charlie ' + money(g.charlie || 0) + ' · Nelson ' + money(g.nelson || 0) + ' · NC ' + money(g.nc || 0) + ' · Viáticos ' + money(g.viaticos || 0) + '</p>' +
         (g.excedente ? '<p class="hint" style="margin:0">✨ Incluye ' + money(g.excedente) + ' de ganancia excedente para cada uno: NC quedó igual que el pago base de un socio y lo que sobraba se reparte entre Charlie y Nelson.</p>' : '') +
         (g.km ? '<p class="hint" style="margin:0">⛽ Gasolina calculada para ' + g.km + ' km ida y vuelta: ' + money(g.gasolina) + '.</p>' : '') +
@@ -876,7 +879,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     var act = INT.filter(function (i) { return ["Reservó", "No le interesó"].indexOf(i.estado) < 0; }), cer = INT.filter(function (i) { return ["Reservó", "No le interesó"].indexOf(i.estado) >= 0; });
     act.sort(function (a, b) { var ta = intToca(a) ? 0 : 1, tb = intToca(b) ? 0 : 1; return ta - tb || String(a.seguimiento || "9").localeCompare(String(b.seguimiento || "9")); });
     var hoyN = act.filter(intToca).length;
-    function card(i) { var t = intToca(i); return '<button class="cl" data-in="' + esc(i.id) + '"><span class="chip ' + (i.estado === "Reservó" ? "ok" : t ? "no" : "wait") + '">' + esc(t ? "Toca escribirle hoy" : i.estado) + '</span><b>' + esc(i.name) + '</b><span>' + esc([i.interes, i.fuente].filter(Boolean).join(" · ")) + '</span>' + (i.notas ? '<span>' + esc(String(i.notas).slice(0, 70)) + '</span>' : '') + '</button>'; }
+    function card(i) { var t = intToca(i); return '<button class="cl" data-in="' + esc(i.id) + '"><span class="chip ' + (i.estado === "Reservó" ? "ok" : t ? "no" : "wait") + '">' + esc(t ? "Toca escribirle hoy" : i.estado) + '</span><b>' + esc(i.name) + '</b><span>' + esc([i.interes, i.fuente].filter(Boolean).join(" · ")) + '</span>' + (i.notas ? '<span>' + esc(String(i.notas).slice(0, 70)) + '</span>' : '') + avTag(i.name, i.phone, i.reserva) + '</button>'; }
     app.innerHTML = segCli("int") + '<section><div class="row" style="justify-content:space-between"><h2>Interesados (' + act.length + ')</h2><button class="btn" id="inew" style="padding:11px 16px">+ Interesado</button></div>' +
       '<p class="hint">Gente que preguntó pero todavía no reserva. Los de la página entran solos; a los que te escriben por WhatsApp o Instagram agrégalos con «+ Interesado». ' + (hoyN ? '<b class="neg">Hoy toca escribirle a ' + hoyN + '.</b>' : '') + '</p></section>' +
       '<div style="display:grid;gap:8px">' + (act.length ? act.map(card).join("") : '<div class="msg">No tienes interesados pendientes.</div>') + '</div>' +
@@ -957,7 +960,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
         L.forEach(function (x) {
           var b = document.createElement("button"); b.className = "cl";
           b.innerHTML = '<span class="chip ' + (x.contacto ? "ok" : "") + '">' + (x.contacto ? "✓ En contactos" : "Sin contacto") + '</span><b>' + esc(x.name) + '</b><span>📱 ' + esc(x.phone) + (x.instagram ? " · @" + esc(x.instagram) : "") + '</span><span>' +
-            (x.reservas ? x.reservas + (x.reservas === 1 ? " sesión" : " sesiones") + " · " + money(x.total) : (x.servicios.length ? "Cotizó, sin reservar" : "Contacto nuevo")) + (x.servicios.length ? " · " + esc(x.servicios[x.servicios.length - 1]) : "") + '</span>';
+            (x.reservas ? x.reservas + (x.reservas === 1 ? " sesión" : " sesiones") + " · " + money(x.total) : (x.servicios.length ? "Cotizó, sin reservar" : "Contacto nuevo")) + (x.servicios.length ? " · " + esc(x.servicios[x.servicios.length - 1]) : "") + '</span>' + avTag(x.name, x.phone, x.ids);
           b.onclick = function () { fichaCli(x); }; $("lsb").appendChild(b);
         });
       }
@@ -972,7 +975,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
   }
   function fichaCli(x) {
     tab("C"); var nuevo = !x; x = x || { name: "", phone: "", email: "", instagram: "", notas: "", servicios: [], ids: [] };
-    app.innerHTML = '<button class="back" id="bkb">‹ Base de clientes</button><section><h2>' + (nuevo ? "Nuevo cliente" : esc(x.name)) + '</h2>' +
+    app.innerHTML = '<button class="back" id="bkb">‹ Base de clientes</button><section>' + (nuevo ? '<h2>Nuevo cliente</h2>' : '<div class="row" style="gap:12px;align-items:center;flex-wrap:nowrap">' + avTag(x.name, x.phone, x.ids, 1) + '<h2 style="margin:0">' + esc(x.name) + '</h2></div>') +
       (nuevo ? "" : '<p class="hint" style="font-size:15px;line-height:1.6">' + esc(x.id) + " · desde " + esc(x.desde) + (x.reservas ? "<br>" + x.reservas + " sesiones confirmadas · " + money(x.total) : "") + (x.servicios.length ? "<br>" + x.servicios.map(esc).join("<br>") : "") + '</p>' +
         '<button class="btn" id="bpf" style="width:100%">📋 Ver su perfil completo</button><div class="acts"><a class="act" style="text-decoration:none" href="https://wa.me/' + wnum(x.phone) + '" target="_blank" rel="noopener">💬 Abrir su chat de WhatsApp</a><button class="act" id="bexp">✨ Enviarle una experiencia</button>' +
         (x.instagram ? '<a class="act" style="text-decoration:none" href="https://instagram.com/' + esc(x.instagram) + '" target="_blank" rel="noopener">📷 Ver su Instagram</a>' : "") + '</div>') +
@@ -1009,7 +1012,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
       var chips = [x.phone ? '<a href="https://wa.me/' + wnum(x.phone) + '" target="_blank" rel="noopener">💬 ' + esc(x.phone) + '</a>' : "", ig ? '<a href="https://instagram.com/' + esc(ig) + '" target="_blank" rel="noopener">📷 @' + esc(ig) + '</a>' : "", x.email ? '<span>✉️ ' + esc(x.email) + '</span>' : "", r.cumple ? '<span>🎂 ' + esc(fechaBonita(r.cumple).replace(/^\S+ /, "")) + (+r.cumple.slice(0, 4) > 1900 && +r.cumple.slice(0, 4) < new Date().getFullYear() ? " · " + (new Date().getFullYear() - +r.cumple.slice(0, 4) - (new Date().toISOString().slice(5, 10) < r.cumple.slice(5) ? 1 : 0)) + " años" : "") + '</span>' : ""].join("");
       var G = [["hobbies", "🎨", "Hobbies"], ["pelis", "🎬", "Películas y series"], ["comida", "🍣", "Comida favorita"], ["musica", "🎵", "Música y artistas"], ["colores", "🌈", "Colores"], ["lugares", "📍", "Lugares"], ["palabras", "✨", "En tres palabras"], ["nogusta", "🚫", "No le gusta en fotos"]].filter(function (q) { return r.gustos[q[0]]; });
       var h = '<button class="back" id="pbk">‹ ' + esc(first(x.name)) + '</button>' +
-        '<div class="pfh"><div class="who"><div class="av">' + esc(ini) + '</div><div><h2>' + esc(x.name) + '</h2><div class="sub">Cliente desde ' + esc(/^\d{4}-\d\d/.test(x.desde || "") ? ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"][+x.desde.slice(5, 7) - 1] + " de " + x.desde.slice(0, 4) : (x.desde || "—")) + (r.formularios ? " · llenó " + r.formularios + " formulario" + (r.formularios === 1 ? "" : "s") : "") + '</div></div></div>' +
+        '<div class="pfh"><div class="who"><div class="av">' + esc(ini) + avTag(x.name, x.phone, x.ids) + '</div><div><h2>' + esc(x.name) + '</h2><div class="sub">Cliente desde ' + esc(/^\d{4}-\d\d/.test(x.desde || "") ? ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"][+x.desde.slice(5, 7) - 1] + " de " + x.desde.slice(0, 4) : (x.desde || "—")) + (r.formularios ? " · llenó " + r.formularios + " formulario" + (r.formularios === 1 ? "" : "s") : "") + '</div></div></div>' +
         '<div class="pfc">' + chips + '</div>' +
         '<div class="pfk"><div><b>' + conf.length + '</b><small>sesiones</small></div><div><b>' + money(x.total || 0) + '</b><small>invertido</small></div><div><b>' + r.reservas.length + '</b><small>reservas</small></div></div></div>' +
         '<section><h2>Lo que le gusta</h2>' + (G.length ? '<div class="tiles">' + G.map(function (q) { return '<div class="tile"><span>' + q[1] + " " + q[2] + '</span><p>' + esc(r.gustos[q[0]]) + '</p></div>'; }).join("") + '</div>' : '<p class="hint">Todavía no ha llenado el formulario de gustos. Mándaselo desde Enviar → Conocer al cliente.</p>') + '</section>' +
@@ -1512,7 +1515,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
       if (!r.ok) { $("glst").innerHTML = '<p class="hint">No pudimos cargar las respuestas. ¿Ya pegaste el código nuevo?</p>'; return; }
       GLIST = r.list;
       $("glst").innerHTML = GLIST.length ? "" : '<p class="hint">Todavía nadie ha llenado el formulario.</p>';
-      GLIST.forEach(function (g) { var b = document.createElement("button"); b.className = "cl"; b.innerHTML = '<span class="chip ' + (g.pdf ? "ok" : "wait") + '">' + (g.pdf ? "✓ Ideas enviadas" : "Faltan sus ideas") + '</span><b>' + esc(g.name) + '</b><span>' + esc(fechaBonita(g.fecha)) + (g.r.ideas ? " · " + esc(g.r.ideas.slice(0, 60)) : "") + '</span>'; b.onclick = function () { gustosDet(g); }; $("glst").appendChild(b); });
+      GLIST.forEach(function (g) { var b = document.createElement("button"); b.className = "cl"; b.innerHTML = '<span class="chip ' + (g.pdf ? "ok" : "wait") + '">' + (g.pdf ? "✓ Ideas enviadas" : "Faltan sus ideas") + '</span><b>' + esc(g.name) + '</b><span>' + esc(fechaBonita(g.fecha)) + (g.r.ideas ? " · " + esc(g.r.ideas.slice(0, 60)) : "") + '</span>' + avTag(g.name, g.phone, g.reserva); b.onclick = function () { gustosDet(g); }; $("glst").appendChild(b); });
     }).catch(function () { if ($("glst")) $("glst").innerHTML = '<p class="hint">No pudimos conectar.</p>'; });
   }
   function abrirGustos(gid) {
@@ -1608,7 +1611,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
         var t = $("pkq").value.toLowerCase().trim();
         var M = L.filter(function (x) { return !t || (x.name + " " + x.phone + " " + x.id + " " + x.service).toLowerCase().indexOf(t) >= 0; }).slice(0, 40);
         $("pkl").innerHTML = M.length ? "" : '<p class="hint">No hay clientes que coincidan.</p>';
-        M.forEach(function (x) { var b = document.createElement("button"); b.className = "cl"; b.innerHTML = chip(x.estado) + "<b>" + esc(x.name) + "</b><span>" + esc(x.service) + "</span><span>" + esc(x.fecha) + "</span>"; b.onclick = function () { alElegir(x); }; $("pkl").appendChild(b); });
+        M.forEach(function (x) { var b = document.createElement("button"); b.className = "cl"; b.innerHTML = chip(x.estado) + "<b>" + esc(x.name) + "</b><span>" + esc(x.service) + "</span><span>" + esc(x.fecha) + "</span>" + avTag(x.name, x.phone, x.id); b.onclick = function () { alElegir(x); }; $("pkl").appendChild(b); });
       }
       $("pkq").oninput = lst; lst();
     }
@@ -1700,6 +1703,31 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     function copiar(txt, ok) { if (navigator.clipboard) navigator.clipboard.writeText(txt).then(ok, function () { m.select(); document.execCommand("copy"); ok(); }); else { m.select(); document.execCommand("copy"); ok(); } }
     $("mcp").onclick = function () { copiar(m.value, function () { $("mcs2").textContent = "✓ Copiado"; }); };
   }
+  /* fotos de perfil: la portada (⭐) de la sesión del cliente en Publicar */
+  var AV = null, AVC = false;
+  function normN(n) { return String(n || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, " ").trim(); }
+  function avTag(name, phone, ids, big) {
+    var t = String(phone || "").replace(/\D/g, ""), k = [].concat(ids || []).filter(Boolean).map(function (r) { return "r:" + r; });
+    if (t.length >= 7) k.push("t:" + t.slice(-8)); if (name) k.push("n:" + normN(name));
+    return '<span class="avs' + (big ? " big" : "") + '" data-av="' + esc(k.join("|")) + '" hidden></span>';
+  }
+  function pintaAv(root) {
+    if (!AV) return;
+    Array.prototype.forEach.call((root || app).querySelectorAll(".avs[data-av]"), function (el) {
+      var keys = el.getAttribute("data-av").split("|"), fid = null;
+      for (var i = 0; i < keys.length && !fid; i++) fid = AV.map[keys[i]];
+      el.removeAttribute("data-av"); if (!fid || !AV.imgs[fid]) return;
+      var im = document.createElement("img"); im.className = "avi" + (el.classList.contains("big") ? " big" : ""); im.src = AV.imgs[fid]; im.alt = "";
+      var cl = el.closest(".cl"); if (cl) cl.classList.add("cav");
+      var rep = el.parentNode && el.parentNode.classList && el.parentNode.classList.contains("av") ? el.parentNode : el; rep.replaceWith(im);
+    });
+  }
+  function cargaAv() {
+    if (AVC) return; AVC = true;
+    try { var g = JSON.parse(localStorage.getItem("ncav") || "null"); if (g && g.map) { AV = g; pintaAv(); } } catch (e) {}
+    call({ action: "avatares", pin: PIN }).then(function (r) { if (!r || !r.ok) return; AV = { map: r.map, imgs: r.imgs }; try { localStorage.setItem("ncav", JSON.stringify(AV)); } catch (e) {} pintaAv(); }).catch(function () {});
+  }
+  if (window.MutationObserver) { var TAV = 0; new MutationObserver(function () { if (!AV) return; clearTimeout(TAV); TAV = setTimeout(function () { pintaAv(); }, 30); }).observe(app, { childList: true, subtree: true }); }
   salir.onclick = function (e) { e.preventDefault(); setPin(""); PIN = ""; pinView(); };
   /* botón atrás del teléfono: mientras en pantalla hay un «‹ Atrás», el atrás del teléfono lo toca en vez de salir */
   var GUARDA = false, SALTA_POP = false, TSINC = 0;
@@ -1718,7 +1746,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     if (b) { b.click(); window.scrollTo(0, 0); }
     setTimeout(sincAtras, 80);
   });
-  if (PIN) inicio(); else pinView();
+  if (PIN) { inicio(); cargaAv(); } else pinView();
 })();
 </script>
 </body>
