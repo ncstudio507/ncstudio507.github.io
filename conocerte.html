@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Queremos conocerte · NC Studio</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<style>
+body{margin:0;background:#F2E4D2;font-family:Arial,Helvetica,sans-serif;color:#222020}
+.top{background:#222020;padding:16px 20px;display:flex;align-items:center;gap:14px}
+.top img{height:38px;display:block}
+.top span{color:#F2E4D2;font-family:Georgia,serif;font-size:18px}
+.bar{height:5px;background:#F99824}
+.paper{max-width:720px;margin:24px auto 40px;background:#FEFEFE;border-radius:10px;padding:30px 32px;box-shadow:0 6px 24px rgba(0,0,0,.08);display:grid;gap:18px}
+.kick{text-align:center;letter-spacing:1px;color:#3A3735;font-size:15px;line-height:1.4;margin:0}
+.band{background:#CDBFB4;text-align:center;padding:10px 12px;margin:0 -8px}
+.band b{font:900 28px Arial,Helvetica,sans-serif;letter-spacing:1px}.band i{font:italic 28px Arial,Helvetica,sans-serif;letter-spacing:1px}
+.intro{font-size:16px;line-height:1.6;margin:0;color:#3A3735}
+h2{font-family:Georgia,serif;font-weight:400;font-size:20px;margin:8px 0 0;border-bottom:2px solid #F99824;padding-bottom:6px}
+label{display:grid;gap:6px;font-size:15px;font-weight:bold;color:#3A3735}
+label small{font-weight:400;color:#6B6466}
+input,textarea{font:16px Arial,Helvetica,sans-serif;padding:11px 12px;border:1.5px solid #D9CDBE;border-radius:6px;background:#FEFEFE;color:#222020;width:100%;box-sizing:border-box}
+textarea{min-height:76px;resize:vertical}
+input:focus,textarea:focus{outline:2px solid #F99824;outline-offset:1px;border-color:#F99824}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.btn{min-height:54px;border-radius:6px;border:0;background:#F99824;color:#222020;font-weight:bold;font-size:17px;cursor:pointer}
+.btn[disabled]{opacity:.5}
+.err{color:#B42318;font-size:14px;margin:0;min-height:1em}
+.msg{max-width:720px;margin:24px auto;background:#FEFEFE;border-radius:10px;padding:26px;font-size:17px;line-height:1.6}
+.msg h2{border:0;font-size:28px;margin:0 0 10px}
+.spin{width:22px;height:22px;border:3px solid #F2E4D2;border-top-color:#F99824;border-radius:50%;animation:s 1s linear infinite;display:inline-block;vertical-align:middle;margin-right:10px}
+@keyframes s{to{transform:rotate(360deg)}}
+@media (max-width:640px){.paper{margin:0;border-radius:0;padding:22px 16px}.g2{grid-template-columns:1fr}.band b,.band i{font-size:22px}.msg{margin:0;border-radius:0}}
+</style>
+</head>
+<body>
+<div class="top"><img src="logo.png" alt="NC Studio"><span>Queremos conocerte</span></div>
+<div class="bar"></div>
+<div id="app"><div class="msg"><span class="spin" aria-hidden="true"></span>Cargando…</div></div>
+<script>
+(function () {
+  var SCRIPT = "https://script.google.com/macros/s/AKfycbzaT3OjIAFX5CET8Opyjnehye_XOfdI_kwA0DxEDusXzCzesOtffZUwsvE2-IbEp4yvIQ/exec";
+  var q = new URLSearchParams(location.search), id = q.get("id") || "", c = q.get("c") || "";
+  var app = document.getElementById("app");
+  function $(x) { return document.getElementById(x); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (m) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]; }); }
+  function call(body) { return fetch(SCRIPT, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) }).then(function (r) { return r.json(); }); }
+  var P = [
+    ["quien", "¿Quién sale en las fotos?", "Tú, tu pareja, tu familia, tu bebé… y sus edades si quieres"],
+    ["hobbies", "Hobbies", "¿Qué te encanta hacer en tu tiempo libre?"],
+    ["pelis", "Películas y series favoritas", "Las que ves una y otra vez"],
+    ["comida", "Comida favorita", ""],
+    ["musica", "Música o artistas favoritos", ""],
+    ["colores", "Colores que te encantan", "Y si hay alguno que no quieres en tus fotos, cuéntanos"],
+    ["lugares", "Lugares que te gustan", "Playa, campo, ciudad, un sitio especial para ti…"],
+    ["palabras", "¿Cómo te describirías en tres palabras?", ""],
+    ["ideas", "Ideas para la sesión", "Algo que siempre quisiste hacer en fotos, una temática, un detalle"],
+    ["nogusta", "¿Algo que no te guste en fotos?", "Un ángulo, una pose, algo que prefieras evitar"]
+  ];
+  function pinta(info) {
+    var nuevo = !!info.nuevo, pr = info.prev ? info.prev.r : {};
+    var cumpleLbl = info.esCumple ? (info.bebe ? "¿Cuándo cumple años tu bebé?" : "¿Cuándo es tu cumpleaños?") : "¿Cuándo es tu cumpleaños? <small>(opcional, para saludarte ese día)</small>";
+    app.innerHTML = '<div class="paper"><p class="kick">¡VAMOS A HACER UNA SESIÓN<br>CREATIVA TAN ORIGINAL COMO TÚ!</p><div class="band"><b>GUSTOS E IDEAS </b><i>DEL CLIENTE</i></div>' +
+      '<p class="intro">' + (info.name ? '¡Hola, ' + esc(String(info.name).split(" ")[0]) + '! ' : '¡Hola! ') + 'Cuéntanos un poquito de ti. Con tus respuestas te preparamos <b>3 ideas para tu sesión' + (info.service ? ' de ' + esc(info.service) : '') + '</b>. No hay respuestas correctas: escribe lo que se te venga a la mente 💛</p>' +
+      '<h2>Tus datos</h2>' +
+      '<label for="nm">Nombre<input id="nm" autocomplete="name"></label>' +
+      '<div class="g2"><label for="ph">WhatsApp<input id="ph" inputmode="tel" autocomplete="tel"></label><label for="em">Correo<input id="em" type="email" autocomplete="email"></label></div>' +
+      '<div class="g2"><label for="ig">Instagram <small>(opcional)</small><input id="ig" placeholder="@tuusuario" autocomplete="off"></label><label for="cu">' + cumpleLbl + '<input id="cu" type="date"></label></div>' +
+      '<h2>Tus gustos</h2>' +
+      P.map(function (p) { return '<label for="q_' + p[0] + '">' + p[1] + (p[2] ? ' <small>' + p[2] + '</small>' : '') + '<textarea id="q_' + p[0] + '"></textarea></label>'; }).join("") +
+      '<p class="err" id="err"></p><button class="btn" id="go">Enviar mis respuestas</button></div>';
+    $("nm").value = info.name || (info.prev && info.prev.name) || ""; $("ph").value = info.phone || ""; $("em").value = info.email || "";
+    $("cu").value = info.cumple || (info.prev && info.prev.cumple) || ""; if (info.prev) $("ig").value = info.prev.instagram || "";
+    P.forEach(function (p) { $("q_" + p[0]).value = pr[p[0]] || ""; });
+    $("go").onclick = function () {
+      var r = { name: $("nm").value.trim(), phone: $("ph").value.trim(), email: $("em").value.trim(), instagram: $("ig").value.trim(), cumple: $("cu").value };
+      P.forEach(function (p) { r[p[0]] = $("q_" + p[0]).value.trim(); });
+      var falta = [];
+      if (!r.name) falta.push("tu nombre");
+      if (nuevo && r.phone.replace(/\D/g, "").length < 7 && !/@/.test(r.email)) falta.push("tu WhatsApp o correo");
+      if (info.esCumple && !r.cumple) falta.push(info.bebe ? "el cumpleaños de tu bebé" : "tu cumpleaños");
+      if (!P.some(function (p) { return r[p[0]]; })) falta.push("al menos uno de tus gustos");
+      if (falta.length) { $("err").textContent = "Falta: " + falta.join(", ") + "."; return; }
+      var b = $("go"); b.disabled = true; b.innerHTML = '<span class="spin"></span>Enviando…';
+      call({ action: "gustos", id: id, c: c, r: r }).then(function (x) {
+        if (!x.ok) { b.disabled = false; b.textContent = "Enviar mis respuestas"; $("err").textContent = x.title || "No se pudo enviar."; return; }
+        app.innerHTML = '<div class="msg"><h2>¡Gracias, ' + esc(x.nombre) + '! ✨</h2><p>Ya recibimos tus respuestas. Con ellas te preparamos 3 ideas para tu sesión y te las mandamos muy pronto.</p><p style="margin:0">— Nelson y Charlie · NC Studio</p></div>';
+        window.scrollTo(0, 0);
+      }).catch(function () { b.disabled = false; b.textContent = "Enviar mis respuestas"; $("err").textContent = "No pudimos conectar. Revisa tu internet e inténtalo otra vez."; });
+    };
+  }
+  if (!id) { pinta({ nuevo: true }); return; }
+  call({ action: "gustos_ver", id: id, c: c }).then(function (r) {
+    if (!r.ok) { app.innerHTML = '<div class="msg"><h2>Ups</h2><p>' + esc(r.title) + '. Pídenos el enlace otra vez por WhatsApp.</p></div>'; return; }
+    pinta(r);
+  }).catch(function () { app.innerHTML = '<div class="msg"><h2>Sin conexión</h2><p>No pudimos cargar el formulario. Revisa tu internet y recarga la página.</p></div>'; });
+})();
+</script>
+</body>
+</html>
