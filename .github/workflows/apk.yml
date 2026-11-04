@@ -27,7 +27,7 @@ jobs:
           KP: ${{ secrets.NC_KEY_PASS }}
         run: |
           if [ -n "$KS" ] && [ -n "$KP" ]; then
-            echo "$KS" | base64 -d > "$RUNNER_TEMP/nc.jks"; echo "NC_KEY_PASS=$KP" >> "$GITHUB_ENV"
+            printf "%s" "$KS" | tr -cd "A-Za-z0-9+/=" | base64 -d > "$RUNNER_TEMP/nc.jks"; echo "Llave: $(printf "%s" "$KS" | tr -cd "A-Za-z0-9+/=" | wc -c) caracteres (deben ser 3608 aprox.)"; echo "NC_KEY_PASS=$KP" >> "$GITHUB_ENV"
           else
             # sin llave guardada: se firma con una llave temporal (para actualizar habrá que reinstalar)
             P=$(openssl rand -hex 16); echo "::add-mask::$P"
