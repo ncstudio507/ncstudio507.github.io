@@ -77,6 +77,14 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 .xc span{display:grid;gap:2px;padding:10px 12px 12px}.xc b{font-size:15px}.xc small{font-size:12px;color:var(--muted)}
 .ig{font:bold 17px Arial,sans-serif;border:0;border-radius:8px;padding:16px;cursor:pointer;color:#fff;background:linear-gradient(45deg,#C13584,#E1306C,#F77737)}
 .fes{display:grid;gap:10px}
+.pfh{background:var(--fg);color:#FEFEFE;border-radius:14px;padding:20px;display:grid;gap:14px}
+.pfh .who{display:flex;gap:14px;align-items:center}.pfh .av{width:62px;height:62px;border-radius:50%;background:var(--accent);color:var(--fg);display:flex;align-items:center;justify-content:center;font:400 26px Georgia,serif;flex:none}
+.pfh h2{color:#FEFEFE;margin:0;font-size:24px}.pfh .sub{color:#F2E4D2;font-size:13px;margin-top:3px}
+.pfc{display:flex;flex-wrap:wrap;gap:6px}.pfc a,.pfc span{background:rgba(255,255,255,.1);color:#FEFEFE;border-radius:20px;padding:6px 11px;font-size:13px;text-decoration:none}
+.pfk{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.pfk div{background:rgba(255,255,255,.08);border-radius:10px;padding:10px;text-align:center}.pfk b{display:block;font:400 20px Georgia,serif;color:var(--accent)}.pfk small{font-size:11px;color:#F2E4D2}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}.tile{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;display:grid;gap:4px;align-content:start}.tile span{font-size:12px;color:var(--muted)}.tile p{margin:0;font-size:15px;line-height:1.4}
+.ses{background:#fff;border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:10px;padding:14px;display:grid;gap:8px}.ses.gris{border-left-color:var(--line)}
+.ses .lk{display:flex;flex-wrap:wrap;gap:6px}.ses .lk a{font-size:13px;border:1px solid var(--line);border-radius:16px;padding:5px 10px;text-decoration:none;color:var(--fg);background:var(--soft)}
 .mail{display:block;text-align:center;font:bold 17px Arial,sans-serif;border-radius:8px;padding:16px;text-decoration:none;color:#fff;background:#3b5b7a}
 .fe{display:flex;gap:14px;align-items:center;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;cursor:pointer;font:inherit;color:var(--fg);width:100%}
 .fe .fei{font-size:30px;line-height:1;width:48px;flex:none;display:flex;justify-content:center}.fe .fei img{width:48px;height:48px;object-fit:contain}.fe span{display:grid;gap:3px}.fe b{font-size:18px;font-family:Georgia,serif;font-weight:400}.fe small{font-size:13px;color:var(--muted)}
@@ -837,7 +845,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     tab("C"); var nuevo = !x; x = x || { name: "", phone: "", email: "", instagram: "", notas: "", servicios: [], ids: [] };
     app.innerHTML = '<button class="back" id="bkb">‹ Base de clientes</button><section><h2>' + (nuevo ? "Nuevo cliente" : esc(x.name)) + '</h2>' +
       (nuevo ? "" : '<p class="hint" style="font-size:15px;line-height:1.6">' + esc(x.id) + " · desde " + esc(x.desde) + (x.reservas ? "<br>" + x.reservas + " sesiones confirmadas · " + money(x.total) : "") + (x.servicios.length ? "<br>" + x.servicios.map(esc).join("<br>") : "") + '</p>' +
-        '<div class="acts"><a class="act" style="text-decoration:none" href="https://wa.me/' + wnum(x.phone) + '" target="_blank" rel="noopener">💬 Abrir su chat de WhatsApp</a><button class="act" id="bexp">✨ Enviarle una experiencia</button>' +
+        '<button class="btn" id="bpf" style="width:100%">📋 Ver su perfil completo</button><div class="acts"><a class="act" style="text-decoration:none" href="https://wa.me/' + wnum(x.phone) + '" target="_blank" rel="noopener">💬 Abrir su chat de WhatsApp</a><button class="act" id="bexp">✨ Enviarle una experiencia</button>' +
         (x.instagram ? '<a class="act" style="text-decoration:none" href="https://instagram.com/' + esc(x.instagram) + '" target="_blank" rel="noopener">📷 Ver su Instagram</a>' : "") + '</div>') +
       '<div class="g2"><label for="cn">Nombre y apellido<input id="cn" autocomplete="off"></label><label for="cph">Teléfono / WhatsApp<input id="cph" inputmode="tel" autocomplete="off"></label>' +
       '<label for="cem">Correo <small>(opcional)</small><input id="cem" type="email" autocomplete="off"></label><label for="cig">Instagram <small>(opcional, sin @)</small><input id="cig" autocomplete="off"></label></div>' +
@@ -846,6 +854,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     $("cn").value = x.name || ""; $("cph").value = x.phone || ""; $("cem").value = x.email || ""; $("cig").value = x.instagram || ""; $("cno").value = x.notas || "";
     $("bkb").onclick = function () { baseCli(); };
     if ($("bexp")) $("bexp").onclick = function () { experiencias(x); };
+    if ($("bpf")) $("bpf").onclick = function () { perfilCli(x); };
     $("cok").onclick = function () {
       var c = { id: x.id, name: $("cn").value.trim(), phone: $("cph").value.trim(), email: $("cem").value.trim(), instagram: $("cig").value.trim(), notas: $("cno").value };
       if (!c.name || String(c.phone).replace(/\D/g, "").length < 7) { $("cer").textContent = "Escribe el nombre y un teléfono válido."; return; }
@@ -857,6 +866,38 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
         BASE = null;
       }).catch(function () { b.disabled = false; b.textContent = lb; $("cer").textContent = "No pudimos conectar."; });
     };
+  }
+
+  /* perfil completo del cliente: todo lo que sabemos de esa persona, bonito y en una sola pantalla */
+  function perfilCli(x) {
+    tab("C"); window.scrollTo(0, 0);
+    app.innerHTML = '<button class="back" id="pbk">‹ ' + esc(first(x.name)) + '</button><div class="msg"><span class="spin"></span>Armando su perfil…</div>';
+    $("pbk").onclick = function () { fichaCli(x); };
+    call({ action: "perfil", pin: PIN, phone: x.phone, email: x.email }).then(function (r) {
+      if (!r.ok) { app.innerHTML = '<button class="back" id="pbk">‹ Volver</button><div class="msg">No pudimos armar el perfil. ¿Ya pegaste el código nuevo?</div>'; $("pbk").onclick = function () { fichaCli(x); }; return; }
+      var conf = r.reservas.filter(function (y) { return y.estado === "Confirmado"; });
+      var ig = x.instagram || r.instagram, ini = String(x.name || "?").split(/\s+/).map(function (w) { return w.charAt(0); }).slice(0, 2).join("").toUpperCase();
+      var chips = [x.phone ? '<a href="https://wa.me/' + wnum(x.phone) + '" target="_blank" rel="noopener">💬 ' + esc(x.phone) + '</a>' : "", ig ? '<a href="https://instagram.com/' + esc(ig) + '" target="_blank" rel="noopener">📷 @' + esc(ig) + '</a>' : "", x.email ? '<span>✉️ ' + esc(x.email) + '</span>' : "", r.cumple ? '<span>🎂 ' + esc(fechaBonita(r.cumple).replace(/^\S+ /, "")) + '</span>' : ""].join("");
+      var G = [["hobbies", "🎨", "Hobbies"], ["pelis", "🎬", "Películas y series"], ["comida", "🍣", "Comida favorita"], ["musica", "🎵", "Música y artistas"], ["colores", "🌈", "Colores"], ["lugares", "📍", "Lugares"], ["palabras", "✨", "En tres palabras"], ["nogusta", "🚫", "No le gusta en fotos"]].filter(function (q) { return r.gustos[q[0]]; });
+      var h = '<button class="back" id="pbk">‹ ' + esc(first(x.name)) + '</button>' +
+        '<div class="pfh"><div class="who"><div class="av">' + esc(ini) + '</div><div><h2>' + esc(x.name) + '</h2><div class="sub">Cliente desde ' + esc(x.desde || "—") + (r.formularios ? " · llenó " + r.formularios + " formulario" + (r.formularios === 1 ? "" : "s") : "") + '</div></div></div>' +
+        '<div class="pfc">' + chips + '</div>' +
+        '<div class="pfk"><div><b>' + conf.length + '</b><small>sesiones</small></div><div><b>' + money(x.total || 0) + '</b><small>invertido</small></div><div><b>' + r.reservas.length + '</b><small>reservas</small></div></div></div>' +
+        '<section><h2>Lo que le gusta</h2>' + (G.length ? '<div class="tiles">' + G.map(function (q) { return '<div class="tile"><span>' + q[1] + " " + q[2] + '</span><p>' + esc(r.gustos[q[0]]) + '</p></div>'; }).join("") + '</div>' : '<p class="hint">Todavía no ha llenado el formulario de gustos. Mándaselo desde Enviar → Conocer al cliente.</p>') + '</section>' +
+        '<section><h2>Sus sesiones</h2>' + (r.reservas.length ? r.reservas.map(function (y) {
+          var links = [y.moodboard ? '<a href="' + esc(y.moodboard) + '" target="_blank" rel="noopener">🎨 Moodboard</a>' : "", y.meet && y.meet.link ? '<a href="' + esc(y.meet.link) + '" target="_blank" rel="noopener">💻 Reunión ' + esc(fechaBonita(y.meet.fecha)) + '</a>' : "", y.pdfIdeas ? '<a href="' + esc(y.pdfIdeas) + '" target="_blank" rel="noopener">📝 Sus 3 ideas</a>' : "",
+            y.pdfContrato ? '<a href="' + esc(y.pdfContrato) + '" target="_blank" rel="noopener">✍️ Contrato</a>' : "", y.gp ? '<a href="' + esc(y.gp) + '" target="_blank" rel="noopener">📷 Pruebas</a>' : "", y.gf ? '<a href="' + esc(y.gf) + '" target="_blank" rel="noopener">🎁 Galería final</a>' : ""].join("");
+          var ideas = y.ideas ? y.ideas.filter(function (i) { return i.titulo; }) : [];
+          return '<div class="ses' + (y.estado === "Confirmado" ? "" : " gris") + '"><div class="row" style="justify-content:space-between;gap:8px"><b style="font:400 18px Georgia,serif">' + esc(String(y.service).split(" · ")[0]) + '</b>' + chip(y.estado) + '</div>' +
+            '<small class="hint">' + esc(y.fecha + " · " + y.total + (y.pagado ? " · pagado ✓" : "") + (y.firmado ? " · contrato firmado" : "")) + '</small>' +
+            (y.cumple ? '<small>🎂 Cumpleaños: ' + esc(fechaBonita(y.cumple)) + '</small>' : y.entregaPara ? '<small>🗓️ Quiere las fotos para el ' + esc(fechaBonita(y.entregaPara)) + '</small>' : "") +
+            (y.quien ? '<small>👥 Salen: ' + esc(y.quien) + '</small>' : "") + (y.ideasCliente ? '<small>💡 Su idea: ' + esc(y.ideasCliente) + '</small>' : y.notas ? '<small>💡 ' + esc(y.notas) + '</small>' : "") +
+            (ideas.length ? '<small>📝 Tus ideas: ' + ideas.map(function (i) { return esc(i.titulo) + (i.acc.filter(Boolean).length ? " (" + esc(i.acc.filter(Boolean).join(", ")) + ")" : ""); }).join(" · ") + '</small>' : "") +
+            (links ? '<div class="lk">' + links + '</div>' : "") + '</div>';
+        }).join("") : '<p class="hint">Todavía no tiene reservas.</p>') + '</section>' +
+        (x.notas ? '<section><h2>Tus notas</h2><p style="margin:0;white-space:pre-line">' + esc(x.notas) + '</p></section>' : "");
+      app.innerHTML = h; $("pbk").onclick = function () { fichaCli(x); };
+    }).catch(function () { app.innerHTML = '<div class="msg">No pudimos conectar.</div>'; });
   }
 
   /* ===================== FOTOS POR PUBLICAR ===================== */
@@ -1330,11 +1371,10 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
   var GLIST = null;
   function gustos() {
     tab("E"); EV2 = "gustos";
-    app.innerHTML = segEnv("gustos") + '<section><h2>Conocer al cliente</h2><p class="hint">Le mandas el formulario de gustos; con sus respuestas armas sus 3 ideas y se las envías en PDF.</p><div class="acts"><button class="act" id="gx">👤 Cliente con reserva</button><button class="act" id="gn">➕ Alguien nuevo</button></div></section><div id="ebox"></div>' +
+    app.innerHTML = segEnv("gustos") + '<section><h2>Conocer al cliente</h2><p class="hint">Elige al cliente (los que ya pagaron el abono) y mándale el formulario de gustos. Con sus respuestas armas sus 3 ideas y se las envías en PDF.</p></section><div id="ebox"></div>' +
       '<section><h2>Respuestas recibidas</h2><div id="glst" style="display:grid;gap:8px"><div class="msg"><span class="spin"></span>Cargando…</div></div></section>';
     bindEnv();
-    $("gx").onclick = function () { pickRes("ebox", function (x) { return x.estado !== "No disponible"; }, gustosEnviar); };
-    $("gn").onclick = function () { gustosEnviar(null); };
+    pickRes("ebox", function (x) { return x.estado === "Confirmado"; }, gustosEnviar);
     call({ action: "gustos_lista", pin: PIN }).then(function (r) {
       if (!$("glst")) return;
       if (!r.ok) { $("glst").innerHTML = '<p class="hint">No pudimos cargar las respuestas. ¿Ya pegaste el código nuevo?</p>'; return; }
