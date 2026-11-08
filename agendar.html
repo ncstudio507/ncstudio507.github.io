@@ -557,7 +557,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
         (ev ? "• Cuéntanos los momentos clave que no nos podemos perder (brindis, pastel, entradas).\n• Compártenos la hora exacta y la dirección del lugar.\n" : "• Prepara tus looks y accesorios con tiempo; déjalos listos la noche anterior.\n• Descansa bien y mantente hidratada.\n") +
         "• Llega puntual para aprovechar al máximo la luz y el tiempo.\n\n" + (ev ? "Tus fotos editadas te llegan en tu galería en línea 10 días después del evento." : "Las pruebas te llegan de 48 a 72 horas hábiles después de la sesión y tendrás 2 días para elegir tus favoritas.") + " ¿Nos confirmas que recibiste este mensaje? 💛" + firma,
       pru: "¡Hola, " + n + "! 📸 ¡Tus fotos de prueba ya están listas!" + acc(x.gp) +
-        "\n\n*Cómo elegir tus fotos:*\n1. Entra al link y toca el corazón ♡ en tus favoritas (la primera vez te pide tu correo).\n2. Revisa tu selección en «Favorites», arriba a la derecha.\n3. Puedes elegir *" + (x.photos || "las") + " fotos* incluidas en tu paquete. Fotos extra: " + precioExtra(x) + " c/u. Liberación de galería (todas sin editar): $60.\n4. Cuando termines, toca «Send to Photographer» en tus favoritas y escríbenos por aquí: «Ya elegí mis fotos» ✅\n\n⏳ Tienes *2 días* para elegir; si no recibimos tu selección, las elegimos nosotros.\n\nTus fotos finales te llegan en máximo 2 semanas después de recibir tu selección. 💛" + firma,
+        "\n\n*Cómo elegir tus fotos:*\n1. Entra al link y toca el corazón ♡ en tus favoritas (la primera vez te pide tu correo).\n2. Revisa tu selección en «Favorites», arriba a la derecha.\n3. Puedes elegir *" + (x.photos || "las") + " fotos* incluidas en tu paquete. Fotos extra: " + precioExtra(x) + " c/u. Liberación de galería (todas sin editar): $60.\n4. Cuando termines, toca «Send to Photographer» en tus favoritas y escríbenos por aquí: «Ya elegí mis fotos» ✅\n\n⏳ Tienes *2 días* para elegir; si no recibimos tu selección, las elegimos nosotros." + (x.xl ? "\n\n😍 ¿Te gustaron más fotos que las de tu paquete? Pide fotos extra aquí y te digo el precio al momento 👇\n" + x.xl : "") + "\n\nTus fotos finales te llegan en máximo 2 semanas después de recibir tu selección. 💛" + firma,
       fin: "¡Hola, " + n + "! 🎁 ¡Llegaron tus fotos finales!" + acc(x.gf) +
         "\n\nPuedes descargarlas y compartirlas con quien quieras. Gracias por permitirnos vivir esta experiencia contigo; esperamos volver a verte pronto frente a la cámara. 💛\n\nSi te gustó, nos ayudaría muchísimo que nos dejes un testimonio cortito. ¡Gracias! ✨" + firma
     };
@@ -571,6 +571,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     M("locacion", "Locación confirmada"); M("listo", "Todo listo (1½ semanas antes)"); M("regalo", "Regalo del cliente preparado");
     A("sesion", ev ? "Evento realizado" : "Sesión realizada", x.dateIso && x.dateIso < hoy); M("memoria", "Fotos en su carpeta y memoria guardada");
     if (!ev) { A("pru", "Pruebas enviadas", !!x.fp); M("eligio", "Eligió sus fotos"); }
+    if (x.extraFotos) A("extras", "Fotos extra pagadas (" + x.extraFotos.n + ")", x.extraFotos.estado === "pagado");
     A("fin", "Fotos finales enviadas", !!x.ff); A("saldo", "Saldo cobrado", x.saldoPagado);
     if (x.productos) M("productos", "Impresiones o álbum entregados");
     M("publicado", "Publicado (créditos y colaboración en IG)");
@@ -598,9 +599,10 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
       ["fin", "🎁 Fotos finales", x.estado === "Confirmado"],
       ["saldo", "💵 Saldo cobrado", x.estado === "Confirmado" && !x.saldoPagado],
       ["rep", "🧮 Anotar repartición", !!x.saldoPagado && !x.reparto],
-      ["gus", "📝 Gustos e ideas", !!x.gid]].filter(function (a) { return a[2]; });
+      ["gus", "📝 Gustos e ideas", !!x.gid],
+      ["extras", "📸 Pago de fotos extra" + (x.extraFotos ? " (" + money(x.extraFotos.monto) + ")" : ""), !!(x.extraFotos && x.extraFotos.estado === "pendiente")]].filter(function (a) { return a[2]; });
     app.innerHTML = '<button class="back" id="bk">‹ Todos los clientes</button><section>' + chip(x.estado) + '<div class="row" style="gap:12px;align-items:center;flex-wrap:nowrap">' + avTag(x.name, x.phone, x.id, 1) + '<h2 style="margin:0">' + esc(x.name) + '</h2></div>' +
-      '<p class="hint" style="font-size:15px;line-height:1.6">' + esc(x.id) + " · " + esc(x.service) + "<br>" + esc(x.fecha) + " · " + esc(x.place) + "<br>📱 " + esc(x.phone) + " · ✉️ " + esc(x.email) + "<br>Total " + esc(x.total) + " · abono " + esc(x.abono) + (x.contrato ? (x.firmado ? " · ✅ contrato firmado" : " · contrato pendiente de firma") : "") + '</p>' +
+      '<p class="hint" style="font-size:15px;line-height:1.6">' + esc(x.id) + " · " + esc(x.service) + "<br>" + esc(x.fecha) + " · " + esc(x.place) + "<br>📱 " + esc(x.phone) + " · ✉️ " + esc(x.email) + "<br>Total " + esc(x.total) + " · abono " + esc(x.abono) + (x.contrato ? (x.firmado ? " · ✅ contrato firmado" : " · contrato pendiente de firma") : "") + "<br>" + (x.estado === "Confirmado" ? "💰 1.er pago (abono) ✓ · " + (x.saldoPagado ? "2.º pago (saldo) ✓" : "2.º pago (saldo) pendiente: " + esc(x.saldo)) : "") + (x.extraFotos ? " · 📸 " + x.extraFotos.n + " fotos extra " + money(x.extraFotos.monto) + (x.extraFotos.estado === "pagado" ? " ✓" : " (sin pagar)") : "") + '</p>' +
       (x.estado !== "No disponible" ? '<div class="card2" style="gap:8px"><label for="dce">' + (x.esCumple ? "🎂 ¿Cuándo cumple años? <small>(fecha de nacimiento)</small>" : "🗓️ ¿Para cuándo quiere las fotos?") + '<input id="dce" type="date" value="' + esc(x.cumple || x.entregaPara || "") + '"></label><div class="row"><button class="btn2" id="dceok">Guardar fecha</button><span class="hint" id="dces">' + (x.cumple || x.entregaPara ? (x.entregaLista ? "✓ Entrega agendada en tu calendario" : x.estado === "Confirmado" ? "" : "Se agenda al recibir el abono") : "") + '</span></div></div>' : "") +
       '<div class="acts">' + acts.map(function (a) { return '<button class="act" data-k="' + a[0] + '" aria-pressed="' + (a[0] === cual) + '">' + a[1] + '</button>'; }).join("") + '</div></section>' + (x.estado !== "No disponible" ? '<section id="prog"></section>' : '') + '<div id="cmp"></div>';
     $("bk").onclick = function () { lista(""); };
@@ -621,6 +623,15 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
   function componer(x, k) {
     var box = $("cmp");
     if (k === "gus") { abrirGustos(x.gid); return; }
+    if (k === "extras") {
+      var xf = x.extraFotos || {};
+      box.innerHTML = '<section><h2>¿Ya llegó el pago de las fotos extra?</h2><p>' + esc(x.name) + ' pidió <b>' + xf.n + ' fotos extra</b> por <b>' + money(xf.monto) + '</b>. Si el Yappy no se reconoció solo o te pagó en efectivo, márcalo aquí: se registra en Finanzas una sola vez y le llega la confirmación por correo.</p><button class="btn" id="okx">Sí, pago recibido</button><p class="err" id="errx"></p></section>';
+      $("okx").onclick = function () {
+        var b = this; b.disabled = true; b.innerHTML = '<span class="spin"></span>Registrando…';
+        call({ action: "extras", id: x.id, t: x.t }).then(function (r) { if (!r.ok) { b.disabled = false; b.textContent = "Sí, pago recibido"; $("errx").textContent = r.title; return; } x.extraFotos.estado = "pagado"; box.innerHTML = '<div class="msg"><b class="pos">✓ ' + esc(r.title) + '</b><br>' + (r.html || "") + '</div>'; LIST = null; }).catch(function () { b.disabled = false; b.textContent = "Sí, pago recibido"; $("errx").textContent = "No pudimos conectar."; });
+      };
+      box.scrollIntoView({ block: "start", behavior: "smooth" }); return;
+    }
     if (k === "rep") { finanzas(x.id); return; }
     if (k === "saldo") {
       box.innerHTML = '<section><h2>Saldo cobrado</h2><p>Registra el pago del saldo de ' + esc(x.name) + '. Después te pedimos cómo repartieron el trabajo.</p>' +
