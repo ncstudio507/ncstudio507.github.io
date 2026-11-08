@@ -50,7 +50,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 .cl{display:grid;gap:4px;text-align:left;width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;cursor:pointer;font:inherit;color:var(--fg)}
 .cl b{font-size:17px}.cl span{font-size:14px;color:var(--muted)}
 .chip{display:inline-block;font-size:12px;font-weight:bold;padding:3px 8px;border-radius:99px;background:var(--soft);color:var(--fg);justify-self:start}
-.chip.ok{background:#D1FADF}.chip.wait{background:#FEF0C7}.chip.no{background:#FEE4E2}.chip.req{background:#F99824;color:#222020}
+.chip.ok{background:#D1FADF}.chip.wait{background:#FEF0C7}.chip.no{background:#FEE4E2}.chip.req{background:#F99824;color:#222020}.trash{position:absolute;top:10px;right:10px;min-width:44px;height:44px;padding:0 10px;border-radius:8px;border:1.5px solid #D9CDBE;background:#FEFEFE;color:#6B6466;cursor:pointer;display:flex;align-items:center;justify-content:center;font:bold 14px Arial,Helvetica,sans-serif}.trash:hover{color:#B42318;border-color:#B42318}.trash.sure{background:#B42318;border-color:#B42318;color:#FEFEFE}
 .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 @media (max-width:420px){.acts{grid-template-columns:1fr}}
 .act{font:bold 15px Arial,sans-serif;text-align:left;background:#fff;border:1px solid var(--line);border-radius:8px;padding:13px 14px;cursor:pointer;color:var(--fg)}
@@ -576,9 +576,21 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     if (!L.length) { box.innerHTML = ""; return; }
     box.innerHTML = '<p class="hint" style="margin:4px 0 0"><b>📅 En tu calendario (' + L.length + ')</b> · los agregaste a mano y les faltan datos para ser reserva.</p>';
     L.forEach(function (m) {
-      var b = document.createElement("button"); b.className = "cl";
+      var w = document.createElement("div"); w.style.position = "relative";
+      var b = document.createElement("button"); b.className = "cl"; b.style.paddingRight = "64px"; b.style.width = "100%";
       b.innerHTML = '<span class="chip req">⚠️ Requiere información</span><b>' + esc(m.titulo || "(sin título)") + '</b><span>' + esc(calCuando(m)) + '</span>' + (m.lugar ? '<span>📍 ' + esc(m.lugar) + '</span>' : '');
-      b.onclick = function () { calDet(m); }; box.appendChild(b);
+      b.onclick = function () { calDet(m); };
+      var x = document.createElement("button"); x.type = "button"; x.className = "trash"; x.setAttribute("aria-label", "Quitar de esta lista (no se borra de tu calendario)"); x.title = "Quitar de esta lista";
+      x.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"></path></svg>';
+      var arm = null;
+      x.onclick = function (ev) {
+        ev.stopPropagation();
+        if (!x.classList.contains("sure")) { x.classList.add("sure"); x.textContent = "¿Quitar?"; clearTimeout(arm); arm = setTimeout(function () { x.classList.remove("sure"); x.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"></path></svg>'; }, 3500); return; }
+        clearTimeout(arm); x.disabled = true; x.innerHTML = '<span class="spin" style="margin:0"></span>';
+        call({ action: "cal_ignorar", pin: PIN, id: m.id }).then(function (r) { if (!r.ok) { x.disabled = false; x.textContent = "Error"; return; } CALM = (CALM || []).filter(function (z) { return z.id !== m.id; }); pintaCalM($("bq") ? $("bq").value.toLowerCase().trim() : ""); })
+          .catch(function () { x.disabled = false; x.textContent = "Sin conexión"; });
+      };
+      w.appendChild(b); w.appendChild(x); box.appendChild(w);
     });
   }
   function calDet(m) {
