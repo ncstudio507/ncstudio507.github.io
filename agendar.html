@@ -208,25 +208,40 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     alto(); window.addEventListener("resize", alto);
   }
   /* ---------- códigos de descuento ---------- */
+  var PALABRAS = {
+    levelup: ["CUMPLE", "LEVELUP", "NIVEL", "FIESTA", "VELITAS"], estudio: ["CUMPLE", "LEVELUP", "ESTUDIO", "VELITAS"], suenos: ["QUINCE", "SUENOS", "PRINCESA", "QUINCEANERA"],
+    dulce: ["DULCE", "ESPERA", "MAMA", "PANCITA"], bebe: ["MIBEBE", "PRIMERANO", "AMOR", "PEQUE"], folklore: ["POLLERA", "MONTUNO", "TIPICO", "FOLKLORE"],
+    infantil: ["MOMENTOS", "PINATA", "PEQUES", "FIESTA"], primer: ["LOGRO", "KINDER", "PEQUES"], gran: ["GRADUADO", "LOGRO", "TOGA"], granext: ["GRADUADO", "TOGA", "BIRRETE"],
+    gameon: ["GAMEON", "EQUIPO", "CAMPEON"], limitless: ["CORREDOR", "META", "RUNNER"], _: ["NCSTUDIO", "FOTOS", "AMIGOS", "RECUERDOS"]
+  };
   function codigos() {
     tab("A"); window.scrollTo(0, 0);
     app.innerHTML = '<button class="back" id="cdbk">‹ Agendar</button><section><h2>Códigos de descuento</h2><p class="hint">Tus clientes los escriben en la página («Tengo un código de descuento») y se les descuenta del total. Quedan activos hasta que los desactives.</p>' +
       '<div class="g2"><label for="cdc">Código<input id="cdc" autocomplete="off" placeholder="Ej.: NAVIDAD10" style="text-transform:uppercase"></label><label for="cdt">Tipo de descuento<select id="cdt"><option value="%">Porcentaje (%)</option><option value="$">Monto fijo ($)</option></select></label>' +
       '<label for="cdv">¿Cuánto descuenta?<input id="cdv" type="number" min="1" step="1" inputmode="decimal" placeholder="Ej.: 10"></label><label for="cdn">Nota <small>(opcional)</small><input id="cdn" autocomplete="off" placeholder="Ej.: promo de diciembre"></label></div>' +
-      '<div class="row"><button class="btn" id="cdok">Crear código</button><button class="btn2" id="cdr">🎲 Generar uno</button><span class="err" id="cderr"></span></div></section><section><h2>Tus códigos</h2><div id="cdl" style="display:grid;gap:8px"><div class="msg"><span class="spin"></span>Cargando…</div></div></section>';
+      '<fieldset style="border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin:0;display:grid;gap:6px"><legend style="font-weight:bold;padding:0 4px">¿Para qué experiencias?</legend><small class="hint">Si no marcas ninguna, sirve para todas.</small><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px">' +
+      DATA.P.map(function (p) { return '<label class="chk" style="font-weight:400"><input type="checkbox" data-cx="' + esc(p.id) + '"> ' + esc(p.title) + '</label>'; }).join("") + '</div></fieldset>' +
+      '<div class="row"><button class="btn" id="cdok">Crear código</button><button class="btn2" id="cdr">🎲 Sugerir una palabra</button><span class="err" id="cderr"></span></div><p class="hint" style="margin:-6px 0 0">Puedes escribir el código que quieras, o tocar «Sugerir una palabra» para que te proponga una que tenga que ver con la experiencia.</p></section><section><h2>Tus códigos</h2><div id="cdl" style="display:grid;gap:8px"><div class="msg"><span class="spin"></span>Cargando…</div></div></section>';
     $("cdbk").onclick = function () { form(); };
-    $("cdr").onclick = function () { var a = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", c = "NC"; for (var i = 0; i < 5; i++) c += a.charAt(Math.floor(Math.random() * a.length)); $("cdc").value = c; };
+    var exSel = function () { return Array.prototype.filter.call(app.querySelectorAll("[data-cx]"), function (x) { return x.checked; }).map(function (x) { return x.getAttribute("data-cx"); }); };
+    var ULT = "";
+    $("cdr").onclick = function () {
+      var ids = exSel(), L = [];
+      (ids.length ? ids : ["_"]).forEach(function (id) { (PALABRAS[id] || PALABRAS._).forEach(function (w) { if (L.indexOf(w) < 0) L.push(w); }); });
+      var w = L[Math.floor(Math.random() * L.length)]; if (L.length > 1) while (w === ULT) w = L[Math.floor(Math.random() * L.length)]; ULT = w;
+      var v = num($("cdv").value); $("cdc").value = w + (v > 0 ? Math.round(v) : "");
+    };
     function pinta(r) {
       if (!r.ok) { $("cdl").innerHTML = '<p class="hint">No pudimos cargar los códigos. ¿Ya pegaste el código nuevo?</p>'; return; }
-      $("cdl").innerHTML = r.list.map(function (c) { return '<div class="card2" style="gap:6px"><div class="row" style="justify-content:space-between"><b style="font:400 20px Georgia,serif;letter-spacing:1px">' + esc(c.codigo) + '</b><span class="chip ' + (c.activo ? "ok" : "no") + '">' + (c.activo ? "Activo" : "Desactivado") + '</span></div><span>' + esc(c.texto) + ' · usado ' + c.usos + (c.usos === 1 ? " vez" : " veces") + (c.notas ? ' · ' + esc(c.notas) : '') + '</span><button class="btn2" data-cd="' + esc(c.codigo) + '" data-on="' + (c.activo ? 0 : 1) + '" style="justify-self:start">' + (c.activo ? "Desactivar" : "Activar otra vez") + '</button></div>'; }).join("");
+      $("cdl").innerHTML = r.list.map(function (c) { return '<div class="card2" style="gap:6px"><div class="row" style="justify-content:space-between"><b style="font:400 20px Georgia,serif;letter-spacing:1px">' + esc(c.codigo) + '</b><span class="chip ' + (c.activo ? "ok" : "no") + '">' + (c.activo ? "Activo" : "Desactivado") + '</span></div><span>' + esc(c.texto) + ' · usado ' + c.usos + (c.usos === 1 ? " vez" : " veces") + (c.notas ? ' · ' + esc(c.notas) : '') + '</span><small class="hint">Sirve para: ' + (c.exps && c.exps.length ? esc(c.exps.map(function (id) { var p = DATA.P.filter(function (x) { return x.id === id; })[0]; return p ? p.title : id; }).join(", ")) : "todas las experiencias") + '</small><button class="btn2" data-cd="' + esc(c.codigo) + '" data-on="' + (c.activo ? 0 : 1) + '" style="justify-self:start">' + (c.activo ? "Desactivar" : "Activar otra vez") + '</button></div>'; }).join("");
       Array.prototype.forEach.call($("cdl").querySelectorAll("[data-cd]"), function (b) { b.onclick = function () { b.disabled = true; call({ action: "cod_save", pin: PIN, c: { codigo: b.getAttribute("data-cd"), activo: b.getAttribute("data-on") === "1" } }).then(pinta); }; });
     }
     call({ action: "cod_lista", pin: PIN }).then(pinta).catch(function () { $("cdl").innerHTML = '<p class="hint">No pudimos conectar.</p>'; });
     $("cdok").onclick = function () {
       var b = this; $("cderr").textContent = ""; b.disabled = true;
-      call({ action: "cod_save", pin: PIN, c: { nuevo: true, codigo: $("cdc").value, tipo: $("cdt").value, valor: $("cdv").value, notas: $("cdn").value } }).then(function (r) {
+      call({ action: "cod_save", pin: PIN, c: { nuevo: true, codigo: $("cdc").value, tipo: $("cdt").value, valor: $("cdv").value, notas: $("cdn").value, exps: exSel() } }).then(function (r) {
         b.disabled = false; if (!r.ok) { $("cderr").textContent = r.title; return; }
-        $("cdc").value = ""; $("cdv").value = ""; $("cdn").value = ""; pinta(r);
+        $("cdc").value = ""; $("cdv").value = ""; $("cdn").value = ""; Array.prototype.forEach.call(app.querySelectorAll("[data-cx]"), function (x) { x.checked = false; }); pinta(r);
       }).catch(function () { b.disabled = false; $("cderr").textContent = "No pudimos conectar."; });
     };
   }
@@ -280,7 +295,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     $("dsv").oninput = function () { if ($("dst").value !== "cod") calc(); };
     $("dsv").onchange = function () {
       if ($("dst").value !== "cod") return; var v = this.value.trim(); if (!v) return; $("dsm").textContent = "Revisando el código…";
-      call({ action: "codigo", codigo: v }).then(function (r) { DSCOD = r.ok ? r : null; $("dsm").innerHTML = r.ok ? '<span class="pos">✓ ' + esc(r.codigo + ": " + r.texto) + '</span>' : '<span class="neg">' + esc(r.title) + '</span>'; calc(); }).catch(function () { $("dsm").textContent = "No pudimos revisar el código."; });
+      call({ action: "codigo", codigo: v, exp: expSel() }).then(function (r) { DSCOD = r.ok ? r : null; $("dsm").innerHTML = r.ok ? '<span class="pos">✓ ' + esc(r.codigo + ": " + r.texto) + '</span>' : '<span class="neg">' + esc(r.title) + '</span>'; calc(); }).catch(function () { $("dsm").textContent = "No pudimos revisar el código."; });
     };
     preguntaEntrega();
     $("tr").onchange = function () { var v = $("tr").value; $("pl").value = v === "otro" ? "" : (v === "0" ? "Estudio o Las Tablas" : DATA.T[+v][0]); if (v === "otro") $("pl").focus(); calc(); };

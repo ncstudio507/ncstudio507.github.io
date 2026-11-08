@@ -2028,8 +2028,9 @@ if (NC_DUENO) (function () {
   new MutationObserver(function () { cambia(); }).observe(document.documentElement, { childList: true, subtree: true, characterData: true });
 })();
 /* código de descuento: se revisa en Apps Script y se descuenta del total */
-function codModel(self, total) {
+function codModel(self, total, expId) {
   var c = self.state.ncCod || { open: false, txt: "", ok: null, msg: "" }, desc = 0;
+  if (c.ok && c.ok.exp !== undefined && c.ok.exp !== (expId || "")) { c = Object.assign({}, c, { ok: null, msg: "Toca «Aplicar» otra vez para revisar el código con esta experiencia." }); }
   if (c.open && c.ok) desc = c.ok.tipo === "%" ? Math.round(total * c.ok.valor) / 100 : Math.min(c.ok.valor, total);
   return { open: !!c.open, onS: c.open ? "true" : "false", boxBg: c.open ? "#F99824" : "#FEFEFE", txt: c.txt || "", msg: c.msg || "", msgColor: c.ok ? "#067647" : "#B42318", desc: desc, code: c.ok && c.open ? c.ok.codigo : "",
     toggle: function () { self.setState({ ncCod: Object.assign({}, c, { open: !c.open }) }); },
@@ -2038,8 +2039,9 @@ function codModel(self, total) {
       var code = String(c.txt || "").trim().toUpperCase();
       if (!code) { self.setState({ ncCod: Object.assign({}, c, { ok: null, msg: "Escribe tu código." }) }); return; }
       self.setState({ ncCod: Object.assign({}, c, { txt: code, ok: null, msg: "Revisando el código…" }) });
-      fetch(NC_SCRIPT, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "codigo", codigo: code }) }).then(function (r) { return r.json(); }).then(function (j) {
+      fetch(NC_SCRIPT, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "codigo", codigo: code, exp: expId || "" }) }).then(function (r) { return r.json(); }).then(function (j) {
         var cc = self.state.ncCod || c;
+        if (j && j.ok) j.exp = expId || "";
         self.setState({ ncCod: Object.assign({}, cc, { txt: code, ok: j && j.ok ? j : null, msg: j && j.ok ? "✓ Código " + j.codigo + ": " + j.texto + ". Ya está descontado del total." : ((j && j.title) || "Ese código no es válido.") }) });
       }).catch(function () { self.setState({ ncCod: Object.assign({}, self.state.ncCod || c, { ok: null, msg: "No pudimos revisar el código. Revisa tu internet." }) }); });
     }
@@ -2379,7 +2381,7 @@ class Component extends DCLogic {
         }
         var ready = !!(self.state.calSel && slot);
         var hora = ready ? slot.split(" · ")[0] : "", lugar = ready ? slot.split(" · ")[1].toLowerCase() : "";
-        var cod = codModel(self, num(ctx.price));
+        var cod = codModel(self, num(ctx.price), self.state.sel);
         var summary = ready ? (selLabel + " a las " + hora + " (" + lugar + ") · " + ctx.exp + ", " + ctx.prop.toLowerCase() + " (" + ctx.price + ")") : "";
         var waMsg = ready ? ("Hola, NC Studio. Quiero reservar el " + selLabel.toLowerCase() + " a las " + hora + " (" + lugar + ") para " + ctx.exp + ", " + ctx.prop.toLowerCase() + " (" + ctx.price + ").") : "";
         return {
@@ -2482,7 +2484,7 @@ class Component extends DCLogic {
         var picked = locs.filter(function (l) { return !!L[l.id]; }), other = false;
         picked.forEach(function (l) { if (l.other) other = true; if (l.v) { total += l.v; lines.push("• Traslado a " + l.place + ": " + money(l.v)); } });
         var lugares = picked.length ? picked.map(function (l) { return l.place; }).join(", ") : "Por definir";
-        var cod = codModel(self, total); if (cod.desc) { total = Math.round((total - cod.desc) * 100) / 100; lines.push("• Descuento (código " + cod.code + "): -" + money(cod.desc)); }
+        var cod = codModel(self, total, self.state.xcId); if (cod.desc) { total = Math.round((total - cod.desc) * 100) / 100; lines.push("• Descuento (código " + cod.code + "): -" + money(cod.desc)); }
         var cal = calModel(self, { off: "xcOff", sel: "xcSel", slot: "xcSlot" }, accent);
         cal.cells.forEach(function (x) { if (x.real && !x.disabled) x.sub = "Libre"; });
         var fecha = st.xcSel ? cal.selLabel : "";
@@ -2640,7 +2642,7 @@ class Component extends DCLogic {
         var picked = locs.filter(function (l) { return !!L[l.id]; }), other = false;
         picked.forEach(function (l) { if (l.other) other = true; if (l.v) { total += l.v; lines.push("• Traslado a " + l.place + ": " + money(l.v)); } });
         var lugares = picked.length ? picked.map(function (l) { return l.place; }).join(", ") : "Por definir";
-        var cod = codModel(self, total); if (cod.desc) { total = Math.round((total - cod.desc) * 100) / 100; lines.push("• Descuento (código " + cod.code + "): -" + money(cod.desc)); }
+        var cod = codModel(self, total, self.state.cotExp); if (cod.desc) { total = Math.round((total - cod.desc) * 100) / 100; lines.push("• Descuento (código " + cod.code + "): -" + money(cod.desc)); }
         var expObj = PACKAGES.filter(function (p) { return p.id === exp; })[0];
         var expName = expObj ? TABNAME[expObj.id][0] : (exp === "otra" ? "Otra" : "Por definir");
         var incl = ["30 minutos de sesión", "Mínimo 15 fotos de prueba", "3 fotos editadas en alta resolución", "Asesoría previa personalizada", "1 cambio de vestuario", "Dirección de poses", "Galería online privada"];
