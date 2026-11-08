@@ -50,7 +50,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 .cl{display:grid;gap:4px;text-align:left;width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;cursor:pointer;font:inherit;color:var(--fg)}
 .cl b{font-size:17px}.cl span{font-size:14px;color:var(--muted)}
 .chip{display:inline-block;font-size:12px;font-weight:bold;padding:3px 8px;border-radius:99px;background:var(--soft);color:var(--fg);justify-self:start}
-.chip.ok{background:#D1FADF}.chip.wait{background:#FEF0C7}.chip.no{background:#FEE4E2}
+.chip.ok{background:#D1FADF}.chip.wait{background:#FEF0C7}.chip.no{background:#FEE4E2}.chip.req{background:#F99824;color:#222020}
 .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 @media (max-width:420px){.acts{grid-template-columns:1fr}}
 .act{font:bold 15px Arial,sans-serif;text-align:left;background:#fff;border:1px solid var(--line);border-radius:8px;padding:13px 14px;cursor:pointer;color:var(--fg)}
@@ -265,7 +265,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
   // formulario rápido (para personalizados, descuentos o las experiencias que en la página se reservan por WhatsApp)
   function formRapido(pre) {
     if (NUEVO_CONTRATO) setTimeout(function () { var s0 = app.querySelector("section"); if (s0) s0.insertAdjacentHTML("beforebegin", '<div class="msg" style="padding:14px 16px">📄 Llena los datos del cliente nuevo y toca «Agendar y enviar». Al terminar te aparece el botón para generar su contrato.</div>'); }, 0);
-    salir.hidden = false; manual = false; tab("A");
+    salir.hidden = false; manual = false; tab("A"); CALPRE = pre && pre.cal || null;
     var hoy = new Date(); hoy.setMinutes(hoy.getMinutes() - hoy.getTimezoneOffset());
     var opts = '<option value="">Elige…</option>' + DATA.P.map(function (p) {
       return '<optgroup label="' + esc(p.title) + '">' + OPTS.filter(function (o) { return o.exp === p; }).map(function (o) { return '<option value="' + o.key + '">' + esc(o.title + " · " + o.nm + " (" + money(o.price) + ")") + '</option>'; }).join("") + '</optgroup>';
@@ -310,6 +310,20 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       if (pre.slot) { var m = String(pre.slot).match(/(\d+):(\d+) (a|p)/); if (m) $("tm").value = ("0" + ((+m[1] % 12) + (m[3] === "p" ? 12 : 0))).slice(-2) + ":" + m[2]; if (/estudio/i.test(pre.slot)) { $("tr").value = "0"; $("tr").onchange(); } }
       if (pre.otro) { $("pk").value = "otro"; $("pk").onchange(); }
       calc(); irPaso(pre.exp && pre.fecha ? (esCumpleId(expSel()) ? 2 : 3) : pre.exp ? 1 : 0);
+    }
+    if (CALPRE) {
+      var m = CALPRE, cli = pre.cli || {};
+      $("dt").removeAttribute("min"); $("dt").value = m.fecha; if (m.hora) $("tm").value = m.hora;
+      $("nm").value = cli.name || ""; $("ph").value = cli.phone || ""; $("em").value = cli.email || "";
+      if (m.lugar) { var ti = -1; DATA.T.forEach(function (t, i) { if (i && normN(m.lugar).indexOf(normN(t[0])) >= 0) ti = i; }); $("tr").value = /estudio|las tablas/i.test(m.lugar) ? "0" : ti > 0 ? String(ti) : "otro"; $("pl").value = m.lugar; }
+      if (m.desc) $("nt").value = m.desc;
+      var eml = $("em").closest("label").querySelector("small"); if (eml) eml.textContent = "(opcional si no le vas a enviar nada por correo)";
+      $("st2").closest("label").insertAdjacentHTML("afterend", '<label class="radio"><input type="radio" name="st" id="st3"><span><b>Ya pagó el abono y no quiero enviarle nada todavía.</b><br>Queda confirmada y unida a tu evento; el contrato y lo demás se los mandas tú desde Enviar.</span></label>');
+      $("st2").checked = true;
+      var top = $("pstop"); top.insertAdjacentHTML("beforebegin", '<div class="msg" style="padding:12px 14px;display:grid;gap:2px"><b>📅 Completando una reserva de tu calendario</b><span>' + esc(m.titulo + " · " + calCuando(m)) + '</span><small class="hint">Te pregunto solo lo que falta; puedes volver atrás para revisar lo que ya se llenó.</small></div>');
+      calc();
+      var n = 0; while (n < 4 && !faltaPaso(n)) n++;
+      irPaso(n);
     }
     calc();
   }
@@ -365,10 +379,10 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
   function irPaso(n) {
     PASO = n;
     Array.prototype.forEach.call(app.querySelectorAll("[data-paso]"), function (x) { x.hidden = +x.getAttribute("data-paso") !== n; });
-    $("pstop").innerHTML = '<div class="row" style="justify-content:space-between;flex-wrap:nowrap">' + (n ? '<button class="back" id="pback" type="button">‹ ' + PASOS[n - 1][0] + '</button>' : '<button class="back" id="pback0" type="button">‹ Experiencias</button>') + '<small class="hint">Paso ' + (n + 1) + ' de ' + PASOS.length + '</small></div>' +
+    $("pstop").innerHTML = '<div class="row" style="justify-content:space-between;flex-wrap:nowrap">' + (n ? '<button class="back" id="pback" type="button">‹ ' + PASOS[n - 1][0] + '</button>' : '<button class="back" id="pback0" type="button">‹ ' + (CALPRE ? "Volver" : "Experiencias") + '</button>') + '<small class="hint">Paso ' + (n + 1) + ' de ' + PASOS.length + '</small></div>' +
       '<div class="pasos">' + PASOS.map(function (p, i) { return '<i class="' + (i <= n ? "on" : "") + '"></i>'; }).join("") + '</div><h2 style="margin:4px 0 0">' + PASOS[n][0] + '</h2><p class="hint" style="margin:0">' + PASOS[n][1] + '</p>';
     if ($("pback")) $("pback").onclick = function () { irPaso(n - 1); };
-    if ($("pback0")) $("pback0").onclick = function () { form(); };
+    if ($("pback0")) $("pback0").onclick = function () { if (CALPRE) calDet(CALPRE); else form(); };
     var go = $("go"); go.textContent = n === PASOS.length - 1 ? "Agendar y enviar" : "Siguiente ›";
     go.onclick = n === PASOS.length - 1 ? enviarReserva : function () { var e = faltaPaso(n); if (e) { avisoPaso(e); return; } irPaso(n + 1); };
     if (n === 2) calAgendar();
@@ -380,7 +394,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     if (n === 0) { if (!o) return "Elige un paquete."; if (o === "otro" && (!$("on").value.trim() || !(num($("op").value) > 0))) return "Escribe el nombre del servicio y su precio."; }
     if (n === 2) { if (!$("dt").value) return "Elige el día en el calendario."; if (esCumpleId(expSel()) && !$("ce").value) return "Falta la fecha de nacimiento del cumpleañero."; }
     if (n === 3) {
-      var f = []; if (!$("nm").value.trim()) f.push("nombre"); if ($("ph").value.replace(/\D/g, "").length < 7) f.push("teléfono"); if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($("em").value.trim())) f.push("correo válido");
+      var f = [], emv = $("em").value.trim(); if (!$("nm").value.trim()) f.push("nombre"); if ($("ph").value.replace(/\D/g, "").length < 7) f.push("teléfono"); if (!(CALPRE && !emv) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emv)) f.push("correo válido");
       if (f.length) return "Falta: " + f.join(", ") + ".";
     }
     var sec = app.querySelector('[data-paso="' + n + '"] .perr'); if (sec) sec.textContent = "";
@@ -484,7 +498,8 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     var nm = $("nm").value.trim(), ph = $("ph").value.trim(), em = $("em").value.trim(), dt = $("dt").value;
     if (!nm) err.push("nombre");
     if (ph.replace(/\D/g, "").length < 7) err.push("teléfono");
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) err.push("correo válido");
+    var calla = !!(CALPRE && $("st3") && $("st3").checked);
+    if (!(calla && !em) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) err.push(CALPRE && !em ? "correo (o elige «no quiero enviarle nada todavía»)" : "correo válido");
     if (!b || !b.service) err.push("paquete");
     if (!dt) err.push("fecha");
     if (!(c.total > 0)) err.push("total");
@@ -502,18 +517,20 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
       durationMin: b.mins, photos: String(b.fotos || ""), tests: b.tests, eventType: "", total: c.total, totalLabel: money(c.total) + ($("tr").value === "otro" ? " + traslado" : ""), notes: $("nt").value.trim(),
       firmante: $("fi").value.trim(), cedula: $("ced").value.trim(),
       codigo: porCod ? DSCOD.codigo : "", descuento: porCod ? c.dsc : 0,
-      expId: expSel(), cumple: esCumpleId(expSel()) ? $("ce").value : "", entregaPara: esCumpleId(expSel()) ? "" : $("ce").value
+      expId: expSel(), cumple: esCumpleId(expSel()) ? $("ce").value : "", entregaPara: esCumpleId(expSel()) ? "" : $("ce").value,
+      evManual: CALPRE ? CALPRE.id : ""
     };
-    var pag = $("st2").checked;
+    var pag = $("st2").checked || calla, calId = CALPRE ? CALPRE.id : "";
     var go = $("go"); go.disabled = true; go.innerHTML = '<span class="spin"></span>Enviando…';
-    call({ action: "agendar", pin: PIN, pagado: pag, data: data }).then(function (r) {
+    call({ action: "agendar", pin: PIN, pagado: pag, silencio: calla, data: data }).then(function (r) {
       if (r.title === "PIN incorrecto") { setPin(""); pinView("El PIN cambió. Escríbelo de nuevo."); return; }
       if (!r.ok) { go.disabled = false; go.textContent = "Agendar y enviar"; $("ferr").innerHTML = esc(r.title || "Error") + ". " + (r.html || ""); return; }
+      if (calId) { CALM = (CALM || []).filter(function (z) { return z.id !== calId; }); CALPRE = null; }
       mostrarAgendado(r);
     }).catch(function () { go.disabled = false; go.textContent = "Agendar y enviar"; $("ferr").textContent = "No pudimos conectar. Revisa tu internet e inténtalo de nuevo."; });
   }
   /* ---------- Clientes: mensajes por WhatsApp ---------- */
-  var LIST = null, YAPPY = "6631-3762";
+  var LIST = null, YAPPY = "6631-3762", CALM = null, CALPRE = null;
   function wnum(p) { var d = String(p || "").replace(/\D/g, ""); if (d.length <= 8) d = "507" + d; return d; }
   function first(n) { return String(n || "").trim().split(/\s+/)[0]; }
   function chip(e) { var k = e === "Confirmado" ? "ok" : e === "Cotización enviada" ? "wait" : e === "No disponible" ? "no" : ""; return '<span class="chip ' + k + '">' + esc(e === "Cotización enviada" ? "Esperando abono" : e) + '</span>'; }
@@ -523,19 +540,20 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     call({ action: "clientes", pin: PIN }).then(function (r) {
       if (r.title === "PIN incorrecto") { setPin(""); pinView("El PIN cambió. Escríbelo de nuevo."); return; }
       if (!r.ok) { app.innerHTML = '<div class="msg">No pudimos cargar la lista. ¿Ya actualizaste el código de Apps Script?</div>'; return; }
-      LIST = r.list; YAPPY = r.yappy || YAPPY;
+      LIST = r.list; YAPPY = r.yappy || YAPPY; CALM = null; cargaCalM();
       var it = abrir && LIST.filter(function (x) { return x.id === abrir; })[0];
       if (it) detalle(it); else lista("");
     }).catch(function () { app.innerHTML = '<div class="msg">No pudimos conectar. Revisa tu internet.</div>'; });
   }
   function lista(q) {
-    app.innerHTML = segCli("res") + '<section><div class="row"><label for="bq" style="flex:1">Buscar cliente<input id="bq" placeholder="Nombre, teléfono o NC-…" autocomplete="off"></label><button class="btn2" id="rf" style="align-self:end">↻ Actualizar</button></div></section><div id="ls" style="display:grid;gap:10px"></div>';
+    app.innerHTML = segCli("res") + '<section><div class="row"><label for="bq" style="flex:1">Buscar cliente<input id="bq" placeholder="Nombre, teléfono o NC-…" autocomplete="off"></label><button class="btn2" id="rf" style="align-self:end">↻ Actualizar</button></div></section><div id="lcal" style="display:grid;gap:10px"></div><div id="ls" style="display:grid;gap:10px"></div>';
     $("bq").value = q || "";
     function pinta() {
       var t = $("bq").value.toLowerCase().trim();
       var hoy = new Date().toISOString().slice(0, 10);
       var L = LIST.filter(function (x) { return x.estado !== "No disponible" || t; }).filter(function (x) { return !t || (x.name + " " + x.phone + " " + x.id + " " + x.service).toLowerCase().indexOf(t) >= 0; });
       L.sort(function (a, b) { var fa = a.dateIso >= hoy, fb = b.dateIso >= hoy; if (fa !== fb) return fa ? -1 : 1; return fa ? (a.dateIso < b.dateIso ? -1 : 1) : (a.dateIso > b.dateIso ? -1 : 1); });
+      pintaCalM(t);
       $("ls").innerHTML = L.length ? "" : '<div class="msg">No hay clientes que coincidan.</div>';
       L.forEach(function (x) {
         var b = document.createElement("button"); b.className = "cl";
@@ -544,6 +562,88 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
       });
     }
     $("bq").oninput = pinta; $("rf").onclick = function () { clientes(); }; bindCli(); pinta();
+  }
+
+  /* ---------- reservas que agregaste a mano en tu calendario: «Requiere información» ---------- */
+  function cargaCalM(cb) {
+    call({ action: "cal_manual", pin: PIN }).then(function (r) { CALM = r.ok ? r.list : []; if ($("lcal") && $("bq")) pintaCalM($("bq").value.toLowerCase().trim()); if (cb) cb(); }).catch(function () { CALM = CALM || []; if (cb) cb(); });
+  }
+  function calCuando(m) { return fechaBonita(m.fecha + (m.hora ? "T" + m.hora : "")) || m.fecha; }
+  function pintaCalM(t) {
+    var box = $("lcal"); if (!box) return;
+    if (CALM === null) { box.innerHTML = '<p class="hint" style="margin:0"><span class="spin"></span>Revisando tu calendario…</p>'; return; }
+    var L = CALM.filter(function (m) { return !t || (m.titulo + " " + m.desc + " " + m.tel).toLowerCase().indexOf(t) >= 0; });
+    if (!L.length) { box.innerHTML = ""; return; }
+    box.innerHTML = '<p class="hint" style="margin:4px 0 0"><b>📅 En tu calendario (' + L.length + ')</b> · los agregaste a mano y les faltan datos para ser reserva.</p>';
+    L.forEach(function (m) {
+      var b = document.createElement("button"); b.className = "cl";
+      b.innerHTML = '<span class="chip req">⚠️ Requiere información</span><b>' + esc(m.titulo || "(sin título)") + '</b><span>' + esc(calCuando(m)) + '</span>' + (m.lugar ? '<span>📍 ' + esc(m.lugar) + '</span>' : '');
+      b.onclick = function () { calDet(m); }; box.appendChild(b);
+    });
+  }
+  function calDet(m) {
+    tab("C"); salir.hidden = false;
+    var falta = ["quién es el cliente (de tu base o nuevo)", "el paquete y el precio"];
+    if (!m.hora) falta.push("la hora");
+    if (!m.lugar) falta.push("el lugar");
+    falta.push("si ya pagó el abono");
+    app.innerHTML = '<button class="back" id="cmb">‹ Reservas</button><section><span class="chip req">⚠️ Requiere información</span><h2 style="margin:4px 0 0">' + esc(m.titulo || "(sin título)") + '</h2>' +
+      '<div class="kv"><span>Fecha</span><b>' + esc(calCuando(m)) + (m.todoDia ? " · todo el día" : "") + '</b>' + (m.lugar ? '<span>Lugar</span><b>' + esc(m.lugar) + '</b>' : '') + (m.tel ? '<span>Teléfono</span><b>' + esc(m.tel) + '</b>' : '') + (m.email ? '<span>Correo</span><b>' + esc(m.email) + '</b>' : '') + (m.total ? '<span>Monto anotado</span><b>' + money(m.total) + '</b>' : '') + '</div>' +
+      (m.desc ? '<details open><summary class="hint" style="cursor:pointer">Lo que anotaste en el calendario</summary><p style="white-space:pre-line;margin:6px 0 0;font-size:14px;line-height:1.5">' + esc(m.desc) + '</p></details>' : '') +
+      '<p class="hint" style="margin:6px 0 0">Para que sea una reserva y puedas mandarle el contrato y lo demás, falta: <b>' + esc(falta.join(", ")) + '</b>. Te lo pregunto paso a paso; lo que ya está en el calendario se llena solo.</p>' +
+      '<button class="btn" id="cmc">Completar la información</button><button class="btn2" id="cmn" style="justify-self:start">No es una reserva · ocultarlo</button><p class="err" id="cme"></p></section>';
+    $("cmb").onclick = function () { lista(""); };
+    $("cmc").onclick = function () { completarCal(m); };
+    $("cmn").onclick = function () {
+      var b = this; b.disabled = true; b.innerHTML = '<span class="spin"></span>Ocultando…';
+      call({ action: "cal_ignorar", pin: PIN, id: m.id }).then(function (r) { if (!r.ok) { b.disabled = false; b.textContent = "No es una reserva · ocultarlo"; $("cme").textContent = r.title || "No se pudo"; return; } CALM = (CALM || []).filter(function (z) { return z.id !== m.id; }); lista(""); })
+        .catch(function () { b.disabled = false; b.textContent = "No es una reserva · ocultarlo"; $("cme").textContent = "No pudimos conectar."; });
+    };
+    window.scrollTo(0, 0);
+  }
+  // los clientes cuyo nombre o teléfono aparece en lo que anotaste
+  function sugerirCli(m) {
+    var txt = " " + normN(m.titulo + " " + m.desc).replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ") + " ", tel = String(m.tel || "").replace(/\D/g, "").slice(-8), vis = {}, out = [];
+    (LIST || []).concat(soloBase()).forEach(function (x) {
+      var k = persona(x.name, x.phone) || x.name; if (vis[k]) return;
+      var nn = normN(x.name).split(" "), pt = String(x.phone || "").replace(/\D/g, "").slice(-8);
+      var porTel = tel && pt && tel === pt, porNom = nn[0] && nn[0].length >= 3 && txt.indexOf(" " + nn[0] + " ") >= 0, ape = porNom && nn[1] && nn[1].length >= 3 && txt.indexOf(" " + nn[1] + " ") >= 0;
+      if (porTel || porNom) { vis[k] = 1; out.push({ x: x, p: (porTel ? 4 : 0) + (ape ? 2 : 0) + (porNom ? 1 : 0) }); }
+    });
+    out.sort(function (a, b) { return b.p - a.p; });
+    return out.slice(0, 5).map(function (o) { return o.x; });
+  }
+  function completarCal(m) {
+    tab("C");
+    app.innerHTML = '<button class="back" id="ccb">‹ Volver</button><section><h2>¿Quién es el cliente?</h2><p class="hint">' + esc((m.titulo || "") + " · " + calCuando(m)) + '</p><div id="csug" style="display:grid;gap:8px"><p class="hint"><span class="spin"></span>Buscando en tu base…</p></div>' +
+      '<button class="btn" id="cnew">+ Es un cliente nuevo</button></section><section><h2>O búscalo en tu base de clientes</h2><div id="cpick"></div></section>';
+    $("ccb").onclick = function () { calDet(m); };
+    $("cnew").onclick = function () { seguirCal(m, { name: "", phone: m.tel || "", email: m.email || "" }); };
+    cargaBase(function () {
+      var S = sugerirCli(m);
+      $("csug").innerHTML = S.length ? '<small class="hint">Coincide con lo que anotaste:</small>' : '';
+      S.forEach(function (x) { var b = document.createElement("button"); b.className = "cl"; b.innerHTML = '<span class="chip ok">Sugerido</span><b>' + esc(x.name) + '</b><span>📱 ' + esc(x.phone) + (x.email ? " · " + esc(x.email) : "") + '</span>' + avTag(x.name, x.phone, x.id); b.onclick = function () { seguirCal(m, x); }; $("csug").appendChild(b); });
+      pickRes("cpick", function () { return true; }, function (x) { seguirCal(m, x); }, true);
+    });
+  }
+  function seguirCal(m, cli) {
+    var key = "";
+    if (m.exp) {
+      var O = OPTS.filter(function (o) { return o.exp.id === m.exp; });
+      var o = (m.total && O.filter(function (z) { return z.price === m.total; })[0]) || (O.length === 1 ? O[0] : null);
+      if (o) key = o.key;
+    }
+    formRapido({ cal: m, cli: { name: cli.name || "", phone: cli.phone || m.tel || "", email: cli.email || m.email || "" }, key: key });
+  }
+  // desde Compromisos: un evento de tu calendario que todavía no es reserva
+  function abrirCalEv(e) {
+    var pre = String(e.id).split("@")[0];
+    function ir() {
+      var m = (CALM || []).filter(function (z) { return String(z.id).split("@")[0] === pre; })[0];
+      if (!m) m = { id: pre + "@google.com", titulo: e.titulo, fecha: e.ini.slice(0, 10), hora: e.todoDia ? "" : e.ini.slice(11, 16), todoDia: e.todoDia, lugar: e.lugar || "", desc: e.desc || "", exp: "", tel: "", email: "", total: 0 };
+      if (!LIST) call({ action: "clientes", pin: PIN }).then(function (r) { LIST = r.list || []; calDet(m); }).catch(function () { LIST = []; calDet(m); }); else calDet(m);
+    }
+    if (CALM) ir(); else cargaCalM(ir);
   }
   function precioExtra(x) { var p = DATA.P.filter(function (e) { return e.id === x.expId; })[0] || DATA.P.filter(function (e) { return String(x.service || "").indexOf(e.title) === 0; })[0], m = p && (p.extras || []).filter(function (e) { return /foto editada extra/i.test(e[0]); })[0]; return m ? String(m[1]).replace(/\s*c\/u/, "") : "$10"; }
   function msgs(x) {
@@ -1147,12 +1247,14 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
           (r.extras.length ? '<span style="font-size:14px">➕ ' + esc(r.extras.join(", ")) + '</span>' : '') + (r.notas ? '<span style="font-size:14px">💡 ' + esc(r.notas) + '</span>' : '') +
           '<div class="row"><button class="btn2" data-kres="' + esc(r.id) + '">Ver su ficha</button><a class="btn2" style="text-decoration:none" href="https://wa.me/' + wnum(r.phone) + '" target="_blank" rel="noopener">💬 WhatsApp</a></div>';
       }
+      if (!r && e.tipo === "cal") h += '<div class="row" style="align-items:center"><span class="chip req">⚠️ Requiere información</span><button class="btn2" data-kcm="' + i + '">Completar como reserva</button></div>';
       if (e.desc) h += '<details' + (r ? '' : ' open') + '><summary class="hint" style="cursor:pointer">Todos los detalles del calendario</summary><p style="white-space:pre-line;margin:6px 0 0;font-size:14px;line-height:1.5">' + esc(e.desc) + '</p></details>';
       h += '</div>';
     });
     h += '<a class="btn2" style="text-decoration:none;justify-self:start" href="https://calendar.google.com/calendar/r/day/' + k.replace(/-/g, "/") + '" target="_blank" rel="noopener">Abrir este día en Google Calendar ↗</a>';
     $("kdia").innerHTML = '<div style="display:grid;gap:10px">' + h + '</div>';
     Array.prototype.forEach.call($("kdia").querySelectorAll("[data-kres]"), function (b) { b.onclick = function () { clientes(b.getAttribute("data-kres")); }; });
+    Array.prototype.forEach.call($("kdia").querySelectorAll("[data-kcm]"), function (b) { b.onclick = function () { abrirCalEv(L[+b.getAttribute("data-kcm")]); }; });
     if ($("kag")) $("kag").onclick = function () { formRapido({ fecha: k }); };
   }
   /* ===================== INTERESADOS ===================== */
