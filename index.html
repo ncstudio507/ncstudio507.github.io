@@ -152,7 +152,7 @@ Escríbenos
 
 <section style="background: #F2E4D2; padding: 64px 20px">
 <div style="max-width: 1160px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px">
-<h2 style="margin: 0; text-align: center; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(30px, 4vw, 44px); line-height: 1.15; text-wrap: balance">¿Por dónde <span style="background: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 200 14%27 preserveAspectRatio=%27none%27%3E%3Cpath d=%27M3 9 C 45 4, 120 3, 197 7%27 stroke=%27%23F99824%27 stroke-width=%274%27 fill=%27none%27 stroke-linecap=%27round%27/%3E%3C/svg%3E') no-repeat 0 100% / 100% 0.3em; padding-bottom: 0.1em">empezamos</span>?</h2>
+<h2 style="margin: 0; text-align: center; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(30px, 4vw, 44px); line-height: 1.15; text-wrap: balance">¿Qué estás <span style="background: url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 200 14%27 preserveAspectRatio=%27none%27%3E%3Cpath d=%27M3 9 C 45 4, 120 3, 197 7%27 stroke=%27%23F99824%27 stroke-width=%274%27 fill=%27none%27 stroke-linecap=%27round%27/%3E%3C/svg%3E') no-repeat 0 100% / 100% 0.3em; padding-bottom: 0.1em">buscando</span>?</h2>
 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px">
 <sc-for list="{{start}}" as="s" hint-placeholder-count="2">
 <div style="display: flex; flex-direction: column; border-radius: 8px; overflow: hidden; background: #222020; color: #FEFEFE">
@@ -183,9 +183,9 @@ Escríbenos
 </div>
 <a href="https://instagram.com/ncstudio507" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 24px; border-radius: 999px; border: 1.5px solid #222020; color: #222020; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 15px">Ver más en Instagram</a>
 </div>
-<div role="group" aria-label="Filtrar experiencias" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: -12px">
+<div role="group" aria-label="Filtrar experiencias por ocasión" style="display: flex; flex-wrap: nowrap; gap: 8px; margin-top: -12px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding-bottom: 4px">
 <sc-for list="{{pfTabs}}" as="t" hint-placeholder-count="3">
-<button type="button" onClick="{{t.pick}}" aria-pressed="{{t.pressed}}" style="min-height: 42px; padding: 0 18px; border-radius: 999px; border: 1.5px solid #222020; background: {{t.bg}}; color: {{t.fg}}; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 14px; cursor: pointer">{{t.label}}</button>
+<button type="button" onClick="{{t.pick}}" aria-pressed="{{t.pressed}}" style="flex: none; white-space: nowrap; min-height: 42px; padding: 0 18px; border-radius: 999px; border: 1.5px solid #222020; background: {{t.bg}}; color: {{t.fg}}; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 14px; cursor: pointer">{{t.label}}</button>
 </sc-for>
 </div>
 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px">
@@ -505,7 +505,7 @@ Calcula tu paquete aquí
 <div style="flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 18px">
 <p style="margin: 0; font-family: Allura, cursive; font-size: 44px; line-height: 1; color: {{accent}}">¿Tienes dudas?</p>
 <h2 style="margin: 0; font-family: 'EB Garamond', Georgia, serif; font-weight: 400; font-size: clamp(34px, 4.5vw, 52px); line-height: 1.1">Hablemos</h2>
-<p style="margin: 0; color: #F2E4D2">¿Quieres algo personalizado, tienes una pregunta sobre un paquete o sobre cómo reservar? Escríbenos y te respondemos con gusto.</p>
+<p style="margin: 0; color: #F2E4D2">¿Quieres algo personalizado, tienes preguntas sobre alguno de nuestros paquetes o no sabes cómo reservar? Escríbenos y te respondemos con gusto.</p>
 <a href="#portafolio" style="align-self: flex-start; display: inline-flex; align-items: center; min-height: 48px; padding: 0 24px; border-radius: 999px; border: 1.5px solid #F2E4D2; color: #FEFEFE; text-decoration: none; font-family: Montserrat, sans-serif; font-weight: 600; font-size: 15px">¿Listo? Ver paquetes y reservar</a>
 <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px; font-size: 16px; color: #F2E4D2">
 <span>WhatsApp y Yappy: 6631-3762</span>
@@ -1521,6 +1521,8 @@ var WA = "https://wa.me/50766313762?text=";
 var IG_FEED = "https://feeds.behold.so/qnBMUzAR3CYanHqAU3Re";
 var IG_FALLBACK = ["suenos", "levelup", "dulce", "infantil", "granext", "folklore"];
 var EVENTOS = ["infantil", "limitless"];
+var PF_TABS = [["", "Todas"], ["xv", "XV años"], ["cum", "Cumpleaños"], ["emb", "Embarazo"], ["beb", "Bebé"], ["gra", "Graduación"], ["fol", "Folklore"], ["dep", "Deportes"], ["ev", "Fiestas y eventos"]];
+var PF_OCASION = { xv: ["suenos"], cum: ["levelup", "estudio", "infantil"], emb: ["dulce"], beb: ["bebe"], gra: ["primer", "gran", "granext"], fol: ["folklore"], dep: ["gameon", "limitless"], ev: ["infantil", "limitless"] };
 var FAQ_CATS = [
   ["Reservas y pagos", [0, 1, 2, 3, 18]],
   ["Lugar y horarios", [4, 5, 6, 7]],
@@ -1795,24 +1797,24 @@ var INFO = {
 
 var FAQ = [
   { q: "¿Cómo reservo mi fecha?", a: "Entra a la experiencia que te gusta, toca «Ver disponibilidad y reservar», elige el día y la hora libres y envíanos el mensaje por WhatsApp. Tu fecha queda separada con el 50 % de abono y la firma del contrato." },
-  { q: "¿Cómo puedo pagar?", a: "Por Yappy (6631-3762) o en efectivo. En las sesiones se abona el 50 % al firmar el contrato y el otro 50 % el día de la sesión. En graduaciones, eventos y carreras, el segundo 50 % se paga el mismo día." },
-  { q: "¿Puedo cambiar la fecha de mi sesión?", a: "Sí. Puedes reprogramar tu sesión para cualquier fecha disponible dentro de los 6 meses siguientes a tu abono. Escríbenos por WhatsApp y te ayudamos a elegir el nuevo día." },
+  { q: "¿Cómo puedo pagar?", a: "Por Yappy (6631-3762) o en efectivo. Para reservar pagas la mitad (abono) y la otra mitad el día de tu sesión o evento, antes de empezar." },
+  { q: "¿Puedo cambiar la fecha de mi sesión?", a: "Sí. Si nos avisas con al menos 3 días de anticipación, puedes cambiarla sin costo a cualquier fecha disponible dentro de los 6 meses siguientes a tu abono. Si nos avisas con menos de 3 días, el cambio tiene un cargo de $15. Escríbenos por WhatsApp y te ayudamos a elegir el nuevo día." },
   { q: "¿Me devuelven el abono si cancelo?", a: "El abono no es reembolsable, pero no lo pierdes: puedes usarlo para reprogramar tu sesión dentro de los 6 meses siguientes a la fecha en que abonaste." },
   { q: "¿Qué pasa si llueve el día de mi sesión en exteriores?", a: "Tú eliges: hacemos la sesión en nuestro estudio ese mismo día o la reprogramamos para otra fecha disponible." },
   { q: "¿Qué horarios tienen?", a: "Entre semana: 7:00 p. m. en estudio.\nFines de semana: 10:00 a. m. en estudio y 4:30 p. m. en exteriores.\nEn el calendario de cada propuesta ves al instante qué días están libres." },
   { q: "¿Dónde queda el estudio?", a: "En el barrio Nuevo México, Las Tablas. Al confirmar tu reserva te enviamos la ubicación exacta por WhatsApp." },
   { q: "¿Hacen sesiones fuera de Las Tablas?", a: "¡Claro! Viajamos a donde estés. El traslado tiene un recargo según el lugar:", tras: true },
   { q: "¿Cómo funciona el plan de 12 Meses de Amor?", a: "Para reservar el plan del primer año se realiza el pago completo de la anualidad. Luego agendamos la primera sesión de tu bebé y, a partir de ahí, coordinamos las siguientes mes a mes. Recomendamos hacer cada sesión entre 3 y 5 días antes del cumple-mes." },
-  { q: "¿Dónde se hacen las sesiones del bebé y quién pone la decoración?", a: "Principalmente en nuestro estudio. También pueden hacerse en casa si eligen una temática sencilla, como una de cocina, y a partir de los 6 meses se puede optar por exteriores. La decoración o temática corre por parte de los padres, pero te damos asesoría previa para elegir ideas que funcionen bien en las fotos." },
+  { q: "¿Dónde se hacen las sesiones del bebé y quién pone la decoración?", a: "Principalmente en nuestro estudio. También pueden hacerse en casa si eligen una temática sencilla, y a partir de los 6 meses se puede optar por exteriores. La decoración o temática corre por parte de los padres, pero te damos asesoría previa para elegir ideas que funcionen bien en las fotos." },
   { q: "¿Qué pasa si mi bebé se enferma el día de la sesión?", a: "En caso de enfermedad o algún imprevisto, reprogramamos la sesión según disponibilidad, coordinando una nueva fecha contigo." },
   { q: "¿Necesito saber posar?", a: "Para nada. Te guiamos en todo momento, sin poses forzadas, para que te sientas cómodo y todo fluya natural." },
   { q: "¿Cómo elijo mis fotos?", a: "Después de la sesión te enviamos tus fotos de prueba en una galería online privada. Tú escoges tus favoritas y nosotros las editamos." },
   { q: "¿Cuándo recibo mis fotos?", a: "Sesiones: las fotos de prueba llegan de 48 a 72 horas hábiles después de la sesión, y las editadas dos semanas después de que nos envías tu selección.\nEventos: las fotos editadas llegan 10 días después del evento.\nCarreras: la cobertura completa queda lista dentro de los 5 días posteriores." },
   { q: "¿Puedo tener todas las fotos sin editar?", a: "Sí. Agrega la liberación de galería como extra al reservar tu paquete o en «Arma tu paquete», y te entregamos todas las fotos de la sesión." },
-  { q: "¿Puedo llevar a más personas a mi sesión?", a: "Sí. Puedes agregar personas extra para fotos grupales o familiares; cada persona suma 10 minutos de sesión y 1 foto editada." },
+  { q: "¿Puedo llevar a más personas a mi sesión?", a: "Sí, con un costo adicional: la 1.ª persona extra $15, de la 2.ª a la 4.ª $12 c/u y de la 5.ª en adelante $10 c/u. Cada una suma 10 minutos de sesión y 1 foto editada. Quienes solo vienen a acompañarte no pagan." },
   { q: "¿Puedo agregar maquillaje, peinado o más cambios de vestuario?", a: "Sí. Al tocar «Ver disponibilidad y reservar» te preguntamos si quieres mejorar tu experiencia y ahí eliges tus extras. También puedes agregarlos en «Arma tu paquete». Cada cambio de vestuario extra suma 10 minutos a tu sesión." },
   { q: "¿Hacen impresiones, álbumes o cuadros?", a: "Sí. Tenemos impresiones desde $3.50, fotografía enmarcada 16×20 y álbum fotográfico de 20 páginas. Pídelos al reservar o agrégalos en tu paquete." },
-  { q: "¿Y si ningún paquete es exactamente lo que busco?", a: "Arma tu propio paquete: eliges tus fotos, lugares y extras, ves el total al instante y nos envías tu cotización por WhatsApp.", cot: true }
+  { q: "¿Y si ningún paquete es exactamente lo que busco?", a: "Arma tu propio paquete: eliges tus fotos, lugares y extras, ves el total al instante y lo reservas ahí mismo con tu abono. Si prefieres hablarlo antes, también puedes enviárnoslo por WhatsApp.", cot: true }
 ];
 
 var B = "img/";
@@ -2309,7 +2311,7 @@ class Component extends DCLogic {
       })
     };
     var pf = this.state.pf || "";
-    var portfolio = PACKAGES.filter(function (p) { return !!GAL[p.id] && (!pf || (pf === "ev") === (EVENTOS.indexOf(p.id) >= 0)); }).map(function (p) {
+    var portfolio = PACKAGES.filter(function (p) { return !!GAL[p.id] && (!pf || (PF_OCASION[pf] || []).indexOf(p.id) >= 0); }).map(function (p) {
       return {
         src: B + GAL[p.id][0] + ".jpg", title: p.title, kind: p.kind,
         open: function () { self.lbAbrir(p.id); }
@@ -2831,16 +2833,16 @@ class Component extends DCLogic {
         }
       },
       portfolio: portfolio,
-      pfTabs: [["", "Todas"], ["ses", "Sesiones de fotos"], ["ev", "Coberturas de eventos"]].map(function (t) {
+      pfTabs: PF_TABS.map(function (t) {
         var on = pf === t[0];
         return { label: t[1], pressed: on ? "true" : "false", bg: on ? "#222020" : "transparent", fg: on ? "#FEFEFE" : "#222020", pick: function () { self.setState({ pf: t[0] }); } };
       }),
-      pfHint: pf === "ev" ? "Coberturas: toca una para ver sus fotos y paquetes." : (pf === "ses" ? "Sesiones de fotos: toca una para ver sus fotos y paquetes." : "Toca una experiencia para ver sus fotos y sus paquetes."),
+      pfHint: "Toca una experiencia para ver sus fotos y sus paquetes.",
       start: [
         { img: B + GAL.suenos[0] + ".jpg", eyebrow: "Quiero", title: "Una sesión de fotos", text: "Cumpleaños, XV años, embarazo, bebé, graduación o estudio. Elige tu experiencia y arma tu paquete.",
-          ctas: [{ href: "#portafolio", label: "Ver sesiones", bg: accent, fg: "#222020", go: function () { self.setState({ pf: "ses" }); } }] },
-        { img: B + GAL.infantil[0] + ".jpg", eyebrow: "Tengo", title: "Un evento", text: "Fiestas, cumpleaños, bautizos y celebraciones con Momentos, o carreras y eventos deportivos con Limitless.",
-          ctas: [{ href: "#portafolio", label: "Ver coberturas", bg: accent, fg: "#222020", go: function () { self.setState({ pf: "ev" }); } }] }
+          ctas: [{ href: "#portafolio", label: "Ver sesiones", bg: accent, fg: "#222020", go: function () { self.setState({ pf: "" }); } }] },
+        { img: B + GAL.infantil[0] + ".jpg", eyebrow: "Tengo", title: "Un evento", text: "Fiestas, cumpleaños, bautizos y celebraciones, o carreras y eventos deportivos.",
+          ctas: [{ href: "#portafolio", label: "Ver coberturas", bg: accent, fg: "#222020", go: function () { self.setState({ pf: "ev" }); setTimeout(function () { var g = document.querySelector('[aria-label="Filtrar experiencias por ocasión"]'), on = g && g.querySelector('[aria-pressed="true"]'); if (on) g.scrollLeft = on.offsetLeft - g.offsetLeft - 16; }, 400); } }] }
       ],
       why: WHY.map(function (w, i) { var d = i % 2 === 0; return { title: w[0], text: w[1], bg: d ? "#222020" : "#F2E4D2", fg: d ? "#FEFEFE" : "#222020", sub: d ? "#F2E4D2" : "#3D3B3E" }; }),
       cifras: CIFRAS.map(function (c) { return { n: c[0], label: c[1] }; }),
