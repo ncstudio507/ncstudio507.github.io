@@ -1522,7 +1522,7 @@ var IG_FEED = "https://feeds.behold.so/qnBMUzAR3CYanHqAU3Re";
 var IG_FALLBACK = ["suenos", "levelup", "dulce", "infantil", "granext", "folklore"];
 var EVENTOS = ["infantil", "limitless"];
 var PF_TABS = [["", "Todas"], ["xv", "XV años"], ["cum", "Cumpleaños"], ["emb", "Embarazo"], ["beb", "Bebé"], ["gra", "Graduación"], ["fol", "Folklore"], ["dep", "Deportes"], ["ev", "Fiestas y eventos"]];
-var PF_OCASION = { xv: ["suenos"], cum: ["levelup", "estudio", "infantil"], emb: ["dulce"], beb: ["bebe"], gra: ["primer", "gran", "granext"], fol: ["folklore"], dep: ["gameon", "limitless"], ev: ["infantil", "limitless"] };
+var PF_OCASION = { xv: ["suenos"], cum: ["levelup", "estudio", "infantil"], emb: ["dulce"], beb: ["bebe"], gra: ["primer", "gran", "granext"], fol: ["folklore", "tradiciones"], dep: ["gameon", "limitless"], ev: ["infantil", "limitless"] };
 var FAQ_CATS = [
   ["Reservas y pagos", [0, 1, 2, 3, 18]],
   ["Lugar y horarios", [4, 5, 6, 7]],
@@ -1633,12 +1633,30 @@ var PACKAGES = [
     img: "img/0d285fd0e68624d100820419a2dda6cf.jpg", imgAlt: "Mujer con pollera y abanico en el estudio",
     intro: "Vestir nuestras tradiciones es llevar puesta una parte de nuestra historia. Una experiencia de estudio para celebrar nuestras raíces y convertirlas en recuerdos que trascienden generaciones.",
     proposals: [
-      prop("Propuesta 1", "Vive la experiencia NC y luce nuestras tradiciones con fotos de estilo.", "$75", "USD",
-        ["Asesoría previa personalizada", "1 hora de sesión", "1 locación de libre elección", "1 cambio de vestuario", "Dirección de poses", "Mínimo 30 fotos de prueba", "6 fotos editadas en alta resolución", "Galería online privada"],
+      prop("Propuesta 1", "Vive la experiencia NC en nuestro estudio y luce tu traje típico con fotos de estilo.", "$75", "USD",
+        ["Asesoría previa personalizada", "1 hora de sesión en estudio", "1 cambio de vestuario", "Dirección de poses", "Mínimo 30 fotos de prueba", "6 fotos editadas en alta resolución", "Galería online privada"],
         "", true),
-      prop("Propuesta 2", "Una sesión corta y rápida con lo esencial para lucir tu traje típico.", "$65", "USD",
+      prop("Propuesta 2", "Nuestro paquete inicial: una sesión corta y rápida con lo esencial para lucir tu traje típico.", "$55", "USD",
         ["Asesoría previa personalizada", "30 minutos de sesión en estudio", "1 cambio de vestuario", "Dirección de poses", "Mínimo 15 fotos de prueba", "3 fotos editadas en alta resolución", "Galería online privada"],
         "")
+    ],
+    extras: [["Foto editada extra", "$10 c/u"], ["Reunión creativa virtual", "$10"], ["Reunión creativa presencial (incluye café)", "$45"], ["Moodboard personalizado", "$15"], ["Maquillaje profesional", "$35"], ["Peinado profesional", "$35"], ["Maquillaje y peinado", "$65"], ["Cambio de vestuario extra (cada uno suma 10 minutos de sesión)", "$10 c/u"], ["Persona extra (cada una suma 10 minutos de sesión y 1 foto editada; de la 2.ª a la 4.ª $12 y de la 5.ª en adelante $10)", "$15"], ["Locación adicional", "$10 c/u"], ["Video detrás de cámaras", "$35"], ["Liberación de galería", "$60"], ["USB con fotografías", "$25"], ["Álbum fotográfico (20 páginas)", "$90"], ["Fotografía enmarcada 16×20", "$70"], ["Foto impresa 4×6", "$3.50 c/u"], ["Foto impresa 5×7", "$5 c/u"], ["Foto impresa 8×10", "$8 c/u"], ["Foto impresa 11×17", "$12 c/u"], ["Juego de 6 fotos tamaño cartera", "$5"]],
+    info: "sesion"
+  },
+  {
+    id: "tradiciones", tab: "Tradiciones", title: "Tradiciones", kind: "Fotografía típica en exteriores",
+    img: "img/2200de75e9cc88245d54ee40a5823953.jpg", imgAlt: "Mujer con pollera de gala bailando al aire libre",
+    intro: "Nuestras tradiciones se viven al aire libre: en un pueblo colonial, un campo o frente al mar. Una experiencia para lucir tu traje típico donde nace nuestra cultura y convertirla en recuerdos que trascienden generaciones.",
+    proposals: [
+      prop("Propuesta 1", "Aunque es una sesión corta, vivirás la experiencia NC y lucirás tu traje típico en exteriores con estilo.", "$75", "USD",
+        ["Asesoría previa personalizada", "1 hora de sesión", "1 locación de libre elección", "1 cambio de vestuario", "Dirección de poses", "Mínimo 30 fotos de prueba", "6 fotos editadas en alta resolución", "Galería online privada"],
+        ""),
+      prop("Propuesta 2", "Perfecta para lucir tu pollera o tu montuno como se debe, con fotos que vas a querer compartir en todas partes.", "$125", "USD",
+        ["Asesoría previa personalizada", "2 horas de sesión", "2 locaciones de libre elección", "2 cambios de vestuario", "Dirección de poses", "Mínimo 60 fotos de prueba", "Hasta 1 persona extra", "12 fotos editadas en alta resolución", "Galería online privada"],
+        ""),
+      prop("Propuesta 3", "Para quienes no solo quieren fotos… quieren una experiencia que se sienta y se recuerde.", "$220", "USD",
+        ["Reunión creativa virtual", "Moodboard personalizado", "Asesoría previa personalizada", "3 horas de sesión", "2 locaciones de libre elección", "3 cambios de vestuario", "Dirección de poses", "Mínimo 90 fotos de prueba", "Hasta 2 personas extra", "18 fotos editadas en alta resolución", "Galería online privada"],
+        "", true)
     ],
     extras: [["Foto editada extra", "$10 c/u"], ["Reunión creativa virtual", "$10"], ["Reunión creativa presencial (incluye café)", "$45"], ["Moodboard personalizado", "$15"], ["Maquillaje profesional", "$35"], ["Peinado profesional", "$35"], ["Maquillaje y peinado", "$65"], ["Cambio de vestuario extra (cada uno suma 10 minutos de sesión)", "$10 c/u"], ["Persona extra (cada una suma 10 minutos de sesión y 1 foto editada; de la 2.ª a la 4.ª $12 y de la 5.ª en adelante $10)", "$15"], ["Locación adicional", "$10 c/u"], ["Video detrás de cámaras", "$35"], ["Liberación de galería", "$60"], ["USB con fotografías", "$25"], ["Álbum fotográfico (20 páginas)", "$90"], ["Fotografía enmarcada 16×20", "$70"], ["Foto impresa 4×6", "$3.50 c/u"], ["Foto impresa 5×7", "$5 c/u"], ["Foto impresa 8×10", "$8 c/u"], ["Foto impresa 11×17", "$12 c/u"], ["Juego de 6 fotos tamaño cartera", "$5"]],
     info: "sesion"
@@ -1756,6 +1774,7 @@ var GRAD = function (p2prints, p1prints) { return [
 ]; };
 var COMPARE = {
   levelup: SES(),
+  tradiciones: SES(),
   suenos: SES([["Vestido de 15 de estreno", Y, N, N]]),
   dulce: SES(),
   granext: SES(),
@@ -1825,6 +1844,7 @@ var GAL = {
   levelup: ["66d414fe4caaeb1bc501312d804fbc58","cbe235cf48610bf741abc2b2736f60ff","3a9d73ff6f4c153b632d81b21d3448d2","c1a0779a6c042177f73f40009257e2c0","fc077081b18bbc990813c648296b4d42","f64cec57bc93f864fe61e5f32d53c27c","5c47cbedefc8eb22d0330ef8ca1c950b","bc12a799c66e299a6cea0e299c6cc023","217dc9d9ae536ddcbfa9922a165ff61b","d3814823cc8ffab758eee471b5497179","4cb7684f79e0f05d845134555475dd3f","15195569a773220d0a80b4f8f94734b2","6807a4602571a218c01920f617039093","ad1f35b8d9493a82b41a031c8a32c508","c0648151f8355ac982ff71f5e2f15df7","42d2b65dd971683e675665b628c9e256","0b0e60afc8f9cd52107d3b934835035f","7c0e60a425e106638f6fc6d48efeb7e1","7910eec13ae5e1194b86531234e64930"],
   estudio: ["5a201c2d11dd0805fc73c2458f3dc1dc","9d37082818a53004aa2218437edb3422","4515bb8a7de4bfaa1a3d291d03190e27","1ad434e8fc9337c64b71a10a66eae445","c3580a39fec35c33253dfdc6dd234265","d9082973868ed29ef4587d41612bff00","5bb795bf0c8134576bde36c8a318e525","c8539344dc7278e30a60050973fcad9b"],
   folklore: ["5ea3b7f296f3cec4b38a4620d33fcaf8","609edafdb13a808635f2baed15b6c4cc","b0ea04fc287e9eb754870faf067f8ff2","6fae9d7d5c11650b331d753eaa060d47","5f8018a304bbdc4eed58f3c23a25d155","71d22bda05f1275615d8124b388e411b","8ba824ea4e2883f3f488fee8cf3bb00e","e899e6c9abb28c24bb2899774886fd74","67703215d765dc37edefd8f7fa2c3667"],
+  tradiciones: ["2200de75e9cc88245d54ee40a5823953","2735c415c70217dad2555bb9fa3788e6","43cc11a2204f4a0e532cbef3009c838e","157267e6014d87bad2e981d1d41ec4cf","5863cbd799340d91b6b719a11f316788","2ec1105de0def66a05f1e0502a6a8bf7","04ba22d05c06b00f852888fc76290a01","ca9db7f63cd3f133c341ca9631ff321f","81c8f584a01386d7a65996509c4794cb","4f9be1fa7dbb6c061939d1402b0a9e8a","e204df75daaa79f1566a58a6fa5f2c14","370c22608ba4fdb553374f111b882d54","8ac342a773d03fb9103dce087f017d87","0e97456a6a8ddcd2bb6b559dd3d446d6","dffd96a52e0fc362345d231727b41a8d","45e578960b45416acf2edf7bde8c32f7","9fdafa9929c810e0693e48d02809808e","023c0496287de636a16aa34f9ce018c9","578e398545baaa06ff554ab9fac613ff","c2b839d54ee60e1eddd794619489753d"],
   infantil: ["47afb0ee2ea4cb916feb0fe22cd01ed4","15e961edf1647668f34626687419d30f","07aed15eb42396acdc6a1c2a89a89dea","b87517360183596da47a608e1ce93e00","62838de371841050f10336484ec10cd4","03ff5a2bc25141550ca9bb23e26ed632","55714c8a4a90307c0a21588077c746bd","a62bedda82e6e8ded7e0e9f850ba8816","ee8e17e00d31ff19d12877a6fc6e9454","d80990e2a5b96cd98d2542488d63d427","e1cb663cf8ac4bc92821b4e5bb2a07bb","e26c37a74fb2934d43cd0504c978f991","a6c3abeb687edbbe1ce9189827ce65a0","c83bb895e5fc328802e451caef54457a","734ce9a9385ad3f1933df4e866ffcf37","fbc61e6dd15113a12e2e0254fca2c481"],
   primer: ["cd8f9728faae7a08b02691d120c16ab5","997ccae929972c82a34212474ec7155e","300552f1947a094134354068f2d47697","c8648695d9ba31af0752f4cc3e272b5c","2a166a6739eef1f7471592e939c4e87e","398cf60e3247d11b7a882178ad710c02","68ee22e2c6470a4afe229acc5da57925"],
   gran: ["0f6810869156c5bd69ccbeb09bbe4bff","2d9bea714b058c9f48eda15883e5c99d","5570633a91e2c8efec96a93a263bf6a7","e443d9af454d5fbd99469793ca7ea9e2","7d606f9fd3eeb47e79ffc48e51c774d0","867a90dd03d745d54b86fffb08bf0b70","2e58d22779ef50a935217c0ca686ef70","1f574c6f1b02860110933e80a3086ccd","f39d4b7c5a0f799f6c39a36d2da73fb8"],
@@ -1837,7 +1857,7 @@ var TESTI = {"suenos": [{"src": "img/21559e82bab41158b58bafa70f382617.jpg", "tit
 
 var TABNAME = {
   levelup: ["Level Up", "Cumpleaños"], suenos: ["Sueños de 15", "Quince años"], bebe: ["12 Meses de Amor", "Primer año del bebé"], dulce: ["Dulce Espera", "Embarazo"],
-  estudio: ["Level Up en estudio", "Cumpleaños en estudio"], folklore: ["Folklore", "Traje típico en estudio"],
+  estudio: ["Level Up en estudio", "Cumpleaños en estudio"], folklore: ["Folklore", "Traje típico en estudio"], tradiciones: ["Tradiciones", "Traje típico en exteriores"],
   infantil: ["Momentos", "Coberturas de eventos"], primer: ["Primer Logro", "Graduación de kínder"],
   gran: ["Gran Logro", "Graduación"], granext: ["Gran Logro exteriores", "Graduación en exteriores"], gameon: ["Game On", "Retrato deportivo"], limitless: ["Limitless", "Carreras"]
 };
@@ -1896,7 +1916,7 @@ function cotTotalFotos(n) {
   return up5(t);
 }
 function cotFotosPrice(extra) { return cotTotalFotos(extra + 3) - 55; }
-var COT_SES = ["levelup", "suenos", "dulce", "bebe", "estudio", "folklore", "primer", "gran", "granext", "gameon"];
+var COT_SES = ["levelup", "suenos", "dulce", "bebe", "estudio", "folklore", "tradiciones", "primer", "gran", "granext", "gameon"];
 var COT_EVT = ["infantil", "otra"];
 var XC = {
   infantil: {
