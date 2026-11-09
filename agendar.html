@@ -50,7 +50,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 .cl{display:grid;gap:4px;text-align:left;width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;cursor:pointer;font:inherit;color:var(--fg)}
 .cl b{font-size:17px}.cl span{font-size:14px;color:var(--muted)}
 .chip{display:inline-block;font-size:12px;font-weight:bold;padding:3px 8px;border-radius:99px;background:var(--soft);color:var(--fg);justify-self:start}
-.chip.ok{background:#D1FADF}.chip.wait{background:#FEF0C7}.chip.no{background:#FEE4E2}.chip.req{background:#F99824;color:#222020}.trash{position:absolute;top:10px;right:10px;min-width:44px;height:44px;padding:0 10px;border-radius:8px;border:1.5px solid #D9CDBE;background:#FEFEFE;color:#6B6466;cursor:pointer;display:flex;align-items:center;justify-content:center;font:bold 14px Arial,Helvetica,sans-serif}.trash:hover{color:#B42318;border-color:#B42318}.trash.sure{background:#B42318;border-color:#B42318;color:#FEFEFE}
+.chip.ok{background:#D1FADF}.chip.wait{background:#FEF0C7}.chip.no{background:#FEE4E2}.chip.req{background:#F99824;color:#222020}.chip.vip{background:#222020;color:#F99824}.trash{position:absolute;top:10px;right:10px;min-width:44px;height:44px;padding:0 10px;border-radius:8px;border:1.5px solid #D9CDBE;background:#FEFEFE;color:#6B6466;cursor:pointer;display:flex;align-items:center;justify-content:center;font:bold 14px Arial,Helvetica,sans-serif}.trash:hover{color:#B42318;border-color:#B42318}.trash.sure{background:#B42318;border-color:#B42318;color:#FEFEFE}
 .acts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 @media (max-width:420px){.acts{grid-template-columns:1fr}}
 .act{font:bold 15px Arial,sans-serif;text-align:left;background:#fff;border:1px solid var(--line);border-radius:8px;padding:13px 14px;cursor:pointer;color:var(--fg)}
@@ -1428,6 +1428,11 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     if (BASE) { cb(); return; }
     call({ action: "base", pin: PIN }).then(function (r) { if (r.ok) { BASE = r.list; PEOPLE = r.people; } cb(); }).catch(function () { cb(); });
   }
+  /* quién se unió a la Zona VIP (por teléfono) */
+  var VIPS = null;
+  function tel8(t) { return String(t || "").replace(/\D/g, "").slice(-8); }
+  function cargaVips(cb) { call({ action: "vip_estados", pin: PIN }).then(function (r) { VIPS = r.ok ? r.cuentas : {}; cb(); }).catch(function () { VIPS = VIPS || {}; cb(); }); }
+  function vipDe(phone) { var k = tel8(phone); return k.length === 8 && VIPS ? VIPS[k] || null : null; }
   function baseCli(q) {
     tab("C"); salir.hidden = false;
     app.innerHTML = segCli("base") + '<div class="msg"><span class="spin"></span>Cargando base de clientes…</div>'; bindCli();
@@ -1446,12 +1451,14 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
         $("lsb").innerHTML = L.length ? "" : '<div class="msg">No hay clientes que coincidan.</div>';
         L.forEach(function (x) {
           var b = document.createElement("button"); b.className = "cl";
-          b.innerHTML = '<span class="chip ' + (x.contacto ? "ok" : "") + '">' + (x.contacto ? "✓ En contactos" : "Sin contacto") + '</span><b>' + esc(x.name) + '</b><span>📱 ' + esc(x.phone) + (x.instagram ? " · @" + esc(x.instagram) : "") + '</span><span>' +
+          var vp = vipDe(x.phone);
+          b.innerHTML = '<span style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip ' + (x.contacto ? "ok" : "") + '">' + (x.contacto ? "✓ En contactos" : "Sin contacto") + '</span>' + (vp ? '<span class="chip vip">👑 Zona VIP</span>' : '') + '</span><b>' + esc(x.name) + '</b><span>📱 ' + esc(x.phone) + (x.instagram ? " · @" + esc(x.instagram) : "") + '</span><span>' +
             (x.reservas ? x.reservas + (x.reservas === 1 ? " sesión" : " sesiones") + " · " + money(x.total) : (x.servicios.length ? "Cotizó, sin reservar" : "Contacto nuevo")) + (x.servicios.length ? " · " + esc(x.servicios[x.servicios.length - 1]) : "") + '</span>' + avTag(x.name, x.phone, x.ids);
           b.onclick = function () { fichaCli(x); }; $("lsb").appendChild(b);
         });
       }
       $("bqb").oninput = pinta; pinta();
+      cargaVips(pinta);
       $("bnew").onclick = function () { fichaCli(null); };
       if ($("bsync")) $("bsync").onclick = function () {
         var b = $("bsync"); b.disabled = true; b.innerHTML = '<span class="spin"></span>Guardando…';
@@ -1473,6 +1480,29 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     $("cn").value = x.name || ""; $("cph").value = x.phone || ""; $("cem").value = x.email || ""; $("cig").value = x.instagram || ""; $("cno").value = x.notas || "";
     $("bkb").onclick = function () { baseCli(); };
     if (!nuevo) {
+      // Zona VIP: si ya se unió y restablecer su contraseña
+      var zv = document.createElement("section"); zv.id = "zvip"; app.appendChild(zv);
+      var pintaZV = function () {
+        var vp = vipDe(x.phone);
+        zv.innerHTML = '<h2>👑 Zona VIP</h2>' + (VIPS === null ? '<p class="hint"><span class="spin"></span>Revisando…</p>' :
+          '<p style="margin:0">' + (vp ? (vp.temp ? '<b>Se unió</b> · tiene la contraseña temporal; al entrar se le pide cambiarla.' : '<b class="pos">✓ Se unió a la Zona VIP</b>' + (vp.acceso ? ' · última vez que entró: ' + esc(fechaBonita(vp.acceso)) : '')) : 'Todavía no se ha unido a la Zona VIP.') + '</p>' +
+          '<p class="hint" style="margin:0">Si te pide ayuda porque olvidó su contraseña, restablécela: queda <b>12345678</b> y la primera vez que entre le pedimos que la cambie.</p>' +
+          '<button class="btn2" id="vrst" style="justify-self:start">🔑 Restablecer su contraseña</button><div id="vrsr"></div>');
+        if (!$("vrst")) return;
+        var arm = null;
+        $("vrst").onclick = function () {
+          var b = this;
+          if (!b.classList.contains("sure")) { b.classList.add("sure"); b.textContent = "¿Seguro? Toca otra vez para restablecerla"; b.style.borderColor = "var(--err)"; clearTimeout(arm); arm = setTimeout(function () { if (b.isConnected) { b.classList.remove("sure"); b.textContent = "🔑 Restablecer su contraseña"; b.style.borderColor = ""; } }, 4000); return; }
+          clearTimeout(arm); b.disabled = true; b.innerHTML = '<span class="spin"></span>Restableciendo…';
+          call({ action: "vip_reset", pin: PIN, phone: x.phone }).then(function (r) {
+            if (!r.ok) { b.disabled = false; b.textContent = "🔑 Restablecer su contraseña"; $("vrsr").innerHTML = '<p class="err">' + esc(r.title) + '</p>'; return; }
+            VIPS = VIPS || {}; VIPS[tel8(x.phone)] = { acceso: "", temp: true }; pintaZV();
+            var t = "¡Hola, " + first(x.name) + "! 👑 Listo, restablecimos tu contraseña de la Zona VIP de NC Studio.\n\nEntra con tu número de WhatsApp y la contraseña temporal *" + r.clave + "*. Apenas entres te vamos a pedir que la cambies por una tuya.\n\nhttps://ncstudio507.github.io/vip.html\n\n— Nelson y Charlie · NC Studio";
+            $("vrsr").innerHTML = '<div class="msg" style="display:grid;gap:8px"><b class="pos">✓ Su contraseña ahora es ' + esc(r.clave) + '</b><span>Avísale para que entre y la cambie:</span><a class="wa" target="_blank" rel="noopener" href="https://wa.me/' + wnum(x.phone) + '?text=' + encodeURIComponent(t) + '">Avisarle por WhatsApp</a></div>';
+          }).catch(function () { b.disabled = false; b.textContent = "🔑 Restablecer su contraseña"; $("vrsr").innerHTML = '<p class="err">No pudimos conectar.</p>'; });
+        };
+      };
+      if (VIPS) pintaZV(); else { pintaZV(); cargaVips(pintaZV); }
       var del = document.createElement("section"); del.innerHTML = '<button class="btn2" id="bdel" style="border-color:var(--err);color:var(--err);justify-self:start">🗑️ Eliminar cliente</button><div id="bdelc"></div>'; app.appendChild(del);
       $("bdel").onclick = function () {
         var b = this; b.disabled = true; $("bdelc").innerHTML = '<div class="msg" style="padding:12px"><span class="spin"></span>Revisando qué tiene…</div>';

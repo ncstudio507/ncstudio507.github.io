@@ -151,7 +151,7 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
       var b = this; cargando(b, "Entrando…");
       call({ action: "vip_entrar", tel: TEL, clave: $("cl").value }).then(function (r) {
         listo(b); if (!r.ok) { $("er").innerHTML = esc(r.title) + (r.html ? ". " + r.html : ""); return; }
-        put("ncVipTok", r.tok); cargar();
+        put("ncVipTok", r.tok); if (r.cambiar) cambiarClave(); else cargar();
       }).catch(function () { listo(b); $("er").textContent = "No pudimos conectar."; });
     };
     $("olv").onclick = function () {
@@ -186,12 +186,33 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
     };
   }
 
+  // después de que NC Studio te restablece la contraseña, la primera vez que entras eliges una nueva
+  function cambiarClave() {
+    nav.hidden = true; saldoEl.style.display = "none";
+    app.innerHTML = '<section class="card"><h2>Crea tu nueva contraseña 🔐</h2><p>Entraste con la contraseña temporal. Por tu seguridad, elige una nueva que solo tú conozcas.</p>' +
+      '<label for="n1">Nueva contraseña <small style="font-weight:normal">(mínimo 6 caracteres)</small><input id="n1" type="password" autocomplete="new-password"></label>' +
+      '<label for="n2">Repítela<input id="n2" type="password" autocomplete="new-password"></label><p class="err" id="er"></p><button class="btn" id="go">Guardar y entrar</button></section>';
+    $("n1").focus();
+    $("go").onclick = function () {
+      var a = $("n1").value, z = $("n2").value;
+      if (a.length < 6) { $("er").textContent = "Tu contraseña debe tener al menos 6 caracteres."; return; }
+      if (a === "12345678") { $("er").textContent = "Elige una diferente a la temporal."; return; }
+      if (a !== z) { $("er").textContent = "Las contraseñas no coinciden."; return; }
+      var b = this; cargando(b, "Guardando…");
+      call({ action: "vip_cambiar", tok: get("ncVipTok"), clave: a }).then(function (r) {
+        listo(b); if (!r.ok) { if (r.salir) { put("ncVipTok", ""); telefono("Tu sesión venció. Entra de nuevo."); return; } $("er").textContent = r.title; return; }
+        put("ncVipTok", r.tok); cargar();
+      }).catch(function () { listo(b); $("er").textContent = "No pudimos conectar."; });
+    };
+  }
+
   /* ---------------- mi zona ---------------- */
   function cargar() {
     var tok = get("ncVipTok"); if (!tok) { quien(); return; }
     app.innerHTML = '<div class="msg"><span class="spin" aria-hidden="true"></span>Cargando tu Zona VIP…</div>';
     call({ action: "vip_datos", tok: tok }).then(function (r) {
       if (!r.ok) { if (r.salir) put("ncVipTok", ""); TEL = ""; telefono(r.salir ? "Tu sesión venció. Entra de nuevo." : r.title); return; }
+      if (r.cambiar) { cambiarClave(); return; }
       D = r; TEL = r.tel;
       // la reserva que se muestra primero: la próxima, o la más reciente
       var hoy = new Date().toISOString().slice(0, 10), prox = -1;
