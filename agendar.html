@@ -558,7 +558,11 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
       L.forEach(function (x) {
         var b = document.createElement("button"); b.className = "cl";
         b.innerHTML = chip(x.estado) + "<b>" + esc(x.name) + "</b><span>" + esc(x.service) + "</span><span>" + esc(x.fecha) + " · " + esc(x.phone) + "</span>" + avTag(x.name, x.phone, x.id);
-        b.onclick = function () { detalle(x); }; $("ls").appendChild(b);
+        b.onclick = function () { detalle(x); };
+        if (delicada(x)) { $("ls").appendChild(b); return; }
+        var w = document.createElement("div"); w.style.position = "relative"; b.style.paddingRight = "64px"; b.style.width = "100%";
+        w.appendChild(b); w.appendChild(basurita("Borrar esta reserva", function () { return call({ action: "res_borrar", pin: PIN, id: x.id }); }, function (r) { LIST = LIST.filter(function (z) { return z.id !== x.id; }); if (r.manual) { CALM = null; cargaCalM(); } pinta(); }));
+        $("ls").appendChild(w);
       });
     }
     $("bq").oninput = pinta; $("rf").onclick = function () { clientes(); }; bindCli(); pinta();
@@ -657,6 +661,24 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     }
     if (CALM) ir(); else cargaCalM(ir);
   }
+
+  // una reserva es «delicada» si ya tiene dinero o contrato: esas no se borran con la basurita
+  function delicada(x) { return x.estado === "Confirmado" || x.firmado || x.saldoPagado; }
+  var ICO_TR = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v6M14 11v6"></path></svg>';
+  // botón de basurita: primer toque pregunta, segundo toque borra
+  function basurita(etq, hacer, listo) {
+    var x = document.createElement("button"); x.type = "button"; x.className = "trash"; x.setAttribute("aria-label", etq); x.title = etq; x.innerHTML = ICO_TR;
+    var arm = null;
+    x.onclick = function (ev) {
+      ev.stopPropagation();
+      if (!x.classList.contains("sure")) { x.classList.add("sure"); x.textContent = "¿Borrar?"; clearTimeout(arm); arm = setTimeout(function () { x.classList.remove("sure"); x.innerHTML = ICO_TR; }, 3500); return; }
+      clearTimeout(arm); x.disabled = true; x.innerHTML = '<span class="spin" style="margin:0"></span>';
+      hacer().then(function (r) { if (!r.ok) { x.disabled = false; x.classList.remove("sure"); x.innerHTML = ICO_TR; alertaSuave(r.title + (r.html ? ". " + r.html.replace(/<[^>]+>/g, "") : "")); return; } listo(r); })
+        .catch(function () { x.disabled = false; x.classList.remove("sure"); x.innerHTML = ICO_TR; alertaSuave("No pudimos conectar."); });
+    };
+    return x;
+  }
+  function alertaSuave(t) { var m = document.createElement("div"); m.className = "msg"; m.style.cssText = "position:fixed;left:16px;right:16px;bottom:16px;z-index:99;box-shadow:0 6px 24px rgba(0,0,0,.25)"; m.textContent = t; document.body.appendChild(m); setTimeout(function () { m.remove(); }, 6000); }
   function precioExtra(x) { var p = DATA.P.filter(function (e) { return e.id === x.expId; })[0] || DATA.P.filter(function (e) { return String(x.service || "").indexOf(e.title) === 0; })[0], m = p && (p.extras || []).filter(function (e) { return /foto editada extra/i.test(e[0]); })[0]; return m ? String(m[1]).replace(/\s*c\/u/, "") : "$10"; }
   function msgs(x) {
     var n = first(x.name), ev = x.kind === "evento", firma = "\n\n— Nelson y Charlie · NC Studio";
@@ -681,10 +703,10 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     A("cot", "Cotización enviada", x.estado !== "Pendiente"); A("abono", "Abono recibido", x.estado === "Confirmado"); A("firma", "Contrato firmado", x.firmado);
     A("gus", "Formulario de gustos", !!x.gid); if (!ev) { A("meet", "Reunión creativa", x.meet && x.meet.fecha); A("mood", "Moodboard enviado", !!x.moodboard); }
     M("locacion", "Locación confirmada"); M("listo", "Todo listo (1½ semanas antes)"); M("regalo", "Regalo del cliente preparado");
-    A("sesion", ev ? "Evento realizado" : "Sesión realizada", x.dateIso && x.dateIso < hoy); M("memoria", "Fotos en su carpeta y memoria guardada");
+    A("sesion", ev ? "Evento realizado" : "Sesión realizada", x.dateIso && x.dateIso < hoy); A("saldo", "Saldo cobrado", x.saldoPagado); M("memoria", "Fotos en su carpeta y memoria guardada");
     if (!ev) { A("pru", "Pruebas enviadas", !!x.fp); M("eligio", "Eligió sus fotos"); }
     if (x.extraFotos) A("extras", "Fotos extra pagadas (" + x.extraFotos.n + ")", x.extraFotos.estado === "pagado");
-    A("fin", "Fotos finales enviadas", !!x.ff); A("saldo", "Saldo cobrado", x.saldoPagado);
+    A("fin", "Fotos finales enviadas", !!x.ff);
     if (x.productos) M("productos", "Impresiones o álbum entregados");
     M("publicado", "Publicado (créditos y colaboración en IG)");
     return P;
@@ -712,7 +734,9 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
       ["saldo", "💵 Saldo cobrado", x.estado === "Confirmado" && !x.saldoPagado],
       ["rep", "🧮 Anotar repartición", !!x.saldoPagado && !x.reparto],
       ["gus", "📝 Gustos e ideas", !!x.gid],
-      ["extras", "📸 Pago de fotos extra" + (x.extraFotos ? " (" + money(x.extraFotos.monto) + ")" : ""), !!(x.extraFotos && x.extraFotos.estado === "pendiente")]].filter(function (a) { return a[2]; });
+      ["extras", "📸 Pago de fotos extra" + (x.extraFotos ? " (" + money(x.extraFotos.monto) + ")" : ""), !!(x.extraFotos && x.extraFotos.estado === "pendiente")],
+      ["fecha", "📅 Cambiar fecha", true],
+      ["borrar", "🗑️ Borrar reserva", !delicada(x)]].filter(function (a) { return a[2]; });
     app.innerHTML = '<button class="back" id="bk">‹ Todos los clientes</button><section>' + chip(x.estado) + '<div class="row" style="gap:12px;align-items:center;flex-wrap:nowrap">' + avTag(x.name, x.phone, x.id, 1) + '<h2 style="margin:0">' + esc(x.name) + '</h2></div>' +
       '<p class="hint" style="font-size:15px;line-height:1.6">' + esc(x.id) + " · " + esc(x.service) + "<br>" + esc(x.fecha) + " · " + esc(x.place) + "<br>📱 " + esc(x.phone) + " · ✉️ " + esc(x.email) + "<br>Total " + esc(x.total) + " · abono " + esc(x.abono) + (x.contrato ? (x.firmado ? " · ✅ contrato firmado" : " · contrato pendiente de firma") : "") + "<br>" + (x.estado === "Confirmado" ? "💰 1.er pago (abono) ✓ · " + (x.saldoPagado ? "2.º pago (saldo) ✓" : "2.º pago (saldo) pendiente: " + esc(x.saldo)) : "") + (x.extraFotos ? " · 📸 " + x.extraFotos.n + " fotos extra " + money(x.extraFotos.monto) + (x.extraFotos.estado === "pagado" ? " ✓" : " (sin pagar)") : "") + '</p>' +
       (x.estado !== "No disponible" ? '<div class="card2" style="gap:8px"><label for="dce">' + (x.esCumple ? "🎂 ¿Cuándo cumple años? <small>(fecha de nacimiento)</small>" : "🗓️ ¿Para cuándo quiere las fotos?") + '<input id="dce" type="date" value="' + esc(x.cumple || x.entregaPara || "") + '"></label><div class="row"><button class="btn2" id="dceok">Guardar fecha</button><span class="hint" id="dces">' + (x.cumple || x.entregaPara ? (x.entregaLista ? "✓ Entrega agendada en tu calendario" : x.estado === "Confirmado" ? "" : "Se agenda al recibir el abono") : "") + '</span></div></div>' : "") +
@@ -745,6 +769,38 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
       box.scrollIntoView({ block: "start", behavior: "smooth" }); return;
     }
     if (k === "rep") { finanzas(x.id); return; }
+    if (k === "fecha") {
+      box.innerHTML = '<section><h2>Cambiar la fecha</h2><p class="hint">Ahora: <b>' + esc(x.fecha) + '</b>. Puedes elegir cualquier día, antes o después de hoy (aunque ya haya pasado). Se mueve también en tu calendario' + (x.estado === "Confirmado" ? ' y se reagenda la entrega de las fotos' : '') + '. Al cliente no le llega nada.</p>' +
+        '<div class="g2"><label for="nfd">Nueva fecha<input id="nfd" type="date" value="' + esc(x.dateIso || "") + '"></label><label for="nfh">Hora <small>(opcional)</small><input id="nfh" type="time" step="900"></label></div>' +
+        '<button class="btn" id="nfok">Guardar la nueva fecha</button><p class="err" id="nfe"></p><div id="nfr"></div></section>';
+      var hm = String(x.fecha || "").match(/(\d{1,2}):(\d{2})\s*(a|p)/i); if (hm) $("nfh").value = ("0" + ((+hm[1] % 12) + (/p/i.test(hm[3]) ? 12 : 0))).slice(-2) + ":" + hm[2];
+      $("nfok").onclick = function () {
+        var f = $("nfd").value; if (!f) { $("nfe").textContent = "Elige la nueva fecha."; return; }
+        var b = this; b.disabled = true; b.innerHTML = '<span class="spin"></span>Moviendo…'; $("nfe").textContent = "";
+        call({ action: "res_fecha", pin: PIN, id: x.id, fecha: f, hora: $("nfh").value }).then(function (r) {
+          b.disabled = false; b.textContent = "Guardar la nueva fecha";
+          if (!r.ok) { $("nfe").textContent = r.title || "No se pudo"; return; }
+          x.dateIso = r.dateIso; x.fecha = r.fecha;
+          (LIST || []).forEach(function (z) { if (z.id === x.id) { z.dateIso = r.dateIso; z.fecha = r.fecha; } });
+          detalle(x, "fecha");
+          $("nfr").innerHTML = '<div class="msg"><b class="pos">✓ Movida</b><br>De ' + esc(r.antes) + '<br>a <b>' + esc(r.fecha) + '</b></div>';
+        }).catch(function () { b.disabled = false; b.textContent = "Guardar la nueva fecha"; $("nfe").textContent = "No pudimos conectar."; });
+      };
+      box.scrollIntoView({ block: "start", behavior: "smooth" }); return;
+    }
+    if (k === "borrar") {
+      box.innerHTML = '<section><h2>¿Borrar esta reserva?</h2><p>Se borra la reserva de <b>' + esc(x.name) + '</b> (' + esc(x.service) + ', ' + esc(x.fecha) + ') y su evento del calendario. El contacto se queda en tu Base de clientes. No tiene abono ni contrato, así que no se pierde ningún registro de dinero.</p>' +
+        '<div class="row"><button class="btn" id="rbok" style="background:#B42318;color:#FEFEFE">Sí, borrarla</button><button class="btn2" id="rbno">Cancelar</button></div><p class="err" id="rbe"></p></section>';
+      $("rbno").onclick = function () { detalle(x); };
+      $("rbok").onclick = function () {
+        var b = this; b.disabled = true; b.innerHTML = '<span class="spin"></span>Borrando…';
+        call({ action: "res_borrar", pin: PIN, id: x.id }).then(function (r) {
+          if (!r.ok) { b.disabled = false; b.textContent = "Sí, borrarla"; $("rbe").innerHTML = esc(r.title) + (r.html ? ". " + r.html : ""); return; }
+          LIST = (LIST || []).filter(function (z) { return z.id !== x.id; }); if (r.manual) { CALM = null; cargaCalM(); } lista("");
+        }).catch(function () { b.disabled = false; b.textContent = "Sí, borrarla"; $("rbe").textContent = "No pudimos conectar."; });
+      };
+      box.scrollIntoView({ block: "start", behavior: "smooth" }); return;
+    }
     if (k === "saldo") {
       box.innerHTML = '<section><h2>Saldo cobrado</h2><p>Registra el pago del saldo de ' + esc(x.name) + '. Después te pedimos cómo repartieron el trabajo.</p>' +
         '<div class="g2"><label for="sm">Monto ($)<input id="sm" type="number" min="0" step="0.5" inputmode="decimal"></label><label for="sme">Método<select id="sme"><option>Efectivo</option><option>Yappy</option><option>Transferencia</option></select></label></div>' +
