@@ -1506,7 +1506,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
         (x.instagram ? '<a class="act" style="text-decoration:none" href="https://instagram.com/' + esc(x.instagram) + '" target="_blank" rel="noopener">📷 Ver su Instagram</a>' : "") + '</div>') +
       '<div class="g2"><label for="cn">Nombre y apellido<input id="cn" autocomplete="off"></label><label for="cph">Teléfono / WhatsApp<input id="cph" inputmode="tel" autocomplete="off"></label>' +
       '<label for="cem">Correo <small>(opcional)</small><input id="cem" type="email" autocomplete="off"></label><label for="cig">Instagram <small>(opcional, sin @)</small><input id="cig" autocomplete="off"></label>' +
-      '<label for="cge">Género <small>(activa la guía de consejos en su Zona VIP si es mujer con Level Up en estudio)</small><select id="cge"><option value="">' + esc(x.generoAuto ? "Automático (por su nombre: " + x.generoAuto.toLowerCase() + ")" : "Automático (no se sabe por su nombre)") + '</option><option value="Mujer">Mujer</option><option value="Hombre">Hombre</option></select></label></div>' +
+      '<label for="cge">Género <small>(activa la guía de consejos en su Zona VIP si es mujer con Level Up)</small><select id="cge"><option value="">' + esc(x.generoAuto ? "Automático (por su nombre: " + x.generoAuto.toLowerCase() + ")" : "Automático (no se sabe por su nombre)") + '</option><option value="Mujer">Mujer</option><option value="Hombre">Hombre</option></select></label></div>' +
       '<label for="cno">Notas <small>(qué le interesa, cómo te contactó…)</small><textarea id="cno"></textarea></label>' +
       '<div class="row"><button class="btn" id="cok">' + (nuevo ? "Guardar cliente y contacto" : "Guardar cambios") + '</button><span class="hint" id="cst"></span></div><p class="err" id="cer"></p></section>';
     $("cn").value = x.name || ""; $("cph").value = x.phone || ""; $("cem").value = x.email || ""; $("cig").value = x.instagram || ""; $("cno").value = x.notas || ""; $("cge").value = x.genero || "";
@@ -2089,26 +2089,33 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     $("gcp").onclick = function () { copiaT(m.value, function () { $("gcs").textContent = "✓ Copiado"; }); };
     return { upd: upd, set: function (t) { m.value = t; upd(); }, get: function () { return m.value; } };
   }
-  /* ---- guía para brillar (los 7 PDF de guia.html) ---- */
-  var GUIA_P = [["", "Toda la guía"], ["1-confianza", "1 · Confianza"], ["2-tu-idea", "2 · Tu idea"], ["3-vestuario", "3 · Vestuario"], ["4-el-color", "4 · El color"], ["5-accesorios-y-manos", "5 · Accesorios y manos"], ["6-tu-sesion-con-nosotros", "6 · Tu sesión con nosotros"], ["7-el-gran-dia", "7 · El gran día"]];
+  /* ---- guía para brillar: versión estudio (guia.html, 7 PDF) y exteriores (guia-exteriores.html, 8 PDF) ---- */
+  var GUIA_V = {
+    estudio: { pag: "guia.html", dir: "guia/", n: 7, P: [["1-confianza", "Confianza", "cómo soltar los nervios"], ["2-tu-idea", "Tu idea", "cómo contarnos lo que imaginas"], ["3-vestuario", "Vestuario", "qué ponerte según tu cuerpo"], ["4-el-color", "El color", "las combinaciones que te iluminan"], ["5-accesorios-y-manos", "Accesorios y manos", "el detalle que más se nota"], ["6-tu-sesion-con-nosotros", "Tu sesión con nosotros", "paso a paso"], ["7-el-gran-dia", "El gran día", "disfrutar y lo práctico"]] },
+    exteriores: { pag: "guia-exteriores.html", dir: "guia-ext/", n: 8, P: [["1-confianza", "Confianza", "cómo soltar los nervios"], ["2-tu-idea", "Tu idea", "cómo contarnos lo que imaginas"], ["3-tu-locacion", "Tu locación", "escenarios, luz y clima"], ["4-vestuario", "Vestuario", "prendas, telas y calzado"], ["5-el-color", "El color", "tu ropa contra el paisaje"], ["6-accesorios-y-manos", "Accesorios y manos", "sombreros, flores y más"], ["7-tu-sesion-con-nosotros", "Tu sesión con nosotros", "paso a paso"], ["8-el-gran-dia", "El gran día", "disfrutar y lo práctico"]] }
+  };
   function guiaEnv() {
     tab("E"); EV2 = "guia";
-    app.innerHTML = segEnv("guia") + '<section><h2>📚 Guía para brillar</h2><p class="hint">Los 7 PDF para que llegue lista a su sesión. Ya les llega sola en el correo de confirmación del abono; aquí se la puedes mandar cuando quieras, completa o una parte.</p>' +
-      '<a class="btn2" href="guia.html" target="_blank" rel="noopener" style="text-decoration:none;justify-self:start">Ver la guía ↗</a></section><div id="ebox"></div>';
+    app.innerHTML = segEnv("guia") + '<section><h2>📚 Guía para brillar</h2><p class="hint">Hay dos versiones: <b>estudio</b> (7 PDF) y <b>exteriores</b> (8 PDF). A las mujeres con Level Up les llega sola en el correo de confirmación del abono (la que le toca); aquí se la puedes mandar a quien quieras, completa o una parte.</p>' +
+      '<div class="row"><a class="btn2" href="guia.html" target="_blank" rel="noopener" style="text-decoration:none">Ver la de estudio ↗</a><a class="btn2" href="guia-exteriores.html" target="_blank" rel="noopener" style="text-decoration:none">Ver la de exteriores ↗</a></div></section><div id="ebox"></div>';
     bindEnv();
     pickRes("ebox", function (x) { return x.estado !== "No disponible"; }, guiaDe, true);
   }
   function guiaDe(x) {
-    var SITE_G = "https://ncstudio507.github.io/", parte = "";
+    var SITE_G = "https://ncstudio507.github.io/", parte = "", ver = x.expId === "levelup" || /^level up(?! en estudio)/i.test(x.service || "") ? "exteriores" : "estudio";
     app.innerHTML = '<button class="back" id="ebk">‹ Elegir otro cliente</button><section><h2>Guía para ' + esc(first(x.name)) + '</h2><p class="hint">' + esc(x.base ? "Contacto sin reserva · 📱 " + x.phone : x.service + " · " + x.fecha) + '</p>' +
-      '<label for="gpar">¿Qué le mandas?<select id="gpar">' + GUIA_P.map(function (g) { return '<option value="' + g[0] + '">' + esc(g[1]) + '</option>'; }).join("") + '</select></label></section><section><div id="gbox"></div></section>';
+      '<label for="gver">¿Qué versión?<select id="gver"><option value="estudio">Estudio (7 partes)</option><option value="exteriores">Exteriores (8 partes)</option></select></label>' +
+      '<label for="gpar">¿Qué le mandas?<select id="gpar"></select></label></section><section><div id="gbox"></div></section>';
     $("ebk").onclick = function () { guiaEnv(); };
+    function partes() { var V = GUIA_V[ver]; $("gpar").innerHTML = '<option value="">Toda la guía</option>' + V.P.map(function (g, i) { return '<option value="' + g[0] + '">' + (i + 1) + ' · ' + esc(g[1]) + '</option>'; }).join(""); parte = ""; }
     function txt() {
-      var n = first(x.name), ev = x.kind === "evento", g = GUIA_P.filter(function (z) { return z[0] === parte; })[0];
-      if (!parte) return "¡Hola, " + n + "! ✨ Para que llegues a tu " + (ev ? "evento" : "sesión") + " tranquila y lista para disfrutarla, te preparamos una guía en 7 partes cortitas:\n\n1. Confianza: cómo soltar los nervios\n2. Tu idea: cómo contarnos lo que imaginas\n3. Vestuario: qué ponerte según tu cuerpo\n4. El color: las combinaciones que te iluminan\n5. Accesorios y manos: el detalle que más se nota\n6. Tu sesión con nosotros: paso a paso\n7. El gran día: disfrutar y lo práctico\n\nLéelas en orden aquí 👇\n" + SITE_G + "guia.html\n\nY en tu *Zona VIP* (entras con tu número de WhatsApp) también las tienes, junto con el proceso de tu sesión y tus fotos 👑\n" + SITE_G + "vip.html\n\n— Nelson y Charlie · NC Studio";
-      return "¡Hola, " + n + "! 💛 Te comparto una parte de tu guía para brillar frente a la cámara: *" + g[1].replace(/^\d+ · /, "") + "*. Es cortita y te va a ayudar muchísimo 👇\n" + SITE_G + "guia/" + parte + ".pdf\n\nLa guía completa está aquí: " + SITE_G + "guia.html\n\n— Nelson y Charlie · NC Studio";
+      var V = GUIA_V[ver], n = first(x.name), ev = x.kind === "evento", g = V.P.filter(function (z) { return z[0] === parte; })[0];
+      if (!parte) return "¡Hola, " + n + "! ✨ Para que llegues a tu " + (ev ? "evento" : "sesión") + (ver === "exteriores" ? " en exteriores" : "") + " tranquila y lista para disfrutarla, te preparamos una guía en " + V.n + " partes cortitas:\n\n" + V.P.map(function (z, i) { return (i + 1) + ". " + z[1] + ": " + z[2]; }).join("\n") + "\n\nLéelas en orden aquí 👇\n" + SITE_G + V.pag + "\n\nY en tu *Zona VIP* (entras con tu número de WhatsApp) también las tienes, junto con el proceso de tu sesión y tus fotos 👑\n" + SITE_G + "vip.html\n\n— Nelson y Charlie · NC Studio";
+      return "¡Hola, " + n + "! 💛 Te comparto una parte de tu guía para brillar frente a la cámara: *" + g[1] + "*. Es cortita y te va a ayudar muchísimo 👇\n" + SITE_G + V.dir + parte + ".pdf\n\nLa guía completa está aquí: " + SITE_G + V.pag + "\n\n— Nelson y Charlie · NC Studio";
     }
+    $("gver").value = ver; partes();
     var pm = panelMsg("gbox", function () { return x; }, txt(), "Tu guía para brillar · NC Studio");
+    $("gver").onchange = function () { ver = this.value; partes(); pm.set(txt()); };
     $("gpar").onchange = function () { parte = this.value; pm.set(txt()); };
     window.scrollTo(0, 0);
   }
