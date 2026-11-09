@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#222020">
+<title>Zona VIP · NC Studio</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<style>
+:root{--dark:#222020;--org:#F99824;--beige:#F2E4D2;--white:#FEFEFE;--muted:#6B6466;--line:#E8DCCB}
+*{box-sizing:border-box}
+body{margin:0;background:var(--beige);font-family:Arial,Helvetica,sans-serif;color:var(--dark);-webkit-tap-highlight-color:transparent}
+.top{position:sticky;top:0;z-index:20;background:var(--dark);padding:12px 16px;display:flex;align-items:center;gap:12px}
+.top img{height:34px;display:block}.top .t{color:var(--beige);font-family:Georgia,serif;font-size:17px;flex:1}
+.saldo{display:none;border-radius:99px;padding:7px 12px;font-weight:bold;font-size:13px;white-space:nowrap;background:var(--org);color:var(--dark)}
+.saldo.pag{background:#D1FADF;color:#05603A}
+.bar{height:5px;background:var(--org)}
+.wrap{max-width:640px;margin:0 auto;padding:18px 16px 110px;display:grid;gap:14px}
+.card{background:var(--white);border-radius:12px;padding:20px;display:grid;gap:12px}
+h1{font:400 30px/1.1 Georgia,serif;margin:0}h2{font:400 22px/1.15 Georgia,serif;margin:0}
+p{margin:0;line-height:1.55}
+.hint{color:var(--muted);font-size:14px}
+label{display:grid;gap:6px;font-weight:bold;font-size:15px}
+input{font:17px Arial;padding:0 14px;min-height:52px;border:1.5px solid #D9CDBE;border-radius:8px;width:100%;background:#fff;color:var(--dark)}
+input:focus{outline:2px solid var(--org);border-color:var(--org)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:54px;border-radius:10px;border:0;background:var(--org);color:var(--dark);font-weight:bold;font-size:17px;cursor:pointer;text-decoration:none;padding:0 18px;text-align:center;width:100%}
+.btn.dk{background:var(--dark);color:#fff}.btn.ol{background:transparent;border:1.5px solid var(--dark);color:var(--dark)}.btn.wa{background:#25D366;color:#fff}
+.btn[disabled]{opacity:.55}
+.lnk{background:none;border:0;color:var(--dark);text-decoration:underline;font-size:15px;cursor:pointer;padding:8px 0;justify-self:center}
+.err{color:#B42318;font-size:15px;min-height:1em}
+.who{display:grid;gap:12px}
+.who button{display:flex;align-items:center;gap:14px;text-align:left;padding:18px;border-radius:12px;border:2px solid var(--dark);background:var(--white);cursor:pointer;font:inherit;color:var(--dark)}
+.who button b{font:400 22px Georgia,serif;display:block}.who button span{font-size:14px;color:var(--muted)}
+.who i{font-style:normal;font-size:30px}
+.spin{width:20px;height:20px;border:3px solid rgba(0,0,0,.15);border-top-color:var(--dark);border-radius:50%;animation:s 1s linear infinite;display:inline-block}
+.dk .spin{border-color:rgba(255,255,255,.25);border-top-color:#fff}
+@keyframes s{to{transform:rotate(360deg)}}
+.msg{background:var(--white);border-radius:12px;padding:24px;font-size:16px;line-height:1.6;display:flex;gap:12px;align-items:center}
+.hello{background:var(--dark);color:var(--white);border-radius:14px;padding:22px 20px;display:grid;gap:8px}
+.hello h1{color:var(--white)}.hello h1 em{font-style:normal;color:var(--org)}.hello p{color:var(--beige)}
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.chips button{flex:none;min-height:42px;padding:0 16px;border-radius:99px;border:1.5px solid var(--dark);background:transparent;font:bold 14px Arial;color:var(--dark);cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--dark);color:#fff}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:15px}.kv span{color:var(--muted)}.kv b{text-align:right}
+.est{display:inline-block;font-size:12px;font-weight:bold;padding:4px 10px;border-radius:99px;background:#FEF0C7;justify-self:start}.est.ok{background:#D1FADF}
+.gals{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gal{min-height:96px;border-radius:12px;border:0;font:bold 16px Arial;cursor:pointer;display:grid;place-items:center;gap:4px;padding:12px;text-align:center}
+.gal small{font-weight:normal;font-size:12px;opacity:.85}
+.gal.no{background:var(--dark);color:#fff}.gal.si{background:var(--org);color:var(--dark);box-shadow:0 6px 18px rgba(249,152,36,.35)}
+.gal .ic{font-size:26px}
+.todo{display:grid;gap:10px}
+.todo a{display:flex;align-items:center;gap:12px;padding:14px;border-radius:10px;background:var(--beige);text-decoration:none;color:var(--dark)}
+.todo a b{display:block}.todo a span{font-size:13px;color:var(--muted)}.todo a i{font-style:normal;font-size:22px}
+.pb{height:10px;border-radius:99px;background:var(--line);overflow:hidden}.pb i{display:block;height:100%;background:var(--org);border-radius:99px}
+.steps{display:grid;gap:0;margin:0;padding:0;list-style:none}
+.steps li{display:grid;grid-template-columns:26px 1fr;gap:12px;padding:0 0 12px;position:relative;font-size:15px;line-height:1.35}
+.steps li:before{content:"";position:absolute;left:12px;top:24px;bottom:0;width:2px;background:var(--line)}.steps li:last-child:before{display:none}
+.steps li i{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);background:#fff;display:grid;place-items:center;font-style:normal;font-size:13px;font-weight:bold}
+.steps li.ok i{background:var(--org);border-color:var(--org)}.steps li.ok{color:var(--dark)}.steps li:not(.ok){color:var(--muted)}
+.steps li.next{color:var(--dark);font-weight:bold}.steps li.next i{border-color:var(--org)}
+.not{display:grid;gap:4px;padding:14px;border-radius:10px;background:var(--beige);position:relative}
+.not.nueva{background:#FFF4E5;border-left:4px solid var(--org)}
+.not b{font-size:15px}.not p{font-size:15px;white-space:pre-line}.not small{color:var(--muted);font-size:12px}
+.g{background:var(--white);border-radius:12px;overflow:hidden;display:grid;grid-template-columns:110px 1fr}
+.g img{width:110px;height:100%;min-height:150px;object-fit:cover;display:block}
+.g div{padding:14px;display:grid;gap:6px;align-content:start}
+.g small{font:bold 11px Arial;letter-spacing:.08em;color:#B26200;text-transform:uppercase}
+.g h2{font-size:19px}.g p{font-size:14px;color:#3A3735}
+.g .btns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.g .btn{width:auto;min-height:42px;font-size:15px}
+.g .ok{display:none;color:#05603A;font-weight:bold;font-size:13px}.g.leido .ok{display:inline}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--dark);display:flex;justify-content:space-around;padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+.nav button{flex:1;background:none;border:0;color:#BDB3A6;font:12px Arial;display:grid;gap:2px;place-items:center;min-height:54px;cursor:pointer;position:relative}
+.nav button i{font-style:normal;font-size:22px}
+.nav button[aria-current="page"]{color:var(--org);font-weight:bold}
+.nav .dot{position:absolute;top:4px;left:calc(50% + 6px);min-width:18px;height:18px;border-radius:9px;background:#E5484D;color:#fff;font:bold 11px/18px Arial;padding:0 5px}
+.modal{position:fixed;inset:0;z-index:50;background:rgba(34,32,32,.7);display:grid;place-items:center;padding:16px}
+.modal>div{background:var(--white);border-radius:14px;padding:22px;max-width:420px;width:100%;display:grid;gap:12px;text-align:center}
+.modal .big{font-size:44px}
+.acc{display:grid;gap:6px;background:var(--beige);border-radius:8px;padding:12px;text-align:left;font-size:15px}
+.copy{display:flex;justify-content:space-between;gap:8px;align-items:center}.copy button{border:1.5px solid var(--dark);background:transparent;border-radius:6px;padding:6px 10px;font:bold 13px Arial;cursor:pointer}
+.pf dt{color:var(--muted);font-size:13px;margin-top:8px}.pf dd{margin:2px 0 0;font-size:16px}
+</style>
+</head>
+<body>
+<div class="top"><img src="logo.png" alt="NC Studio"><span class="t">Zona VIP</span><span class="saldo" id="saldo" role="status"></span></div>
+<div class="bar"></div>
+<main class="wrap" id="app"><div class="msg"><span class="spin" aria-hidden="true"></span>Cargando…</div></main>
+<nav class="nav" id="nav" hidden aria-label="Secciones de tu Zona VIP">
+  <button data-s="inicio" aria-current="page"><i aria-hidden="true">🏠</i>Inicio</button>
+  <button data-s="avisos"><i aria-hidden="true">🔔</i>Avisos<span class="dot" id="dot" hidden></span></button>
+  <button data-s="consejos"><i aria-hidden="true">✨</i>Consejos</button>
+  <button data-s="perfil"><i aria-hidden="true">👤</i>Mi perfil</button>
+</nav>
+<script src="guia.js"></script>
+<script>
+(function () {
+  var SCRIPT = "https://script.google.com/macros/s/AKfycbzaT3OjIAFX5CET8Opyjnehye_XOfdI_kwA0DxEDusXzCzesOtffZUwsvE2-IbEp4yvIQ/exec";
+  var app = document.getElementById("app"), nav = document.getElementById("nav"), saldoEl = document.getElementById("saldo");
+  var D = null, SEL = 0, SEC = "inicio", TEL = "";
+  function $(x) { return document.getElementById(x); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (m) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]; }); }
+  function get(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } }
+  function put(k, v) { try { if (v) localStorage.setItem(k, v); else localStorage.removeItem(k); } catch (e) {} }
+  function call(b) { return fetch(SCRIPT, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(b) }).then(function (r) { return r.json(); }); }
+  function cargando(b, t) { b.disabled = true; b.dataset.t = b.innerHTML; b.innerHTML = '<span class="spin" aria-hidden="true"></span>' + (t || "Un momento…"); }
+  function listo(b) { b.disabled = false; if (b.dataset.t) b.innerHTML = b.dataset.t; }
+  function telBonito(t) { var d = String(t || "").replace(/\D/g, "").slice(-8); return d.length === 8 ? d.slice(0, 4) + "-" + d.slice(4) : t; }
+  function fechaHora(s) { var m = String(s || "").match(/^(\d{4})-(\d\d)-(\d\d)(?:T(\d\d):(\d\d))?/); if (!m) return ""; var M = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]; return +m[3] + " " + M[+m[2] - 1] + (m[4] ? " · " + ((+m[4] % 12) || 12) + ":" + m[5] + (+m[4] < 12 ? " a. m." : " p. m.") : ""); }
+  function modal(html) {
+    var w = document.createElement("div"); w.className = "modal"; w.setAttribute("role", "dialog"); w.setAttribute("aria-modal", "true");
+    w.innerHTML = '<div>' + html + '<button class="btn dk" data-close>Entendido</button></div>';
+    w.addEventListener("click", function (e) { if (e.target === w || e.target.hasAttribute("data-close")) w.remove(); });
+    document.body.appendChild(w); var b = w.querySelector("[data-close]"); if (b) b.focus(); return w;
+  }
+
+  /* ---------------- entrar ---------------- */
+  function quien() {
+    nav.hidden = true; saldoEl.style.display = "none";
+    app.innerHTML = '<section class="card"><h1>Bienvenido a tu Zona VIP 👑</h1><p class="hint">Tu espacio en NC Studio: el proceso de tu sesión, tus pagos, tus fotos y nuestros consejos.</p></section>' +
+      '<div class="who"><button id="wc"><i aria-hidden="true">📸</i><span><b>Soy cliente</b><span>Entro con mi número de WhatsApp</span></span></button>' +
+      '<button id="wa"><i aria-hidden="true">🔑</i><span><b>Soy administrador</b><span>Solo para Nelson y Charlie</span></span></button></div>';
+    $("wc").onclick = function () { telefono(); };
+    $("wa").onclick = function () { location.href = "agendar.html"; };
+  }
+  function telefono(msg) {
+    app.innerHTML = '<section class="card"><h2>Entra con tu número</h2><p class="hint">El mismo número de WhatsApp con el que reservaste.</p>' +
+      '<label for="tel">Número de WhatsApp<input id="tel" inputmode="tel" autocomplete="tel" placeholder="6000-0000" value="' + esc(TEL) + '"></label>' +
+      '<p class="err" id="er">' + esc(msg || "") + '</p><button class="btn" id="go">Continuar</button><button class="lnk" id="bk">‹ Volver</button></section>';
+    $("bk").onclick = quien;
+    $("tel").focus();
+    $("tel").onkeydown = function (e) { if (e.key === "Enter") $("go").click(); };
+    $("go").onclick = function () {
+      var t = $("tel").value.replace(/\D/g, "");
+      if (t.length < 7) { $("er").textContent = "Escribe tu número completo."; return; }
+      TEL = t; var b = this; cargando(b, "Buscando…");
+      call({ action: "vip_inicio", tel: t }).then(function (r) {
+        listo(b);
+        if (!r.ok) { $("er").innerHTML = esc(r.title) + (r.html ? ". " + r.html : ""); return; }
+        if (r.paso === "clave") clave(r.nombre); else codigo(r.nombre, r.correo);
+      }).catch(function () { listo(b); $("er").textContent = "No pudimos conectar. Revisa tu internet."; });
+    };
+  }
+  function clave(nombre) {
+    app.innerHTML = '<section class="card"><h2>¡Hola de nuevo, ' + esc(nombre) + '! ✨</h2>' +
+      '<label for="cl">Tu contraseña<input id="cl" type="password" autocomplete="current-password"></label>' +
+      '<p class="err" id="er"></p><button class="btn" id="go">Entrar</button><button class="lnk" id="olv">Olvidé mi contraseña</button><button class="lnk" id="bk">‹ Usar otro número</button></section>';
+    $("cl").focus(); $("bk").onclick = function () { telefono(); };
+    $("cl").onkeydown = function (e) { if (e.key === "Enter") $("go").click(); };
+    $("go").onclick = function () {
+      var b = this; cargando(b, "Entrando…");
+      call({ action: "vip_entrar", tel: TEL, clave: $("cl").value }).then(function (r) {
+        listo(b); if (!r.ok) { $("er").innerHTML = esc(r.title) + (r.html ? ". " + r.html : ""); return; }
+        put("ncVipTok", r.tok); cargar();
+      }).catch(function () { listo(b); $("er").textContent = "No pudimos conectar."; });
+    };
+    $("olv").onclick = function () {
+      var b = this; b.disabled = true; b.textContent = "Enviando código…";
+      call({ action: "vip_inicio", tel: TEL, olvide: true }).then(function (r) { if (!r.ok) { b.disabled = false; b.textContent = "Olvidé mi contraseña"; $("er").innerHTML = esc(r.title) + (r.html ? ". " + r.html : ""); return; } codigo(r.nombre, r.correo, true); })
+        .catch(function () { b.disabled = false; b.textContent = "Olvidé mi contraseña"; $("er").textContent = "No pudimos conectar."; });
+    };
+  }
+  function codigo(nombre, correo, olvido) {
+    app.innerHTML = '<section class="card"><h2>' + (olvido ? 'Crea una contraseña nueva' : '¡Hola, ' + esc(nombre) + '! Crea tu contraseña') + '</h2>' +
+      '<p>Para proteger tu información te enviamos un código de 6 números a <b>' + esc(correo) + '</b>. Revisa también la carpeta de spam o promociones.</p>' +
+      '<label for="co">Código del correo<input id="co" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000"></label>' +
+      '<label for="c1">Tu contraseña <small style="font-weight:normal">(mínimo 6 caracteres)</small><input id="c1" type="password" autocomplete="new-password"></label>' +
+      '<label for="c2">Repítela<input id="c2" type="password" autocomplete="new-password"></label>' +
+      '<p class="err" id="er"></p><button class="btn" id="go">Crear y entrar</button><button class="lnk" id="re">No me llegó: enviar otro código</button><button class="lnk" id="bk">‹ Usar otro número</button></section>';
+    $("co").focus(); $("bk").onclick = function () { telefono(); };
+    $("go").onclick = function () {
+      var c = $("co").value.replace(/\D/g, ""), a = $("c1").value, z = $("c2").value;
+      if (c.length !== 6) { $("er").textContent = "El código tiene 6 números."; return; }
+      if (a.length < 6) { $("er").textContent = "Tu contraseña debe tener al menos 6 caracteres."; return; }
+      if (a !== z) { $("er").textContent = "Las contraseñas no coinciden."; return; }
+      var b = this; cargando(b, "Creando…");
+      call({ action: "vip_crear", tel: TEL, codigo: c, clave: a }).then(function (r) {
+        listo(b); if (!r.ok) { $("er").innerHTML = esc(r.title) + (r.html ? ". " + r.html : ""); return; }
+        put("ncVipTok", r.tok); cargar();
+      }).catch(function () { listo(b); $("er").textContent = "No pudimos conectar."; });
+    };
+    $("re").onclick = function () {
+      var b = this; b.disabled = true; b.textContent = "Enviando…";
+      call({ action: "vip_inicio", tel: TEL, olvide: true }).then(function (r) { b.disabled = false; b.textContent = "No me llegó: enviar otro código"; $("er").innerHTML = r.ok ? '<span style="color:#05603A">Listo, revisa tu correo.</span>' : esc(r.title); })
+        .catch(function () { b.disabled = false; b.textContent = "No me llegó: enviar otro código"; });
+    };
+  }
+
+  /* ---------------- mi zona ---------------- */
+  function cargar() {
+    var tok = get("ncVipTok"); if (!tok) { quien(); return; }
+    app.innerHTML = '<div class="msg"><span class="spin" aria-hidden="true"></span>Cargando tu Zona VIP…</div>';
+    call({ action: "vip_datos", tok: tok }).then(function (r) {
+      if (!r.ok) { if (r.salir) put("ncVipTok", ""); TEL = ""; telefono(r.salir ? "Tu sesión venció. Entra de nuevo." : r.title); return; }
+      D = r; TEL = r.tel;
+      // la reserva que se muestra primero: la próxima, o la más reciente
+      var hoy = new Date().toISOString().slice(0, 10), prox = -1;
+      D.reservas.forEach(function (x, i) { if (x.dateIso >= hoy && (prox < 0 || x.dateIso < D.reservas[prox].dateIso)) prox = i; });
+      SEL = prox >= 0 ? prox : 0;
+      nav.hidden = false; pintar();
+    }).catch(function () { app.innerHTML = '<div class="msg">No pudimos cargar tu Zona VIP. Revisa tu internet y recarga.</div>'; });
+  }
+  function pintaSaldo() {
+    var x = D && D.reservas[SEL];
+    if (!x) { saldoEl.style.display = "none"; return; }
+    saldoEl.style.display = "inline-block";
+    if (x.pagado) { saldoEl.className = "saldo pag"; saldoEl.textContent = "✓ Pagado"; }
+    else if (!x.abonado) { saldoEl.className = "saldo"; saldoEl.textContent = "Abono: " + x.abono; }
+    else { saldoEl.className = "saldo"; saldoEl.textContent = "Saldo: " + x.saldo; }
+  }
+  function sinLeer() { return D.notificaciones.filter(function (n) { return !n.leida; }).length; }
+  function pintaNav() {
+    Array.prototype.forEach.call(nav.querySelectorAll("button"), function (b) { if (b.getAttribute("data-s") === SEC) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
+    var n = sinLeer(); $("dot").hidden = !n; $("dot").textContent = n;
+  }
+  function pintar() {
+    pintaSaldo(); pintaNav(); window.scrollTo(0, 0);
+    if (SEC === "avisos") return avisos();
+    if (SEC === "consejos") return consejos();
+    if (SEC === "perfil") return perfil();
+    inicio();
+  }
+  function inicio() {
+    var x = D.reservas[SEL], n = sinLeer();
+    var h = '<section class="hello"><h1>Hola, <em>' + esc(D.primer) + '</em> 👑</h1><p>' + (x ? (x.dateIso >= new Date().toISOString().slice(0, 10) ? 'Ya falta poco para tu ' + (x.evento ? 'evento' : 'sesión') + '. Aquí tienes todo en un solo lugar.' : 'Aquí tienes todo sobre tu ' + (x.evento ? 'evento' : 'sesión') + '.') : 'Todavía no tienes una reserva activa.') + '</p>' +
+      (n ? '<button class="btn" id="vn" style="margin-top:6px">🔔 Tienes ' + n + (n === 1 ? ' aviso nuevo' : ' avisos nuevos') + '</button>' : '') + '</section>';
+    if (!x) {
+      h += '<section class="card"><p>Cuando reserves con nosotros, aquí vas a ver el proceso de tu sesión, tus pagos y tus fotos.</p><a class="btn" href="index.html#portafolio">Ver experiencias</a></section>';
+      app.innerHTML = h; if ($("vn")) $("vn").onclick = function () { ir("avisos"); }; return;
+    }
+    if (D.reservas.length > 1) h += '<div class="chips" role="group" aria-label="Tus reservas">' + D.reservas.map(function (r, i) { return '<button data-r="' + i + '" aria-pressed="' + (i === SEL) + '">' + esc(r.service) + ' · ' + esc(fechaHora(r.dateIso)) + '</button>'; }).join("") + '</div>';
+    h += '<section class="card"><span class="est' + (x.abonado ? ' ok' : '') + '">' + esc(x.estado) + '</span><h2>' + esc(x.service) + '</h2>' +
+      '<div class="kv"><span>Fecha</span><b>' + esc(x.fecha) + '</b>' + (x.lugar ? '<span>Lugar</span><b>' + esc(x.lugar) + '</b>' : '') + (x.fotos ? '<span>Fotos editadas</span><b>' + esc(x.fotos) + '</b>' : '') + '</div></section>';
+    // galerías
+    h += '<div class="gals">' + (x.sinPruebas ? '' : galBtn("pru", "📸", "Fotos de prueba", x.pruebas)) + galBtn("fin", "🎁", "Fotos finales", x.finales) + '</div>';
+    // pendientes
+    var T = [];
+    if (!x.abonado) T.push(['💰', 'Envía tu abono de ' + x.abono, 'Por Yappy al ' + D.yappy + ' y mándanos la captura por WhatsApp.', 'https://wa.me/' + D.whatsapp + '?text=' + encodeURIComponent('Hola, NC Studio. Soy ' + D.nombre + ', te envío la captura de mi abono.')]);
+    if (x.contrato) T.push(['✍️', 'Firma tu contrato', 'Léelo con calma y acéptalo en línea.', x.contrato]);
+    if (x.gustos) T.push(['💛', 'Cuéntanos de ti', 'Un formulario cortito para prepararte 3 ideas.', x.gustos]);
+    if (x.tips) T.push(['📋', 'Cómo prepararte', 'Tu guía con fecha, lugar y lo que debes saber.', x.tips]);
+    if (x.extrasLink) T.push(['➕', '¿Te gustaron más fotos?', 'Pide fotos extra y te decimos el precio al momento.', x.extrasLink]);
+    if (x.pdfContrato) T.push(['📄', 'Tu contrato firmado', 'Tu copia en PDF.', x.pdfContrato]);
+    if (T.length) h += '<section class="card"><h2>Lo que te toca</h2><div class="todo">' + T.map(function (t) { return '<a href="' + esc(t[3]) + '" target="_blank" rel="noopener"><i aria-hidden="true">' + t[0] + '</i><span><b>' + esc(t[1]) + '</b><span>' + esc(t[2]) + '</span></span></a>'; }).join("") + '</div></section>';
+    // progreso
+    var ok = x.pasos.filter(function (p) { return p.ok; }).length, sig = x.pasos.filter(function (p) { return !p.ok; })[0];
+    h += '<section class="card"><div style="display:flex;justify-content:space-between;align-items:baseline"><h2>Tu proceso</h2><b>' + ok + ' de ' + x.pasos.length + '</b></div><div class="pb"><i style="width:' + Math.round(ok / x.pasos.length * 100) + '%"></i></div>' +
+      '<ol class="steps">' + x.pasos.map(function (p) { return '<li class="' + (p.ok ? 'ok' : p === sig ? 'next' : '') + '"><i aria-hidden="true">' + (p.ok ? '✓' : '') + '</i><span>' + esc(p.t) + (p === sig ? ' <small class="hint">· lo que sigue</small>' : '') + '</span></li>'; }).join("") + '</ol></section>';
+    // pagos
+    h += '<section class="card"><h2>Tus pagos</h2><div class="kv"><span>Total</span><b>' + esc(x.total) + '</b><span>Abono (50 %)</span><b>' + esc(x.abono) + (x.abonado ? ' ✓' : ' · pendiente') + '</b><span>Saldo</span><b>' + esc(x.saldo) + (x.pagado ? ' ✓ pagado' : '') + '</b></div>' +
+      (x.abonado && !x.pagado ? '<p class="hint">El saldo se paga el día de tu ' + (x.evento ? 'evento' : 'sesión') + ', antes de empezar, por Yappy al ' + esc(D.yappy) + ' o en efectivo.</p>' : '') + '</section>';
+    if (x.incluye.length) h += '<section class="card"><details><summary style="cursor:pointer;font:400 20px Georgia,serif">Lo que incluye tu paquete</summary><ul style="margin:10px 0 0;padding-left:20px;line-height:1.6">' + x.incluye.map(function (i) { return '<li>' + esc(i) + '</li>'; }).join("") + x.extras.map(function (i) { return '<li>' + esc(i) + '</li>'; }).join("") + '</ul></details></section>';
+    h += '<a class="btn wa" href="https://wa.me/' + esc(D.whatsapp) + '" target="_blank" rel="noopener">💬 Escribirnos por WhatsApp</a>';
+    app.innerHTML = h;
+    if ($("vn")) $("vn").onclick = function () { ir("avisos"); };
+    Array.prototype.forEach.call(app.querySelectorAll("[data-r]"), function (b) { b.onclick = function () { SEL = +b.getAttribute("data-r"); pintar(); }; });
+    Array.prototype.forEach.call(app.querySelectorAll("[data-gal]"), function (b) { b.onclick = function () { abrirGal(b.getAttribute("data-gal"), x); }; });
+  }
+  function galBtn(k, ic, t, g) { return '<button class="gal ' + (g ? 'si' : 'no') + '" data-gal="' + k + '"><span class="ic" aria-hidden="true">' + ic + '</span>' + t + '<small>' + (g ? '¡Ya están listas!' : 'Todavía no') + '</small></button>'; }
+  function abrirGal(k, x) {
+    var g = k === "pru" ? x.pruebas : x.finales, pru = k === "pru";
+    if (!g) {
+      modal('<div class="big" aria-hidden="true">' + (pru ? '⏳' : '🎨') + '</div><h2>' + (pru ? 'Aún no están listas tus fotos de prueba' : 'Aún no están listas tus fotos') + '</h2><p>' +
+        (pru ? 'Te llegan de 48 a 72 horas hábiles después de tu sesión. Cuando estén listas, este botón se pone naranja y te avisamos aquí y por correo.' : 'Llegan editadas en un máximo de 2 semanas después de que nos envíes tu selección. Cuando estén listas, este botón se pone naranja y te avisamos.') + '</p>');
+      return;
+    }
+    var w = modal('<div class="big" aria-hidden="true">' + (pru ? '📸' : '🎁') + '</div><h2>' + (pru ? '¡Tus fotos de prueba están listas!' : '¡Tus fotos finales están listas!') + '</h2>' +
+      (pru ? '<p>Toca el corazón ♡ en tus favoritas y al terminar presiona «Send to Photographer». Tienes 2 días para elegirlas.</p>' : '<p>Descárgalas, guárdalas en dos lugares y compártelas. ¡Nos encanta verlas!</p>') +
+      ((g.clave || g.pin) ? '<div class="acc">' + (g.clave ? '<div class="copy"><span>Contraseña: <b>' + esc(g.clave) + '</b></span><button data-cp="' + esc(g.clave) + '">Copiar</button></div>' : '') + (g.pin ? '<div class="copy"><span>PIN de descarga: <b>' + esc(g.pin) + '</b></span><button data-cp="' + esc(g.pin) + '">Copiar</button></div>' : '') + '</div>' : '') +
+      '<a class="btn" href="' + esc(g.link) + '" target="_blank" rel="noopener">Abrir mi galería</a>' + (pru && x.extrasLink ? '<a class="btn ol" href="' + esc(x.extrasLink) + '" target="_blank" rel="noopener">¿Quieres fotos extra?</a>' : ''));
+    Array.prototype.forEach.call(w.querySelectorAll("[data-cp]"), function (b) { b.onclick = function () { try { navigator.clipboard.writeText(b.getAttribute("data-cp")); b.textContent = "✓ Copiado"; } catch (e) {} }; });
+  }
+  function avisos() {
+    var L = D.notificaciones;
+    app.innerHTML = '<section class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2>Tus avisos</h2>' + (sinLeer() ? '<button class="lnk" id="todas" style="padding:0">Marcar todos como leídos</button>' : '') + '</div>' +
+      (L.length ? L.map(function (n) { return '<div class="not' + (n.leida ? '' : ' nueva') + '"><b>' + esc(n.titulo) + '</b><p>' + esc(n.mensaje) + '</p><small>' + esc(fechaHora(n.fecha)) + '</small></div>'; }).join("") : '<p class="hint">Aquí te llegan nuestros avisos: cuando confirmemos tu abono, cuando estén tus fotos y los mensajes que te mandemos.</p>') + '</section>';
+    if ($("todas")) $("todas").onclick = leerTodas;
+    if (sinLeer()) setTimeout(leerTodas, 2500); // al abrir los avisos se marcan como leídos
+  }
+  function leerTodas() {
+    call({ action: "vip_leida", tok: get("ncVipTok"), todas: true }).catch(function () {});
+    D.notificaciones.forEach(function (n) { n.leida = true; }); pintaNav();
+    if ($("todas")) $("todas").remove();
+  }
+  function consejos() {
+    app.innerHTML = '<section class="hello"><h1>Tu guía para <em>brillar</em> ✨</h1><p>Seis guías cortitas para llegar a tu sesión tranquila y lista para disfrutarla. Léelas en orden.</p><div class="pb" style="background:rgba(255,255,255,.15)"><i id="gp" style="width:0"></i></div><small id="gt" style="color:var(--beige)"></small></section><div id="gl" style="display:grid;gap:12px"></div>';
+    window.ncGuia($("gl"), function (n, t) { $("gp").style.width = (n / t * 100) + "%"; $("gt").textContent = n + " de " + t + " leídas"; });
+  }
+  function perfil() {
+    var G = D.gustos || {}, K = Object.keys(G).filter(function (k) { return G[k] && !/^(ideas|quien)$/i.test(k); });
+    var nom = { hobbies: "Hobbies y gustos", comidas: "Comidas favoritas", peliculas: "Películas y series", artistas: "Artistas favoritos", colores: "Colores", estilo: "Tu estilo", musica: "Música", lugares: "Lugares" };
+    app.innerHTML = '<section class="card"><h2>Mi perfil</h2><dl class="pf" style="margin:0"><dt>Nombre</dt><dd>' + esc(D.nombre) + '</dd><dt>WhatsApp</dt><dd>' + esc(telBonito(D.tel)) + '</dd><dt>Correo</dt><dd>' + esc(D.correo || "—") + '</dd>' +
+      (D.cumple ? '<dt>Cumpleaños</dt><dd>' + esc(fechaHora(D.cumple).replace(/ \d{4}$/, "")) + ' 🎂</dd>' : '') + (D.instagram ? '<dt>Instagram</dt><dd>' + esc(D.instagram) + '</dd>' : '') + '</dl>' +
+      '<p class="hint">¿Algo cambió? Escríbenos y lo actualizamos.</p></section>' +
+      (K.length ? '<section class="card"><h2>Lo que nos contaste de ti 💛</h2><dl class="pf" style="margin:0">' + K.map(function (k) { return '<dt>' + esc(nom[k] || k.charAt(0).toUpperCase() + k.slice(1)) + '</dt><dd>' + esc(G[k]) + '</dd>'; }).join("") + '</dl></section>' : '') +
+      '<section class="card"><h2>Tus sesiones con nosotros</h2>' + (D.reservas.length ? D.reservas.map(function (r) { return '<div class="not"><b>' + esc(r.service) + '</b><small>' + esc(r.fecha) + ' · ' + esc(r.pagado ? "Pagada" : r.estado) + '</small></div>'; }).join("") : '<p class="hint">Todavía no tienes sesiones.</p>') + '</section>' +
+      '<button class="btn ol" id="out">Cerrar sesión</button>';
+    $("out").onclick = function () { put("ncVipTok", ""); D = null; TEL = ""; quien(); };
+  }
+  function ir(s) { SEC = s; pintar(); }
+  Array.prototype.forEach.call(nav.querySelectorAll("button"), function (b) { b.onclick = function () { ir(b.getAttribute("data-s")); }; });
+  var q = new URLSearchParams(location.search);
+  if (q.get("s")) SEC = q.get("s");
+  if (get("ncVipTok")) cargar(); else if (q.get("cliente")) telefono(); else quien();
+})();
+</script>
+</body>
+</html>

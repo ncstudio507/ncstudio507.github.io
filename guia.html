@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tu guía para brillar · NC Studio</title>
+<meta name="description" content="Seis guías cortitas para llegar a tu sesión con NC Studio lista para disfrutarla: confianza, tu idea, vestuario, color, manos y el gran día.">
+<meta property="og:title" content="Tu guía para brillar frente a la cámara · NC Studio">
+<meta property="og:description" content="Seis guías cortitas para llegar a tu sesión lista para disfrutarla.">
+<meta property="og:image" content="https://ncstudio507.github.io/guia/1-confianza.jpg">
+<link rel="icon" type="image/png" href="favicon.png">
+<style>
+body{margin:0;background:#F2E4D2;font-family:Arial,Helvetica,sans-serif;color:#222020}
+.top{background:#222020;padding:16px 20px;display:flex;align-items:center;gap:14px}
+.top img{height:38px;display:block}.top span{color:#F2E4D2;font-family:Georgia,serif;font-size:18px}
+.bar{height:5px;background:#F99824}
+.wrap{max-width:820px;margin:0 auto;padding:24px 16px 48px;display:grid;gap:18px}
+.hero{background:#222020;color:#FEFEFE;border-radius:14px;padding:26px 22px;display:grid;gap:10px}
+.hero h1{font:400 32px/1.1 Georgia,serif;margin:0}.hero h1 em{font-style:normal;color:#F99824}
+.hero p{margin:0;color:#F2E4D2;line-height:1.55;font-size:16px}
+.prog{display:flex;align-items:center;gap:10px;font-size:14px;color:#F2E4D2}.prog i{flex:1;height:8px;border-radius:99px;background:rgba(255,255,255,.15);overflow:hidden;display:block}.prog i b{display:block;height:100%;background:#F99824;width:0;transition:width .4s}
+.list{display:grid;gap:14px}
+.g{background:#FEFEFE;border-radius:12px;overflow:hidden;display:grid;grid-template-columns:120px 1fr}
+.g img{width:120px;height:100%;min-height:150px;object-fit:cover;display:block}
+.g div{padding:16px 16px 16px 14px;display:grid;gap:8px;align-content:start}
+.g small{font:bold 12px Arial;letter-spacing:.08em;color:#B26200;text-transform:uppercase}
+.g h2{font:400 22px/1.15 Georgia,serif;margin:0}
+.g p{margin:0;font-size:15px;line-height:1.5;color:#3A3735}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 18px;border-radius:8px;background:#F99824;color:#222020;font-weight:bold;font-size:15px;text-decoration:none}
+.btn.l{background:transparent;border:1.5px solid #222020}
+.ok{display:none;color:#05603A;font-weight:bold;font-size:14px}.g.leido .ok{display:inline}
+.foot{background:#FEFEFE;border-radius:12px;padding:20px;display:grid;gap:10px;text-align:center}
+.foot p{margin:0;line-height:1.55}
+.wa{background:#25D366;color:#fff}
+@media(min-width:620px){.g{grid-template-columns:170px 1fr}.g img{width:170px;min-height:210px}}
+</style>
+</head>
+<body>
+<div class="top"><img src="logo.png" alt="NC Studio"><span>Tu guía para brillar</span></div>
+<div class="bar"></div>
+<main class="wrap">
+<section class="hero">
+<h1>Frente a la cámara, <em>sé tú.</em></h1>
+<p>Seis guías cortitas, de las que se leen con un café, para que llegues a tu sesión tranquila y sepas exactamente qué ponerte, qué llevar y cómo disfrutarla. Léelas en orden: cada una te deja lista para la siguiente.</p>
+<div class="prog"><i><b id="pb"></b></i><span id="pt">0 de 6 leídas</span></div>
+</section>
+<div class="list" id="list"></div>
+<section class="foot">
+<p><b>¿Te quedó alguna duda o ya tienes tu idea?</b><br>Escríbenos y la aterrizamos juntos.</p>
+<a class="btn wa" href="https://wa.me/50766313762?text=Hola%2C%20NC%20Studio.%20Ya%20le%C3%AD%20la%20gu%C3%ADa%20y%20tengo%20una%20pregunta" target="_blank" rel="noopener">Escribirnos por WhatsApp</a>
+<p style="color:#6B6466;font-size:14px">Con cariño, Nelson y Charlie · NC Studio</p>
+</section>
+</main>
+<script src="guia.js"></script>
+<script>
+ncGuia(document.getElementById("list"), function (n, t) { document.getElementById("pb").style.width = (n / t * 100) + "%"; document.getElementById("pt").textContent = n + " de " + t + " leídas"; });
+</script>
+</body>
+</html>

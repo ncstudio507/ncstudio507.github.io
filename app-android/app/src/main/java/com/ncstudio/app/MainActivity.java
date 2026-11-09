@@ -54,24 +54,25 @@ import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
 
 /**
- * NC Studio: app privada. Se abre con tu huella (o el PIN/patrón del teléfono)
- * y tiene dos vistas: la página como la ven los clientes y tu página de dueño.
+ * NC Studio: tres entradas. Clientes (la página), Zona VIP (cada cliente con su
+ * número y contraseña) y Admin (Nelson y Charlie; se confirma con la huella).
  */
 public class MainActivity extends AppCompatActivity {
     private static final String SITE = "https://ncstudio507.github.io/";
     private static final String OWNER = SITE + "agendar.html";
-    private static final long RELOCK_MS = 60_000; // se vuelve a bloquear si la dejas en segundo plano 1 minuto
+    private static final String VIP = SITE + "vip.html?cliente=1";
+    private static final int CLIENTE = 0, ZONA = 1, ADMIN = 2;
 
     private static final int ORANGE = Color.parseColor("#F99824");
     private static final int DARK = Color.parseColor("#222020");
     private static final int BEIGE = Color.parseColor("#F2E4D2");
 
     private FrameLayout root;
-    private View lockView, homeView, webWrap;
-    private WebView clientWeb, ownerWeb, current;
+    private View homeView, webWrap;
+    private final WebView[] webs = new WebView[3];
+    private WebView current;
     private TextView webTitle;
-    private boolean unlocked = false, prompting = false;
-    private long hiddenAt = 0;
+    private boolean prompting = false;
 
     @Override
     protected void onCreate(Bundle b) {
@@ -83,11 +84,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(root);
         homeView = buildHome();
         webWrap = buildWebWrap();
-        lockView = buildLock();
         root.addView(homeView);
         root.addView(webWrap);
-        root.addView(lockView);
         webWrap.setVisibility(View.GONE);
+        buscarVersion();
         getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
             @Override public void handleOnBackPressed() {
                 if (webWrap.getVisibility() == View.VISIBLE) {
@@ -98,39 +98,30 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    @Override protected void onStart() {
-        super.onStart();
-        if (unlocked && hiddenAt > 0 && SystemClock.elapsedRealtime() - hiddenAt > RELOCK_MS) unlocked = false;
-        if (!unlocked) { lockView.setVisibility(View.VISIBLE); askUnlock(); }
-    }
-
-    @Override protected void onStop() { super.onStop(); hiddenAt = SystemClock.elapsedRealtime(); }
-
-    /* ---------- desbloqueo ---------- */
-    private void askUnlock() {
+    /* ---------- huella para entrar como administrador (la pide la página de Admin) ---------- */
+    private void pedirHuella(WebView w) {
         if (prompting) return;
         int auth = Build.VERSION.SDK_INT >= 30
                 ? BiometricManager.Authenticators.BIOMETRIC_WEAK | BiometricManager.Authenticators.DEVICE_CREDENTIAL
                 : BiometricManager.Authenticators.BIOMETRIC_WEAK;
-        int can = BiometricManager.from(this).canAuthenticate(auth);
-        if (can != BiometricManager.BIOMETRIC_SUCCESS && Build.VERSION.SDK_INT >= 30) {
-            Toast.makeText(this, "Tu teléfono no tiene bloqueo de pantalla: actívalo para proteger la app.", Toast.LENGTH_LONG).show();
-            unlock(); return;
+        if (BiometricManager.from(this).canAuthenticate(auth) != BiometricManager.BIOMETRIC_SUCCESS) {
+            Toast.makeText(this, "Activa la huella o el bloqueo de pantalla de tu teléfono para entrar como administrador.", Toast.LENGTH_LONG).show();
+            responder(w, false); return;
         }
         BiometricPrompt.PromptInfo.Builder info = new BiometricPrompt.PromptInfo.Builder()
-                .setTitle("NC Studio")
-                .setSubtitle("Usa tu huella para entrar");
+                .setTitle("Admin · NC Studio")
+                .setSubtitle("Confirma que eres tú con tu huella");
         if (Build.VERSION.SDK_INT >= 30) info.setAllowedAuthenticators(auth);
         else info.setDeviceCredentialAllowed(true);
         BiometricPrompt p = new BiometricPrompt(this, ContextCompat.getMainExecutor(this), new BiometricPrompt.AuthenticationCallback() {
-            @Override public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult r) { prompting = false; unlock(); }
-            @Override public void onAuthenticationError(int code, @NonNull CharSequence msg) { prompting = false; }
+            @Override public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult r) { prompting = false; responder(w, true); }
+            @Override public void onAuthenticationError(int code, @NonNull CharSequence msg) { prompting = false; responder(w, false); }
         });
         prompting = true;
         p.authenticate(info.build());
     }
 
-    private void unlock() { unlocked = true; lockView.setVisibility(View.GONE); buscarVersion(); }
+    private void responder(WebView w, boolean ok) { w.evaluateJavascript("window.ncHuella && window.ncHuella(" + ok + ")", null); }
 
     /* ---------- aviso de versión nueva: revisa en GitHub si hay una app más reciente ---------- */
     private static final String RELEASE_API = "https://api.github.com/repos/ncstudio507/ncstudio507.github.io/releases/tags/app";
@@ -174,31 +165,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /* ---------- pantallas ---------- */
-    private View buildLock() {
-        LinearLayout l = column();
-        l.setBackgroundColor(DARK);
-        l.addView(logo());
-        TextView t = text("App privada de NC Studio", 18, BEIGE, false);
-        l.addView(t, lp(0, 24));
-        Button b = bigButton("🔒  Desbloquear");
-        b.setOnClickListener(v -> askUnlock());
-        l.addView(b, lp(0, 32));
-        l.setClickable(true);
-        return l;
-    }
-
     private View buildHome() {
         LinearLayout l = column();
         l.addView(logo());
-        l.addView(text("¿Qué quieres abrir?", 22, Color.WHITE, true), lp(0, 28));
-        Button cli = bigButton("👀  Vista cliente");
-        cli.setOnClickListener(v -> open(false));
+        l.addView(text("¿A dónde quieres entrar?", 22, Color.WHITE, true), lp(0, 28));
+        Button cli = bigButton("📸  Clientes");
+        cli.setOnClickListener(v -> open(CLIENTE));
         l.addView(cli, lp(0, 28));
-        l.addView(text("La página tal como la ven tus clientes", 14, BEIGE, false), lp(0, 8));
-        Button own = bigButton("🔑  Mi página de dueño");
-        own.setOnClickListener(v -> open(true));
-        l.addView(own, lp(0, 28));
-        l.addView(text("Agendar, clientes, finanzas, publicar y experiencias", 14, BEIGE, false), lp(0, 8));
+        l.addView(text("Experiencias, paquetes y reservas", 14, BEIGE, false), lp(0, 8));
+        Button vip = bigButton("👑  Zona VIP");
+        vip.setOnClickListener(v -> open(ZONA));
+        l.addView(vip, lp(0, 24));
+        l.addView(text("Tu sesión, tus pagos y tus fotos", 14, BEIGE, false), lp(0, 8));
+        Button adm = bigButton("🔑  Admin");
+        GradientDrawable g = new GradientDrawable(); g.setColor(DARK); g.setStroke(dp(2), BEIGE); g.setCornerRadius(dp(10));
+        adm.setBackground(g); adm.setTextColor(Color.WHITE);
+        adm.setOnClickListener(v -> open(ADMIN));
+        l.addView(adm, lp(0, 24));
+        l.addView(text("Solo Nelson y Charlie · con tu huella", 14, BEIGE, false), lp(0, 8));
         return l;
     }
 
@@ -213,15 +197,11 @@ public class MainActivity extends AppCompatActivity {
         home.setOnClickListener(v -> showHome());
         webTitle = text("", 16, Color.WHITE, true);
         webTitle.setGravity(Gravity.CENTER);
-        Button swap = flatButton("⇄");
-        swap.setContentDescription("Cambiar de vista");
-        swap.setOnClickListener(v -> open(current != ownerWeb));
         Button reload = flatButton("↻");
         reload.setContentDescription("Recargar");
         reload.setOnClickListener(v -> { if (current != null) current.reload(); });
         bar.addView(home);
         bar.addView(webTitle, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
-        bar.addView(swap);
         bar.addView(reload);
         View line = new View(this);
         line.setBackgroundColor(ORANGE);
@@ -234,14 +214,16 @@ public class MainActivity extends AppCompatActivity {
         return l;
     }
 
-    private void open(boolean owner) {
+    private void open(int cual) {
         FrameLayout holder = webWrap.findViewWithTag("holder");
-        if (owner && ownerWeb == null) { ownerWeb = newWeb(); ownerWeb.loadUrl(OWNER); holder.addView(ownerWeb); }
-        if (!owner && clientWeb == null) { clientWeb = newWeb(); clientWeb.loadUrl(SITE); holder.addView(clientWeb); }
-        current = owner ? ownerWeb : clientWeb;
-        if (ownerWeb != null) ownerWeb.setVisibility(owner ? View.VISIBLE : View.GONE);
-        if (clientWeb != null) clientWeb.setVisibility(owner ? View.GONE : View.VISIBLE);
-        webTitle.setText(owner ? "Dueño" : "Vista cliente");
+        if (webs[cual] == null) {
+            webs[cual] = newWeb();
+            webs[cual].loadUrl(cual == ADMIN ? OWNER : cual == ZONA ? VIP : SITE);
+            holder.addView(webs[cual]);
+        }
+        current = webs[cual];
+        for (int i = 0; i < webs.length; i++) if (webs[i] != null) webs[i].setVisibility(i == cual ? View.VISIBLE : View.GONE);
+        webTitle.setText(cual == ADMIN ? "Admin" : cual == ZONA ? "Zona VIP" : "Clientes");
         homeView.setVisibility(View.GONE);
         webWrap.setVisibility(View.VISIBLE);
     }
@@ -286,6 +268,9 @@ public class MainActivity extends AppCompatActivity {
     private class Puente {
         private final WebView web;
         Puente(WebView w) { web = w; }
+
+        @JavascriptInterface
+        public void huella() { runOnUiThread(() -> pedirHuella(web)); }
 
         @JavascriptInterface
         public void descargar(String json) {

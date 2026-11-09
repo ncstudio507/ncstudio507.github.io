@@ -124,7 +124,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 </style>
 </head>
 <body>
-<div class="top"><img src="logo.png" alt="NC Studio"><span>Agendar reserva</span><a href="#" id="salir" hidden>Cambiar PIN</a></div>
+<div class="top"><img src="logo.png" alt="NC Studio"><span>Agendar reserva</span><a href="#" id="salir" hidden>Salir</a></div>
 <nav class="tabs" id="tabs" hidden><button id="tA" aria-pressed="true">Agendar</button><button id="tK" aria-pressed="false">Compromisos</button><button id="tC" aria-pressed="false">Clientes</button><button id="tF" aria-pressed="false">Finanzas</button><button id="tP" aria-pressed="false">Publicar</button><button id="tE" aria-pressed="false">Enviar</button></nav>
 <div class="bar"></div>
 <main id="app"></main>
@@ -160,18 +160,42 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
   $("tE").onclick = function () { enviar(); };
   var QS = new URLSearchParams(location.search), REPARTO = QS.get("reparto"), PUBQ = QS.get("pub");
   function inicio() { if (REPARTO) { var r = REPARTO; REPARTO = null; finanzas(r); } else if (PUBQ) { var q = PUBQ; PUBQ = null; publicar(q); } else form(); }
+  /* Entrada de administradores: tu teléfono + la pregunta loca del día (la respuesta siempre es «goku»).
+     El PIN se pide solo la primera vez en cada teléfono o computadora. En la app, la huella reemplaza la pregunta. */
+  function hoyAdm() { var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
+  function admLS(k, v) { try { if (v === undefined) return localStorage.getItem(k) || ""; if (v) localStorage.setItem(k, v); else localStorage.removeItem(k); } catch (e) { return ""; } }
+  function admHoy() { return admLS("ncAdmDia") === hoyAdm(); }
+  var HUELLA = !!(window.NCApp && window.NCApp.huella);
   function pinView(msg) {
     salir.hidden = true; $("tabs").hidden = true;
-    app.innerHTML = '<section><h2>Entrar</h2><p class="hint">Escribe el PIN de tu página para agendar. Lo encuentras en tu código de Apps Script, en la línea <b>PIN</b>.</p>' +
-      '<label for="pin">PIN<input id="pin" inputmode="numeric" autocomplete="off"></label><p class="err" id="perr">' + esc(msg || "") + '</p><button class="btn" id="pok">Entrar</button></section>';
+    var sinPin = !PIN, tel = admLS("ncAdmTel");
+    app.innerHTML = '<section><h2>Entrar como administrador</h2><p class="hint">Solo para Nelson y Charlie.</p>' +
+      '<label for="atel">Tu número<input id="atel" inputmode="tel" autocomplete="tel" value="' + esc(tel) + '" placeholder="6000-0000"></label>' +
+      (sinPin ? '<label for="pin">PIN de NC Studio <small>(solo la primera vez en este equipo)</small><input id="pin" inputmode="numeric" type="password" autocomplete="off"></label>' : '') +
+      (HUELLA ? '<p class="hint" style="margin:0">En la app entras con tu huella.</p>' : '<div class="card2" style="gap:8px"><small class="hint">🤔 La pregunta de hoy</small><b id="apq" style="font:400 20px/1.3 Georgia,serif"><span class="spin"></span></b><label for="aresp">Tu respuesta<input id="aresp" autocomplete="off" autocapitalize="off"></label></div>') +
+      '<p class="err" id="perr">' + esc(msg || "") + '</p><button class="btn" id="pok">' + (HUELLA ? '👆 Entrar con mi huella' : 'Entrar') + '</button>' +
+      (sinPin ? '' : '<button class="btn2" id="otropin" type="button" style="justify-self:start">Usar otro PIN</button>') + '</section>';
+    if (!HUELLA) call({ action: "adm_pregunta" }).then(function (r) { $("apq").textContent = r.pregunta || "¿Quién es el más fuerte del universo?"; }).catch(function () { $("apq").textContent = "¿Quién es el más fuerte del universo?"; });
+    if ($("otropin")) $("otropin").onclick = function () { setPin(""); PIN = ""; pinView(); };
+    function entrar(huella) {
+      var t = $("atel").value.replace(/\D/g, ""), pin = sinPin ? $("pin").value.trim() : PIN;
+      if (t.length < 7) { $("perr").textContent = "Escribe tu número."; return; }
+      if (!pin) { $("perr").textContent = "Escribe el PIN."; return; }
+      var b = $("pok"); b.disabled = true; b.innerHTML = '<span class="spin"></span>Revisando…';
+      call({ action: "adm_entrar", tel: t, resp: huella ? "" : $("aresp").value, huella: !!huella, pin: pin }).then(function (r) {
+        b.disabled = false; b.textContent = HUELLA ? "👆 Entrar con mi huella" : "Entrar";
+        if (!r.ok) { if (r.title === "PIN incorrecto") { setPin(""); PIN = ""; pinView("PIN incorrecto."); return; } $("perr").innerHTML = esc(r.title) + (r.html ? " " + r.html : ""); return; }
+        PIN = pin; setPin(pin); admLS("ncAdmTel", t); admLS("ncAdmDia", hoyAdm()); admLS("ncAdmNom", r.nombre || "");
+        inicio(); cargaAv();
+      }).catch(function () { b.disabled = false; b.textContent = HUELLA ? "👆 Entrar con mi huella" : "Entrar"; $("perr").textContent = "No pudimos conectar. Revisa tu internet."; });
+    }
     $("pok").onclick = function () {
-      var v = $("pin").value.trim(); if (!v) return;
-      $("pok").disabled = true; $("pok").innerHTML = '<span class="spin"></span>Revisando…';
-      call({ action: "pin", pin: v }).then(function (r) {
-        if (r.ok) { PIN = v; setPin(v); inicio(); cargaAv(); } else pinView("PIN incorrecto.");
-      }).catch(function () { pinView("No pudimos conectar. Revisa tu internet."); });
+      if (!HUELLA) { if (!$("aresp").value.trim()) { $("perr").textContent = "Contesta la pregunta 😏"; return; } entrar(false); return; }
+      window.ncHuella = function (ok) { if (ok) entrar(true); else $("perr").textContent = "No se pudo confirmar tu huella. Inténtalo de nuevo."; };
+      try { window.NCApp.huella(); } catch (e) { $("perr").textContent = "Actualiza la app para entrar con tu huella."; }
     };
-    $("pin").onkeydown = function (e) { if (e.key === "Enter") $("pok").click(); };
+    (sinPin && !tel ? $("atel") : sinPin ? $("pin") : HUELLA ? $("pok") : $("aresp") || $("pok")).focus();
+    Array.prototype.forEach.call(app.querySelectorAll("input"), function (x) { x.onkeydown = function (e) { if (e.key === "Enter") $("pok").click(); }; });
   }
 
   var manual = false;
@@ -839,7 +863,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
       '<a class="wa" id="wa" target="_blank" rel="noopener">Abrir en WhatsApp</a><p class="hint" style="margin-top:-6px">Se abre el chat de ' + esc(x.name) + ' (' + esc(x.phone) + ') con el mensaje escrito. Solo presiona enviar ➤.</p>' + extraHtml("c") +
       '<div class="row"><button class="btn2" id="cp">Copiar mensaje</button><span class="hint" id="cps"></span></div></section>';
     var mt = $("mt"); mt.value = txt;
-    var upx = extraBind("c", function () { return mt.value; }, function () { return deBase(x.phone, "instagram"); }, function () { return x.email || deBase(x.phone, "email"); }, k === "fin" ? "Tus fotos finales · NC Studio" : k === "pru" ? "Tus fotos de prueba · NC Studio" : "NC Studio · " + (x.service || ""));
+    var upx = extraBind("c", function () { return mt.value; }, function () { return deBase(x.phone, "instagram"); }, function () { return x.email || deBase(x.phone, "email"); }, k === "fin" ? "Tus fotos finales · NC Studio" : k === "pru" ? "Tus fotos de prueba · NC Studio" : "NC Studio · " + (x.service || ""), function () { return { phone: x.phone, id: x.id }; });
     function link() { $("wa").href = "https://wa.me/" + wnum(x.phone) + "?text=" + encodeURIComponent(mt.value); upx(); }
     mt.oninput = link; link(); cargaBase(link);
     $("cp").onclick = function () { var ok = function () { $("cps").textContent = "✓ Copiado"; }; if (navigator.clipboard) navigator.clipboard.writeText(mt.value).then(ok, function () { mt.select(); }); else { mt.select(); document.execCommand("copy"); ok(); } };
@@ -1840,10 +1864,24 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
   function deBase(phone, campo) { var p = String(phone || "").replace(/\D/g, "").slice(-8), c = p && BASE ? BASE.filter(function (z) { return String(z.phone).replace(/\D/g, "").slice(-8) === p; })[0] : null; return c && c[campo] ? c[campo] : ""; }
   // botones de Instagram y correo debajo del de WhatsApp
   function extraHtml(pre, sinCorreo) {
-    return '<button class="ig" id="' + pre + 'ig">Copiar y abrir Instagram</button><p class="hint" id="' + pre + 'igs" style="margin-top:-6px">Instagram no deja escribir el mensaje solo: lo copio sin asteriscos y lo pegas en el chat.</p>' + (sinCorreo ? "" : '<a class="mail" id="' + pre + 'ml">✉️ Enviar por correo</a>');
+    return '<button class="ig" id="' + pre + 'ig">Copiar y abrir Instagram</button><p class="hint" id="' + pre + 'igs" style="margin-top:-6px">Instagram no deja escribir el mensaje solo: lo copio sin asteriscos y lo pegas en el chat.</p>' + (sinCorreo ? "" : '<a class="mail" id="' + pre + 'ml">✉️ Enviar por correo</a>') +
+      '<button class="btn2" type="button" id="' + pre + 'vip" hidden>🔔 Enviar a su Zona VIP</button><p class="hint" id="' + pre + 'vips" hidden style="margin-top:-6px"></p>';
   }
-  function extraBind(pre, txt, ig, mail, asunto) {
-    var a = $(pre + "ml");
+  function extraBind(pre, txt, ig, mail, asunto, para) {
+    var a = $(pre + "ml"), vb = $(pre + "vip");
+    // aviso dentro de la Zona VIP del cliente (lo ve al entrar con su número)
+    if (vb && para) {
+      vb.hidden = false;
+      vb.onclick = function () {
+        var d = para() || {}, st = $(pre + "vips"); st.hidden = false;
+        if (!String(d.phone || "").replace(/\D/g, "")) { st.innerHTML = '<span class="neg">Este cliente no tiene teléfono.</span>'; return; }
+        vb.disabled = true; vb.innerHTML = '<span class="spin"></span>Enviando…';
+        call({ action: "vip_notif", pin: PIN, phone: d.phone, reserva: d.id || "", titulo: String(asunto || "Mensaje de NC Studio").replace(/\s*·\s*NC Studio$/, "") || "Mensaje de NC Studio", mensaje: paraIG(txt()) }).then(function (r) {
+          vb.disabled = false; vb.textContent = "🔔 Enviar a su Zona VIP";
+          st.innerHTML = r.ok ? '<span class="pos">✓ Le llegó a su Zona VIP.</span>' + (r.cuenta ? '' : ' Todavía no ha entrado a su Zona VIP: lo verá cuando cree su contraseña.') : '<span class="neg">' + esc(r.title || "No se pudo") + '</span>';
+        }).catch(function () { vb.disabled = false; vb.textContent = "🔔 Enviar a su Zona VIP"; st.innerHTML = '<span class="neg">No pudimos conectar.</span>'; });
+      };
+    }
     function up() { if (!a) return; var m = String(mail() || "").trim(); a.href = "mailto:" + encodeURI(m) + "?subject=" + encodeURIComponent(asunto) + "&body=" + encodeURIComponent(paraIG(txt())); a.textContent = "✉️ Enviar por correo" + (m ? " a " + m : " (escribes el correo)"); }
     if (a) { a.onclick = up; up(); }
     $(pre + "ig").onclick = function () {
@@ -1976,7 +2014,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     $(boxId).innerHTML = '<label for="gm">Mensaje <small>(puedes editarlo)</small><textarea id="gm" style="min-height:210px"></textarea></label><p class="hint" id="glen" style="text-align:right;margin-top:-6px"></p>' +
       '<a class="wa" id="gwa" target="_blank" rel="noopener">Enviar por WhatsApp</a>' + extraHtml("g") + '<div class="row"><button class="btn2" id="gcp">Copiar mensaje</button><span class="hint" id="gcs"></span></div>';
     var m = $("gm"); m.value = txt;
-    var upx = extraBind("g", function () { return m.value; }, function () { var d = dest(); return d.instagram || deBase(d.phone, "instagram"); }, function () { var d = dest(); return d.email || deBase(d.phone, "email"); }, asunto);
+    var upx = extraBind("g", function () { return m.value; }, function () { var d = dest(); return d.instagram || deBase(d.phone, "instagram"); }, function () { var d = dest(); return d.email || deBase(d.phone, "email"); }, asunto, function () { var d = dest(); return { phone: d.phone, id: d.id || "" }; });
     function upd() {
       var d = dest(), n = String(d.phone || "").replace(/\D/g, ""), L = paraIG(m.value).length;
       $("gwa").href = "https://wa.me/" + (n.length >= 7 ? wnum(n) : "") + "?text=" + encodeURIComponent(m.value);
@@ -2127,7 +2165,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
         var txt = "¡Hola, " + first(x.name) + "! ✍️ Te comparto tu contrato de *" + x.service + "* (" + x.fecha + ").\n\n" + (r.firmado ? "Aquí tienes tu copia firmada 👇\n" + r.url : "Léelo y fírmalo aquí: marca «Acepto» y presiona «Enviar confirmación» 👇\n" + r.link + "\n\nSi prefieres verlo en PDF: " + r.url) + "\n\n¡Cualquier duda, quedamos a la orden! — Nelson y Charlie · NC Studio";
         $("cres").innerHTML = '<div class="card2"><b class="pos">✓ ' + esc(r.title) + (mail ? " a " + esc(x.email) : "") + '</b><a class="btn2" href="' + esc(r.url) + '" target="_blank" rel="noopener" style="text-decoration:none">Abrir el PDF ↗</a>' +
           '<label for="cmt">Mensaje para WhatsApp<textarea id="cmt" style="min-height:180px"></textarea></label><a class="wa" id="cwa" target="_blank" rel="noopener">Enviar por WhatsApp a ' + esc(first(x.name)) + '</a>' + extraHtml("k", true) + '</div>';
-        $("cmt").value = txt; cargaBase(function () {}); extraBind("k", function () { return $("cmt").value; }, function () { return deBase(x.phone, "instagram"); }, function () { return ""; }, ""); var up = function () { $("cwa").href = "https://wa.me/" + wnum(x.phone) + "?text=" + encodeURIComponent($("cmt").value); }; $("cmt").oninput = up; up();
+        $("cmt").value = txt; cargaBase(function () {}); extraBind("k", function () { return $("cmt").value; }, function () { return deBase(x.phone, "instagram"); }, function () { return ""; }, "Tu contrato", function () { return { phone: x.phone, id: x.id }; }); var up = function () { $("cwa").href = "https://wa.me/" + wnum(x.phone) + "?text=" + encodeURIComponent($("cmt").value); }; $("cmt").oninput = up; up();
       }).catch(function () { b.disabled = false; b.textContent = lb; $("cres").innerHTML = '<p class="err">No pudimos conectar.</p>'; });
     }
     $("cpdf").onclick = function () { gen(false); }; $("cmail").onclick = function () { gen(true); };
@@ -2223,7 +2261,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     call({ action: "avatares", pin: PIN }).then(function (r) { if (!r || !r.ok) return; AV = { map: r.map, imgs: r.imgs }; try { localStorage.setItem("ncav", JSON.stringify(AV)); } catch (e) {} pintaAv(); }).catch(function () {});
   }
   if (window.MutationObserver) { var TAV = 0; new MutationObserver(function () { if (!AV) return; clearTimeout(TAV); TAV = setTimeout(function () { pintaAv(); }, 30); }).observe(app, { childList: true, subtree: true }); }
-  salir.onclick = function (e) { e.preventDefault(); setPin(""); PIN = ""; pinView(); };
+  salir.onclick = function (e) { e.preventDefault(); admLS("ncAdmDia", ""); pinView(); };
   /* botón atrás del teléfono: mientras en pantalla hay un «‹ Atrás», el atrás del teléfono lo toca en vez de salir */
   var GUARDA = false, SALTA_POP = false, TSINC = 0;
   function sincAtras() {
@@ -2241,7 +2279,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     if (b) { b.click(); window.scrollTo(0, 0); }
     setTimeout(sincAtras, 80);
   });
-  if (PIN) { inicio(); cargaAv(); } else pinView();
+  if (PIN && admHoy()) { inicio(); cargaAv(); } else pinView();
 })();
 </script>
 </body>
