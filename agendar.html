@@ -310,6 +310,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       '<section><h2>Total y estado</h2><div class="g2"><label for="dst">Descuento<select id="dst"><option value="">Sin descuento</option><option value="$">En dólares ($)</option><option value="%">En porcentaje (%)</option><option value="cod">Con un código</option></select></label><label for="dsv" id="dsvl" hidden><span id="dsvt">¿Cuánto?</span><input id="dsv" autocomplete="off"></label></div><p class="hint" id="dsm" style="margin:-6px 0 0"></p><div class="sum" id="sum"></div><label for="tt">Total final ($) <small>(o escríbelo tú directo)</small><input id="tt" type="number" min="0" step="0.5" inputmode="decimal"></label>' +
       '<label class="radio"><input type="radio" name="st" id="st1" checked><span><b>Enviar cotización y esperar el abono.</b><br>Le llega la cotización en PDF con las instrucciones de Yappy; a ti el botón «Abono recibido».</span></label>' +
       '<label class="radio"><input type="radio" name="st" id="st2"><span><b>Ya pagó el abono.</b><br>Le llega la cotización, la confirmación y el enlace para firmar el contrato.</span></label>' +
+      '<label class="radio"><input type="radio" name="st" id="st4"><span><b>No enviar nada.</b><br>Solo se guarda la reserva esperando el abono (y tu fecha queda apartada). Al cliente no le llega nada; la cotización se la mandas tú cuando quieras.</span></label>' +
       '<p class="err" id="ferr"></p></section>' +
       '<div class="foot"><div><small>Total · abono 50 %</small><b id="ft">$0</b></div><button class="btn" id="go">Agendar y enviar</button></div>';
     ["nm","ph","em","pl","dt","tm","nt","on","op","of","oh"].forEach(function (k) { $(k).oninput = calc; });
@@ -342,7 +343,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
       if (m.lugar) { var ti = -1; DATA.T.forEach(function (t, i) { if (i && normN(m.lugar).indexOf(normN(t[0])) >= 0) ti = i; }); $("tr").value = /estudio|las tablas/i.test(m.lugar) ? "0" : ti > 0 ? String(ti) : "otro"; $("pl").value = m.lugar; }
       if (m.desc) $("nt").value = m.desc;
       var eml = $("em").closest("label").querySelector("small"); if (eml) eml.textContent = "(opcional si no le vas a enviar nada por correo)";
-      $("st2").closest("label").insertAdjacentHTML("afterend", '<label class="radio"><input type="radio" name="st" id="st3"><span><b>Ya pagó el abono y no quiero enviarle nada todavía.</b><br>Queda confirmada y unida a tu evento; el contrato y lo demás se los mandas tú desde Enviar.</span></label>');
+      $("st2").closest("label").insertAdjacentHTML("afterend", '<label class="radio"><input type="radio" name="st" id="st3"><span><b>Ya pagó el abono, pero no enviar nada todavía.</b><br>Queda confirmada y unida a tu evento; el contrato y lo demás se los mandas tú desde Enviar.</span></label>');
       $("st2").checked = true;
       var top = $("pstop"); top.insertAdjacentHTML("beforebegin", '<div class="msg" style="padding:12px 14px;display:grid;gap:2px"><b>📅 Completando una reserva de tu calendario</b><span>' + esc(m.titulo + " · " + calCuando(m)) + '</span><small class="hint">Te pregunto solo lo que falta; puedes volver atrás para revisar lo que ya se llenó.</small></div>');
       calc();
@@ -522,8 +523,8 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     var nm = $("nm").value.trim(), ph = $("ph").value.trim(), em = $("em").value.trim(), dt = $("dt").value;
     if (!nm) err.push("nombre");
     if (ph.replace(/\D/g, "").length < 7) err.push("teléfono");
-    var calla = !!(CALPRE && $("st3") && $("st3").checked);
-    if (!(calla && !em) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) err.push(CALPRE && !em ? "correo (o elige «no quiero enviarle nada todavía»)" : "correo válido");
+    var st3 = !!($("st3") && $("st3").checked), calla = st3 || $("st4").checked;
+    if (!(calla && !em) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) err.push(!em ? "correo (o elige «No enviar nada»)" : "correo válido");
     if (!b || !b.service) err.push("paquete");
     if (!dt) err.push("fecha");
     if (!(c.total > 0)) err.push("total");
@@ -544,7 +545,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
       expId: expSel(), cumple: esCumpleId(expSel()) ? $("ce").value : "", entregaPara: esCumpleId(expSel()) ? "" : $("ce").value,
       evManual: CALPRE ? CALPRE.id : ""
     };
-    var pag = $("st2").checked || calla, calId = CALPRE ? CALPRE.id : "";
+    var pag = $("st2").checked || st3, calId = CALPRE ? CALPRE.id : "";
     var go = $("go"); go.disabled = true; go.innerHTML = '<span class="spin"></span>Enviando…';
     call({ action: "agendar", pin: PIN, pagado: pag, silencio: calla, data: data }).then(function (r) {
       if (r.title === "PIN incorrecto") { setPin(""); pinView("El PIN cambió. Escríbelo de nuevo."); return; }
