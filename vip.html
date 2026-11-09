@@ -52,6 +52,15 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
 .todo{display:grid;gap:10px}
 .todo a{display:flex;align-items:center;gap:12px;padding:14px;border-radius:10px;background:var(--beige);text-decoration:none;color:var(--dark)}
 .todo a b{display:block}.todo a span{font-size:13px;color:var(--muted)}.todo a i{font-style:normal;font-size:22px}
+.cr{display:grid;gap:10px}.cr .et{display:grid;grid-template-columns:104px 1fr;gap:10px;align-items:stretch}
+.cr .et b{background:var(--dark);color:var(--org);border-radius:10px;display:grid;place-content:center;text-align:center;padding:8px 6px;font:bold 16px Arial;line-height:1.1}.cr .et b small{display:block;color:#fff;font:12px Arial;margin-top:2px}
+.cr .et span{background:var(--beige);border-radius:10px;padding:10px 12px;font-size:14px;line-height:1.45;display:flex;align-items:center}
+.cr .et.ya{opacity:.5}.cr .et.ya span::before{content:"✓ ";color:#05603A;font-weight:bold;margin-right:4px}
+.cr .et.hoy b{background:var(--org);color:var(--dark)}.cr .et.hoy b small{color:var(--dark)}.cr .et.hoy span{outline:2px solid var(--org);background:#FFF4E5}
+.falta{font:400 26px Georgia,serif;margin:0}.falta em{font-style:normal;color:#B26200}
+.ckl{display:grid;gap:6px}.ckl label{display:flex;gap:12px;align-items:center;padding:12px;border-radius:10px;background:var(--beige);cursor:pointer;font-size:15px;line-height:1.35}
+.ckl input{width:24px;height:24px;min-height:0;flex:none;accent-color:var(--org);margin:0}.ckl label.ok{background:#ECFDF3}.ckl label.ok span{text-decoration:line-through;color:var(--muted)}
+.ckl small{display:block;font-size:12px;color:var(--muted);text-decoration:none}
 .pb{height:10px;border-radius:99px;background:var(--line);overflow:hidden}.pb i{display:block;height:100%;background:var(--org);border-radius:99px}
 .steps{display:grid;gap:0;margin:0;padding:0;list-style:none}
 .steps li{display:grid;grid-template-columns:26px 1fr;gap:12px;padding:0 0 12px;position:relative;font-size:15px;line-height:1.35}
@@ -276,6 +285,8 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
     if (x.extrasLink) T.push(['➕', '¿Te gustaron más fotos?', 'Pide fotos extra y te decimos el precio al momento.', x.extrasLink]);
     if (x.pdfContrato) T.push(['📄', 'Tu contrato firmado', 'Tu copia en PDF.', x.pdfContrato]);
     if (T.length) h += '<section class="card"><h2>Lo que te toca</h2><div class="todo">' + T.map(function (t) { return '<a href="' + esc(t[3]) + '" target="_blank" rel="noopener"><i aria-hidden="true">' + t[0] + '</i><span><b>' + esc(t[1]) + '</b><span>' + esc(t[2]) + '</span></span></a>'; }).join("") + '</div></section>';
+    // cuenta regresiva + checklist (solo sesiones confirmadas que aún no pasan)
+    if (x.prep) h += cuentaHtml(x);
     // progreso
     var ok = x.pasos.filter(function (p) { return p.ok; }).length, sig = x.pasos.filter(function (p) { return !p.ok; })[0];
     h += '<section class="card"><div style="display:flex;justify-content:space-between;align-items:baseline"><h2>Tu proceso</h2><b>' + ok + ' de ' + x.pasos.length + '</b></div><div class="pb"><i style="width:' + Math.round(ok / x.pasos.length * 100) + '%"></i></div>' +
@@ -293,6 +304,31 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
     if ($("vn")) $("vn").onclick = function () { ir("avisos"); };
     Array.prototype.forEach.call(app.querySelectorAll("[data-r]"), function (b) { b.onclick = function () { SEL = +b.getAttribute("data-r"); pintar(); }; });
     Array.prototype.forEach.call(app.querySelectorAll("[data-gal]"), function (b) { b.onclick = function () { abrirGal(b.getAttribute("data-gal"), x); }; });
+    if (x.prep) cuentaBind(x);
+  }
+  function diasPara(iso) { var h = new Date(); h.setHours(0, 0, 0, 0); return Math.round((new Date(iso + "T00:00:00") - h) / 864e5); }
+  function cuentaHtml(x) {
+    var P = x.prep, d = diasPara(x.dateIso), et = d <= 0 ? 0 : d <= 1 ? 1 : d <= 3 ? 3 : d <= 7 ? 7 : null;
+    var tit = d <= 0 ? '¡Hoy es <em>tu día</em>! ✨' : d === 1 ? '¡Mañana es <em>tu sesión</em>!' : 'Faltan <em>' + d + ' días</em>';
+    var h = '<section class="card"><small class="hint" style="font-weight:bold;letter-spacing:.08em;text-transform:uppercase">Cuenta regresiva</small><p class="falta">' + tit + '</p><p class="hint" style="margin:0">Así llegas al día de tu sesión sin carreras.</p><div class="cr">' +
+      P.etapas.map(function (e) { var c = et === null ? "" : e.k === et ? " hoy" : e.k > et ? " ya" : ""; return '<div class="et' + c + '"><b>' + esc(e.t) + '<small>' + esc(e.s) + '</small></b><span>' + esc(e.x) + '</span></div>'; }).join("") + '</div></section>';
+    var n = P.items.filter(function (i) { return P.hechos[i.k]; }).length;
+    h += '<section class="card" id="ckc"><div style="display:flex;justify-content:space-between;align-items:baseline"><h2>Tu checklist</h2><b id="ckn">' + n + ' de ' + P.items.length + '</b></div><div class="pb"><i id="ckb" style="width:' + Math.round(n / P.items.length * 100) + '%"></i></div><p class="hint" style="margin:0">Ve marcando a medida que te preparas. ¡Ya casi!</p><div class="ckl">' +
+      P.items.map(function (i) { var hc = P.hechos[i.k]; return '<label class="' + (hc ? "ok" : "") + '"><input type="checkbox" data-pk="' + i.k + '"' + (hc ? " checked" : "") + '><span>' + esc(i.t) + (hc && hc.q === "nc" ? '<small>✓ Lo marcó NC Studio</small>' : '') + '</span></label>'; }).join("") +
+      '</div><p style="font:italic 18px Georgia,serif;margin:4px 0 0">Lo demás, déjanoslo a nosotros.</p></section>';
+    return h;
+  }
+  function cuentaBind(x) {
+    Array.prototype.forEach.call(app.querySelectorAll("[data-pk]"), function (c) {
+      c.onchange = function () {
+        var k = c.getAttribute("data-pk"), v = c.checked, lab = c.closest("label");
+        lab.classList.toggle("ok", v); if (v) x.prep.hechos[k] = { q: "cliente" }; else delete x.prep.hechos[k]; contar();
+        call({ action: "vip_prep", tok: get("ncVipTok"), id: x.id, k: k, v: v }).then(function (r) {
+          if (r.ok) { x.prep.hechos = r.hechos; put("ncVipCache", ""); } else { c.checked = !v; lab.classList.toggle("ok", !v); if (!v) x.prep.hechos[k] = { q: "cliente" }; else delete x.prep.hechos[k]; contar(); }
+        }).catch(function () { c.checked = !v; lab.classList.toggle("ok", !v); if (!v) x.prep.hechos[k] = { q: "cliente" }; else delete x.prep.hechos[k]; contar(); });
+      };
+    });
+    function contar() { var n = x.prep.items.filter(function (i) { return x.prep.hechos[i.k]; }).length; $("ckn").textContent = n + " de " + x.prep.items.length; $("ckb").style.width = Math.round(n / x.prep.items.length * 100) + "%"; }
   }
   function galBtn(k, ic, t, g) { return '<button class="gal ' + (g ? 'si' : 'no') + '" data-gal="' + k + '"><span class="ic" aria-hidden="true">' + ic + '</span>' + t + '<small>' + (g ? '¡Ya están listas!' : 'Todavía no') + '</small></button>'; }
   function abrirGal(k, x) {

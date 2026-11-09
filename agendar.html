@@ -757,6 +757,18 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
         call({ action: "check", pin: PIN, id: x.id, k: k, v: v }).then(function (r) { if (r.ok) x.check = r.check; pintaProg(x); }).catch(function () { c.checked = !v; c.disabled = false; });
       };
     });
+    // checklist de preparación que la clienta ve en su Zona VIP (lo pueden marcar ella o ustedes)
+    if (x.prep && x.estado === "Confirmado") {
+      var Q = x.prep, hq = Q.hechos || {}, nq = Q.items.filter(function (i) { return hq[i.k]; }).length;
+      $("prog").insertAdjacentHTML("beforeend", '<div class="prg" style="margin-top:14px"><div class="row" style="justify-content:space-between"><h2 style="margin:0">✅ Su checklist (Zona VIP)</h2><b>' + nq + ' de ' + Q.items.length + '</b></div><small class="hint">Lo ve y lo marca ella en su Zona VIP; tú también puedes marcarlo. Le llegan avisos solos 1 semana, 3 días, 1 día antes y el mismo día.</small></div><div>' +
+        Q.items.map(function (i) { var o = hq[i.k]; return '<label class="stp' + (o ? ' ok' : '') + '"><input type="checkbox" data-pq="' + i.k + '"' + (o ? " checked" : "") + '><span>' + esc(i.t) + '</span><small>' + (o ? (o.q === "nc" ? "lo marcaste tú" : "lo marcó ella") + (o.f ? " · " + esc(fechaBonita(o.f)) : "") : "pendiente") + '</small></label>'; }).join("") + '</div>');
+      Array.prototype.forEach.call($("prog").querySelectorAll("[data-pq]"), function (c) {
+        c.onchange = function () {
+          var k = c.getAttribute("data-pq"), v = c.checked; c.disabled = true;
+          call({ action: "prep_set", pin: PIN, id: x.id, k: k, v: v }).then(function (r) { if (r.ok) x.prep.hechos = r.hechos; try { localStorage.removeItem("ncCliCache"); } catch (e) {} pintaProg(x); }).catch(function () { c.checked = !v; c.disabled = false; });
+        };
+      });
+    }
   }
   function detalle(x, cual) {
     tab("C");
