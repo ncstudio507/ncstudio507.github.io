@@ -126,11 +126,15 @@ public class MainActivity extends AppCompatActivity {
     /* ---------- aviso de versión nueva: revisa en GitHub si hay una app más reciente ---------- */
     private static final String RELEASE_API = "https://api.github.com/repos/ncstudio507/ncstudio507.github.io/releases/tags/app";
     private static final String APK_URL = "https://github.com/ncstudio507/ncstudio507.github.io/releases/download/app/NCStudio.apk";
-    private boolean versionRevisada = false;
+    private long ultimaRevision = 0;
+
+    // se revisa al abrir la app y cada vez que vuelves a ella (máximo una vez por hora)
+    @Override protected void onStart() { super.onStart(); buscarVersion(); }
 
     private void buscarVersion() {
-        if (versionRevisada) return;
-        versionRevisada = true;
+        long ahora = SystemClock.elapsedRealtime();
+        if (ultimaRevision > 0 && ahora - ultimaRevision < 3_600_000L) return;
+        ultimaRevision = ahora;
         new Thread(() -> {
             try {
                 java.net.HttpURLConnection c = (java.net.HttpURLConnection) new java.net.URL(RELEASE_API).openConnection();
