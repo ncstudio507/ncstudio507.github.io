@@ -1474,10 +1474,11 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
         '<button class="btn" id="bpf" style="width:100%">📋 Ver su perfil completo</button><div class="acts"><a class="act" style="text-decoration:none" href="https://wa.me/' + wnum(x.phone) + '" target="_blank" rel="noopener">💬 Abrir su chat de WhatsApp</a><button class="act" id="bexp">✨ Enviarle una experiencia</button>' +
         (x.instagram ? '<a class="act" style="text-decoration:none" href="https://instagram.com/' + esc(x.instagram) + '" target="_blank" rel="noopener">📷 Ver su Instagram</a>' : "") + '</div>') +
       '<div class="g2"><label for="cn">Nombre y apellido<input id="cn" autocomplete="off"></label><label for="cph">Teléfono / WhatsApp<input id="cph" inputmode="tel" autocomplete="off"></label>' +
-      '<label for="cem">Correo <small>(opcional)</small><input id="cem" type="email" autocomplete="off"></label><label for="cig">Instagram <small>(opcional, sin @)</small><input id="cig" autocomplete="off"></label></div>' +
+      '<label for="cem">Correo <small>(opcional)</small><input id="cem" type="email" autocomplete="off"></label><label for="cig">Instagram <small>(opcional, sin @)</small><input id="cig" autocomplete="off"></label>' +
+      '<label for="cge">Género <small>(activa la guía de consejos en su Zona VIP si es mujer con Level Up)</small><select id="cge"><option value="">' + esc(x.generoAuto ? "Automático (por su nombre: " + x.generoAuto.toLowerCase() + ")" : "Automático (no se sabe por su nombre)") + '</option><option value="Mujer">Mujer</option><option value="Hombre">Hombre</option></select></label></div>' +
       '<label for="cno">Notas <small>(qué le interesa, cómo te contactó…)</small><textarea id="cno"></textarea></label>' +
       '<div class="row"><button class="btn" id="cok">' + (nuevo ? "Guardar cliente y contacto" : "Guardar cambios") + '</button><span class="hint" id="cst"></span></div><p class="err" id="cer"></p></section>';
-    $("cn").value = x.name || ""; $("cph").value = x.phone || ""; $("cem").value = x.email || ""; $("cig").value = x.instagram || ""; $("cno").value = x.notas || "";
+    $("cn").value = x.name || ""; $("cph").value = x.phone || ""; $("cem").value = x.email || ""; $("cig").value = x.instagram || ""; $("cno").value = x.notas || ""; $("cge").value = x.genero || "";
     $("bkb").onclick = function () { baseCli(); };
     if (!nuevo) {
       // Zona VIP: si ya se unió y restablecer su contraseña
@@ -1529,7 +1530,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     if ($("bexp")) $("bexp").onclick = function () { experiencias(x); };
     if ($("bpf")) $("bpf").onclick = function () { perfilCli(x); };
     $("cok").onclick = function () {
-      var c = { id: x.id, name: $("cn").value.trim(), phone: $("cph").value.trim(), email: $("cem").value.trim(), instagram: $("cig").value.trim(), notas: $("cno").value };
+      var c = { id: x.id, name: $("cn").value.trim(), phone: $("cph").value.trim(), email: $("cem").value.trim(), instagram: $("cig").value.trim(), notas: $("cno").value, genero: $("cge").value };
       if (!c.name || String(c.phone).replace(/\D/g, "").length < 7) { $("cer").textContent = "Escribe el nombre y un teléfono válido."; return; }
       var b = $("cok"), lb = b.textContent; b.disabled = true; b.innerHTML = '<span class="spin"></span>Guardando…';
       call({ action: "base_save", pin: PIN, c: c }).then(function (r) {

@@ -79,6 +79,7 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
 .modal .big{font-size:44px}
 .acc{display:grid;gap:6px;background:var(--beige);border-radius:8px;padding:12px;text-align:left;font-size:15px}
 .copy{display:flex;justify-content:space-between;gap:8px;align-items:center}.copy button{border:1.5px solid var(--dark);background:transparent;border-radius:6px;padding:6px 10px;font:bold 13px Arial;cursor:pointer}
+.pay{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;background:#FEF3F2;border-left:4px solid #B42318}.pay.ok{background:#ECFDF3;border-left-color:#12B76A}.pay span{display:grid;font-size:15px}.pay small{font-size:12px;font-weight:bold;color:#B42318}.pay.ok small{color:#05603A}.pay b{font-size:18px;color:#B42318}.pay.ok b{color:#05603A}
 .pf dt{color:var(--muted);font-size:13px;margin-top:8px}.pf dd{margin:2px 0 0;font-size:16px}
 </style>
 </head>
@@ -235,6 +236,9 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
     var n = sinLeer(); $("dot").hidden = !n; $("dot").textContent = n;
   }
   function pintar() {
+    // los consejos (la guía en PDF) se activan según su experiencia
+    var bc = nav.querySelector('[data-s="consejos"]'); if (bc) bc.hidden = !D.consejos;
+    if (SEC === "consejos" && !D.consejos) SEC = "inicio";
     pintaSaldo(); pintaNav(); window.scrollTo(0, 0);
     if (SEC === "avisos") return avisos();
     if (SEC === "consejos") return consejos();
@@ -268,7 +272,11 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
     h += '<section class="card"><div style="display:flex;justify-content:space-between;align-items:baseline"><h2>Tu proceso</h2><b>' + ok + ' de ' + x.pasos.length + '</b></div><div class="pb"><i style="width:' + Math.round(ok / x.pasos.length * 100) + '%"></i></div>' +
       '<ol class="steps">' + x.pasos.map(function (p) { return '<li class="' + (p.ok ? 'ok' : p === sig ? 'next' : '') + '"><i aria-hidden="true">' + (p.ok ? '✓' : '') + '</i><span>' + esc(p.t) + (p === sig ? ' <small class="hint">· lo que sigue</small>' : '') + '</span></li>'; }).join("") + '</ol></section>';
     // pagos
-    h += '<section class="card"><h2>Tus pagos</h2><div class="kv"><span>Total</span><b>' + esc(x.total) + '</b><span>Abono (50 %)</span><b>' + esc(x.abono) + (x.abonado ? ' ✓' : ' · pendiente') + '</b><span>Saldo</span><b>' + esc(x.saldo) + (x.pagado ? ' ✓ pagado' : '') + '</b></div>' +
+    var ab = x.abonoN != null ? x.abonoN : x.saldoN, pagado = (x.abonado ? ab : 0) + (x.pagado ? x.saldoN : 0), pend = (x.abonado ? 0 : ab) + (x.pagado ? 0 : x.saldoN);
+    var lin = function (t, monto, ok) { return '<div class="pay' + (ok ? ' ok' : '') + '"><span>' + t + '<small>' + (ok ? '✓ Pagado' : 'Pendiente') + '</small></span><b>' + (ok ? '' : '−') + esc(monto) + '</b></div>'; };
+    h += '<section class="card"><h2>Tus pagos</h2><div class="kv"><span>Total de tu ' + (x.evento ? 'evento' : 'sesión') + '</span><b>' + esc(x.total) + '</b></div>' +
+      lin('Abono (50 %)', x.abono, x.abonado) + lin('Saldo (50 %)', x.saldo, x.pagado) +
+      '<div class="kv" style="border-top:1.5px solid var(--line);padding-top:10px"><span>Ya pagaste</span><b style="color:#05603A">$' + (Math.round(pagado * 100) % 100 ? pagado.toFixed(2) : Math.round(pagado)) + '</b><span>Te falta pagar</span><b style="color:' + (pend ? '#B42318' : '#05603A') + '">' + (pend ? '−$' + (Math.round(pend * 100) % 100 ? pend.toFixed(2) : Math.round(pend)) : '$0 · ¡todo pagado! 🎉') + '</b></div>' +
       (x.abonado && !x.pagado ? '<p class="hint">El saldo se paga el día de tu ' + (x.evento ? 'evento' : 'sesión') + ', antes de empezar, por Yappy al ' + esc(D.yappy) + ' o en efectivo.</p>' : '') + '</section>';
     if (x.incluye.length) h += '<section class="card"><details><summary style="cursor:pointer;font:400 20px Georgia,serif">Lo que incluye tu paquete</summary><ul style="margin:10px 0 0;padding-left:20px;line-height:1.6">' + x.incluye.map(function (i) { return '<li>' + esc(i) + '</li>'; }).join("") + x.extras.map(function (i) { return '<li>' + esc(i) + '</li>'; }).join("") + '</ul></details></section>';
     h += '<a class="btn wa" href="https://wa.me/' + esc(D.whatsapp) + '" target="_blank" rel="noopener">💬 Escribirnos por WhatsApp</a>';
