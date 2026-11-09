@@ -210,17 +210,26 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
   /* ---------------- mi zona ---------------- */
   function cargar() {
     var tok = get("ncVipTok"); if (!tok) { quien(); return; }
-    app.innerHTML = '<div class="msg"><span class="spin" aria-hidden="true"></span>Cargando tu Zona VIP…</div>';
+    // se muestra al instante lo último que vimos y se actualiza por detrás
+    var c0 = get("ncVipCache"), previo = "";
+    try { var o = JSON.parse(c0); if (o && o.tok === tok) { previo = o.j; mostrar(JSON.parse(o.j)); } } catch (e) {}
+    if (!previo) app.innerHTML = '<div class="msg"><span class="spin" aria-hidden="true"></span>Cargando tu Zona VIP…</div>';
     call({ action: "vip_datos", tok: tok }).then(function (r) {
-      if (!r.ok) { if (r.salir) put("ncVipTok", ""); TEL = ""; telefono(r.salir ? "Tu sesión venció. Entra de nuevo." : r.title); return; }
-      if (r.cambiar) { cambiarClave(); return; }
+      if (!r.ok) { put("ncVipCache", ""); if (r.salir) put("ncVipTok", ""); TEL = ""; telefono(r.salir ? "Tu sesión venció. Entra de nuevo." : r.title); return; }
+      if (r.cambiar) { put("ncVipCache", ""); cambiarClave(); return; }
+      var j = JSON.stringify(r); put("ncVipCache", JSON.stringify({ tok: tok, j: j }));
+      if (j !== previo) mostrar(r, !!previo);
+    }).catch(function () { if (!previo) app.innerHTML = '<div class="msg">No pudimos cargar tu Zona VIP. Revisa tu internet y recarga.</div>'; });
+  }
+  function mostrar(r, otraVez) {
+      var sel0 = otraVez && D && D.reservas[SEL] ? D.reservas[SEL].id : null;
       D = r; TEL = r.tel;
       // la reserva que se muestra primero: la próxima, o la más reciente
       var hoy = new Date().toISOString().slice(0, 10), prox = -1;
       D.reservas.forEach(function (x, i) { if (x.dateIso >= hoy && (prox < 0 || x.dateIso < D.reservas[prox].dateIso)) prox = i; });
       SEL = prox >= 0 ? prox : 0;
+      if (sel0) D.reservas.forEach(function (x, i) { if (x.id === sel0) SEL = i; });
       nav.hidden = false; pintar();
-    }).catch(function () { app.innerHTML = '<div class="msg">No pudimos cargar tu Zona VIP. Revisa tu internet y recarga.</div>'; });
   }
   function pintaSaldo() {
     var x = D && D.reservas[SEL];
@@ -324,7 +333,7 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
       (K.length ? '<section class="card"><h2>Lo que nos contaste de ti 💛</h2><dl class="pf" style="margin:0">' + K.map(function (k) { return '<dt>' + esc(nom[k] || k.charAt(0).toUpperCase() + k.slice(1)) + '</dt><dd>' + esc(G[k]) + '</dd>'; }).join("") + '</dl></section>' : '') +
       '<section class="card"><h2>Tus sesiones con nosotros</h2>' + (D.reservas.length ? D.reservas.map(function (r) { return '<div class="not"><b>' + esc(r.service) + '</b><small>' + esc(r.fecha) + ' · ' + esc(r.pagado ? "Pagada" : r.estado) + '</small></div>'; }).join("") : '<p class="hint">Todavía no tienes sesiones.</p>') + '</section>' +
       '<button class="btn ol" id="out">Cerrar sesión</button>';
-    $("out").onclick = function () { put("ncVipTok", ""); D = null; TEL = ""; quien(); };
+    $("out").onclick = function () { put("ncVipTok", ""); put("ncVipCache", ""); D = null; TEL = ""; quien(); };
   }
   function ir(s) { SEC = s; pintar(); }
   Array.prototype.forEach.call(nav.querySelectorAll("button"), function (b) { b.onclick = function () { ir(b.getAttribute("data-s")); }; });

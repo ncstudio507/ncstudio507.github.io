@@ -560,14 +560,23 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
   function chip(e) { var k = e === "Confirmado" ? "ok" : e === "Cotización enviada" ? "wait" : e === "No disponible" ? "no" : ""; return '<span class="chip ' + k + '">' + esc(e === "Cotización enviada" ? "Esperando abono" : e) + '</span>'; }
   function clientes(abrir) {
     tab("C"); salir.hidden = false;
-    app.innerHTML = '<div class="msg"><span class="spin"></span>Cargando clientes…</div>';
+    // se muestra al instante la última lista guardada en este equipo y se actualiza por detrás
+    var previo = admLS("ncCliCache"), ya = false;
+    if (previo) try { var r0 = JSON.parse(previo); LIST = r0.list; YAPPY = r0.yappy || YAPPY; ya = true; abrirCli(abrir); } catch (e) { previo = ""; }
+    if (!ya) app.innerHTML = '<div class="msg"><span class="spin"></span>Cargando clientes…</div>';
     call({ action: "clientes", pin: PIN }).then(function (r) {
-      if (r.title === "PIN incorrecto") { setPin(""); pinView("El PIN cambió. Escríbelo de nuevo."); return; }
-      if (!r.ok) { app.innerHTML = '<div class="msg">No pudimos cargar la lista. ¿Ya actualizaste el código de Apps Script?</div>'; return; }
+      if (r.title === "PIN incorrecto") { admLS("ncCliCache", ""); setPin(""); pinView("El PIN cambió. Escríbelo de nuevo."); return; }
+      if (!r.ok) { if (!ya) app.innerHTML = '<div class="msg">No pudimos cargar la lista. ¿Ya actualizaste el código de Apps Script?</div>'; return; }
+      var j = JSON.stringify({ list: r.list, yappy: r.yappy }); try { admLS("ncCliCache", j); } catch (e) {}
       LIST = r.list; YAPPY = r.yappy || YAPPY; CALM = null; cargaCalM();
-      var it = abrir && LIST.filter(function (x) { return x.id === abrir; })[0];
-      if (it) detalle(it); else lista("");
-    }).catch(function () { app.innerHTML = '<div class="msg">No pudimos conectar. Revisa tu internet.</div>'; });
+      if ($("tC").getAttribute("aria-pressed") !== "true") return; // ya se fue a otra pestaña
+      if (!ya) abrirCli(abrir);
+      else if (j !== previo && $("ls") && $("bq")) { var q = $("bq").value, f = document.activeElement === $("bq"); lista(q); if (f) $("bq").focus(); }
+    }).catch(function () { if (!ya) app.innerHTML = '<div class="msg">No pudimos conectar. Revisa tu internet.</div>'; });
+  }
+  function abrirCli(abrir) {
+    var it = abrir && LIST.filter(function (x) { return x.id === abrir; })[0];
+    if (it) detalle(it); else lista("");
   }
   function lista(q) {
     app.innerHTML = segCli("res") + '<section><div class="row"><label for="bq" style="flex:1">Buscar cliente<input id="bq" placeholder="Nombre, teléfono o NC-…" autocomplete="off"></label><button class="btn2" id="rf" style="align-self:end">↻ Actualizar</button></div></section><div id="lcal" style="display:grid;gap:10px"></div><div id="ls" style="display:grid;gap:10px"></div>';
@@ -1289,13 +1298,22 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
   function compromisos(mes) {
     tab("K"); salir.hidden = false; window.scrollTo(0, 0);
     mes = mes || AGMES || isoD(new Date()).slice(0, 7); AGMES = mes;
-    app.innerHTML = '<div class="msg"><span class="spin"></span>Leyendo tu calendario…</div>';
-    call({ action: "agenda", pin: PIN, mes: mes }).then(function (r) {
-      if (!r.ok) { app.innerHTML = '<div class="msg">No pudimos leer tu calendario. ¿Ya pegaste el código nuevo?</div>'; return; }
+    // lo último guardado de ese mes se ve al instante; luego se actualiza
+    var ck = "ncAg" + mes, previo = admLS(ck), ya = false;
+    function poner(r) {
       AG = {}; r.eventos.forEach(function (e) { diasDe(e).forEach(function (k) { (AG[k] = AG[k] || []).push(e); }); });
       var hoy = isoD(new Date()); if (!AGDIA || AGDIA.slice(0, 7) !== mes) AGDIA = hoy.slice(0, 7) === mes ? hoy : mes + "-01";
       pintaComp();
-    }).catch(function () { app.innerHTML = '<div class="msg">No pudimos conectar. Revisa tu internet.</div>'; });
+    }
+    if (previo) try { poner(JSON.parse(previo)); ya = true; } catch (e) { previo = ""; }
+    if (!ya) app.innerHTML = '<div class="msg"><span class="spin"></span>Leyendo tu calendario…</div>';
+    call({ action: "agenda", pin: PIN, mes: mes }).then(function (r) {
+      if (!r.ok) { if (!ya) app.innerHTML = '<div class="msg">No pudimos leer tu calendario. ¿Ya pegaste el código nuevo?</div>'; return; }
+      var j = JSON.stringify({ eventos: r.eventos });
+      try { Object.keys(localStorage).forEach(function (k) { if (/^ncAg\d/.test(k) && k !== ck) localStorage.removeItem(k); }); } catch (e) {}
+      admLS(ck, j);
+      if (j !== previo && AGMES === mes && $("tK").getAttribute("aria-pressed") === "true") poner(r);
+    }).catch(function () { if (!ya) app.innerHTML = '<div class="msg">No pudimos conectar. Revisa tu internet.</div>'; });
   }
   function cuposDe(k) {
     var d = new Date(k + "T12:00:00"), L = (AG[k] || []).filter(function (e) { return e.tipo === "cal"; }), sl = slotsDia(d);
@@ -2316,7 +2334,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     call({ action: "avatares", pin: PIN }).then(function (r) { if (!r || !r.ok) return; AV = { map: r.map, imgs: r.imgs }; try { localStorage.setItem("ncav", JSON.stringify(AV)); } catch (e) {} pintaAv(); }).catch(function () {});
   }
   if (window.MutationObserver) { var TAV = 0; new MutationObserver(function () { if (!AV) return; clearTimeout(TAV); TAV = setTimeout(function () { pintaAv(); }, 30); }).observe(app, { childList: true, subtree: true }); }
-  salir.onclick = function (e) { e.preventDefault(); admLS("ncAdmDia", ""); pinView(); };
+  salir.onclick = function (e) { e.preventDefault(); admLS("ncAdmDia", ""); admLS("ncCliCache", ""); try { Object.keys(localStorage).forEach(function (k) { if (/^ncAg\d/.test(k)) localStorage.removeItem(k); }); } catch (e) {} pinView(); };
   /* botón atrás del teléfono: mientras en pantalla hay un «‹ Atrás», el atrás del teléfono lo toca en vez de salir */
   var GUARDA = false, SALTA_POP = false, TSINC = 0;
   function sincAtras() {
