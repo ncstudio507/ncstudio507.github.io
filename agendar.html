@@ -679,6 +679,8 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     return x;
   }
   function alertaSuave(t) { var m = document.createElement("div"); m.className = "msg"; m.style.cssText = "position:fixed;left:16px;right:16px;bottom:16px;z-index:99;box-shadow:0 6px 24px rgba(0,0,0,.25)"; m.textContent = t; document.body.appendChild(m); setTimeout(function () { m.remove(); }, 6000); }
+  // de quién es el movimiento (quien hizo o recibió el Yappy, o el cliente de la reserva)
+  function quienDe(m) { var p = String(m.persona || "").trim(); if (!p || (m.desc && m.desc.indexOf(p) >= 0)) return ""; var sale = m.sentido === "Enviado" || m.monto < 0 || /^(Gasto|Inversi|Deuda|Ahorro)/.test(m.tipo || ""), entra = ENTRA[m.tipo] || m.sentido === "Recibido" || m.monto > 0; return ' · <b>' + (sale ? "a " : entra ? "de " : "") + esc(p) + '</b>'; }
   function precioExtra(x) { var p = DATA.P.filter(function (e) { return e.id === x.expId; })[0] || DATA.P.filter(function (e) { return String(x.service || "").indexOf(e.title) === 0; })[0], m = p && (p.extras || []).filter(function (e) { return /foto editada extra/i.test(e[0]); })[0]; return m ? String(m[1]).replace(/\s*c\/u/, "") : "$10"; }
   function msgs(x) {
     var n = first(x.name), ev = x.kind === "evento", firma = "\n\n— Nelson y Charlie · NC Studio";
@@ -1066,7 +1068,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
         var sc = m.estado === "Por clasificar";
         var t = m.hacia && m.banco !== b ? "Transferencia desde " + (BANCO_NOM[m.banco] || "otra cuenta") : m.hacia ? "Transferencia a " + (BANCO_NOM[m.hacia] || m.hacia) : sc ? (m.monto > 0 ? "Yappy de " : "Yappy a ") + (m.persona || "?") : (m.cat || m.tipo);
         if (sc) m.desc = "";
-        return '<div class="mv"><span><b>' + esc(t) + '</b>' + (m.desc || m.persona ? ' · ' + esc(m.desc || m.persona) : '') + '</span><span class="m' + (m.monto > 0 ? ' in' : '') + '">' + (m.monto > 0 ? '+' : '−') + money(Math.abs(m.monto)) + '</span><small>' + esc(m.fecha + " · " + (m.estado === "Por clasificar" ? "sin clasificar · " : "") + m.tipo + (m.metodo ? " · " + m.metodo : "")) + ' · saldo ' + money(m.saldo) + '</small></div>';
+        return '<div class="mv"><span><b>' + esc(t) + '</b>' + (sc ? '' : quienDe(m)) + (m.desc ? ' · ' + esc(m.desc) : '') + '</span><span class="m' + (m.monto > 0 ? ' in' : '') + '">' + (m.monto > 0 ? '+' : '−') + money(Math.abs(m.monto)) + '</span><small>' + esc(m.fecha + " · " + (m.estado === "Por clasificar" ? "sin clasificar · " : "") + m.tipo + (m.metodo ? " · " + m.metodo : "")) + ' · saldo ' + money(m.saldo) + '</small></div>';
       }).join("") : '<p class="hint">Todavía no hay movimientos desde esa fecha.</p>') + '</section>';
       app.innerHTML = h; bindSeg();
       $("ebok").onclick = function () { if ($("ebs").value === "") return; pintaEdo({ banco: { saldo: $("ebs").value } }); };
@@ -1200,7 +1202,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     if (FV === "nuevo") h += '<section><h2>Registrar · ' + esc(FE === "global" ? "cualquier cuenta" : ENT[FE].n) + '</h2><p class="hint">En efectivo, Yappy, tarjeta o transferencia. También puedes seguir anotándolos en tu calendario: se leen solos cada hora.</p>' + formMov("nv", null, false) + '</section>';
     if (FV === "mov") h += '<section><h2>Movimientos · ' + esc(FE === "global" ? "todos" : ENT[FE].n) + '</h2>' + (ult.length ? '' : '<p class="hint">Todavía no hay movimientos.</p>') + '<div id="ult">' + ult.map(function (m, i) {
       var entra = ENTRA[m.tipo];
-      return '<div class="mv"><span><b>' + esc(m.cat || m.tipo) + '</b> · ' + esc(m.desc || m.persona || "") + '</span><span class="m' + (entra ? ' in' : '') + '">' + (entra ? '+' : '−') + money(m.monto) + '</span><small>' + esc(m.fecha + " · " + m.tipo + (m.metodo ? " · " + m.metodo : "") + " · " + m.origen) + '</small>' +
+      return '<div class="mv"><span><b>' + esc(m.cat || m.tipo) + '</b>' + quienDe(m) + (m.desc ? ' · ' + esc(m.desc) : '') + '</span><span class="m' + (entra ? ' in' : '') + '">' + (entra ? '+' : '−') + money(m.monto) + '</span><small>' + esc(m.fecha + " · " + m.tipo + (m.metodo ? " · " + m.metodo : "") + " · " + m.origen) + '</small>' +
         (m.origen === "Reserva" || m.origen === "Reparto" ? '' : '<div class="ac"><button data-e="' + i + '">Editar</button><button data-b="' + i + '">Borrar</button></div><div id="ed' + i + '"></div>') + '</div>';
     }).join("") + '</div></section>';
     app.innerHTML = h; bindSeg();
