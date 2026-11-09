@@ -1970,7 +1970,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
   }
   /* ===================== ENVIAR: contrato, pruebas, fotos finales, mensajes y experiencias ===================== */
   var EV2 = "";
-  var ENV_OP = [["contrato", "📄", "Contrato", "Genera el PDF y mándalo para firmar"], ["gustos", "📝", "Conocer al cliente", "Formulario de gustos y sus 3 ideas en PDF"], ["meet", "💻", "Reunión creativa", "Link de Meet y la cita en tu calendario"], ["mood", "🎨", "Moodboard", "Mandarle el moodboard de su sesión"], ["pru", "📷", "Fotos de prueba", "La galería para que elija sus favoritas"], ["fin", "🎁", "Fotos finales", "La galería final ya editada"], ["msg", "💬", "Mensajes", "Recordatorios, saldos, gracias y más"], ["exp", "✨", "Experiencias", "Enviarle a alguien una experiencia"]];
+  var ENV_OP = [["contrato", "📄", "Contrato", "Genera el PDF y mándalo para firmar"], ["gustos", "📝", "Conocer al cliente", "Formulario de gustos y sus 3 ideas en PDF"], ["meet", "💻", "Reunión creativa", "Link de Meet y la cita en tu calendario"], ["mood", "🎨", "Moodboard", "Mandarle el moodboard de su sesión"], ["pru", "📷", "Fotos de prueba", "La galería para que elija sus favoritas"], ["fin", "🎁", "Fotos finales", "La galería final ya editada"], ["guia", "📚", "Guía para brillar", "Los 7 PDF para prepararse antes de su sesión"], ["msg", "💬", "Mensajes", "Recordatorios, saldos, gracias y más"], ["exp", "✨", "Experiencias", "Enviarle a alguien una experiencia"]];
   function segEnv(act) { return act ? '<button class="back" data-ev="">‹ Atrás</button>' : ""; }
   function menuEnv() {
     app.innerHTML = '<section style="gap:6px"><h2>Enviar</h2><p class="hint">¿Qué quieres mandar? Todo sale por WhatsApp, Instagram o correo.</p></section><div class="fes">' +
@@ -1987,6 +1987,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     if (EV2 === "exp") { experiencias(); return; }
     if (EV2 === "msg") { mensajes(); return; }
     if (EV2 === "gustos") { gustos(); return; }
+    if (EV2 === "guia") { guiaEnv(); return; }
     if (EV2 === "mood" || EV2 === "meet") {
       app.innerHTML = segEnv(EV2) + '<section><h2>' + (EV2 === "mood" ? "Enviar el moodboard" : "Reunión creativa por Meet") + '</h2><p class="hint">Elige el cliente.</p></section><div id="ebox"></div>';
       bindEnv(); var cual = EV2;
@@ -2025,6 +2026,29 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     m.oninput = upd; upd(); cargaBase(upd);
     $("gcp").onclick = function () { copiaT(m.value, function () { $("gcs").textContent = "✓ Copiado"; }); };
     return { upd: upd, set: function (t) { m.value = t; upd(); }, get: function () { return m.value; } };
+  }
+  /* ---- guía para brillar (los 7 PDF de guia.html) ---- */
+  var GUIA_P = [["", "Toda la guía"], ["1-confianza", "1 · Confianza"], ["2-tu-idea", "2 · Tu idea"], ["3-vestuario", "3 · Vestuario"], ["4-el-color", "4 · El color"], ["5-accesorios-y-manos", "5 · Accesorios y manos"], ["6-tu-sesion-con-nosotros", "6 · Tu sesión con nosotros"], ["7-el-gran-dia", "7 · El gran día"]];
+  function guiaEnv() {
+    tab("E"); EV2 = "guia";
+    app.innerHTML = segEnv("guia") + '<section><h2>📚 Guía para brillar</h2><p class="hint">Los 7 PDF para que llegue lista a su sesión. Ya les llega sola en el correo de confirmación del abono; aquí se la puedes mandar cuando quieras, completa o una parte.</p>' +
+      '<a class="btn2" href="guia.html" target="_blank" rel="noopener" style="text-decoration:none;justify-self:start">Ver la guía ↗</a></section><div id="ebox"></div>';
+    bindEnv();
+    pickRes("ebox", function (x) { return x.estado !== "No disponible"; }, guiaDe, true);
+  }
+  function guiaDe(x) {
+    var SITE_G = "https://ncstudio507.github.io/", parte = "";
+    app.innerHTML = '<button class="back" id="ebk">‹ Elegir otro cliente</button><section><h2>Guía para ' + esc(first(x.name)) + '</h2><p class="hint">' + esc(x.base ? "Contacto sin reserva · 📱 " + x.phone : x.service + " · " + x.fecha) + '</p>' +
+      '<label for="gpar">¿Qué le mandas?<select id="gpar">' + GUIA_P.map(function (g) { return '<option value="' + g[0] + '">' + esc(g[1]) + '</option>'; }).join("") + '</select></label></section><section><div id="gbox"></div></section>';
+    $("ebk").onclick = function () { guiaEnv(); };
+    function txt() {
+      var n = first(x.name), ev = x.kind === "evento", g = GUIA_P.filter(function (z) { return z[0] === parte; })[0];
+      if (!parte) return "¡Hola, " + n + "! ✨ Para que llegues a tu " + (ev ? "evento" : "sesión") + " tranquila y lista para disfrutarla, te preparamos una guía en 7 partes cortitas:\n\n1. Confianza: cómo soltar los nervios\n2. Tu idea: cómo contarnos lo que imaginas\n3. Vestuario: qué ponerte según tu cuerpo\n4. El color: las combinaciones que te iluminan\n5. Accesorios y manos: el detalle que más se nota\n6. Tu sesión con nosotros: paso a paso\n7. El gran día: disfrutar y lo práctico\n\nLéelas en orden aquí 👇\n" + SITE_G + "guia.html\n\nY en tu *Zona VIP* (entras con tu número de WhatsApp) también las tienes, junto con el proceso de tu sesión y tus fotos 👑\n" + SITE_G + "vip.html\n\n— Nelson y Charlie · NC Studio";
+      return "¡Hola, " + n + "! 💛 Te comparto una parte de tu guía para brillar frente a la cámara: *" + g[1].replace(/^\d+ · /, "") + "*. Es cortita y te va a ayudar muchísimo 👇\n" + SITE_G + "guia/" + parte + ".pdf\n\nLa guía completa está aquí: " + SITE_G + "guia.html\n\n— Nelson y Charlie · NC Studio";
+    }
+    var pm = panelMsg("gbox", function () { return x; }, txt(), "Tu guía para brillar · NC Studio");
+    $("gpar").onchange = function () { parte = this.value; pm.set(txt()); };
+    window.scrollTo(0, 0);
   }
   function h12(h) { var m = String(h || "").match(/^(\d{1,2}):(\d{2})/); if (!m) return h || ""; var H = +m[1]; return ((H % 12) || 12) + ":" + m[2] + (H < 12 ? " a. m." : " p. m."); }
   /* ---- conocer al cliente ---- */
