@@ -357,9 +357,9 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
     if ($("todas")) $("todas").remove();
   }
   function consejos() {
-    var ext = D.consejos === "exteriores";
-    app.innerHTML = '<section class="hello"><h1>Tu guía para <em>brillar</em> ✨</h1><p>' + (ext ? 'Ocho guías cortitas para llegar a tu sesión en exteriores tranquila y lista para disfrutarla.' : 'Siete guías cortitas para llegar a tu sesión tranquila y lista para disfrutarla.') + ' Léelas en orden.</p><div class="pb" style="background:rgba(255,255,255,.15)"><i id="gp" style="width:0"></i></div><small id="gt" style="color:var(--beige)"></small></section><div id="gl" style="display:grid;gap:12px"></div>';
-    window.ncGuia($("gl"), function (n, t) { $("gp").style.width = (n / t * 100) + "%"; $("gt").textContent = n + " de " + t + " leídas"; }, "", ext ? "exteriores" : "estudio");
+    var ver = D.consejos, ext = ver === "exteriores", q15 = ver === "quince";
+    app.innerHTML = '<section class="hello"><h1>' + (q15 ? 'Tu noche de <em>magia</em> ✨' : 'Tu guía para <em>brillar</em> ✨') + '</h1><p>' + (q15 ? 'Nueve guías cortitas para ti, quinceañera, y para tu mamá. Léanlas juntas y en orden.' : (ext ? 'Ocho guías cortitas para llegar a tu sesión en exteriores tranquila y lista para disfrutarla.' : 'Siete guías cortitas para llegar a tu sesión tranquila y lista para disfrutarla.') + ' Léelas en orden.') + '</p><div class="pb" style="background:rgba(255,255,255,.15)"><i id="gp" style="width:0"></i></div><small id="gt" style="color:var(--beige)"></small></section><div id="gl" style="display:grid;gap:12px"></div>';
+    window.ncGuia($("gl"), function (n, t) { $("gp").style.width = (n / t * 100) + "%"; $("gt").textContent = n + " de " + t + " leídas"; }, "", ver);
   }
   function perfil() {
     var G = D.gustos || {}, K = Object.keys(G).filter(function (k) { return G[k] && !/^(ideas|quien)$/i.test(k); });
