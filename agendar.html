@@ -1640,11 +1640,44 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     DET = x.id; PUB_OPEN[x.id] = 1; FSOLO = ""; ELEG = []; tab("P"); window.scrollTo(0, 0);
     app.innerHTML = '<button class="back" id="pbk">‹ ' + (x.estado === "Por publicar" ? "Por publicar" : "Publicadas") + '</button>' +
       '<section><div class="row" style="justify-content:space-between"><h2>Fotos</h2><span class="row" id="pfl"></span></div><div id="pfb"><div class="msg" style="padding:12px"><span class="spin"></span>Buscando las fotos…</div></div></section>' +
+      ("videos" in x ? '<section><h2>Videos y entregables</h2><div id="pveBox"></div></section>' : '') +
       tarjetaPub(x, "d0");
     if ($("d0tg")) $("d0tg").hidden = true;
     bindPub(x, "d0");
+    if ("videos" in x) pintaVE(x);
     $("pbk").onclick = function () { DET = null; pintaPub(); };
     fotosDet(x, 0);
+  }
+  /* Videos (álbum de Google Fotos) y entregables (carpeta de Drive), 16-11-2026.
+     Solo aparece si el Apps Script ya devuelve estos campos (columnas Videos y Entregables). */
+  var VE_CAMPOS = [
+    { k: "videos", id: "pvv", txt: "Link del álbum de Google Fotos con los videos", ph: "https://photos.app.goo.gl/…", abrir: "Abrir álbum", ok: /^https:\/\/(photos\.app\.goo\.gl|photos\.google\.com)\//, err: "Pega el link de un álbum compartido de Google Fotos." },
+    { k: "entregables", id: "pve", txt: "Link de la carpeta de entregables en Drive (reel, miniatura, caption, storyboard e historias)", ph: "https://drive.google.com/drive/folders/…", abrir: "Abrir entregables", ok: /^https:\/\/drive\.google\.com\//, err: "Pega el link de una carpeta de Google Drive." }
+  ];
+  function pintaVE(x) {
+    var box = $("pveBox"); if (!box) return;
+    box.innerHTML = VE_CAMPOS.map(function (c) {
+      var v = x[c.k] || "";
+      return '<label for="' + c.id + '">' + c.txt + '<input id="' + c.id + '" type="url" placeholder="' + c.ph + '" autocomplete="off"></label>' +
+        '<div class="row"><button class="btn2" id="' + c.id + 'ok">Guardar</button>' +
+        (v ? '<a class="btn2" href="' + esc(v) + '" target="_blank" rel="noopener">' + c.abrir + '</a>' : '') +
+        '<span class="err" id="' + c.id + 'e"></span></div>';
+    }).join("");
+    VE_CAMPOS.forEach(function (c) {
+      $(c.id).value = x[c.k] || "";
+      $(c.id + "ok").onclick = function () {
+        var v = $(c.id).value.trim();
+        if (v && !c.ok.test(v)) { $(c.id + "e").textContent = c.err; return; }
+        var b = $(c.id + "ok"); b.disabled = true; b.innerHTML = '<span class="spin"></span>Guardando…';
+        var p = { id: x.id }; p[c.k] = v;
+        call({ action: "pub_save", pin: PIN, p: p }).then(function (r) {
+          if (!r.ok) { b.disabled = false; b.textContent = "Guardar"; $(c.id + "e").textContent = r.title || "No se pudo guardar."; return; }
+          x[c.k] = v;
+          PUB = PUB.map(function (y) { if (y.id !== x.id) return y; var z = Object.assign({}, y); z[c.k] = v; return z; });
+          pintaVE(x);
+        }).catch(function () { b.disabled = false; b.textContent = "Guardar"; $(c.id + "e").textContent = "No pudimos conectar."; });
+      };
+    });
   }
   function formCarpeta(x, msg) {
     $("pfb").innerHTML = (msg ? '<p class="hint">' + msg + '</p>' : '') + '<label for="pfc">Link de la carpeta de Drive con las fotos editadas<input id="pfc" type="url" placeholder="https://drive.google.com/drive/folders/…" autocomplete="off"></label><div class="row"><button class="btn2" id="pfok">Guardar carpeta</button><span class="err" id="pfe"></span></div>';
