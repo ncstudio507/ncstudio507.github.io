@@ -11,7 +11,9 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(-
 .hd nav a{text-decoration:none;padding:8px 0}
 .hd nav a.on{color:var(--naranja)}
 .hd nav a{white-space:nowrap}
-@media (max-width:440px){.hd{gap:8px;font-size:12px;letter-spacing:.01em}.hd img{height:22px}.hd nav{gap:11px}}
+.hd nav{overflow-x:auto;scrollbar-width:none}.hd nav::-webkit-scrollbar{display:none}
+@media (max-width:520px){.hd{gap:8px;padding:8px 12px;font-size:12px;letter-spacing:.01em}.hd img{height:22px}.hd nav{gap:12px}}
+@media (max-width:380px){.hd{font-size:11px}.hd nav{gap:9px}}
 .wrap{max-width:1180px;margin:0 auto;padding:20px 16px 120px}
 h1{font-family:Montserrat,sans-serif;font-weight:700;font-size:28px;letter-spacing:.02em;margin:8px 0 4px;color:var(--blanco)}
 .sub{color:#bdb3a6;margin:0 0 18px}
