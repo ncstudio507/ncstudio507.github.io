@@ -204,9 +204,10 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
   function form() {
     salir.hidden = false; tab("A"); window.scrollTo(0, 0);
     app.innerHTML = (NUEVO_CONTRATO ? '<div class="msg" style="padding:14px 16px">📄 Agenda al cliente nuevo; al terminar te aparece el botón para generar su contrato.</div>' : '') +
-      '<section><div class="row" style="justify-content:space-between"><h2 style="margin:0">Agendar</h2><button class="btn2" id="bcod">🏷️ Códigos de descuento</button></div>' +
+      '<section><div class="row" style="justify-content:space-between"><h2 style="margin:0">Agendar</h2><span class="row" style="gap:6px"><button class="btn2" id="bcod">🏷️ Códigos de descuento</button><button class="btn2" id="bpap">🗑️ Papelera</button></span></div>' +
       '<label for="agx">Experiencia<select id="agx"><option value="">— Elige la experiencia —</option>' + DATA.P.map(function (p) { return '<option value="' + esc(p.id) + '">' + esc(p.title) + '</option>'; }).join("") + '<option value="otro">Otro / personalizado</option></select></label></section><div id="agp" style="display:grid;gap:10px"></div>';
     $("bcod").onclick = function () { codigos(); };
+    $("bpap").onclick = function () { papelera(); };
     $("agx").onchange = function () { AGEXP = this.value; pintaPaquetes(); };
     if (AGEXP) { $("agx").value = AGEXP; pintaPaquetes(); }
   }
@@ -257,8 +258,10 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     };
     function pinta(r) {
       if (!r.ok) { $("cdl").innerHTML = '<p class="hint">No pudimos cargar los códigos. ¿Ya pegaste el código nuevo?</p>'; return; }
-      $("cdl").innerHTML = r.list.map(function (c) { return '<div class="card2" style="gap:6px"><div class="row" style="justify-content:space-between"><b style="font:400 20px Georgia,serif;letter-spacing:1px">' + esc(c.codigo) + '</b><span class="chip ' + (c.activo ? "ok" : "no") + '">' + (c.activo ? "Activo" : "Desactivado") + '</span></div><span>' + esc(c.texto) + ' · usado ' + c.usos + (c.usos === 1 ? " vez" : " veces") + (c.notas ? ' · ' + esc(c.notas) : '') + '</span><small class="hint">Sirve para: ' + (c.exps && c.exps.length ? esc(c.exps.map(function (id) { var p = DATA.P.filter(function (x) { return x.id === id; })[0]; return p ? p.title : id; }).join(", ")) : "todas las experiencias") + '</small><button class="btn2" data-cd="' + esc(c.codigo) + '" data-on="' + (c.activo ? 0 : 1) + '" style="justify-self:start">' + (c.activo ? "Desactivar" : "Activar otra vez") + '</button></div>'; }).join("");
+      $("cdl").innerHTML = r.list.map(function (c) { return '<div class="card2" style="gap:6px"><div class="row" style="justify-content:space-between"><b style="font:400 20px Georgia,serif;letter-spacing:1px">' + esc(c.codigo) + '</b><span class="chip ' + (c.activo ? "ok" : "no") + '">' + (c.activo ? "Activo" : "Desactivado") + '</span></div><span>' + esc(c.texto) + ' · usado ' + c.usos + (c.usos === 1 ? " vez" : " veces") + (c.notas ? ' · ' + esc(c.notas) : '') + '</span><small class="hint">Sirve para: ' + (c.exps && c.exps.length ? esc(c.exps.map(function (id) { var p = DATA.P.filter(function (x) { return x.id === id; })[0]; return p ? p.title : id; }).join(", ")) : "todas las experiencias") + '</small><button class="btn2" data-cd="' + esc(c.codigo) + '" data-on="' + (c.activo ? 0 : 1) + '" style="justify-self:start">' + (c.activo ? "Desactivar" : "Activar otra vez") + '</button><button class="btn2" data-cdx="' + esc(c.codigo) + '" style="justify-self:start">🗑️ Borrar</button></div>'; }).join("");
       Array.prototype.forEach.call($("cdl").querySelectorAll("[data-cd]"), function (b) { b.onclick = function () { b.disabled = true; call({ action: "cod_save", pin: PIN, c: { codigo: b.getAttribute("data-cd"), activo: b.getAttribute("data-on") === "1" } }).then(pinta); }; });
+      // borrar: va a la papelera 30 días
+      Array.prototype.forEach.call($("cdl").querySelectorAll("[data-cdx]"), function (b) { b.onclick = function () { var k = b.getAttribute("data-cdx"); if (!confirmar("¿Borrar el código " + k + "? Va a la papelera 30 días.")) return; b.disabled = true; call({ action: "cod_del", pin: PIN, codigo: k }).then(function (r) { if (!r.ok) { b.disabled = false; alertaSuave(r.title); return; } call({ action: "cod_lista", pin: PIN }).then(pinta); }); }; });
     }
     call({ action: "cod_lista", pin: PIN }).then(pinta).catch(function () { $("cdl").innerHTML = '<p class="hint">No pudimos conectar.</p>'; });
     $("cdok").onclick = function () {
@@ -268,6 +271,18 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
         $("cdc").value = ""; $("cdv").value = ""; $("cdn").value = ""; Array.prototype.forEach.call(app.querySelectorAll("[data-cx]"), function (x) { x.checked = false; }); pinta(r);
       }).catch(function () { b.disabled = false; $("cderr").textContent = "No pudimos conectar."; });
     };
+  }
+  // papelera: lo que borras queda aquí 30 días (las reservas con pago no se borran)
+  function papelera() {
+    tab("A"); window.scrollTo(0, 0);
+    app.innerHTML = '<button class="back" id="ppbk">‹ Agendar</button><section><h2>🗑️ Papelera</h2><p class="hint">Todo lo que borras en tu panel queda aquí <b>30 días</b>; después se borra para siempre. Al recuperar algo vuelve a su lugar (los eventos del calendario que se borraron no vuelven).</p><div id="ppl" style="display:grid;gap:8px"><div class="msg"><span class="spin"></span>Cargando…</div></div></section>';
+    $("ppbk").onclick = function () { form(); };
+    function pinta(r) {
+      if (!r.ok) { $("ppl").innerHTML = '<p class="hint">No pudimos cargar la papelera. ¿Ya pegaste el código nuevo?</p>'; return; }
+      $("ppl").innerHTML = r.list.length ? r.list.map(function (x) { return '<div class="card2" style="gap:6px"><div class="row" style="justify-content:space-between"><b>' + esc(x.titulo) + '</b><span class="chip wait">' + esc(x.tipo) + '</span></div><small class="hint">Borrado el ' + esc(new Date(x.fecha).toLocaleString("es-PA")) + '</small><button class="btn2" data-pp="' + esc(x.id) + '" style="justify-self:start">↩️ Recuperar</button></div>'; }).join("") : '<p class="hint">La papelera está vacía.</p>';
+      Array.prototype.forEach.call($("ppl").querySelectorAll("[data-pp]"), function (b) { b.onclick = function () { b.disabled = true; call({ action: "pap_restaurar", pin: PIN, id: b.getAttribute("data-pp") }).then(function (r2) { if (!r2.ok) { b.disabled = false; alertaSuave(r2.title); return; } if (r2.html) alertaSuave(r2.html); LIST = null; BASE = null; call({ action: "pap_lista", pin: PIN }).then(pinta); }); }; });
+    }
+    call({ action: "pap_lista", pin: PIN }).then(pinta).catch(function () { $("ppl").innerHTML = '<p class="hint">No pudimos conectar.</p>'; });
   }
   window.addEventListener("message", function (e) {
     if (e.origin !== location.origin || !e.data || !e.data.nc) return;
@@ -725,9 +740,9 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
       con: "¡Hola, " + n + "! 💛 Ya recibimos tu abono de " + x.abono + ". ¡Tu fecha está oficialmente reservada! 🙌🏼\n\nSolo falta un paso: lee y firma tu contrato en línea aquí 👇\n" + x.contrato + "\n\nMarca la casilla «Acepto» y presiona «Enviar confirmación». Te llegará una copia en PDF a tu correo." + (x.tips ? "\n\n📋 Y aquí tienes tu guía para prepararte para la sesión:\n" + x.tips : "") + "\n\n¡Gracias por confiar en nosotros! ✨" + firma,
       rec: "¡Hola, " + n + "! ✨ ¡Ya casi llega el gran día!\n\n📅 " + x.fecha + "\n📍 " + x.place + "\n📸 " + x.service + "\n💵 Saldo a pagar ese día: " + x.saldo + "\n\nPara que todo salga increíble:\n" +
         (ev ? "• Cuéntanos los momentos clave que no nos podemos perder (brindis, pastel, entradas).\n• Compártenos la hora exacta y la dirección del lugar.\n" : "• Prepara tus looks y accesorios con tiempo; déjalos listos la noche anterior.\n• Descansa bien y mantente hidratada.\n") +
-        "• Llega puntual para aprovechar al máximo la luz y el tiempo.\n\n" + (ev ? "Tus fotos editadas te llegan en tu galería en línea 10 días después del evento." : "Las pruebas te llegan de 48 a 72 horas hábiles después de la sesión y tendrás 2 días para elegir tus favoritas.") + " ¿Nos confirmas que recibiste este mensaje? 💛" + firma,
+        "• Llega puntual para aprovechar al máximo la luz y el tiempo.\n\n" + (ev ? "Tus fotos editadas te llegan en tu galería en línea 10 días después del evento." : "Las pruebas te llegan de 48 a 72 horas hábiles después de la sesión y tendrás 3 días para elegir tus favoritas.") + " ¿Nos confirmas que recibiste este mensaje? 💛" + firma,
       pru: "¡Hola, " + n + "! 📸 ¡Tus fotos de prueba ya están listas!" + acc(x.gp) +
-        "\n\n*Cómo elegir tus fotos:*\n1. Entra al link y toca el corazón ♡ en tus favoritas (la primera vez te pide tu correo).\n2. Revisa tu selección en «Favorites», arriba a la derecha.\n3. Puedes elegir *" + (x.photos || "las") + " fotos* incluidas en tu paquete. Fotos extra: " + precioExtra(x) + " c/u. Liberación de galería (todas sin editar): $60.\n4. Cuando termines, toca «Send to Photographer» en tus favoritas y escríbenos por aquí: «Ya elegí mis fotos» ✅\n\n⏳ Tienes *2 días* para elegir; si no recibimos tu selección, las elegimos nosotros." + (x.xl ? "\n\n😍 ¿Te gustaron más fotos que las de tu paquete? Pide fotos extra aquí y te digo el precio al momento 👇\n" + x.xl : "") + "\n\nTus fotos finales te llegan en máximo 2 semanas después de recibir tu selección. 💛" + firma,
+        "\n\n*Cómo elegir tus fotos:*\n1. Entra al link y toca el corazón ♡ en tus favoritas (la primera vez te pide tu correo).\n2. Revisa tu selección en «Favorites», arriba a la derecha.\n3. Puedes elegir *" + (x.photos || "las") + " fotos* incluidas en tu paquete. Fotos extra: " + precioExtra(x) + " c/u. Liberación de galería (todas sin editar): $60.\n4. Cuando termines, toca «Send to Photographer» en tus favoritas y escríbenos por aquí: «Ya elegí mis fotos» ✅\n\n⏳ Tienes *3 días* para elegir; si no recibimos tu selección, las elegimos nosotros." + (x.xl ? "\n\n😍 ¿Te gustaron más fotos que las de tu paquete? Pide fotos extra aquí y te digo el precio al momento 👇\n" + x.xl : "") + "\n\nTus fotos finales te llegan en máximo 2 semanas después de recibir tu selección. 💛" + firma,
       fin: "¡Hola, " + n + "! 🎁 ¡Llegaron tus fotos finales!" + acc(x.gf) +
         "\n\nPuedes descargarlas y compartirlas con quien quieras. Gracias por permitirnos vivir esta experiencia contigo; esperamos volver a verte pronto frente a la cámara. 💛\n\nSi te gustó, nos ayudaría muchísimo que nos dejes un testimonio cortito. ¡Gracias! ✨" + firma
     };
@@ -2193,8 +2208,10 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
       '<div class="card2" style="gap:6px">' + P.filter(function (q) { return g.r[q[0]]; }).map(function (q) { return '<div><small class="hint">' + q[1] + '</small><br>' + esc(g.r[q[0]]) + '</div>'; }).join("") + '</div></section>' +
       '<section><h2>Sus 3 ideas</h2><p class="hint">Inspirado en sus respuestas: ponle un título a cada idea y los accesorios. Sale en un PDF con el diseño de «Gustos e ideas del cliente».</p>' +
       [0, 1, 2].map(function (i) { var it = I[i] || { titulo: "", acc: [] }; return '<div class="card2" style="gap:8px"><b>Idea #' + (i + 1) + '</b><label for="it' + i + '">Título<input id="it' + i + '" autocomplete="off" value="' + esc(it.titulo || "") + '"></label><small class="hint">Accesorios</small>' + [0, 1, 2].map(function (j) { return '<input id="ia' + i + "_" + j + '" aria-label="Accesorio ' + (j + 1) + ' de la idea ' + (i + 1) + '" autocomplete="off" placeholder="Elemento" value="' + esc((it.acc || [])[j] || "") + '">'; }).join("") + '</div>'; }).join("") +
-      '<div class="acts"><button class="act" id="ipdf">📄 Generar el PDF</button>' + (/@/.test(g.email || "") ? '<button class="act" id="imail">✉️ Generar y enviárselo por correo</button>' : '') + '</div><p class="err" id="ierr"></p><div id="ires" style="display:grid;gap:12px"></div></section>';
+      '<div class="acts"><button class="act" id="ipdf">📄 Generar el PDF</button>' + (/@/.test(g.email || "") ? '<button class="act" id="imail">✉️ Generar y enviárselo por correo</button>' : '') + '</div><p class="err" id="ierr"></p><div id="ires" style="display:grid;gap:12px"></div></section>' +
+      '<section><button class="btn2" id="gdel">🗑️ Borrar estas respuestas</button><p class="hint" style="margin:6px 0 0">Van a la papelera 30 días.</p></section>';
     $("gbk").onclick = function () { gustos(); };
+    $("gdel").onclick = function () { if (!confirmar("¿Borrar las respuestas de " + g.name + "? Van a la papelera 30 días.")) return; var b = this; b.disabled = true; call({ action: "gustos_del", pin: PIN, id: g.id }).then(function (r) { if (!r.ok) { b.disabled = false; alertaSuave(r.title); return; } gustos(); }).catch(function () { b.disabled = false; alertaSuave("No pudimos conectar."); }); };
     function ideas() { return [0, 1, 2].map(function (i) { return { titulo: $("it" + i).value.trim(), acc: [0, 1, 2].map(function (j) { return $("ia" + i + "_" + j).value.trim(); }) }; }); }
     function listo(url, enviado) {
       var ti = ideas().filter(function (x) { return x.titulo; }).map(function (x, i) { return ["1️⃣", "2️⃣", "3️⃣"][i] + " " + x.titulo; }).join("\n");
@@ -2220,6 +2237,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
       '<label for="mlk">Link del moodboard <small>(Canva, Pinterest o Drive)</small><input id="mlk" type="url" placeholder="https://…" autocomplete="off"></label><button class="btn" id="mok">Preparar mensaje</button><p class="err" id="merr"></p><div id="mbox" style="display:grid;gap:12px"></div></section>';
     $("ebk").onclick = function () { enviar("mood"); };
     $("mlk").value = x.moodboard || "";
+    if (x.moodboard && x.id) { var mq = document.createElement("button"); mq.className = "btn2"; mq.textContent = "🗑️ Quitar el moodboard"; mq.style.justifySelf = "start"; $("mok").after(mq); mq.onclick = function () { if (!confirmar("¿Quitar el moodboard de " + x.name + "? Va a la papelera 30 días.")) return; mq.disabled = true; call({ action: "res_campo_del", pin: PIN, id: x.id, campo: "moodboard" }).then(function (r) { if (!r.ok) { mq.disabled = false; alertaSuave(r.title); return; } x.moodboard = ""; moodDe(x); }); }; }
     $("mok").onclick = function () {
       var lk = $("mlk").value.trim(); if (!/^https?:\/\//i.test(lk)) { $("merr").textContent = "Pega el link completo (empieza con https://)."; return; }
       $("merr").textContent = ""; x.moodboard = lk;
@@ -2239,6 +2257,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
       '<button class="btn" id="rok">Guardar y preparar mensaje</button><p class="err" id="rerr"></p><div id="rbox" style="display:grid;gap:12px"></div></section>';
     $("ebk").onclick = function () { enviar("meet"); };
     $("rdt").value = mt.fecha || ""; $("rhr").value = mt.hora || ""; $("rlk").value = mt.link || "";
+    if (mt.link && x.id) { var rq = document.createElement("button"); rq.className = "btn2"; rq.textContent = "🗑️ Borrar la reunión"; rq.style.justifySelf = "start"; $("rok").after(rq); rq.onclick = function () { if (!confirmar("¿Borrar la reunión con " + x.name + "? Se quita de tu calendario y va a la papelera 30 días.")) return; rq.disabled = true; call({ action: "res_campo_del", pin: PIN, id: x.id, campo: "meet" }).then(function (r) { if (!r.ok) { rq.disabled = false; alertaSuave(r.title); return; } x.meet = null; meetDe(x); }); }; }
     $("rok").onclick = function () {
       var f = $("rdt").value, h = $("rhr").value, lk = $("rlk").value.trim();
       if (!f || !h) { $("rerr").textContent = "Elige el día y la hora."; return; }

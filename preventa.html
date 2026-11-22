@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Preventa · NC Studio</title>
+<meta name="theme-color" content="#222020">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Tenor+Sans&display=swap">
+<link rel="stylesheet" href="galeria.css">
+<style>
+.paq{display:grid;gap:10px;margin:14px 0}
+.paq label{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;background:#2b2929;border:2px solid var(--gris);border-radius:14px;padding:14px 16px;cursor:pointer}
+.paq label:has(input:checked){border-color:var(--naranja)}
+.paq b{font-family:Montserrat,sans-serif;color:var(--blanco)}
+.paq .pr{font-family:Montserrat,sans-serif;font-weight:700;font-size:20px;color:var(--naranja)}
+</style>
+</head>
+<body>
+<header class="hd">
+  <a href="news.html"><img src="logo.png" alt="NC Studio"></a>
+  <nav aria-label="Menú principal"><a href="news.html">📰 News</a><a href="mis-fotos.html">📷 Mis fotos</a></nav>
+</header>
+<main class="wrap" style="max-width:620px" id="main"></main>
+<div class="modal" id="modal" hidden><div class="caja" id="caja"></div></div>
+<script src="nc-config.js"></script>
+<script src="tienda.js"></script>
+<script src="nc-api.js"></script>
+<script>
+(function () {
+  var T = window.NC_TIENDA, $ = T.dinero, main = document.getElementById('main'), A = window.NC_API, pvId = new URLSearchParams(location.search).get('p');
+  (A.real ? A.gal('publico', [null]).then(function (r) { return (r.preventas || []).filter(function (x) { return x.id === pvId; })[0]; }) : Promise.resolve(T.preventa(pvId))).then(pintar, function () { main.innerHTML = '<h1>Sin conexión</h1>'; });
+  function pintar(pv) {
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  if (!pv) { main.innerHTML = '<h1>Preventa no encontrada</h1><p class="nota">Revisa el link o escríbenos por WhatsApp.</p>'; return; }
+  document.title = 'Preventa · ' + pv.nombre + ' · NC Studio';
+  var abierta = A.real ? pv.abierta : T.preventaAbierta(pv);
+  main.innerHTML = '<p class="nota" style="margin:0">🎟 Preventa de fotos</p><h1>' + esc(pv.nombre) + '</h1>' +
+    '<p class="sub">' + esc(pv.fecha || '') + (pv.lugar ? ' · ' + esc(pv.lugar) : '') + (pv.hasta ? ' · se vende hasta el ' + esc(pv.hasta) : '') + '</p>' +
+    (abierta ? '<div class="aviso"><span>📸</span><div>Compra tus fotos <b>antes de la carrera</b> y te salen más baratas. Cuando salgan, te las asignamos por tu <b>dorsal y tu rostro</b> y te avisamos por WhatsApp. Las editamos en orden de turno.</div></div>' +
+      '<div class="paq">' + pv.paquetes.map(function (q, i) {
+        return '<label><input type="radio" name="paq" value="' + i + '"' + (i === 0 ? ' checked' : '') + '><span><b>' + esc(q.nombre) + '</b><br><span class="nota">' + (q.fotos ? 'Eliges ' + q.fotos + (q.fotos === 1 ? ' foto' : ' fotos') + ' del álbum (las que quieras)' : 'Todas las fotos donde sales tú: tu rostro o tu dorsal') + '</span></span><span class="pr">' + $(q.precio) + '</span></label>';
+      }).join('') + '</div>' +
+      '<p class="nota">«Todas tus fotos» incluye todas donde sales <b>tú</b> (tu rostro o tu dorsal). Las de otra persona se agregan aparte; las grupales siguen gratis.</p>' +
+      '<label class="campo">Nombre y apellido<input type="text" id="fNom" autocomplete="name"></label>' +
+      '<label class="campo">Celular (WhatsApp)<input type="tel" id="fTel" placeholder="6xxx-xxxx" autocomplete="tel"></label>' +
+      '<label class="campo">Número de dorsal<input type="text" id="fDor" inputmode="numeric" placeholder="Si todavía no lo tienes, ponlo cuando lo recibas por WhatsApp"></label>' +
+      '<label class="campo">Correo (opcional)<input type="email" id="fMail" autocomplete="email"></label>' +
+      '<p class="nota" id="fErr" style="color:#ffb4a8"></p>' +
+      '<div class="fila"><button class="btn" id="ok">Pagar con Yappy</button></div>'
+      : '<div class="aviso"><span>⌛</span><div>Esta preventa ya cerró. Cuando salgan las fotos las podrás elegir en el álbum de la carrera.</div></div>');
+  if (!abierta) return;
+  function paq() { return +document.querySelector('input[name=paq]:checked').value; }
+  function boton() { document.getElementById('ok').textContent = 'Pagar ' + $(pv.paquetes[paq()].precio) + ' con Yappy'; }
+  document.querySelectorAll('input[name=paq]').forEach(function (r) { r.onchange = boton; }); boton();
+  document.getElementById('ok').onclick = function () {
+    var nom = document.getElementById('fNom').value.trim(), tel = document.getElementById('fTel').value.replace(/\D/g, ''), dor = document.getElementById('fDor').value.replace(/\D/g, ''), mail = document.getElementById('fMail').value.trim();
+    var err = !nom ? 'Falta tu nombre.' : tel.length < 7 ? 'Revisa tu número de celular.' : mail && !/^\S+@\S+\.\S+$/.test(mail) ? 'Revisa tu correo (o déjalo vacío).' : '';
+    document.getElementById('fErr').textContent = err; if (err) return;
+    A.gal('comprarPreventaPublico', [pv.id, paq(), { nombre: nom, tel: tel, dorsal: dor, correo: mail }]).then(function (r) { if (!r.ok) { document.getElementById('fErr').textContent = r.title; return; } pagar(r.pedido); });
+  };
+  function pagar(p) {
+    var caja = document.getElementById('caja'), modal = document.getElementById('modal');
+    caja.innerHTML = '<div class="ticket"><h3 style="margin-top:0">Paga con Yappy</h3><div class="num">' + $(p.monto) + '</div><p class="nota">Paga desde tu Yappy con el mismo celular (' + p.tel + ').</p>' +
+      (A.real ? window.NC_API.botonYappy(p) + '<div class="fila" style="justify-content:center"><button class="btn" id="pago">Listo, ya pagué</button></div></div>'
+        : '<p class="nota"><span class="sim">SIMULACIÓN</span> Aquí va el botón de Yappy.</p><div class="fila" style="justify-content:center"><button class="btn" id="pago">Simular: llegó el Yappy</button></div></div>');
+    modal.hidden = false;
+    document.getElementById('pago').onclick = function () {
+      if (!A.real) T.registrarYappy({ nombre: p.nombre, tel: p.tel, monto: p.monto });
+      caja.innerHTML = '<div class="ticket"><p class="nota">¡Listo, ' + esc(p.nombre) + '!</p><div class="num">🎟 ' + esc(p.paquete.nombre) + '</div><p class="nota">Tu preventa está pagada. Cuando salgan las fotos te avisamos por WhatsApp; las verás en <a href="mis-fotos.html?tel=' + p.tel + '">Mis fotos</a>.</p></div>';
+    };
+  }
+  }
+})();
+</script>
+</body>
+</html>

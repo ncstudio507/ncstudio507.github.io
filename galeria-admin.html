@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Panel galerías · NC Studio</title>
+<meta name="theme-color" content="#222020">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Tenor+Sans&display=swap">
+<link rel="stylesheet" href="galeria.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+.cifras{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:0 0 20px}
+.cifra{background:#2b2929;border:1px solid var(--gris);border-radius:12px;padding:12px 14px}
+.cifra b{display:block;font-family:Montserrat,sans-serif;font-size:24px;color:var(--blanco)}
+.cifra span{font-size:13px;color:#bdb3a6}
+.tarjeta{background:#2b2929;border:1px solid var(--gris);border-radius:14px;padding:14px 16px;margin:0 0 12px}
+.ev-adm{display:grid;grid-template-columns:96px minmax(0,1fr);gap:14px}
+@media (max-width:520px){.ev-adm{grid-template-columns:56px minmax(0,1fr);gap:10px}.ev-adm .por{width:56px!important;height:56px!important}}
+.ped>div{min-width:0}
+.ev-adm .por{width:96px;height:96px;border-radius:10px;background-size:cover;background-position:center}
+.ev-adm h3{margin:0;font-family:Montserrat,sans-serif;color:var(--blanco);font-size:17px}
+.link{display:flex;gap:8px;margin:8px 0}
+.link input,.sel,textarea{flex:1;min-width:0;min-height:40px;padding:0 10px;border-radius:10px;border:1.5px solid var(--gris);background:#1d1c1c;color:var(--blanco);font:inherit;font-size:14px}
+textarea{width:100%;min-height:110px;padding:10px}
+.mini-btn{min-height:40px;padding:0 14px;border-radius:999px;border:1.5px solid var(--gris);background:transparent;color:var(--crema);cursor:pointer;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center}
+.mini-btn.na{background:var(--naranja);border-color:var(--naranja);color:var(--fondo)}
+.acciones{display:flex;flex-wrap:wrap;gap:8px}
+.qr{background:#fff;padding:10px;border-radius:10px;display:inline-block;margin-top:8px}
+.ped{display:grid;grid-template-columns:1fr auto;gap:6px 12px}
+.ped .tk{font-family:Montserrat,sans-serif;font-weight:700;color:var(--naranja)}
+.estado{display:inline-block;padding:3px 10px;border-radius:999px;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700}
+.e-esperando{background:#3a2a2a;color:#ffb4a8}.e-pagado{background:#3a3128;color:#F99824}.e-edicion{background:#22324a;color:#9cc0ff}.e-entregado{background:#1f3a2a;color:#8fe0a8}
+.lista{font-family:Consolas,monospace;font-size:13px;background:#1d1c1c;border-radius:10px;padding:10px;word-break:break-all;margin:8px 0}
+.msj{white-space:pre-wrap;background:#1d1c1c;border-radius:10px;padding:10px;font-size:14px;margin:8px 0}
+.ok{color:#8fe0a8}.mal{color:#ffb4a8}
+</style>
+</head>
+<body>
+<header class="hd">
+  <a href="news.html"><img src="logo.png" alt="NC Studio"></a>
+  <nav aria-label="Panel"><a href="#" class="on">⚙️ Panel galerías</a></nav>
+</header>
+<main class="wrap">
+  <h1>Panel de galerías</h1>
+  <div class="tabs" role="tablist">
+    <button class="tab on" data-t="resumen">Resumen</button>
+    <button class="tab" data-t="eventos">Álbumes y links</button>
+    <button class="tab" data-t="cola">Cola de edición</button>
+    <button class="tab" data-t="yappy">Pagos Yappy</button>
+    <button class="tab" data-t="pedidos">Pedidos</button>
+    <button class="tab" data-t="capturas">Capturas</button>
+    <button class="tab" data-t="reclamos">Reclamos</button>
+    <button class="tab" data-t="preventas">Preventas</button>
+    <button class="tab" data-t="lightroom">Lista Lightroom</button>
+    <button class="tab" data-t="entregas">Entregar editadas</button>
+    <button class="tab" data-t="grupales">Grupales</button>
+    <button class="tab" data-t="clientes">Clientes · Carreras</button>
+    <button class="tab" data-t="sesiones">Sesiones (VIP)</button>
+    <button class="tab" data-t="papelera">🗑 Papelera</button>
+  </div>
+  <section data-p="capturas" hidden></section>
+  <section data-p="reclamos" hidden></section>
+  <section data-p="preventas" hidden></section>
+  <section data-p="papelera" hidden></section>
+  <section data-p="sesiones" hidden></section>
+  <section data-p="grupales" hidden></section>
+  <section data-p="yappy" hidden></section>
+  <section data-p="cola" hidden></section>
+  <section data-p="clientes" hidden></section>
+  <section data-p="resumen"></section>
+  <section data-p="eventos" hidden></section>
+  <section data-p="pedidos" hidden></section>
+  <section data-p="lightroom" hidden></section>
+  <section data-p="entregas" hidden></section>
+</main>
+<script src="nc-config.js"></script>
+<script>if (!(window.NC_CONFIG || {}).url) document.write('<script src="datos-prueba.js"><\/script><script src="sesiones/indice.js"><\/script>');</script>
+<script src="tienda.js"></script>
+<script src="nc-api.js"></script>
+<script>
+// en la página real: entra con el MISMO PIN de agendar.html (se recuerda en este celular)
+(function arrancarPanel() {
+  window.NC_API.cargarAdmin().then(panel, function (e) {
+    var m = document.querySelector('main');
+    m.innerHTML = '<h1>Panel de galerías</h1><p class="nota">' + ((e && e.title) || 'Sin conexión') + '. Escribe el PIN de tu página para agendar:</p>' +
+      '<div class="fila"><input id="pinIn" class="buscar" type="password" inputmode="numeric" style="max-width:200px" aria-label="PIN"><button class="btn" id="pinOk">Entrar</button></div>';
+    document.getElementById('pinOk').onclick = function () { try { localStorage.setItem('ncPin', document.getElementById('pinIn').value.trim()); } catch (x) {} location.reload(); };
+  });
+})();
+function panel() {
+  var T = window.NC_TIENDA, EV = (window.NC_EVENTOS || []).filter(function (e) { return !T.eventoOculto(e.id); });
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function $(x) { return '$' + Number(x || 0).toFixed(2); }
+  function ev(id) { return EV.filter(function (e) { return e.id === id; })[0]; }
+  function link(e) { return new URL(e.compartir || ('evento.html?e=' + encodeURIComponent(e.id)), location.href).href; }
+  function copiar(txt, btn) {
+    var hecho = function () { var t = btn.textContent; btn.textContent = '✓ Copiado'; setTimeout(function () { btn.textContent = t; }, 1500); };
+    if (navigator.clipboard) navigator.clipboard.writeText(txt).then(hecho, function () { prompt('Copia:', txt); });
+    else prompt('Copia:', txt);
+  }
+  function opcionesEventos(conTodos) {
+    return (conTodos ? '<option value="">Todos los álbumes</option>' : '') + EV.filter(function (e) { return e.fotos.length; })
+      .map(function (e) { return '<option value="' + esc(e.id) + '">' + esc(e.nombre) + '</option>'; }).join('');
+  }
+  var ESTADOS = { esperando: '💳 Esperando Yappy', pagado: '⏳ En la fila', edicion: '✏️ En edición', entregado: '✅ Entregado', vencido: '⌛ Vencido', pausado: '⏸ Pausado (captura)', elegir: '🎟 Por elegir' };
+  function titulo(t) { return '<h3 style="font-family:Montserrat,sans-serif;color:var(--blanco);font-size:16px;margin:18px 0 8px">' + t + '</h3>'; }
+  // borrar: solo Nelson (en la versión real, con su PIN); va a la papelera 30 días
+  function borrarCon(tipo, id, que, luego) { if (confirm('¿Borrar ' + que + '? Va a la papelera: lo puedes recuperar durante 30 días.')) { T.borrar(tipo, id); luego(); } }
+
+  // ---------------- resumen
+  function resumen() {
+    var todos = T.pedidos().filter(function (p) { return !p.borrado; }), l = todos.filter(function (p) { return T.pagado(p) && p.tipo !== 'diferencia'; }), cuenta = function (s) { return todos.filter(function (p) { return p.estado === s; }).length; };
+    var total = l.reduce(function (a, p) { return a + Number(p.monto); }, 0);
+    var fotos = l.reduce(function (a, p) { return a + p.fotos.length; }, 0);
+    var sinMatch = T.yappys().filter(function (y) { return !y.ticket; }).length;
+    var avisos = T.avisos().filter(function (a) { return !a.borrado; }).slice(-12).reverse(), pend = T.sinAbrir(), msjs = T.mensajesCliente().slice(-6).reverse();    var porEv = EV.filter(function (e) { return e.fotos.length; }).map(function (e) {
+      var pe = l.filter(function (p) { return p.evento === e.id; });
+      return '<tr><td>' + esc(e.nombre) + '</td><td>' + pe.length + ' pedidos</td><td>' + $(pe.reduce(function (a, p) { return a + Number(p.monto); }, 0)) + '</td></tr>';
+    }).join('');
+    document.querySelector('[data-p=resumen]').innerHTML =
+      '<div class="cifras">' +
+      '<div class="cifra"><b>' + $(total) + '</b><span>cobrado (Yappy confirmado)</span></div>' +
+      '<div class="cifra"><b>' + l.length + '</b><span>pedidos pagados · ' + fotos + ' fotos</span></div>' +
+      '<div class="cifra"><b>' + cuenta('esperando') + '</b><span>esperando Yappy</span></div>' +
+      (sinMatch ? '<div class="cifra"><b class="mal">' + sinMatch + '</b><span>Yappys sin match (revisar)</span></div>' : '') +
+      '<div class="cifra"><b>' + cuenta('pagado') + '</b><span>en cola</span></div>' +
+      '<div class="cifra"><b>' + cuenta('edicion') + '</b><span>en edición</span></div>' +
+      '<div class="cifra"><b>' + cuenta('entregado') + '</b><span>entregados</span></div>' +
+      '<div class="cifra"><b>' + todos.filter(function (p) { return p.capturaEstado === 'revisar'; }).length + '</b><span>capturas por revisar</span></div>' +
+      '<div class="cifra"><b>' + T.reclamos().filter(function (r) { return r.estado === 'pendiente'; }).length + '</b><span>reclamos por revisar</span></div></div>' +
+      '<table class="tabla">' + porEv + '</table>' +
+      '<div class="fila"><button class="mini-btn" id="venc">Revisar vencimientos ahora</button><span class="nota">En la versión real lo hace la tarea de Necty sola.</span></div>' +
+      (pend.length ? titulo('⏳ Te faltan por escribir (en orden de turno)') + pend.map(function (x) {
+        return '<div class="tarjeta ped"><div><b>' + (x.p && x.p.turno ? 'Turno ' + x.p.turno + ' · ' : '') + esc(x.p ? x.p.nombre : '') + '</b> <span class="nota">' + esc(x.p ? x.p.eventoNombre : '') + '</span></div>' +
+          '<div class="acciones"><a class="mini-btn na" href="ir.html?a=' + esc(x.a.id) + '" target="_blank" rel="noopener">💬 Escribirle</a></div></div>';
+      }).join('') : '') +
+      titulo('Avisos que te manda Necty (uno por persona)') +
+      '<p class="nota" style="margin-top:0">Solo cuando hay pago (o es gratis). «💬 Escribirle» abre su chat con el saludo ya escrito y marca que ya le escribiste.</p>' +
+      (avisos.length ? avisos.map(function (a) {
+        return '<div class="msj">' + esc(a.texto) + (a.saludo ? '\n' + (a.abierto ? '<span class="ok">✓ Ya abriste su chat</span> · ' : '') + '<a href="ir.html?a=' + esc(a.id) + '" target="_blank" rel="noopener">💬 Escribirle</a>' : '') + '</div>';
+      }).join('') : '<p class="vacio">Todavía no hay avisos.</p>') +
+      (msjs.length ? titulo('Mensajes que Necty les manda a los clientes') + msjs.map(function (m) { return '<div class="msj"><b>→ ' + esc(m.nombre) + ' (' + esc(m.tel) + ')</b>\n' + esc(m.texto) + '</div>'; }).join('') : '');
+    var vb = document.getElementById('venc'); if (vb) vb.onclick = function () { var n = T.revisarVencimientos(); T.revisarPlazosSesiones(); resumen(); alert(n ? n + ' cambios por vencimientos.' : 'Nada vencido por ahora.'); };
+  }
+
+  // ---------------- sesiones: galerías privadas de la Zona VIP (nunca en News)
+  function sesiones() {
+    var box = document.querySelector('[data-p=sesiones]'), L = window.NC_SESIONES || [];
+    var lk = function (s, t) { return new URL('sesion.html?s=' + encodeURIComponent(s.id) + '&v=' + t, location.href).href; };
+    box.innerHTML = '<p class="nota" style="margin-top:0">Galerías de sesiones: <b>privadas</b>, no salen en News. Reemplazan a Pixieset: el link va en los botones «Fotos de prueba» y «Fotos finales» de la Zona VIP de la clienta, y también lo puedes mandar directo.</p>' +
+      '<div class="tarjeta"><b>Cómo crear una</b><div class="lista">procesar-sesion.ps1 -Link "&lt;carpeta Drive&gt;" -Cliente "Nombre" -Sesion "Sesión de …" -Tipo pruebas -Incluidas 10 -Tel 6xxxxxxx</div>' +
+      '<p class="nota" style="margin:0">Para las finales, lo mismo con <b>-Tipo finales</b>: queda en la misma galería, con el mismo link.</p></div>' +
+      (L.length ? L.map(function (s, i) {
+        var sel = T.selSesion(s.id), listas = T.listasSesion(s.id), otros = Object.keys(listas).filter(function (t) { return t !== s.tel && listas[t].fotos.length; });
+        var notas = Object.keys(sel.notas || {}).filter(function (k) { return sel.notas[k]; });
+        var plazo = T.plazoSesion(s), vencio = new Date() > plazo;
+        return '<div class="tarjeta"><b>' + esc(s.cliente) + '</b> · ' + esc(s.sesion) + ' <span class="nota">· ' + esc(s.fecha) + '</span>' +
+          ['pruebas', 'finales'].filter(function (t) { return s[t]; }).map(function (t) {
+            return '<div class="link"><input readonly value="' + esc(lk(s, t)) + '" aria-label="Link"><button class="mini-btn" data-scop="' + i + ':' + t + '">Copiar ' + t + '</button><a class="mini-btn" target="_blank" href="' + esc(lk(s, t)) + '">Abrir</a></div>';
+          }).join('') +
+          '<div class="nota">' + (s.pruebas ? s.pruebas.length + ' pruebas' : 'sin pruebas') + (s.incluidas ? ' · paquete de ' + s.incluidas : '') + ' · ' + (s.finales ? s.finales.length + ' finales' : 'finales pendientes') + '</div>' +
+          (s.pruebas && !sel.enviada ? '<div class="nota ' + (vencio ? 'mal' : '') + '">⏳ Plazo para elegir: hasta el ' + plazo.toLocaleDateString('es-PA') + (vencio ? ' (vencido)' : '') + ' <button class="mini-btn" data-ext="' + i + '">+2 días</button></div>' : '') +
+          (sel.enviada ? '<div class="nota ok">❤ La dueña eligió ' + sel.fotos.length + ' el ' + new Date(sel.enviada).toLocaleString('es-PA') + (s.incluidas && sel.fotos.length > s.incluidas ? ' · <span class="mal">' + (sel.fotos.length - s.incluidas) + ' extra ($' + (sel.fotos.length - s.incluidas) * 10 + ')</span>' : '') + '</div>' +
+            '<div class="lista">' + esc(sel.fotos.join(', ')) + '</div><button class="mini-btn na" data-slr="' + i + '">Copiar para Lightroom</button>' +
+            (notas.length ? '<div class="msj"><b>📝 Notas de la clienta:</b>\n' + notas.map(function (k) { return '• ' + esc(k) + ': ' + esc(sel.notas[k]); }).join('\n') + '</div>' : '')
+            : s.pruebas ? '<div class="nota">Todavía no ha enviado su selección.</div>' : '') +
+          (otros.length ? '<div class="nota">💬 También dieron ♡: ' + otros.map(function (t) { return esc(listas[t].nombre || t) + ' (' + listas[t].fotos.length + ')'; }).join(' · ') + '</div>' : '') +
+          (s.tel ? ' <a class="mini-btn" target="_blank" rel="noopener" href="https://wa.me/507' + esc(s.tel) + '">💬 WhatsApp</a>' : '') + '</div>';
+      }).join('') : '<p class="vacio">Todavía no hay galerías de sesión.</p>');
+    box.querySelectorAll('[data-scop]').forEach(function (b) { b.onclick = function () { var p = b.dataset.scop.split(':'); copiar(lk(L[p[0]], p[1]), b); }; });
+    box.querySelectorAll('[data-slr]').forEach(function (b) { b.onclick = function () { copiar(T.selSesion(L[b.dataset.slr].id).fotos.join(', '), b); }; });
+    box.querySelectorAll('[data-ext]').forEach(function (b) { b.onclick = function () { T.extenderSesion(L[b.dataset.ext].id, 2); sesiones(); }; });
+  }
+
+  // ---------------- capturas de "sigo a NC": la PC las lee; aquí solo las que salieron dudosas
+  function capturas() {
+    var box = document.querySelector('[data-p=capturas]');
+    var l = T.pedidos().filter(function (p) { return p.captura && !p.borrado; });
+    var rev = l.filter(function (p) { return p.capturaEstado === 'revisar'; });
+    box.innerHTML = '<p class="nota" style="margin-top:0">La PC lee cada captura: si dice <b>ncstudio507</b> y <b>Siguiendo</b> se aprueba sola. Aquí te salen las dudosas. Si es falsa, Necty le cobra la diferencia y el pedido se pausa hasta que pague.</p>' +
+      '<p class="nota"><span class="sim">SIMULACIÓN</span> En el prototipo todas salen "por revisar" porque la lectura la hace la PC.</p>' +
+      (rev.length ? rev.map(function (p) {
+        return '<div class="tarjeta ped"><div><span class="tk">' + esc(p.ticket) + '</span> ' + esc(p.nombre) + ' · ' + esc(p.eventoNombre) + ' · pagó ' + $(p.monto) + '<div class="nota">📸 ' + esc(p.captura) + '</div></div>' +
+          '<div class="acciones" style="flex-direction:column;align-items:stretch"><button class="mini-btn na" data-cok="' + esc(p.ticket) + '">✓ Sí sigue</button><button class="mini-btn" data-cno="' + esc(p.ticket) + '">✗ Captura falsa</button></div></div>';
+      }).join('') : '<p class="vacio">No hay capturas por revisar. 👌</p>') +
+      titulo('Ya revisadas') + (l.filter(function (p) { return p.capturaEstado !== 'revisar'; }).map(function (p) {
+        return '<div class="nota">' + esc(p.ticket) + ' · ' + esc(p.nombre) + ' · ' + ({ ok: '<span class="ok">✓ sigue</span>', falsa: '<span class="mal">✗ falsa: cobrando diferencia</span>', 'pagada-diferencia': '<span class="ok">pagó la diferencia</span>' }[p.capturaEstado] || '') + '</div>';
+      }).join('') || '<p class="nota">—</p>');
+    box.querySelectorAll('[data-cok]').forEach(function (b) { b.onclick = function () { T.revisarCaptura(b.dataset.cok, true); capturas(); }; });
+    box.querySelectorAll('[data-cno]').forEach(function (b) { b.onclick = function () { if (confirm('¿Marcar la captura como falsa? Se le cobra la diferencia y el pedido se pausa.')) { T.revisarCaptura(b.dataset.cno, false); capturas(); } }; });
+  }
+
+  // ---------------- reclamos de "Esta también es mía" (paquete «todas»)
+  function reclamos() {
+    var box = document.querySelector('[data-p=reclamos]'), R = T.reclamos().slice().reverse();
+    var src = function (evId, n) { var e = ev(evId); var f = e && e.fotos.filter(function (x) { return x.nombre === n; })[0]; return f ? f.src : ''; };
+    box.innerHTML = '<p class="nota" style="margin-top:0">El que compró «todas sus fotos» puede reclamar una foto donde no lo reconocimos. Compara su rostro con la foto y decide.</p>' +
+      (R.length ? R.map(function (r) {
+        var p = T.pedido(r.ticket); if (!p) return '';
+        return '<div class="tarjeta" style="display:grid;grid-template-columns:64px 96px minmax(0,1fr);gap:10px;align-items:center">' +
+          (p.cara ? '<img src="' + esc(p.cara) + '" alt="" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--naranja)">' : '<div>👤</div>') +
+          '<img src="' + esc(src(p.evento, r.foto)) + '" alt="" style="width:96px;height:96px;object-fit:cover;border-radius:10px">' +
+          '<div><b>' + esc(p.nombre) + '</b> · ' + esc(r.foto) + '<div class="nota">' + esc(p.eventoNombre) + ' · turno ' + (p.turno || '—') + '</div>' +
+          (r.estado === 'pendiente' ? '<div class="acciones"><button class="mini-btn na" data-rok="' + esc(r.id) + '">✓ Sí es él</button><button class="mini-btn" data-rno="' + esc(r.id) + '">✗ No es</button></div>' : '<div class="nota ' + (r.estado === 'aprobado' ? 'ok' : 'mal') + '">' + r.estado + '</div>') + '</div></div>';
+      }).join('') : '<p class="vacio">No hay reclamos.</p>');
+    box.querySelectorAll('[data-rok]').forEach(function (b) { b.onclick = function () { T.resolverReclamo(b.dataset.rok, true); reclamos(); }; });
+    box.querySelectorAll('[data-rno]').forEach(function (b) { b.onclick = function () { T.resolverReclamo(b.dataset.rno, false); reclamos(); }; });
+  }
+
+  // ---------------- preventas con paquetes personalizados por carrera
+  function preventas() {
+    var box = document.querySelector('[data-p=preventas]'), L = T.preventas();
+    var lk = function (pv) { return new URL('preventa.html?p=' + encodeURIComponent(pv.id), location.href).href; };
+    box.innerHTML = '<p class="nota" style="margin-top:0">Vende las fotos <b>antes</b> de la carrera. Cada carrera tiene sus propios paquetes. Cuando proceses el álbum, en <b>Álbumes y links</b> tocas «Asignar preventas» y cada comprador recibe sus fotos por dorsal.</p>' +
+      '<div class="tarjeta"><b>Nueva preventa</b>' +
+      '<div class="link"><input id="pvNom" placeholder="Carrera, ej. 10K Las Tablas 2027"></div>' +
+      '<div class="link"><input id="pvFecha" type="date" aria-label="Fecha de la carrera"><input id="pvLugar" placeholder="Lugar"><input id="pvHasta" type="date" aria-label="Se vende hasta"></div>' +
+      '<div class="nota">Paquetes (nombre · fotos, 0 = todas las suyas · precio):</div><div id="pvPaq"></div>' +
+      '<div class="acciones"><button class="mini-btn" id="pvMas">+ Paquete</button><button class="mini-btn na" id="pvOk">Crear preventa</button></div></div>' +
+      (L.length ? L.map(function (pv, i) {
+        var comp = T.pedidos().filter(function (p) { return p.preventa === pv.id && !p.borrado; });
+        return '<div class="tarjeta"><b>' + esc(pv.nombre) + '</b> <span class="nota">· ' + esc(pv.fecha || '') + ' · ' + (T.preventaAbierta(pv) ? '<span class="ok">abierta</span>' : '<span class="mal">cerrada</span>') + (pv.hasta ? ' hasta ' + esc(pv.hasta) : '') + '</span>' +
+          '<div class="nota">' + pv.paquetes.map(function (q) { return esc(q.nombre) + ' ' + $(q.precio); }).join(' · ') + '</div>' +
+          '<div class="link"><input readonly value="' + esc(lk(pv)) + '"><button class="mini-btn na" data-pvcop="' + i + '">Copiar link</button><button class="mini-btn" data-pvqr="' + i + '">QR</button></div><div data-pvqrbox="' + i + '"></div>' +
+          '<div class="fila"><label class="nota">Álbum de la carrera: <select class="sel" data-pvev="' + i + '" style="max-width:240px"><option value="">— todavía no —</option>' + opcionesEventos(false) + '</select></label></div>' +
+          titulo(comp.length + (comp.length === 1 ? ' comprador' : ' compradores')) +
+          comp.map(function (p) { return '<div class="nota">' + esc(p.nombre) + ' · ' + esc(p.tel) + ' · dorsal ' + esc(p.dorsal || '—') + ' · ' + esc(p.paquete.nombre) + ' · ' + ESTADOS[p.estado] + '</div>'; }).join('') +
+          '<div class="acciones" style="margin-top:8px"><button class="mini-btn" data-pvcerrar="' + i + '">' + (pv.abierta ? 'Cerrar venta' : 'Reabrir') + '</button><button class="mini-btn" data-pvborrar="' + i + '">Borrar</button></div></div>';
+      }).join('') : '<p class="vacio">Todavía no hay preventas.</p>');
+    var paq = box.querySelector('#pvPaq');
+    function filaPaq(n, f, p) { var d = document.createElement('div'); d.className = 'link'; d.innerHTML = '<input placeholder="Nombre" value="' + esc(n) + '"><input type="number" min="0" style="max-width:80px" value="' + f + '" aria-label="Fotos (0 = todas)"><input type="number" min="0" step="0.5" style="max-width:90px" value="' + p + '" aria-label="Precio">'; paq.appendChild(d); }
+    filaPaq('3 fotos', 3, 6); filaPaq('Todas tus fotos', 0, 12);
+    box.querySelector('#pvMas').onclick = function () { filaPaq('', 1, 0); };
+    box.querySelector('#pvOk').onclick = function () {
+      var nom = box.querySelector('#pvNom').value.trim(); if (!nom) { box.querySelector('#pvNom').focus(); return; }
+      var ps = [].map.call(paq.children, function (d) { var i = d.querySelectorAll('input'); return { nombre: i[0].value.trim() || (+i[1].value ? i[1].value + ' fotos' : 'Todas tus fotos'), fotos: +i[1].value || 0, precio: +i[2].value || 0 }; }).filter(function (q) { return q.precio > 0; });
+      if (!ps.length) { alert('Pon al menos un paquete con precio.'); return; }
+      T.guardarPreventa({ nombre: nom, fecha: box.querySelector('#pvFecha').value, lugar: box.querySelector('#pvLugar').value.trim(), hasta: box.querySelector('#pvHasta').value, paquetes: ps, evento: '' });
+      preventas();
+    };
+    box.querySelectorAll('[data-pvcop]').forEach(function (b) { b.onclick = function () { copiar(lk(L[b.dataset.pvcop]), b); }; });
+    box.querySelectorAll('[data-pvqr]').forEach(function (b) { b.onclick = function () { var q = box.querySelector('[data-pvqrbox="' + b.dataset.pvqr + '"]'); if (q.innerHTML) { q.innerHTML = ''; return; } q.innerHTML = '<div class="qr"></div>'; if (window.QRCode) new QRCode(q.firstChild, { text: lk(L[b.dataset.pvqr]), width: 180, height: 180 }); }; });
+    box.querySelectorAll('[data-pvev]').forEach(function (s) { s.value = L[s.dataset.pvev].evento || ''; s.onchange = function () { var pv = L[s.dataset.pvev]; pv.evento = s.value; T.guardarPreventa(pv); T.pedidos().filter(function (p) { return p.preventa === pv.id; }).forEach(function (p) { T.actualizar(p.ticket, { evento: s.value }); }); }; });
+    box.querySelectorAll('[data-pvcerrar]').forEach(function (b) { b.onclick = function () { var pv = L[b.dataset.pvcerrar]; pv.abierta = !pv.abierta; T.guardarPreventa(pv); preventas(); }; });
+    box.querySelectorAll('[data-pvborrar]').forEach(function (b) { b.onclick = function () { borrarCon('preventa', L[b.dataset.pvborrar].id, 'la preventa «' + L[b.dataset.pvborrar].nombre + '»', preventas); }; });
+  }
+
+  // ---------------- papelera: lo borrado se recupera durante 30 días
+  function papelera() {
+    var box = document.querySelector('[data-p=papelera]'), L = T.papelera().slice().reverse();
+    box.innerHTML = '<p class="nota" style="margin-top:0">Todo lo que borras en el panel queda aquí <b>30 días</b>. Después se borra para siempre.</p>' +
+      (L.length ? L.map(function (x) {
+        return '<div class="tarjeta ped"><div><b>' + esc(x.titulo) + '</b><div class="nota">' + esc(x.tipo) + ' · borrado el ' + new Date(x.fecha).toLocaleString('es-PA') + '</div></div><div class="acciones"><button class="mini-btn na" data-rest="' + esc(x.id) + '">Recuperar</button></div></div>';
+      }).join('') : '<p class="vacio">La papelera está vacía.</p>');
+    box.querySelectorAll('[data-rest]').forEach(function (b) { b.onclick = function () { T.restaurar(b.dataset.rest); papelera(); }; });
+  }
+
+  // ---------------- cola de edición: se edita en el orden del ticket, uno detrás de otro
+  var coEv = '';
+  function cola() {
+    var box = document.querySelector('[data-p=cola]');
+    var conCola = EV.filter(function (e) { return T.cola(e.id).length; });
+    if (!coEv) coEv =conCola.length ? conCola[0].id : (EV[0] && EV[0].id);
+    var l = T.cola(coEv);
+    box.innerHTML = '<p class="nota" style="margin-top:0">Una fila por carrera, en orden de turno (el turno se da cuando llega el pago). El corredor ve «Tu turno: 15 · NC va por el 6». Las sesiones no tienen fila.</p>' +
+      '<div class="fila"><select class="sel" id="coEv" style="max-width:320px">' + EV.filter(function (e) { return e.fotos.length; }).map(function (e) { var n = T.cola(e.id).length; return '<option value="' + esc(e.id) + '">' + esc(e.nombre) + (n ? ' · ' + n + ' en fila' : '') + '</option>'; }).join('') + '</select>' +
+      '<span class="nota">NC va por el <b>' + T.vaPor(coEv) + '</b></span></div>' +
+      (l.length ? l.map(function (p, i) {
+        return '<div class="tarjeta ped"' + (i === 0 ? ' style="border-color:var(--naranja)"' : '') + '><div>' +
+          '<span class="tk" style="font-size:22px">Turno ' + p.turno + '</span> <span class="tk">' + esc(p.ticket) + '</span> <span class="estado e-' + p.estado + '">' + ESTADOS[p.estado] + '</span>' +
+          (p.finisher ? ' <span class="nota">⭐ historia: ' + esc(p.finisher) + '</span>' : '') + (p.patrocinio ? ' <span class="nota">🎉 ' + (p.gratisPatrocinio || 0) + ' gratis con logo</span>' : '') +
+          (i === 0 ? ' <b class="ok">← ahora</b>' : '') +
+          '<div style="margin-top:4px"><b>' + esc(p.nombre) + '</b> · ' + esc(p.eventoNombre) + ' · ' + p.fotos.length + (p.fotos.length === 1 ? ' foto' : ' fotos') + '</div>' +
+          '<div class="lista">' + esc(p.fotos.join(', ')) + '</div></div>' +
+          '<div class="acciones" style="flex-direction:column;align-items:stretch">' +
+          '<button class="mini-btn na" data-ccop="' + esc(p.ticket) + '">Copiar para Lightroom</button>' +
+          (p.estado === 'pagado' ? '<button class="mini-btn" data-cedit="' + esc(p.ticket) + '">✏️ Empezar a editar</button>' : '') +
+          '<a class="mini-btn" target="_blank" rel="noopener" href="https://wa.me/507' + esc(p.tel) + '">💬 WhatsApp</a></div></div>';
+      }).join('') + '<p class="nota">Cuando termines, súbelas a Drive y entrégalas en <b>Entregar editadas</b>: el siguiente sube solo.</p>'
+        : '<p class="vacio">La cola está vacía. 🎉</p>');
+    box.querySelectorAll('[data-ccop]').forEach(function (b) { b.onclick = function () { var p = T.pedidos().filter(function (x) { return x.ticket === b.dataset.ccop; })[0]; copiar(p.fotos.join(', '), b); }; });
+    box.querySelectorAll('[data-cedit]').forEach(function (b) { b.onclick = function () { T.actualizar(b.dataset.cedit, { estado: 'edicion' }); cola(); }; });
+    var cs = box.querySelector('#coEv'); if (cs) { cs.value = coEv; cs.onchange = function () { coEv = cs.value; cola(); }; }
+  }
+
+  // ---------------- pagos Yappy: cruce de cada Yappy que llega al correo con los pedidos que esperan pago
+  function yappy() {
+    var box = document.querySelector('[data-p=yappy]');
+    var esperan = T.pedidos().filter(function (p) { return p.estado === 'esperando'; });
+    var ys = T.yappys().slice().reverse();
+    var opciones = function (y) {
+      return '<option value="">Elegir pedido…</option>' + esperan.filter(function (p) { return Math.abs(Number(p.monto) - y.monto) < 0.01 || !y.dudas.length; })
+        .map(function (p) { return '<option value="' + esc(p.ticket) + '">' + esc(p.ticket + ' · ' + p.nombre + ' · ' + p.tel + ' · ' + $(p.monto)) + '</option>'; }).join('');
+    };
+    box.innerHTML = '<p class="nota" style="margin-top:0">Tu Apps Script ya lee cada Yappy que te llega al correo (monto, nombre, celular y confirmación). ' +
+      'Se confirma solo cuando coinciden <b>celular y monto</b>, o <b>monto y nombre parecido</b>: el pedido entra a la cola y Necty te avisa. ' +
+      'Si solo coincide el monto (puede ser un Yappy de una sesión), queda como "puede ser" y lo eliges tú.</p>' +
+      '<div class="tarjeta"' + (window.NC_API.real ? ' hidden' : '') + '><b>Simular un Yappy que llega al correo</b> <span class="sim">SIMULACIÓN</span>' +
+      '<div class="link"><input id="yNom" placeholder="Nombre en el Yappy"><input id="yTel" placeholder="Celular" inputmode="tel" style="max-width:120px"><input id="yMon" placeholder="Monto" inputmode="decimal" style="max-width:80px"></div>' +
+      '<button class="mini-btn na" id="yOk">Llegó este Yappy</button> <span class="nota" id="yRes"></span></div>' +
+      '<h3 style="font-family:Montserrat,sans-serif;color:var(--blanco);font-size:16px;margin:16px 0 8px">Esperando Yappy (' + esperan.length + ')</h3>' +
+      (esperan.length ? esperan.map(function (p) {
+        return '<div class="tarjeta ped"><div><span class="tk">' + esc(p.ticket) + '</span> ' + esc(p.nombre) + ' · ' + esc(p.tel) + ' · <b>' + $(p.monto) + '</b>' +
+          '<div class="nota">' + esc(p.eventoNombre) + ' · ' + new Date(p.creado).toLocaleString('es-PA') + '</div></div>' +
+          '<div class="acciones"><button class="mini-btn" data-mano="' + esc(p.ticket) + '">Confirmar a mano</button></div></div>';
+      }).join('') : '<p class="vacio">Nadie está esperando pago.</p>') +
+      '<h3 style="font-family:Montserrat,sans-serif;color:var(--blanco);font-size:16px;margin:16px 0 8px">Yappys recibidos</h3>' +
+      (ys.length ? ys.map(function (y, i) {
+        return '<div class="tarjeta"><b>' + $(y.monto) + '</b> · ' + esc(y.nombre || 'sin nombre') + (y.tel ? ' · ' + esc(y.tel) : '') + ' <span class="nota">· ' + new Date(y.fecha).toLocaleString('es-PA') + '</span><div>' +
+          (y.ticket ? '<span class="ok">✓ Match con ' + esc(y.ticket) + '</span>' :
+            '<span class="mal">' + (y.dudas.length ? 'Puede ser ' + esc(y.dudas.join(' o ')) + ': elige tú' : 'Sin match') + '</span>' +
+            '<div class="link"><select class="sel" data-ysel="' + esc(y.ref) + '">' + opciones(y) + '</select><button class="mini-btn na" data-yasig="' + esc(y.ref) + '">Asignar</button></div>') +
+          '</div></div>';
+      }).join('') : '<p class="vacio">Todavía no llegan Yappys.</p>');
+    box.querySelector('#yOk').onclick = function () {
+      var y = T.registrarYappy({ nombre: box.querySelector('#yNom').value.trim(), tel: box.querySelector('#yTel').value, monto: parseFloat(box.querySelector('#yMon').value) || 0 });
+      yappy();
+      box.querySelector('#yRes').textContent = y.ticket ? '✓ Match con ' + y.ticket + ': entró a la cola y Necty te avisó.' : y.dudas && y.dudas.length ? 'No se confirmó solo: revisa abajo y elige el pedido.' : 'Sin match: no hay pedido esperando ese monto.';
+    };
+    box.querySelectorAll('[data-mano]').forEach(function (b) {
+      b.onclick = function () { if (confirm('¿Confirmas que ya te llegó el Yappy de ' + b.dataset.mano + '?')) { T.confirmarPago(b.dataset.mano, null); yappy(); } };
+    });
+    box.querySelectorAll('[data-yasig]').forEach(function (b) {
+      b.onclick = function () {
+        var t = box.querySelector('[data-ysel="' + b.dataset.yasig + '"]').value; if (!t) return;
+        var y = T.yappys().filter(function (x) { return x.ref === b.dataset.yasig; })[0];
+        T.confirmarPago(t, y); yappy();
+      };
+    });
+  }
+
+  // ---------------- eventos y links
+  function eventos() {
+    var box = document.querySelector('[data-p=eventos]');
+    box.innerHTML = '<p class="nota" style="margin-top:0">Cada álbum tiene su link propio para Instagram, WhatsApp o un QR impreso en la carrera.</p>' +
+      EV.map(function (e, i) {
+        var u = link(e);
+        return '<div class="tarjeta ev-adm"><div class="por" style="background-image:url(&quot;' + esc(e.portada) + '&quot;)"></div><div>' +
+          '<h3>' + esc(e.nombre) + '</h3><div class="nota">' + esc(e.fecha) + ' · ' + esc(e.lugar) + (e.fotos.length ? ' · ' + e.fotos.length + ' fotos · ' + e.corredores.filter(function (c) { return !c.oculto; }).length + ' corredores' : '') + '</div>' +
+          '<div class="link"><input readonly value="' + esc(u) + '" aria-label="Link del álbum"><button class="mini-btn na" data-copiar="' + i + '">Copiar</button></div>' +
+          '<div class="acciones">' +
+          (navigator.share ? '<button class="mini-btn" data-compartir="' + i + '">Compartir</button>' : '') +
+          '<button class="mini-btn" data-qr="' + i + '">QR</button>' +
+          '<a class="mini-btn" href="' + esc(u) + '" target="_blank">Abrir</a>' +
+          (e.revision ? '<a class="mini-btn" href="' + esc(e.revision) + '" target="_blank">Revisar grupos</a>' : '') +
+          (e.tipo === 'carrera' || e.fotos.length ? '<button class="mini-btn' + (T.liberado(e.id) ? ' na' : '') + '" data-lib="' + i + '">' + (T.liberado(e.id) ? '🔒 Volver a proteger' : '🔓 Liberar (patrocinio)') + '</button>' : '') +
+          (e.fotos.length ? '<button class="mini-btn" data-precios="' + i + '">💲 Precios' + (T.precios(e.id).propio ? ' (propios)' : '') + '</button><button class="mini-btn" data-asig="' + i + '">🎟 Asignar preventas</button>' : '') +
+          '<button class="mini-btn" data-evborrar="' + i + '">Borrar</button>' +
+          '</div>' + (T.liberado(e.id) ? '<p class="nota ok" style="margin:8px 0 0">🔓 Liberado' + (T.liberado(e.id).patrocinador ? ' por ' + esc(T.liberado(e.id).patrocinador) : '') + ': a color, sin marca; ' + T.precios(e.id).patrocinio.gratis + ' gratis por persona (con el logo del patrocinador que le pasas a Claude).</p>' : '') +
+          '<div data-prbox="' + i + '"></div><div data-qrbox="' + i + '"></div></div></div>';
+      }).join('');
+    // precios propios de esta carrera (los de siempre quedan por defecto)
+    box.querySelectorAll('[data-precios]').forEach(function (b) {
+      b.onclick = function () {
+        var i = b.dataset.precios, e = EV[i], P = T.precios(e.id), q = box.querySelector('[data-prbox="' + i + '"]');
+        if (q.innerHTML) { q.innerHTML = ''; return; }
+        var inp = function (k, v) { return '<input type="number" step="0.5" min="0" data-k="' + k + '" value="' + v + '" style="max-width:76px">'; };
+        q.innerHTML = '<div class="tarjeta" style="margin-top:8px"><div class="nota">Normal: 1 · 2 · 3 · 4 o más</div><div class="link">' + inp('t0', P.tabla[0]) + inp('t1', P.tabla[1]) + inp('t2', P.tabla[2]) + inp('t3', P.tabla[3]) + '</div>' +
+          '<div class="nota">Siguiendo a NC: 1 foto · todas</div><div class="link">' + inp('c0', P.captura[0]) + inp('c1', P.captura[1]) + '</div>' +
+          '<div class="nota">Patrocinio: fotos gratis · precio desde la siguiente</div><div class="link">' + inp('pg', P.patrocinio.gratis) + inp('pe', P.patrocinio.extra) + '</div>' +
+          '<div class="acciones"><button class="mini-btn na" data-prok>Guardar</button><button class="mini-btn" data-prbase>Volver a los de siempre</button></div></div>';
+        var v = function (k) { return +q.querySelector('[data-k=' + k + ']').value || 0; };
+        q.querySelector('[data-prok]').onclick = function () { T.guardarPrecios(e.id, { tabla: [v('t0'), v('t1'), v('t2'), v('t3')], captura: [v('c0'), v('c1')], patrocinio: { gratis: Math.round(v('pg')), extra: v('pe') } }); eventos(); };
+        q.querySelector('[data-prbase]').onclick = function () { T.guardarPrecios(e.id, null); eventos(); };
+      };
+    });
+    // preventas: cada comprador recibe sus fotos por dorsal; «todas» entra a la fila, «N fotos» queda por elegir
+    box.querySelectorAll('[data-asig]').forEach(function (b) {
+      b.onclick = function () {
+        var r = T.asignarPreventas(EV[b.dataset.asig]);
+        alert(r.length ? r.map(function (x) { return x.nombre + ' (dorsal ' + x.dorsal + '): ' + (x.encontrado ? x.fotos + ' fotos' + (x.todas ? ' → a la fila' : ' → le toca elegir') : 'NO se encontró el dorsal, revisa') ; }).join('\n') : 'No hay preventas pagadas sin asignar para esta carrera. (Conecta la preventa con este álbum en la pestaña Preventas.)');
+        eventos();
+      };
+    });
+    box.querySelectorAll('[data-evborrar]').forEach(function (b) { b.onclick = function () { var e = EV[b.dataset.evborrar]; borrarCon('evento', e.id, 'el álbum «' + e.nombre + '» (se oculta de News)', function () { EV = window.NC_EVENTOS.filter(function (x) { return !T.eventoOculto(x.id); }); eventos(); }); }; });
+    box.querySelectorAll('[data-copiar]').forEach(function (b) { b.onclick = function () { copiar(link(EV[b.dataset.copiar]), b); }; });
+    // patrocinio: SOLO Nelson, a mano
+    box.querySelectorAll('[data-lib]').forEach(function (b) {
+      b.onclick = function () {
+        var e = EV[b.dataset.lib];
+        if (T.liberado(e.id)) { if (confirm('¿Volver a proteger "' + e.nombre + '"? Las fotos vuelven al blanco y negro y la marca de agua.')) T.liberar(e.id, false); }
+        else {
+          var p = prompt('Liberar "' + e.nombre + '": a color, sin marca de agua y ' + T.precios(e.id).patrocinio.gratis + ' fotos gratis por persona.\n\n¿Quién patrocina? (opcional, sale en el álbum)\nRecuerda pasarle el logo del patrocinador a Claude.', '');
+          if (p === null) return;
+          T.liberar(e.id, p.trim());
+        }
+        eventos();
+      };
+    });
+    box.querySelectorAll('[data-compartir]').forEach(function (b) { b.onclick = function () { var e = EV[b.dataset.compartir]; navigator.share({ title: e.nombre + ' · NC Studio', text: '📸 Busca tus fotos de ' + e.nombre, url: link(e) }).catch(function () {}); }; });
+    box.querySelectorAll('[data-qr]').forEach(function (b) {
+      b.onclick = function () {
+        var q = box.querySelector('[data-qrbox="' + b.dataset.qr + '"]');
+        if (q.innerHTML) { q.innerHTML = ''; return; }
+        q.innerHTML = '<div class="qr"></div>';
+        if (window.QRCode) new QRCode(q.firstChild, { text: link(EV[b.dataset.qr]), width: 180, height: 180 });
+        else q.textContent = 'No cargó el generador de QR (sin internet).';
+      };
+    });
+  }
+
+  // ---------------- pedidos
+  var fPed = { ev: '', estado: '' };
+  function pedidos() {
+    var box = document.querySelector('[data-p=pedidos]');
+    var l = T.pedidos().filter(function (p) { return !p.borrado && (!fPed.ev || p.evento === fPed.ev) && (!fPed.estado || p.estado === fPed.estado); }).reverse();
+    box.innerHTML = '<div class="fila"><select class="sel" id="fEv" style="max-width:280px">' + opcionesEventos(true) + '</select>' +
+      '<select class="sel" id="fEs" style="max-width:200px"><option value="">Todos los estados</option>' + Object.keys(ESTADOS).map(function (k) { return '<option value="' + k + '">' + ESTADOS[k] + '</option>'; }).join('') + '</select></div>' +
+      (l.length ? l.map(function (p) {
+        var pos = (p.turno ? ' · turno ' + p.turno : '') + (p.tipo && p.tipo !== 'carrera' ? ' · ' + ({ preventa: 'preventa ' + (p.paquete ? p.paquete.nombre : ''), impresion: 'impresiones', diferencia: 'diferencia de ' + p.de, 'extras-sesion': 'extras de sesión' }[p.tipo] || p.tipo) : '');
+        return '<div class="tarjeta ped"><div><span class="tk">' + esc(p.ticket) + '</span> <span class="estado e-' + p.estado + '">' + ESTADOS[p.estado] + '</span>' + esc(pos) +
+          '<div style="margin-top:4px"><b>' + esc(p.nombre) + '</b> · <a href="https://wa.me/507' + esc(p.tel) + '" target="_blank">' + esc(p.tel) + '</a>' + (p.correo ? ' · ' + esc(p.correo) : '') + (p.dorsal ? ' · dorsal ' + esc(p.dorsal) : '') + '</div>' +
+          '<div class="nota">' + esc(p.eventoNombre) + ' · ' + new Date(p.creado).toLocaleString('es-PA') + ' · ' + p.fotos.length + (p.fotos.length === 1 ? ' foto' : ' fotos') +
+          ((p.gratis || []).length ? ' (' + p.gratis.length + (p.gratis.length === 1 ? ' grupal gratis)' : ' grupales gratis)') : '') + ' · ' + (Number(p.monto) ? $(p.monto) : 'GRATIS') +
+          (p.captura ? ' · 📸 captura: ' + ({ revisar: '<span class="mal">por revisar</span>', ok: '<span class="ok">ok</span>', falsa: '<span class="mal">falsa</span>', 'pagada-diferencia': '<span class="ok">pagó diferencia</span>' }[p.capturaEstado] || '') : '') +
+          (p.items ? '<br>' + p.items.map(function (it) { return it.cant + ' × ' + esc(it.nombre) + ' (' + esc(it.foto) + ')'; }).join(' · ') : '') + '</div>' +
+          (p.fotos.length ? '<div class="lista">' + esc(p.fotos.join(', ')) + '</div>' : '') + '</div>' +
+          '<div class="acciones" style="flex-direction:column;align-items:stretch"><button class="mini-btn" data-cop="' + esc(p.ticket) + '">Copiar nombres</button><button class="mini-btn" data-pborrar="' + esc(p.ticket) + '">Borrar</button>' +
+          '<select class="sel" data-est="' + esc(p.ticket) + '">' + Object.keys(ESTADOS).map(function (k) { return '<option value="' + k + '"' + (k === p.estado ? ' selected' : '') + '>' + ESTADOS[k] + '</option>'; }).join('') + '</select></div></div>';
+      }).join('') : '<p class="vacio">No hay pedidos con ese filtro.</p>');
+    var fe = box.querySelector('#fEv'), fs = box.querySelector('#fEs');
+    fe.value = fPed.ev; fs.value = fPed.estado;
+    fe.onchange = function () { fPed.ev = fe.value; pedidos(); };
+    fs.onchange = function () { fPed.estado = fs.value; pedidos(); };
+    box.querySelectorAll('[data-cop]').forEach(function (b) { b.onclick = function () { var p = T.pedidos().filter(function (x) { return x.ticket === b.dataset.cop; })[0]; copiar(p.fotos.join(', '), b); }; });
+    box.querySelectorAll('[data-pborrar]').forEach(function (b) { b.onclick = function () { borrarCon('pedido', b.dataset.pborrar, 'el pedido ' + b.dataset.pborrar, pedidos); }; });
+    box.querySelectorAll('[data-est]').forEach(function (s) {
+      s.onchange = function () {
+        var p = T.pedidos().filter(function (x) { return x.ticket === s.dataset.est; })[0];
+        if (p.estado === 'esperando' && s.value !== 'esperando') {
+          // sacarlo de "esperando" es confirmar el pago a mano (y así Necty te avisa)
+          if (!confirm('¿Confirmas que ya te llegó el Yappy de ' + p.ticket + '?')) { pedidos(); return; }
+          T.confirmarPago(p.ticket, null); if (s.value !== 'pagado') T.actualizar(p.ticket, { estado: s.value });
+        } else T.actualizar(s.dataset.est, { estado: s.value });
+        pedidos();
+      };
+    });
+  }
+
+  // ---------------- lista para Lightroom
+  var lrEv = '', lrTodas = false;
+  function lightroom() {
+    var box = document.querySelector('[data-p=lightroom]');
+    var conPedidos = EV.filter(function (e) { return e.fotos.length; });
+    if (!lrEv && conPedidos.length) lrEv = conPedidos[0].id;
+    var l = T.pedidos().filter(function (p) { return p.evento === lrEv && T.pagado(p) && p.turno && !p.borrado && (lrTodas || p.estado !== 'entregado'); });
+    var nombres = []; l.forEach(function (p) { p.fotos.forEach(function (f) { if (nombres.indexOf(f) < 0) nombres.push(f); }); });
+    nombres.sort();
+    box.innerHTML = '<div class="fila"><select class="sel" id="lrEv" style="max-width:320px">' + opcionesEventos(false) + '</select>' +
+      '<label class="nota" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="lrT"' + (lrTodas ? ' checked' : '') + '> incluir entregados</label></div>' +
+      '<p class="res">' + nombres.length + ' fotos elegidas en ' + l.length + ' pedidos pagados (los que esperan Yappy no salen aquí)</p>' +
+      '<div class="lista" id="lrL">' + (esc(nombres.join(', ')) || '—') + '</div>' +
+      '<button class="btn" id="lrC"' + (nombres.length ? '' : ' disabled') + '>Copiar lista</button>' +
+      '<p class="nota">En Lightroom Classic: Biblioteca → filtro de Texto → Nombre de archivo → Contiene → pegar.</p>';
+    var s = box.querySelector('#lrEv'); s.value = lrEv;
+    s.onchange = function () { lrEv = s.value; lightroom(); };
+    box.querySelector('#lrT').onchange = function () { lrTodas = this.checked; lightroom(); };
+    box.querySelector('#lrC').onclick = function () { copiar(nombres.join(', '), this); };
+  }
+
+  // ---------------- entregas
+  function mensaje(p, url) {
+    return '¡Hola ' + p.nombre.split(' ')[0] + '! 📸 Tus fotos editadas de ' + p.eventoNombre + ' ya están listas (ticket ' + p.ticket + ').\n\n' +
+      'Velas y descárgalas en buena calidad aquí, con tu número de celular: ' + new URL('mis-fotos.html?tel=' + p.tel, location.href).href + '\n' +
+      'Quedan disponibles 90 días.' + (p.finisher ? ' Ahí también está tu imagen de Finisher para historias ⭐' : '') + '\n\n' +
+      '¡Gracias por confiar en nosotros! Si te gustaron, etiquétanos en Instagram @ncstudio507 🧡';
+  }
+  function entregas() {
+    var box = document.querySelector('[data-p=entregas]');
+    box.innerHTML = '<p class="nota" style="margin-top:0">Exporta de Lightroom a una carpeta de Drive, pega aquí su link y la página cruza los nombres con los pedidos.</p>' +
+      '<div class="fila"><select class="sel" id="enEv" style="max-width:320px">' + opcionesEventos(false) + '</select></div>' +
+      '<div class="link"><input id="enLink" placeholder="Link de la carpeta editada en Drive"></div>' +
+      '<p class="nota"><span class="sim">SIMULACIÓN</span> La versión real lee sola los nombres de la carpeta. Aquí pégalos (uno por línea o separados por coma):</p>' +
+      '<textarea id="enNom" placeholder="IMG_1001-Editar.jpg&#10;IMG_1007-Editar.jpg"></textarea>' +
+      '<div class="fila" style="margin-top:10px"><button class="btn" id="enCruzar">Cruzar con pedidos</button></div><div id="enRes"></div>';
+    box.querySelector('#enCruzar').onclick = function () {
+      var evId = box.querySelector('#enEv').value, url = box.querySelector('#enLink').value.trim();
+      var nombres = box.querySelector('#enNom').value.split(/[\n,]+/);
+      var res = box.querySelector('#enRes');
+      if (!/^https?:\/\//.test(url)) { res.innerHTML = '<p class="mal">Pega el link de la carpeta editada.</p>'; return; }
+      var r = T.cruzar(evId, nombres, url);
+      if (!r.length) { res.innerHTML = '<p class="nota">No hay pedidos pendientes de ese álbum.</p>'; return; }
+      res.innerHTML = r.map(function (x, i) {
+        var p = x.pedido;
+        if (!x.completo) return '<div class="tarjeta"><span class="tk">' + esc(p.ticket) + '</span> ' + esc(p.nombre) + ' — <span class="mal">faltan ' + x.faltan.length + ':</span><div class="lista">' + esc(x.faltan.join(', ')) + '</div><p class="nota">No se entrega a medias.</p></div>';
+        var m = mensaje(p, url);
+        return '<div class="tarjeta"><span class="tk ok">' + esc(p.ticket) + '</span> ' + esc(p.nombre) + ' · ' + esc(p.tel) + ' — <span class="ok">completo (' + p.fotos.length + (p.fotos.length === 1 ? ' foto' : ' fotos') + ')</span>' +
+          '<div class="msj">' + esc(m) + '</div><div class="acciones">' +
+          '<button class="mini-btn na" data-ent="' + i + '">Marcar entregado</button>' +
+          '<a class="mini-btn" target="_blank" href="https://wa.me/507' + esc(p.tel) + '?text=' + encodeURIComponent(m) + '">Abrir WhatsApp</a>' +
+          (p.correo ? '<a class="mini-btn" href="mailto:' + esc(p.correo) + '?subject=' + encodeURIComponent('Tus fotos de ' + p.eventoNombre + ' están listas') + '&body=' + encodeURIComponent(m) + '">Correo</a>' : '') + '</div></div>';
+      }).join('');
+      res.querySelectorAll('[data-ent]').forEach(function (b) {
+        b.onclick = function () { var x = r[b.dataset.ent]; T.entregar(x.pedido.ticket, x.link, x.archivos); b.textContent = '✓ Entregado'; b.disabled = true; };
+      });
+    };
+  }
+
+  // ---------------- grupales: Nelson clasifica cuáles son gratis
+  // y arma los álbumes de grupo (club, equipo): cada foto va a un solo álbum
+  var grEv = '', grVer = 'todas', grAl = '';
+  function linkAlbum(e, a) { return new URL('evento.html?e=' + encodeURIComponent(e.id) + '&g=' + encodeURIComponent(a.id), location.href).href; }
+  function grupales() {
+    var box = document.querySelector('[data-p=grupales]');
+    var conFotos = EV.filter(function (e) { return e.fotos.length; });
+    if (!grEv && conFotos.length) grEv = conFotos[0].id;
+    var e = ev(grEv); if (!e) { box.innerHTML = '<p class="vacio">No hay álbumes.</p>'; return; }
+    var albs = T.albumes(e.id);
+    if (grAl && !albs.some(function (a) { return a.id === grAl; })) grAl = '';
+    var activo = albs.filter(function (a) { return a.id === grAl; })[0];
+    var es = function (f) { return T.esGrupal(e.id, f.nombre, !!f.grupal); };
+    var de = function (f) { return T.albumDe(e.id, f.nombre); };
+    var lista = e.fotos.filter(function (f) {
+      return grVer === 'grupales' ? es(f) : grVer === 'sueltas' ? es(f) && !de(f) : grVer === 'album' ? activo && de(f) && de(f).id === activo.id : true;
+    }).slice().sort(function (a, b) { return (b.caras || 0) - (a.caras || 0); });
+    box.innerHTML = '<p class="nota" style="margin-top:0">Las fotos con mucha gente (6 caras o más) salen solas como <b>grupales gratis</b>. ' +
+      'Crea un <b>álbum de grupo</b> por club o equipo y mete ahí sus fotos: cada foto va a <b>un solo</b> álbum, así no se mezclan. Las fotos de un álbum de grupo son gratis.</p>' +
+      '<div class="fila"><select class="sel" id="grEv" style="max-width:320px">' + opcionesEventos(false) + '</select></div>' +
+      '<div class="tarjeta"><b>Álbumes de grupo</b>' +
+      '<div class="link"><input id="grNuevo" placeholder="Nombre del grupo, ej. Club Leones" aria-label="Nombre del álbum de grupo"><button class="mini-btn na" id="grCrear">Crear álbum</button></div>' +
+      (albs.length ? albs.map(function (a, i) {
+        return '<div class="ped" style="border-top:1px solid var(--gris);padding-top:10px;margin-top:10px"><div>' +
+          '<b>' + esc(a.nombre) + '</b> <span class="nota">· ' + a.fotos.length + (a.fotos.length === 1 ? ' foto' : ' fotos') + (a.privado ? ' · 🔒 solo con su link' : ' · visible en el álbum') + '</span>' +
+          '<div class="link"><input readonly value="' + esc(linkAlbum(e, a)) + '" aria-label="Link del álbum de grupo"><button class="mini-btn" data-alcop="' + i + '">Copiar link</button></div>' +
+          '<div class="acciones">' +
+          '<button class="mini-btn' + (a.id === grAl ? ' na' : '') + '" data-alsel="' + i + '">' + (a.id === grAl ? '✓ Llenando este' : 'Llenar este álbum') + '</button>' +
+          '<button class="mini-btn" data-alnom="' + i + '">Nombres para Lightroom</button>' +
+          '<button class="mini-btn" data-alpriv="' + i + '">' + (a.privado ? 'Mostrar en el álbum' : 'Solo con su link') + '</button>' +
+          '<button class="mini-btn" data-alren="' + i + '">Renombrar</button>' +
+          '<button class="mini-btn" data-alborr="' + i + '">Borrar</button></div>' +
+          '<div class="lista" data-allista="' + i + '" hidden></div></div></div>';
+      }).join('') : '<p class="nota" style="margin-bottom:0">Todavía no hay álbumes de grupo en este evento.</p>') + '</div>' +
+      (activo ? '<div class="promo" style="margin:0 0 10px">📂 <div>Llenando <b>' + esc(activo.nombre) + '</b>: toca una foto para meterla o sacarla. Si estaba en otro grupo, se pasa a este. <a href="#" id="grSoltar">Terminar</a></div></div>'
+        : '<p class="nota">Toca una foto para marcarla o desmarcarla como grupal gratis. Para meter fotos en un grupo, toca <b>Llenar este álbum</b>.</p>') +
+      '<div class="fila"><select class="sel" id="grVer" style="max-width:260px">' +
+      '<option value="todas">Ver todas las fotos</option><option value="grupales">Solo grupales</option><option value="sueltas">Grupales sin álbum</option>' +
+      (activo ? '<option value="album">Solo las de ' + esc(activo.nombre) + '</option>' : '') + '</select></div>' +
+      '<p class="res">' + e.fotos.filter(es).length + (e.fotos.filter(es).length === 1 ? ' grupal gratis de ' : ' grupales gratis de ') + e.fotos.length + ' fotos · mostrando ' + lista.length + '</p>' +
+      '<div class="grid">' + lista.map(function (f) {
+        var a = de(f), enActivo = activo && a && a.id === activo.id;
+        return '<button class="mini' + ((activo ? enActivo : es(f)) ? ' sel' : '') + '" data-gr="' + esc(f.nombre) + '" title="' + esc(f.nombre) + '"><img loading="lazy" src="' + esc(f.src) + '" alt="">' +
+          (a ? '<span class="gratis" style="background:#22324a;color:#cfe0ff;max-width:calc(100% - 12px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">📂 ' + esc(a.nombre) + '</span>' : es(f) ? '<span class="gratis">GRATIS</span>' : '') +
+          '<span class="like" style="font-size:12px;width:auto;padding:0 8px;border-radius:999px">' + (f.caras || 0) + ' 👤</span></button>';
+      }).join('') + '</div>';
+    var s = box.querySelector('#grEv'); s.value = grEv; s.onchange = function () { grEv = s.value; grAl = ''; grVer = 'todas'; grupales(); };
+    var v = box.querySelector('#grVer'); v.value = grVer; v.onchange = function () { grVer = v.value; grupales(); };
+    box.querySelector('#grCrear').onclick = function () {
+      var n = box.querySelector('#grNuevo').value.trim(); if (!n) { box.querySelector('#grNuevo').focus(); return; }
+      grAl = T.crearAlbum(e.id, n); grVer = 'grupales'; grupales();
+    };
+    box.querySelector('#grNuevo').onkeydown = function (ev) { if (ev.key === 'Enter') box.querySelector('#grCrear').click(); };
+    var sol = box.querySelector('#grSoltar'); if (sol) sol.onclick = function (ev) { ev.preventDefault(); grAl = ''; if (grVer === 'album') grVer = 'todas'; grupales(); };
+    box.querySelectorAll('[data-alsel]').forEach(function (b) { b.onclick = function () { var a = albs[b.dataset.alsel]; grAl = grAl === a.id ? '' : a.id; if (!grAl && grVer === 'album') grVer = 'todas'; grupales(); }; });
+    box.querySelectorAll('[data-alcop]').forEach(function (b) { b.onclick = function () { copiar(linkAlbum(e, albs[b.dataset.alcop]), b); }; });
+    box.querySelectorAll('[data-alnom]').forEach(function (b) {
+      b.onclick = function () {
+        var a = albs[b.dataset.alnom], l = box.querySelector('[data-allista="' + b.dataset.alnom + '"]'), txt = a.fotos.join(', ');
+        l.hidden = !l.hidden; l.textContent = txt || 'Este álbum está vacío.'; if (txt) copiar(txt, b);
+      };
+    });
+    box.querySelectorAll('[data-alpriv]').forEach(function (b) { b.onclick = function () { var a = albs[b.dataset.alpriv]; T.cambiarAlbum(e.id, a.id, { privado: !a.privado }); grupales(); }; });
+    box.querySelectorAll('[data-alren]').forEach(function (b) { b.onclick = function () { var a = albs[b.dataset.alren], n = prompt('Nuevo nombre del álbum:', a.nombre); if (n && n.trim()) { T.cambiarAlbum(e.id, a.id, { nombre: n.trim() }); grupales(); } }; });
+    box.querySelectorAll('[data-alborr]').forEach(function (b) {
+      b.onclick = function () { var a = albs[b.dataset.alborr]; if (confirm('¿Borrar el álbum "' + a.nombre + '"? Las fotos no se borran, solo quedan sueltas.')) { T.borrarAlbum(e.id, a.id); grupales(); } };
+    });
+    box.querySelectorAll('[data-gr]').forEach(function (b) {
+      b.onclick = function () {
+        var f = e.fotos.filter(function (x) { return x.nombre === b.dataset.gr; })[0], a = de(f);
+        if (activo) T.ponerEnAlbum(e.id, f.nombre, a && a.id === activo.id ? null : activo.id);
+        else if (a) { if (confirm('Esta foto está en el álbum "' + a.nombre + '". ¿Sacarla de ahí?')) T.ponerEnAlbum(e.id, f.nombre, null); }
+        else T.marcarGrupal(e.id, f.nombre, !es(f));
+        grupales();
+      };
+    });
+  }
+
+  // ---------------- contactos de Nelson: CSV de Google Contactos (nuevo o viejo, inglés o español) o vCard
+  function partirCsv(txt) {
+    var filas = [], fila = [], v = '', q = false;
+    for (var i = 0; i < txt.length; i++) {
+      var ch = txt[i];
+      if (q) { if (ch === '"') { if (txt[i + 1] === '"') { v += '"'; i++; } else q = false; } else v += ch; }
+      else if (ch === '"') q = true;
+      else if (ch === ',') { fila.push(v); v = ''; }
+      else if (ch === '\n' || ch === '\r') { if (ch === '\r' && txt[i + 1] === '\n') i++; fila.push(v); filas.push(fila); fila = []; v = ''; }
+      else v += ch;
+    }
+    if (v || fila.length) { fila.push(v); filas.push(fila); }
+    return filas;
+  }
+  function telefonos(s) {
+    return String(s || '').split(/:::|,|;|\//).map(function (x) { return T.soloDigitos(x); }).filter(function (x) { return x.length >= 7; });
+  }
+  function leerCsvContactos(txt) {
+    var filas = partirCsv(txt.replace(/^﻿/, '')); if (filas.length < 2) return [];
+    var h = filas[0].map(function (x) { return x.trim().toLowerCase(); });
+    var idx = function (re) { return h.map(function (x, i) { return re.test(x) ? i : -1; }).filter(function (i) { return i >= 0; }); };
+    var nom = idx(/^(name|nombre)$/), pri = idx(/^(first name|given name|nombre de pila)$/), seg = idx(/^(middle name|additional name|segundo nombre)$/), ape = idx(/^(last name|family name|apellido|apellidos)$/);
+    var tels = idx(/(phone|tel[eé]fono).*(value|valor)|^(phone|tel[eé]fono|m[oó]vil|celular)$/);
+    return filas.slice(1).map(function (r) {
+      var n = nom.length ? r[nom[0]] : [pri, seg, ape].map(function (c) { return c.length ? r[c[0]] : ''; }).filter(Boolean).join(' ');
+      var ts = []; tels.forEach(function (i) { ts = ts.concat(telefonos(r[i])); });
+      return { nombre: String(n || '').trim() || '(sin nombre)', tels: ts };
+    }).filter(function (c) { return c.tels.length; });
+  }
+  function leerVcf(txt) {
+    return txt.split(/END:VCARD/i).map(function (b) {
+      var fn = (b.match(/^FN[^:]*:(.*)$/im) || [])[1] || '', ts = [];
+      (b.match(/^TEL[^:]*:(.*)$/gim) || []).forEach(function (l) { ts = ts.concat(telefonos(l.replace(/^TEL[^:]*:/i, ''))); });
+      return { nombre: fn.trim() || '(sin nombre)', tels: ts };
+    }).filter(function (c) { return c.tels.length; });
+  }
+
+  // ---------------- clientes de carreras (base de datos)
+  var clQ = '', clSolo = '';
+  function clientes() {
+    var box = document.querySelector('[data-p=clientes]');
+    var todos = T.clientes(), q = clQ.toLowerCase(), nContactos = T.contactos().length, G = T.grupos(), P = T.posibles();
+    todos.forEach(function (c) { c.contacto = T.contactoDe(c.tel); });
+    var conocidos = todos.filter(function (c) { return c.contacto; }).length;
+    var l = todos.filter(function (c) { return (!q || (c.nombre + ' ' + c.tel + ' ' + c.correo + ' ' + c.dorsales.join(' ') + ' ' + c.eventos.join(' ') + ' ' + (c.contacto ? c.contacto.nombre : '')).toLowerCase().indexOf(q) >= 0) && (!clSolo || (clSolo === 'si' ? c.contacto : !c.contacto)); });
+    box.innerHTML = '<p class="nota" style="margin-top:0">Todos los corredores que han pedido fotos, con su cara, celular y carreras. El contacto se guarda solo al hacer el pedido. En la versión real esto va en <b>Clientes → Carreras</b> de tu panel.</p>' +
+      '<div class="tarjeta"><b>📇 Cruzar con mis contactos</b>' +
+      '<p class="nota" style="margin:4px 0 8px">En <b>contacts.google.com</b> (con la cuenta donde tienes a los corredores): Exportar → <b>CSV de Google</b> o vCard, y súbelo aquí. Se cruza por número de celular; tus contactos no salen de tu panel.</p>' +
+      '<div class="acciones"><label class="mini-btn na" style="cursor:pointer">Subir contactos (CSV o VCF)<input type="file" id="clImp" accept=".csv,.vcf,text/csv,text/vcard" hidden></label>' +
+      (nContactos ? '<button class="mini-btn" id="clNuevos">Bajar los que no tengo (para Google Contactos)</button>' : '') + '</div>' +
+      '<p class="res" style="margin:8px 0 0">' + (nContactos ? nContactos + ' contactos cargados · <span class="ok">' + conocidos + ' de ' + todos.length + ' corredores ya los conoces</span>' : 'Todavía no has subido tus contactos.') + '</p></div>' +
+      '<div class="fila"><input class="buscar" id="clQ" placeholder="Buscar nombre, celular, dorsal o carrera" style="max-width:360px" value="' + esc(clQ) + '">' +
+      '<select class="sel" id="clSolo" style="max-width:200px;min-width:170px"><option value="">Todos</option><option value="si">Ya en mis contactos</option><option value="no">Nuevos para mí</option></select>' +
+      '<button class="mini-btn na" id="clCsv">Descargar Excel (CSV)</button></div>' +
+      '<p class="res">' + (l.length === 1 ? '1 corredor' : l.length + ' corredores') + ' guardados</p>' +
+      (l.length ? l.map(function (c) {
+        return '<div class="tarjeta" style="display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;align-items:center">' +
+          (c.caras[0] ? '<img src="' + esc(c.caras[0]) + '" alt="" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--naranja)">' : '<div style="width:64px;height:64px;border-radius:50%;background:#3D3B3E;display:grid;place-items:center">👤</div>') +
+          '<div><b>' + esc(c.nombre) + '</b> · <a href="https://wa.me/507' + esc(c.tel) + '" target="_blank">' + esc(c.tel) + '</a>' + (c.correo ? ' · ' + esc(c.correo) : '') +
+          '<div class="nota">' + esc(c.eventos.join(' · ')) + (c.dorsales.length ? ' · dorsal ' + esc(c.dorsales.join(', ')) : '') + '</div>' +
+          '<div class="nota">' + c.pedidos + (c.pedidos === 1 ? ' pedido' : ' pedidos') + ' · ' + c.fotos + (c.fotos === 1 ? ' foto · ' : ' fotos · ') + $(c.gastado) + ' pagado</div>' +
+          (c.contacto ? '<div class="nota ok">📇 En tus contactos como «' + esc(c.contacto.nombre) + '»</div>' : nContactos ? '<div class="nota">🆕 No está en tus contactos</div>' : '') +
+          '<div class="acciones" style="margin-top:6px"><select class="sel" data-cgrupo="' + esc(c.tel) + '" style="max-width:200px;min-height:34px"><option value="">Sin grupo</option>' + Object.keys(G).map(function (g) { return '<option' + (c.grupo === g ? ' selected' : '') + '>' + esc(g) + '</option>'; }).join('') + '</select>' +
+          '<button class="mini-btn" data-cborrar="' + esc(c.tel) + '">Borrar cliente</button></div></div></div>';
+      }).join('') : '<p class="vacio">Todavía no hay corredores.</p>') +
+      titulo('👥 Grupos (clubes, equipos)') +
+      '<p class="nota" style="margin-top:0">El saludo de Necty lleva la frase del grupo. Pásale a Claude el contexto de cada grupo (quiénes son, cómo hablan) y él escribe la frase base; Necty la varía.</p>' +
+      Object.keys(G).map(function (g) { return '<div class="link"><input value="' + esc(g) + '" readonly style="max-width:160px"><input data-gfrase="' + esc(g) + '" value="' + esc(G[g].frase || '') + '" placeholder="Frase del grupo"><button class="mini-btn" data-gborrar="' + esc(g) + '">Quitar</button></div>'; }).join('') +
+      '<div class="link"><input id="gNuevo" placeholder="Nuevo grupo, ej. Leones" style="max-width:200px"><input id="gFrase" placeholder="Frase, ej. ¡Arriba esos Leones! 🦁"><button class="mini-btn na" id="gCrear">Agregar</button></div>' +
+      titulo('🙋 Posibles clientes (' + P.length + ')') +
+      '<p class="nota" style="margin-top:0">Gente que abrió una galería de sesión o mandó una selfie, sin comprar todavía.</p>' +
+      (P.length ? P.map(function (x) { return '<div class="tarjeta ped"><div><b>' + esc(x.nombre) + '</b> · <a href="https://wa.me/507' + esc(x.tel) + '" target="_blank">' + esc(x.tel) + '</a><div class="nota">' + esc(x.origenes.join(' · ')) + '</div></div><div class="acciones"><button class="mini-btn" data-pbor="' + esc(x.tel) + '">Borrar</button></div></div>'; }).join('') : '<p class="vacio">Todavía no hay posibles clientes.</p>');
+    box.querySelectorAll('[data-cgrupo]').forEach(function (s) { s.onchange = function () { T.ponerGrupo(s.dataset.cgrupo, s.value); }; });
+    box.querySelectorAll('[data-cborrar]').forEach(function (b) { b.onclick = function () { borrarCon('cliente', b.dataset.cborrar, 'los datos de este cliente (nombre, celular, correo y cara)', clientes); }; });
+    box.querySelectorAll('[data-gfrase]').forEach(function (i) { i.onchange = function () { T.guardarGrupo(i.dataset.gfrase, { frase: i.value.trim() }); }; });
+    box.querySelectorAll('[data-gborrar]').forEach(function (b) { b.onclick = function () { T.guardarGrupo(b.dataset.gborrar, null); clientes(); }; });
+    box.querySelector('#gCrear').onclick = function () { var n = box.querySelector('#gNuevo').value.trim(); if (!n) return; T.guardarGrupo(n, { frase: box.querySelector('#gFrase').value.trim() }); clientes(); };
+    box.querySelectorAll('[data-pbor]').forEach(function (b) { b.onclick = function () { borrarCon('posible', b.dataset.pbor, 'este posible cliente', clientes); }; });
+    box.querySelector('#clSolo').value = clSolo;
+    box.querySelector('#clSolo').onchange = function () { clSolo = this.value; clientes(); };
+    box.querySelector('#clImp').onchange = function () {
+      var f = this.files[0]; if (!f) return;
+      f.text().then(function (txt) {
+        var l = /BEGIN:VCARD/i.test(txt) ? leerVcf(txt) : leerCsvContactos(txt);
+        T.guardarContactos(l); clientes();
+        if (!l.length) alert('No encontré contactos con teléfono en ese archivo.');
+      });
+    };
+    var nb = box.querySelector('#clNuevos');
+    if (nb) nb.onclick = function () {
+      // formato que Google Contactos acepta al importar
+      var filas = [['First Name', 'Last Name', 'Labels', 'E-mail 1 - Value', 'Phone 1 - Label', 'Phone 1 - Value', 'Notes']].concat(todos.filter(function (c) { return !c.contacto; }).map(function (c) {
+        var p = c.nombre.split(' ');
+        return [p[0], p.slice(1).join(' '), 'Corredores NC', c.correo, 'Mobile', '+507 ' + c.tel, c.eventos.join(' | ') + (c.dorsales.length ? ' · dorsal ' + c.dorsales.join(', ') : '')];
+      }));
+      var csv = filas.map(function (r) { return r.map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(','); }).join('\r\n');
+      var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = 'corredores-nuevos-para-google.csv'; a.click();
+    };
+    var inp = box.querySelector('#clQ');
+    inp.oninput = function () { clQ = inp.value; var pos = inp.selectionStart; clientes(); var n = document.getElementById('clQ'); n.focus(); n.setSelectionRange(pos, pos); };
+    box.querySelector('#clCsv').onclick = function () {
+      var filas = [['Nombre', 'Celular', 'Correo', 'Grupo', 'Dorsales', 'Carreras', 'Pedidos', 'Fotos', 'Gastado', 'Último pedido', 'En mis contactos como']].concat(todos.map(function (c) {
+        return [c.nombre, c.tel, c.correo || '', c.grupo || '', c.dorsales.join(' '), c.eventos.join(' | '), c.pedidos, c.fotos, c.gastado.toFixed(2), c.ultimo.slice(0, 10), c.contacto ? c.contacto.nombre : ''];
+      }));
+      var csv = '﻿' + filas.map(function (r) { return r.map(function (v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(','); }).join('\r\n');
+      var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = 'clientes-carreras.csv'; a.click();
+    };
+  }
+
+  var PINTAR = { capturas: capturas, reclamos: reclamos, preventas: preventas, papelera: papelera, sesiones: sesiones, cola: cola, yappy: yappy, resumen: resumen, eventos: eventos, pedidos: pedidos, lightroom: lightroom, entregas: entregas, grupales: grupales, clientes: clientes };
+  function ir(t) {
+    document.querySelectorAll('.tab').forEach(function (b) { b.classList.toggle('on', b.dataset.t === t); });
+    document.querySelectorAll('[data-p]').forEach(function (s) { s.hidden = s.dataset.p !== t; });
+    var on = document.querySelector('.tab.on'); if (on) on.parentNode.scrollLeft = on.offsetLeft - 16;
+    PINTAR[t]();
+  }
+  document.querySelectorAll('.tab').forEach(function (b) { b.onclick = function () { ir(b.dataset.t); }; });
+  // página real: cuando el servidor confirma un cambio, se vuelve a pintar la pestaña abierta con sus datos
+  window.NC_API.envolverAdmin(function () {
+    EV = (window.NC_EVENTOS || []).filter(function (e) { return !T.eventoOculto(e.id); });
+    var on = document.querySelector('.tab.on'); if (on && PINTAR[on.dataset.t] && !document.querySelector('[data-p]:not([hidden]) input:focus, [data-p]:not([hidden]) textarea:focus')) PINTAR[on.dataset.t]();
+  });
+  ir('resumen');
+}
+</script>
+</body>
+</html>

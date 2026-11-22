@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Mis fotos · NC Studio</title>
+<meta name="theme-color" content="#222020">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Tenor+Sans&display=swap">
+<link rel="stylesheet" href="galeria.css">
+<style>
+.pedido{background:#2b2929;border:1px solid var(--gris);border-radius:14px;padding:14px 16px;margin:0 0 12px}
+.pedido .t{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.pedido .tk{font-family:Montserrat,sans-serif;font-weight:700;color:var(--naranja);font-size:20px}
+.estado{display:inline-block;padding:3px 10px;border-radius:999px;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700}
+.e-pagado{background:#3a3128;color:#F99824}.e-edicion{background:#22324a;color:#9cc0ff}.e-entregado{background:#1f3a2a;color:#8fe0a8}.e-esperando,.e-vencido,.e-pausado{background:#3a2a2a;color:#ffb4a8}.e-elegir{background:#22324a;color:#9cc0ff}
+.turno{display:flex;gap:16px;align-items:baseline;margin:8px 0}
+.turno b{font-family:Montserrat,sans-serif;font-size:30px;color:var(--blanco)}
+.ed{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin:10px 0}
+.ed button{position:relative;padding:0;border:0;border-radius:10px;overflow:hidden;aspect-ratio:3/4;background:#1d1c1c;cursor:pointer}
+.ed img{width:100%;height:100%;object-fit:cover;display:block}
+.ed .tag{position:absolute;left:6px;top:6px;background:#F99824;color:#222020;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700}
+.grande{position:fixed;inset:0;background:#0d0c0c;z-index:50;display:flex;flex-direction:column}
+.grande[hidden]{display:none}
+.grande .top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;color:var(--crema)}
+.grande img{flex:1;min-height:0;width:100%;object-fit:contain}
+.grande .pie{display:flex;gap:8px;justify-content:center;padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+.fin-prev{width:min(240px,60%);border-radius:14px;display:block;margin:8px 0;border:1px solid var(--gris)}
+.imp{display:grid;grid-template-columns:56px minmax(0,1fr);gap:10px;align-items:center;margin:0 0 8px}
+.imp img{width:56px;height:56px;object-fit:cover;border-radius:8px}
+.imp select,.imp input{min-height:38px;border-radius:10px;border:1.5px solid var(--gris);background:#1d1c1c;color:var(--blanco);font:inherit;font-size:14px;padding:0 8px}
+</style>
+</head>
+<body>
+<header class="hd">
+  <a href="news.html"><img src="logo.png" alt="NC Studio"></a>
+  <nav aria-label="Menú principal"><a href="news.html">📰 News</a><a href="mis-fotos.html" class="on">📷 Mis fotos</a></nav>
+</header>
+<main class="wrap" style="max-width:620px">
+  <h1>Mis fotos</h1>
+  <p class="sub">Tu zona de NC Studio: escribe el celular que pusiste al pagar para ver tu turno y, cuando estén listas, ver y descargar tus fotos editadas en buena calidad.</p>
+  <form id="f" class="fila">
+    <input id="tel" class="buscar" type="tel" inputmode="tel" placeholder="6xxx-xxxx" aria-label="Número de celular" autocomplete="tel" style="max-width:260px">
+    <button class="btn">Buscar</button>
+  </form>
+  <div id="res"></div>
+</main>
+<div class="grande" id="grande" hidden>
+  <div class="top"><span id="gNom"></span><span class="nota" id="gPos"></span><button class="btn sec" id="gX" aria-label="Cerrar">✕</button></div>
+  <img id="gImg" alt="">
+  <div class="pie"><button class="btn sec" id="gAnt" aria-label="Anterior">‹</button><button class="btn" id="gBajar">⬇ Descargar</button><button class="btn sec" id="gSig" aria-label="Siguiente">›</button></div>
+</div>
+<div class="modal" id="modal" hidden><div class="caja" id="caja"></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="nc-config.js"></script>
+<script>if (!(window.NC_CONFIG || {}).url) document.write('<script src="datos-prueba.js"><\/script><script src="sesiones/indice.js"><\/script>');</script>
+<script src="tienda.js"></script>
+<script src="nc-api.js"></script>
+<script>
+(function () {
+  var T = window.NC_TIENDA, $ = T.dinero, A = window.NC_API, VAPOR = {};
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  var EV = {}; (window.NC_EVENTOS || []).forEach(function (e) { EV[e.id] = e; });
+  var SRC = {}; (window.NC_EVENTOS || []).forEach(function (e) { e.fotos.forEach(function (f) { SRC[e.id + '/' + f.nombre] = f.src; }); });
+  var MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  function fecha(d) { return d.getDate() + ' ' + MESES[d.getMonth()] + ' ' + d.getFullYear(); }
+
+  // ---------- fotos editadas del pedido (prototipo: la vista previa; real: el archivo editado del Drive) ----------
+  // en carreras con patrocinio, las fotos GRATIS salen con el logo del patrocinador (+ NC); las pagadas, limpias
+  function editadas(p) {
+    var l = p.editadas || p.fotos.map(function (f) { return { original: f, editada: f }; });
+    var pagables = p.fotos.filter(function (f) { return (p.gratis || []).indexOf(f) < 0; });
+    // en la página real el logo ya viene puesto por la PC al entregar (no se pinta aquí)
+    var conLogo = p.patrocinio && !A.real ? pagables.slice(0, p.gratisPatrocinio || 0) : [];
+    return l.map(function (x) { return { nombre: x.editada, original: x.original, src: x.url || SRC[p.evento + '/' + x.original] || '', logo: conLogo.indexOf(x.original) >= 0 }; });
+  }
+  var cacheImg = {};
+  function cargarImg(src) { return cacheImg[src] = cacheImg[src] || new Promise(function (ok, mal) { var i = new Image(); i.onload = function () { ok(i); }; i.onerror = mal; i.src = src; }); }
+  // pega el logo del patrocinador y el de NC en la esquina (en la versión real lo hace la PC al entregar)
+  function conPatrocinio(x) {
+    if (!x.logo) return Promise.resolve(x.src);
+    return Promise.all([cargarImg(x.src), cargarImg('logo-patrocinador-prueba.png'), cargarImg('logo.png')]).then(function (r) {
+      var f = r[0], c = document.createElement('canvas'); c.width = f.naturalWidth; c.height = f.naturalHeight; var g = c.getContext('2d');
+      g.drawImage(f, 0, 0); var m = c.width * 0.03, w1 = c.width * 0.26, h1 = w1 * r[1].naturalHeight / r[1].naturalWidth;
+      g.drawImage(r[1], m, c.height - h1 - m, w1, h1); var w2 = c.width * 0.14, h2 = w2 * r[2].naturalHeight / r[2].naturalWidth;
+      g.globalAlpha = 0.85; g.drawImage(r[2], c.width - w2 - m, c.height - h2 - m, w2, h2);
+      return c.toDataURL('image/jpeg', 0.9);
+    });
+  }
+  // imagen de Finisher para historias: la foto ⭐ detrás de la plantilla que hace Nelson, con el nombre (gratis)
+  var PLANTILLA = { src: 'plantilla-finisher-prueba.png', hueco: [60, 260, 960, 1240], nombre: [70, 1610] };
+  function armarFinisher(p) {
+    if (A.real) return p.finisherUrl ? Promise.resolve(p.finisherUrl) : Promise.reject();   // la arma la PC al entregar
+    var x = editadas(p).filter(function (e) { return e.original === p.finisher; })[0]; if (!x) return Promise.reject();
+    return Promise.all([cargarImg(x.src), cargarImg(PLANTILLA.src)]).then(function (r) {
+      var f = r[0], c = document.createElement('canvas'); c.width = 1080; c.height = 1920; var g = c.getContext('2d'), H = PLANTILLA.hueco;
+      var s = Math.max(H[2] / f.naturalWidth, H[3] / f.naturalHeight), w = f.naturalWidth * s, h = f.naturalHeight * s;
+      g.save(); g.beginPath(); g.rect(H[0], H[1], H[2], H[3]); g.clip(); g.drawImage(f, H[0] + (H[2] - w) / 2, H[1] + (H[3] - h) / 2.6, w, h); g.restore();
+      g.drawImage(r[1], 0, 0, 1080, 1920);
+      g.fillStyle = '#F2E4D2'; g.font = '700 64px Montserrat, sans-serif'; g.fillText(p.nombre.split(' ').slice(0, 2).join(' ').toUpperCase(), PLANTILLA.nombre[0], PLANTILLA.nombre[1]);
+      g.fillStyle = '#F99824'; g.font = '600 40px Montserrat, sans-serif'; g.fillText(p.eventoNombre + (p.dorsal ? ' · #' + p.dorsal : ''), PLANTILLA.nombre[0], PLANTILLA.nombre[1] + 64);
+      return c.toDataURL('image/jpeg', 0.9);
+    });
+  }
+  function bajarUrl(url, nombre) { var a = document.createElement('a'); a.href = url; a.download = nombre; document.body.appendChild(a); a.click(); a.remove(); }
+  function bajar(x) { conPatrocinio(x).then(function (u) { bajarUrl(u, x.nombre); }); }
+
+  // ---------- tarjetas ----------
+  var lista = [];
+  function tarjeta(p) {
+    var cab = function (estado, cls) { return '<div class="pedido"><div class="t"><span class="tk">' + esc(p.ticket) + '</span><span class="estado e-' + cls + '">' + estado + '</span></div><p style="margin:6px 0 2px"><b>' + esc(p.eventoNombre) + '</b></p>'; };
+    if (p.tipo === 'diferencia') return '';
+    if (p.tipo === 'impresion') return cab(p.estado === 'esperando' ? '💳 Esperando tu Yappy' : p.estado === 'entregado' ? '✅ Entregado' : '🖼️ Impresión en proceso', p.estado) +
+      '<p class="nota">' + p.items.map(function (it) { return it.cant + ' × ' + esc(it.nombre); }).join(' · ') + ' · ' + $(p.monto) + '</p>' + (p.estado === 'esperando' ? botonPago(p) : '<p class="nota">Nelson te escribe por WhatsApp para coordinar la entrega.</p>') + '</div>';
+    if (p.tipo === 'preventa' && p.estado === 'pagado' && !p.asignada) return cab('🎟 Preventa pagada', 'pagado') +
+      '<p class="nota">' + esc(p.paquete.nombre) + ' · dorsal ' + esc(p.dorsal) + '. Cuando salgan las fotos de la carrera te las asignamos y te avisamos por WhatsApp.</p></div>';
+    if (p.estado === 'elegir') return cab('🎟 Elige tus fotos', 'elegir') +
+      '<p class="nota">Ya salieron las fotos. Tu paquete «' + esc(p.paquete.nombre) + '» incluye <b>' + p.porElegir + ' fotos</b>: elige las que quieras.</p>' +
+      '<a class="btn" style="display:inline-flex;align-items:center;text-decoration:none" href="evento.html?e=' + encodeURIComponent(p.evento) + '&elegir=' + encodeURIComponent(p.ticket) + '&tel=' + p.tel + '">Elegir mis ' + p.porElegir + ' fotos</a></div>';
+    if (p.estado === 'esperando') return cab('💳 Esperando tu Yappy', 'esperando') +
+      '<p class="nota">Todavía no nos llega tu pago de ' + $(p.monto) + '. Cuando llegue recibes tu turno. Tu pedido se guarda <b>7 días</b>.</p>' + botonPago(p) + '</div>';
+    if (p.estado === 'vencido') return cab('⌛ Vencido', 'vencido') + '<p class="nota">Este pedido no se pagó en 7 días y se canceló. Si todavía quieres tus fotos, vuelve a elegirlas en el álbum.</p></div>';
+    if (p.estado === 'pausado') return cab('⏸ Pausado', 'pausado') + '<p class="nota">Revisamos tu captura y no se ve que sigas a @ncstudio507. Paga la diferencia para seguir en la fila (te escribimos por WhatsApp).</p></div>';
+    var turno = '<div class="turno"><span class="nota">Tu turno</span><b>' + p.turno + '</b><span class="nota">NC va por el</span><b>' + (VAPOR[p.evento] || 0) + '</b></div>';
+    var reclamo = p.tipo === 'preventa' && !p.paquete.fotos ? '<p class="nota">¿Te falta alguna foto tuya? <a href="evento.html?e=' + encodeURIComponent(p.evento) + '&reclamo=' + encodeURIComponent(p.ticket) + '&tel=' + p.tel + '">Reclámala aquí</a>.</p>' : '';
+    if (p.estado !== 'entregado') return cab(p.estado === 'edicion' ? '✏️ En edición' : '⏳ En la fila', p.estado) + turno +
+      '<p class="nota">' + p.fotos.length + (p.fotos.length === 1 ? ' foto' : ' fotos') + (Number(p.monto) ? ' · ' + $(p.monto) : ' · gratis') + '. Tus fotos están sin editar; te avisamos por WhatsApp cuando estén listas.</p>' + reclamo + '</div>';
+    // entregado
+    var hasta = T.disponibleHasta(p), vencida = p.expirado || (hasta && new Date() > hasta);
+    if (vencida) return cab('🗂 Vencidas', 'vencido') + '<p class="nota">Tus fotos estuvieron disponibles 90 días y ya se vencieron. Si las necesitas, escríbenos por WhatsApp.</p></div>';
+    var ed = editadas(p);
+    return cab('✅ Editadas y entregadas', 'entregado') +
+      '<p class="nota">¡Tus fotos están listas! Disponibles hasta el <b>' + fecha(hasta) + '</b> (90 días): descárgalas y guárdalas.</p>' +
+      '<div class="ed">' + ed.map(function (x, i) { return '<button data-ver="' + esc(p.ticket) + '" data-i="' + i + '" aria-label="Ver ' + esc(x.nombre) + '"><img loading="lazy" src="' + esc(x.src) + '" alt="">' + (x.logo ? '<span class="tag">gratis · patrocinio</span>' : '') + '</button>'; }).join('') + '</div>' +
+      '<div class="fila"><button class="btn" data-todas="' + esc(p.ticket) + '">⬇ Descargar todas en un ZIP (' + ed.length + ')</button><span class="nota" data-zipest="' + esc(p.ticket) + '"></span></div>' +
+      (p.finisher ? '<p class="nota" style="margin-bottom:0"><b>⭐ Tu imagen de Finisher</b> para historias (gratis):</p><img class="fin-prev" data-fin="' + esc(p.ticket) + '" alt="Imagen de Finisher"><div class="fila"><button class="btn sec" data-finbajar="' + esc(p.ticket) + '">⬇ Descargar mi historia</button></div>' : '') +
+      '<div class="fila"><button class="btn sec" data-imprimir="' + esc(p.ticket) + '">🖼️ Pedir impresiones o álbum</button></div>' +
+      (A.real ? '' : '<p class="nota"><span class="sim">SIMULACIÓN</span> Aquí se ve la vista previa; en la versión real se descarga el archivo editado en calidad completa desde Drive.</p>') + '</div>';
+  }
+  function botonPago(p) {
+    return A.real ? window.NC_API.botonYappy(p) + '<div class="fila"><button class="btn sec" data-pagar="' + esc(p.ticket) + '">Ya pagué: revisar</button></div>'
+      : '<div class="fila"><button class="btn" data-pagar="' + esc(p.ticket) + '">Pagar ' + $(p.monto) + ' con Yappy</button><span class="sim">SIMULACIÓN</span></div>';
+  }
+
+  function buscar(tel) {
+    var res = document.getElementById('res');
+    if (String(tel).replace(/\D/g, '').length < 7) { res.innerHTML = '<p class="nota">Escribe tu número completo.</p>'; return; }
+    res.innerHTML = '<p class="nota">Buscando…</p>';
+    A.gal('misPedidos', [tel]).then(function (r) { pintarLista(tel, r); }, function () { res.innerHTML = '<p class="vacio">Sin conexión. Inténtalo otra vez.</p>'; });
+  }
+  function pintarLista(tel, R) {
+    var res = document.getElementById('res');
+    VAPOR = R.vaPor || {};
+    lista = (R.pedidos || []).filter(function (p) { return p.tipo !== 'diferencia' && p.tipo !== 'extras-sesion'; });
+    if (!lista.length) { res.innerHTML = '<p class="vacio">No encontramos pedidos con ese número. Revisa que sea el mismo que pusiste al pagar, o escríbenos por WhatsApp.</p>'; return; }
+    res.innerHTML = lista.slice().reverse().map(tarjeta).join('');
+    try { localStorage.setItem('nc-mi-tel', tel); } catch (e) {}
+    res.querySelectorAll('[data-ver]').forEach(function (b) { b.onclick = function () { abrir(porTicket(b.dataset.ver), +b.dataset.i); }; });
+    res.querySelectorAll('[data-pagar]').forEach(function (b) { b.onclick = function () { var p = porTicket(b.dataset.pagar); if (!A.real) T.registrarYappy({ nombre: p.nombre, tel: p.tel, monto: p.monto }); buscar(tel); }; });
+    res.querySelectorAll('[data-fin]').forEach(function (im) { armarFinisher(porTicket(im.dataset.fin)).then(function (u) { im.src = u; }, function () { im.remove(); }); });
+    res.querySelectorAll('[data-finbajar]').forEach(function (b) { b.onclick = function () { var p = porTicket(b.dataset.finbajar); armarFinisher(p).then(function (u) { bajarUrl(u, 'Finisher-' + p.eventoNombre.replace(/[^\w]+/g, '-') + '.jpg'); }); }; });
+    res.querySelectorAll('[data-imprimir]').forEach(function (b) { b.onclick = function () { imprimir(porTicket(b.dataset.imprimir)); }; });
+    res.querySelectorAll('[data-todas]').forEach(function (b) {
+      b.onclick = function () {
+        var p = porTicket(b.dataset.todas), l = editadas(p), est = res.querySelector('[data-zipest="' + p.ticket + '"]');
+        if (A.real) { if (p.entrega) window.open(p.entrega, '_blank'); else l.forEach(function (x, i) { setTimeout(function () { bajar(x); }, i * 600); }); return; }   // Drive: su carpeta trae «Descargar todo»
+        if (!window.JSZip) { l.forEach(function (x, i) { setTimeout(function () { bajar(x); }, i * 600); }); return; }
+        var zip = new JSZip(), n = 0; b.disabled = true;
+        Promise.all(l.map(function (x) { return conPatrocinio(x).then(function (u) { return fetch(u); }).then(function (r) { return r.blob(); }).then(function (bl) { zip.file(x.nombre, bl); est.textContent = 'Preparando ' + (++n) + ' de ' + l.length + '…'; }); }))
+          .then(function () { return zip.generateAsync({ type: 'blob' }); })
+          .then(function (bl) { bajarUrl(URL.createObjectURL(bl), 'NC-Studio-' + p.eventoNombre.replace(/[^\w]+/g, '-') + '-' + p.ticket + '.zip'); est.textContent = '✓ Listo'; b.disabled = false; })
+          .catch(function () { est.textContent = 'No se pudo armar el ZIP; bájalas una por una.'; b.disabled = false; });
+      };
+    });
+  }
+  function porTicket(t) { return lista.filter(function (p) { return p.ticket === t; })[0]; }
+
+  // ---------- impresiones (solo con las fotos ya editadas) ----------
+  var modal = document.getElementById('modal'), caja = document.getElementById('caja');
+  modal.onclick = function (ev) { if (ev.target === modal) modal.hidden = true; };
+  function imprimir(p) {
+    var ed = editadas(p), opts = T.CATALOGO.map(function (c) { return '<option value="' + c.id + '">' + esc(c.nombre) + ' · ' + $(c.precio) + '</option>'; }).join('');
+    caja.innerHTML = '<h3>Pedir impresiones</h3><p class="nota" style="margin-top:0">Elige qué foto, qué producto y cuántas. Pagas por Yappy y Nelson te escribe para coordinar la entrega.</p>' +
+      ed.map(function (x, i) { return '<div class="imp"><img src="' + esc(x.src) + '" alt=""><div class="fila" style="margin:0;gap:6px"><select data-prod="' + i + '"><option value="">— Nada —</option>' + opts + '</select><input data-cant="' + i + '" type="number" min="1" value="1" style="width:64px" aria-label="Cantidad"></div></div>'; }).join('') +
+      '<p class="res" id="impTot">Total: $0.00</p><p class="nota" id="impErr" style="color:#ffb4a8"></p>' +
+      '<div class="fila"><button class="btn sec" id="impX">Cancelar</button><button class="btn" id="impOk">Pedir y pagar con Yappy</button></div>';
+    modal.hidden = false;
+    function items() { var l = []; ed.forEach(function (x, i) { var pr = caja.querySelector('[data-prod="' + i + '"]').value, n = Math.max(1, +caja.querySelector('[data-cant="' + i + '"]').value || 1); if (pr) l.push({ foto: x.nombre, producto: pr, cant: n }); }); return l; }
+    function tot() { var t = 0; items().forEach(function (it) { t += T.CATALOGO.filter(function (c) { return c.id === it.producto; })[0].precio * it.cant; }); document.getElementById('impTot').textContent = 'Total: ' + $(t); }
+    caja.querySelectorAll('select,input').forEach(function (el) { el.onchange = el.oninput = tot; });
+    document.getElementById('impX').onclick = function () { modal.hidden = true; };
+    document.getElementById('impOk').onclick = function () {
+      var l = items(); if (!l.length) { document.getElementById('impErr').textContent = 'Elige al menos un producto.'; return; }
+      A.gal('pedirImpresionPublico', [{ de: p.ticket, tel: p.tel, items: l }]).then(function (r) {
+        if (!r.ok) { document.getElementById('impErr').textContent = r.title; return; }
+        modal.hidden = true; buscar(p.tel);
+      });
+    };
+  }
+
+  // ---------- visor grande ----------
+  var G = { l: [], i: 0 }, gr = document.getElementById('grande');
+  function abrir(p, i) { G.l = editadas(p); mostrarG(i); gr.hidden = false; document.body.style.overflow = 'hidden'; }
+  function mostrarG(i) {
+    G.i = (i + G.l.length) % G.l.length; var x = G.l[G.i];
+    conPatrocinio(x).then(function (u) { document.getElementById('gImg').src = u; });
+    document.getElementById('gNom').textContent = x.nombre; document.getElementById('gPos').textContent = (G.i + 1) + ' de ' + G.l.length;
+  }
+  document.getElementById('gBajar').onclick = function () { bajar(G.l[G.i]); };
+  document.getElementById('gX').onclick = function () { gr.hidden = true; document.body.style.overflow = ''; };
+  document.getElementById('gAnt').onclick = function () { mostrarG(G.i - 1); };
+  document.getElementById('gSig').onclick = function () { mostrarG(G.i + 1); };
+  document.getElementById('f').onsubmit = function (ev) { ev.preventDefault(); buscar(document.getElementById('tel').value); };
+  var q = new URLSearchParams(location.search).get('tel'), guardado = '';
+  try { guardado = localStorage.getItem('nc-mi-tel') || ''; } catch (e) {}
+  q = q || guardado;
+  if (q) { document.getElementById('tel').value = q; buscar(q); }
+})();
+</script>
+</body>
+</html>

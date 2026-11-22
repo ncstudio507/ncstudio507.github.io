@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>News · NC Studio</title>
+<meta name="theme-color" content="#222020">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Tenor+Sans&display=swap">
+<link rel="stylesheet" href="galeria.css">
+</head>
+<body>
+<header class="hd">
+  <a href="news.html"><img src="logo.png" alt="NC Studio"></a>
+  <nav aria-label="Menú principal"><a href="news.html" class="on">📰 News</a><a href="mis-fotos.html">📷 Mis fotos</a><a href="#">👑 Zona VIP</a></nav>
+</header>
+<main class="wrap">
+  <h1>News</h1>
+  <p class="sub">Galerías de carreras y eventos, novedades y consejos de NC Studio.</p>
+  <div class="filtros">
+    <input id="q" class="buscar" type="search" placeholder="Buscar evento, lugar…" aria-label="Buscar evento">
+    <div id="tipos" class="fila" style="margin:0"></div>
+    <div id="anios" class="fila" style="margin:0"></div>
+  </div>
+  <div id="lista" class="eventos"></div>
+  <p id="vacio" class="vacio" hidden>No hay eventos con ese filtro.</p>
+</main>
+<script src="nc-config.js"></script>
+<script>if (!(window.NC_CONFIG || {}).url) document.write('<script src="datos-prueba.js"><\/script>');</script>
+<script src="tienda.js"></script>
+<script src="nc-api.js"></script>
+<script>
+(function () {
+  var EV = [], filtro = { q: '', tipo: 'todos', anio: 'todos' };
+  var MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  function fecha(f) { var p = f.split('-'); return +p[2] + ' ' + MESES[+p[1] - 1] + ' ' + p[0]; }
+  function norm(s) { return String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase(); }
+  function chips(el, valores, clave) {
+    el.innerHTML = '';
+    valores.forEach(function (v) {
+      var b = document.createElement('button');
+      b.className = 'chip' + (filtro[clave] === v ? ' on' : '');
+      b.textContent = v === 'todos' ? (clave === 'tipo' ? 'Todo' : 'Todos los años') : v.charAt(0).toUpperCase() + v.slice(1) + (clave === 'tipo' ? 's' : '');
+      b.onclick = function () { filtro[clave] = v; pintar(); };
+      el.appendChild(b);
+    });
+  }
+  function pintar() {
+    var tipos = ['todos'].concat(EV.map(function (e) { return e.tipo; }).filter(function (v, i, a) { return a.indexOf(v) === i; }));
+    var anios = ['todos'].concat(EV.map(function (e) { return e.fecha.slice(0, 4); }).filter(function (v, i, a) { return a.indexOf(v) === i; }).sort().reverse());
+    chips(document.getElementById('tipos'), tipos, 'tipo');
+    chips(document.getElementById('anios'), anios, 'anio');
+    var lista = document.getElementById('lista'); lista.innerHTML = '';
+    var q = norm(filtro.q), vis = EV.filter(function (e) {
+      return (filtro.tipo === 'todos' || e.tipo === filtro.tipo) && (filtro.anio === 'todos' || e.fecha.indexOf(filtro.anio) === 0) &&
+        (!q || norm(e.nombre + ' ' + e.lugar).indexOf(q) >= 0);
+    }).sort(function (a, b) { return a.fecha < b.fecha ? 1 : -1; });
+    vis.forEach(function (e) {
+      var a = document.createElement('a'); a.className = 'ev'; a.href = 'evento.html?e=' + encodeURIComponent(e.id);
+      var nf = e.nfotos != null ? e.nfotos : (e.fotos || []).length, extra = nf ? ' · ' + nf + ' fotos' : '';
+      a.innerHTML = '<div class="por"></div><div class="tx"><div class="tipo"></div><h2></h2><div class="meta"></div></div>';
+      a.querySelector('.por').style.backgroundImage = 'url("' + e.portada + '")';
+      a.querySelector('.tipo').textContent = e.tipo;
+      a.querySelector('h2').textContent = e.nombre;
+      a.querySelector('.meta').textContent = fecha(e.fecha) + ' · ' + e.lugar + extra;
+      // solo si Nelson lo liberó por patrocinio; si no, no sale nada
+      var lib = e.liberado;
+      if (lib) {
+        var s = document.createElement('div'); s.className = 'sello-patrocinio';
+        s.textContent = '🎉 Patrocinado' + (lib.patrocinador ? ' por ' + lib.patrocinador : '') + ' · 3 fotos gratis';
+        a.querySelector('.tx').appendChild(s);
+      }
+      lista.appendChild(a);
+    });
+    document.getElementById('vacio').hidden = vis.length > 0;
+    document.getElementById('vacio').textContent = EV.length ? 'No hay eventos con ese filtro.' : '📸 Muy pronto aquí vas a encontrar las fotos de las carreras y eventos donde estuvimos.';
+  }
+  document.getElementById('q').addEventListener('input', function () { filtro.q = this.value; pintar(); });
+  // la lista de eventos la da el servidor (en el prototipo, la tienda de este navegador)
+  window.NC_API.gal('listaEventos', []).then(function (l) { EV = l; pintar(); }, function () { document.getElementById('vacio').hidden = false; document.getElementById('vacio').textContent = 'Sin conexión. Inténtalo otra vez.'; });
+})();
+</script>
+</body>
+</html>

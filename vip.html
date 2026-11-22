@@ -339,7 +339,7 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
       return;
     }
     var w = modal('<div class="big" aria-hidden="true">' + (pru ? '📸' : '🎁') + '</div><h2>' + (pru ? '¡Tus fotos de prueba están listas!' : '¡Tus fotos finales están listas!') + '</h2>' +
-      (pru ? '<p>Toca el corazón ♡ en tus favoritas y al terminar presiona «Send to Photographer». Tienes 2 días para elegirlas.</p>' : '<p>Descárgalas, guárdalas en dos lugares y compártelas. ¡Nos encanta verlas!</p>') +
+      (pru ? '<p>Toca el corazón ♡ en tus favoritas y al terminar presiona «Send to Photographer». Tienes 3 días para elegirlas.</p>' : '<p>Descárgalas, guárdalas en dos lugares y compártelas. ¡Nos encanta verlas!</p>') +
       ((g.clave || g.pin) ? '<div class="acc">' + (g.clave ? '<div class="copy"><span>Contraseña: <b>' + esc(g.clave) + '</b></span><button data-cp="' + esc(g.clave) + '">Copiar</button></div>' : '') + (g.pin ? '<div class="copy"><span>PIN de descarga: <b>' + esc(g.pin) + '</b></span><button data-cp="' + esc(g.pin) + '">Copiar</button></div>' : '') + '</div>' : '') +
       '<a class="btn" href="' + esc(g.link) + '" target="_blank" rel="noopener">Abrir mi galería</a>' + (pru && x.extrasLink ? '<a class="btn ol" href="' + esc(x.extrasLink) + '" target="_blank" rel="noopener">¿Quieres fotos extra?</a>' : ''));
     Array.prototype.forEach.call(w.querySelectorAll("[data-cp]"), function (b) { b.onclick = function () { try { navigator.clipboard.writeText(b.getAttribute("data-cp")); b.textContent = "✓ Copiado"; } catch (e) {} }; });

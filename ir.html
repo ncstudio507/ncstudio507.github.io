@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Abriendo WhatsApp · NC Studio</title>
+<style>body{margin:0;background:#222020;color:#F2E4D2;font:16px system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;text-align:center;padding:16px}a{color:#F99824}</style>
+</head>
+<body>
+<p id="m">Abriendo WhatsApp…</p>
+<script src="nc-config.js"></script>
+<script src="tienda.js"></script>
+<script src="nc-api.js"></script>
+<script>
+// Link de los avisos de Necty: anota que Nelson abrió el chat (así no se lo vuelve a mostrar como pendiente)
+// y abre WhatsApp con el saludo ya escrito. En la versión real esta página llama al Apps Script.
+(function () {
+  var id = new URLSearchParams(location.search).get('a');
+  window.NC_API.ir(id).then(function (url) {
+  if (!url) { document.getElementById('m').textContent = 'Este aviso ya no existe.'; return; }
+  document.getElementById('m').innerHTML = 'Abriendo WhatsApp… <br><a href="' + url + '">Toca aquí si no se abre</a>';
+  if (!/[?&]probar=1/.test(location.search)) location.replace(url);
+  });
+})();
+</script>
+</body>
+</html>
