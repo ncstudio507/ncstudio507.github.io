@@ -34,12 +34,13 @@
 <body>
 <header class="hd">
   <a href="index.html" aria-label="NC Studio, página principal"><img src="logo.png" alt="NC Studio"></a>
-  <nav aria-label="Menú principal"><a href="index.html">🏠 Inicio</a><a href="news.html">📰 News</a><a href="mis-fotos.html" class="on" aria-current="page">📷 Mis fotos</a><a href="vip.html">👑 Zona VIP</a></nav>
+  <nav aria-label="Menú principal"><a href="index.html">🏠 Inicio</a><a href="news.html">📰 News</a><a href="vip.html" class="on" aria-current="page">👑 Zona VIP</a></nav>
 </header>
 <main class="wrap" style="max-width:620px">
-  <h1>Mis fotos</h1>
-  <p class="sub">Tu zona de NC Studio: escribe el celular que pusiste al pagar para ver tu turno y, cuando estén listas, ver y descargar tus fotos editadas en buena calidad.</p>
-  <form id="f" class="fila">
+  <p style="margin:0 0 6px"><a href="vip.html" style="color:var(--crema);text-decoration:none;font-family:Montserrat,sans-serif;font-size:14px">‹ Volver a mi Zona VIP</a></p>
+  <h1>Mis fotos de carreras</h1>
+  <p class="sub" id="sub">Tu turno en la fila de edición y, cuando estén listas, tus fotos editadas para ver y descargar en buena calidad.</p>
+  <form id="f" class="fila" hidden>
     <input id="tel" class="buscar" type="tel" inputmode="tel" placeholder="6xxx-xxxx" aria-label="Número de celular" autocomplete="tel" style="max-width:260px">
     <button class="btn">Buscar</button>
   </form>
@@ -142,7 +143,22 @@
       : '<div class="fila"><button class="btn" data-pagar="' + esc(p.ticket) + '">Pagar ' + $(p.monto) + ' con Yappy</button><span class="sim">SIMULACIÓN</span></div>';
   }
 
+  // página real: se entra con la sesión de la Zona VIP (sin ella, te manda a entrar con tu número y tu contraseña)
+  function token() { try { return localStorage.getItem('ncVipTok') || ''; } catch (e) { return ''; } }
+  function cargarMias() {
+    var res = document.getElementById('res'), tok = token();
+    if (!tok) { location.replace('vip.html?volver=mis-fotos'); return; }
+    res.innerHTML = '<p class="nota">Cargando tus fotos…</p>';
+    A.mis(tok).then(function (r) {
+      if (r.nombre) document.getElementById('sub').textContent = '¡Hola, ' + String(r.nombre).split(' ')[0] + '! Aquí ves tu turno en la fila de edición y, cuando estén listas, tus fotos editadas para ver y descargar en buena calidad.';
+      pintarLista(r.tel, r);
+    }, function (e) {
+      if (e && e.salir) { try { localStorage.removeItem('ncVipTok'); } catch (x) {} location.replace('vip.html?volver=mis-fotos'); return; }
+      res.innerHTML = '<p class="vacio">Sin conexión. Inténtalo otra vez.</p>';
+    });
+  }
   function buscar(tel) {
+    if (A.real) { cargarMias(); return; }
     var res = document.getElementById('res');
     if (String(tel).replace(/\D/g, '').length < 7) { res.innerHTML = '<p class="nota">Escribe tu número completo.</p>'; return; }
     res.innerHTML = '<p class="nota">Buscando…</p>';
@@ -152,7 +168,7 @@
     var res = document.getElementById('res');
     VAPOR = R.vaPor || {};
     lista = (R.pedidos || []).filter(function (p) { return p.tipo !== 'diferencia' && p.tipo !== 'extras-sesion'; });
-    if (!lista.length) { res.innerHTML = '<p class="vacio">No encontramos pedidos con ese número. Revisa que sea el mismo que pusiste al pagar, o escríbenos por WhatsApp.</p>'; return; }
+    if (!lista.length) { res.innerHTML = '<p class="vacio">Todavía no tienes pedidos de fotos de carreras con este número. Busca tu carrera en <a href="news.html">News</a>.</p>'; return; }
     res.innerHTML = lista.slice().reverse().map(tarjeta).join('');
     try { localStorage.setItem('nc-mi-tel', tel); } catch (e) {}
     res.querySelectorAll('[data-ver]').forEach(function (b) { b.onclick = function () { abrir(porTicket(b.dataset.ver), +b.dataset.i); }; });
@@ -211,6 +227,9 @@
   document.getElementById('gAnt').onclick = function () { mostrarG(G.i - 1); };
   document.getElementById('gSig').onclick = function () { mostrarG(G.i + 1); };
   document.getElementById('f').onsubmit = function (ev) { ev.preventDefault(); buscar(document.getElementById('tel').value); };
+  if (A.real) { cargarMias(); return; }
+  // prototipo (sin servidor): se busca con el número, como antes
+  document.getElementById('f').hidden = false;
   var q = new URLSearchParams(location.search).get('tel'), guardado = '';
   try { guardado = localStorage.getItem('nc-mi-tel') || ''; } catch (e) {}
   q = q || guardado;

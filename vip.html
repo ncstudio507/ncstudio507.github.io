@@ -79,6 +79,7 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
 .g .btns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.g .btn{width:auto;min-height:42px;font-size:15px}
 .g .ok{display:none;color:#05603A;font-weight:bold;font-size:13px}.g.leido .ok{display:inline}
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--dark);display:flex;justify-content:space-around;padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+.nav[hidden],.nav button[hidden]{display:none}
 .nav button{flex:1;background:none;border:0;color:#BDB3A6;font:12px Arial;display:grid;gap:2px;place-items:center;min-height:54px;cursor:pointer;position:relative}
 .nav button i{font-style:normal;font-size:22px}
 .nav button[aria-current="page"]{color:var(--org);font-weight:bold}
@@ -90,10 +91,31 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
 .copy{display:flex;justify-content:space-between;gap:8px;align-items:center}.copy button{border:1.5px solid var(--dark);background:transparent;border-radius:6px;padding:6px 10px;font:bold 13px Arial;cursor:pointer}
 .pay{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;background:#FEF3F2;border-left:4px solid #B42318}.pay.ok{background:#ECFDF3;border-left-color:#12B76A}.pay span{display:grid;font-size:15px}.pay small{font-size:12px;font-weight:bold;color:#B42318}.pay.ok small{color:#05603A}.pay b{font-size:18px;color:#B42318}.pay.ok b{color:#05603A}
 .pf dt{color:var(--muted);font-size:13px;margin-top:8px}.pf dd{margin:2px 0 0;font-size:16px}
+.top a{display:block;line-height:0}.top .home{color:var(--beige);font:bold 13px Arial;text-decoration:none;line-height:1;padding:10px 4px;white-space:nowrap}
+/* regalo de bienvenida */
+.regalo{background:var(--dark);color:var(--white);border-radius:14px;padding:20px;display:grid;gap:12px}
+.regalo h2{color:var(--white)}.regalo h2 em{font-style:normal;color:var(--org)}.regalo p{color:var(--beige)}
+.opc{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opc div{background:#2f2c2c;border-radius:12px;padding:14px 12px;display:grid;gap:4px;align-content:start}
+.opc b{font:400 30px/1 Georgia,serif;color:var(--org)}.opc span{font-size:14px;line-height:1.35;color:var(--white)}.opc small{font-size:12px;color:#BDB3A6;line-height:1.35}
+.bien{position:fixed;inset:0;z-index:60;background:rgba(20,19,19,.92);display:grid;place-items:center;padding:16px;overflow:auto}
+.bien .img{width:min(420px,100%);aspect-ratio:4/5;border-radius:18px;background:radial-gradient(120% 80% at 50% 0%,#3a302a 0%,#222020 60%);border:2px solid var(--org);color:var(--white);
+  display:grid;grid-template-rows:auto auto 1fr auto;gap:12px;padding:26px 22px;text-align:center;position:relative;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.bien .img img{height:46px;justify-self:center}
+.bien .img h2{font:400 30px/1.12 Georgia,serif;color:var(--white);margin:0}.bien .img h2 em{font-style:normal;color:var(--org);display:block;font-size:34px}
+.bien .img .der{font-size:15px;color:var(--beige);line-height:1.45;align-self:center;display:grid;gap:10px}
+.bien .img .der b{display:block;font:400 22px/1.2 Georgia,serif;color:var(--org)}
+.bien .img .o{font:italic 15px Georgia,serif;color:#BDB3A6}
+.bien .img .pie{font:bold 11px Arial;letter-spacing:.18em;color:var(--beige);opacity:.8}
+.bien .conf{position:absolute;font-size:22px;animation:cae 2.6s ease-in forwards;opacity:0}
+@keyframes cae{0%{transform:translateY(-30px) rotate(0);opacity:1}100%{transform:translateY(460px) rotate(300deg);opacity:0}}
+.bien .btn{width:min(420px,100%);margin-top:14px}
+@media (prefers-reduced-motion:reduce){.bien .conf{display:none}}
+@media (max-width:440px){.top{gap:8px}.top .home span{display:none}.top .home{font-size:18px;padding:8px 2px}}
 </style>
 </head>
 <body>
-<div class="top"><img src="logo.png" alt="NC Studio"><span class="t">Zona VIP</span><span class="saldo" id="saldo" role="status"></span></div>
+<div class="top"><a href="index.html" aria-label="NC Studio, página principal"><img src="logo.png" alt="NC Studio"></a><span class="t">Zona VIP</span><span class="saldo" id="saldo" role="status"></span><a class="home" href="index.html" aria-label="Inicio">🏠<span> Inicio</span></a><a class="home" href="news.html" aria-label="News">📰<span> News</span></a></div>
 <div class="bar"></div>
 <main class="wrap" id="app"><div class="msg"><span class="spin" aria-hidden="true"></span>Cargando…</div></main>
 <nav class="nav" id="nav" hidden aria-label="Secciones de tu Zona VIP">
@@ -127,14 +149,14 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
   /* ---------------- entrar ---------------- */
   function quien() {
     nav.hidden = true; saldoEl.style.display = "none";
-    app.innerHTML = '<section class="card"><h1>Bienvenido a tu Zona VIP 👑</h1><p class="hint">Tu espacio en NC Studio: el proceso de tu sesión, tus pagos, tus fotos y nuestros consejos.</p></section>' +
-      '<div class="who"><button id="wc"><i aria-hidden="true">📸</i><span><b>Soy cliente</b><span>Entro con mi número de WhatsApp</span></span></button>' +
+    app.innerHTML = '<section class="card"><h1>Bienvenido a tu Zona VIP 👑</h1><p class="hint">Tu espacio en NC Studio: el proceso de tu sesión, tus pagos, tus fotos de sesiones y de carreras, y nuestros consejos.</p></section>' +
+      '<div class="who"><button id="wc"><i aria-hidden="true">📸</i><span><b>Soy cliente</b><span>Sesiones y carreras · entro con mi número de WhatsApp</span></span></button>' +
       '<button id="wa"><i aria-hidden="true">🔑</i><span><b>Soy administrador</b><span>Solo para Nelson y Charlie</span></span></button></div>';
     $("wc").onclick = function () { telefono(); };
     $("wa").onclick = function () { location.href = "agendar.html"; };
   }
   function telefono(msg) {
-    app.innerHTML = '<section class="card"><h2>Entra con tu número</h2><p class="hint">El mismo número de WhatsApp con el que reservaste.</p>' +
+    app.innerHTML = '<section class="card"><h2>Entra con tu número</h2><p class="hint">El mismo número de WhatsApp con el que reservaste tu sesión o pediste tus fotos de la carrera. Tu número es tu usuario.</p>' +
       '<label for="tel">Número de WhatsApp<input id="tel" inputmode="tel" autocomplete="tel" placeholder="6000-0000" value="' + esc(TEL) + '"></label>' +
       '<p class="err" id="er">' + esc(msg || "") + '</p><button class="btn" id="go">Continuar</button><button class="lnk" id="bk">‹ Volver</button></section>';
     $("bk").onclick = quien;
@@ -147,7 +169,7 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
       call({ action: "vip_inicio", tel: t }).then(function (r) {
         listo(b);
         if (!r.ok) { $("er").innerHTML = esc(r.title) + (r.html ? ". " + r.html : ""); return; }
-        if (r.paso === "clave") clave(r.nombre); else codigo(r.nombre, r.correo);
+        if (r.paso === "clave") clave(r.nombre); else codigo(r.nombre, r.correo, false, r.via === "whatsapp" ? (r.whatsapp || "") : null);
       }).catch(function () { listo(b); $("er").textContent = "No pudimos conectar. Revisa tu internet."; });
     };
   }
@@ -166,17 +188,23 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
     };
     $("olv").onclick = function () {
       var b = this; b.disabled = true; b.textContent = "Enviando código…";
-      call({ action: "vip_inicio", tel: TEL, olvide: true }).then(function (r) { if (!r.ok) { b.disabled = false; b.textContent = "Olvidé mi contraseña"; $("er").innerHTML = esc(r.title) + (r.html ? ". " + r.html : ""); return; } codigo(r.nombre, r.correo, true); })
+      call({ action: "vip_inicio", tel: TEL, olvide: true }).then(function (r) { if (!r.ok) { b.disabled = false; b.textContent = "Olvidé mi contraseña"; $("er").innerHTML = esc(r.title) + (r.html ? ". " + r.html : ""); return; } codigo(r.nombre, r.correo, true, r.via === "whatsapp" ? (r.whatsapp || "") : null); })
         .catch(function () { b.disabled = false; b.textContent = "Olvidé mi contraseña"; $("er").textContent = "No pudimos conectar."; });
     };
   }
-  function codigo(nombre, correo, olvido) {
+  // wa: el código llegó por WhatsApp con el pedido de la carrera (no se manda correo); trae el número de NC para pedir otro
+  function codigo(nombre, correo, olvido, wa) {
+    var porWa = wa != null;
     app.innerHTML = '<section class="card"><h2>' + (olvido ? 'Crea una contraseña nueva' : '¡Hola, ' + esc(nombre) + '! Crea tu contraseña') + '</h2>' +
-      '<p>Para proteger tu información te enviamos un código de 6 números a <b>' + esc(correo) + '</b>. Revisa también la carpeta de spam o promociones.</p>' +
-      '<label for="co">Código del correo<input id="co" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000"></label>' +
+      (porWa ? '<p>Escribe el <b>código de 6 números</b> que te mandamos por WhatsApp con tu pedido de fotos y elige tu contraseña.' + (olvido ? '' : ' 🎁 Al crear tu usuario te ganas un regalo de bienvenida.') + '</p>'
+        : '<p>Para proteger tu información te enviamos un código de 6 números a <b>' + esc(correo) + '</b>. Revisa también la carpeta de spam o promociones.</p>') +
+      '<label for="co">' + (porWa ? 'Código de WhatsApp' : 'Código del correo') + '<input id="co" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000"></label>' +
       '<label for="c1">Tu contraseña <small style="font-weight:normal">(mínimo 6 caracteres)</small><input id="c1" type="password" autocomplete="new-password"></label>' +
       '<label for="c2">Repítela<input id="c2" type="password" autocomplete="new-password"></label>' +
-      '<p class="err" id="er"></p><button class="btn" id="go">Crear y entrar</button><button class="lnk" id="re">No me llegó: enviar otro código</button><button class="lnk" id="bk">‹ Usar otro número</button></section>';
+      '<p class="err" id="er"></p><button class="btn" id="go">Crear y entrar</button>' +
+      (porWa ? '<a class="lnk" id="re" href="https://wa.me/' + esc(wa) + '?text=' + encodeURIComponent('Hola, NC Studio 👋 No tengo mi código para crear mi usuario de la Zona VIP. Mi número es ' + TEL + '.') + '" target="_blank" rel="noopener">No lo tengo o se venció: pedir otro por WhatsApp</a>'
+        : '<button class="lnk" id="re">No me llegó: enviar otro código</button>') +
+      '<button class="lnk" id="bk">‹ Usar otro número</button></section>';
     $("co").focus(); $("bk").onclick = function () { telefono(); };
     $("go").onclick = function () {
       var c = $("co").value.replace(/\D/g, ""), a = $("c1").value, z = $("c2").value;
@@ -186,9 +214,11 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
       var b = this; cargando(b, "Creando…");
       call({ action: "vip_crear", tel: TEL, codigo: c, clave: a }).then(function (r) {
         listo(b); if (!r.ok) { $("er").innerHTML = esc(r.title) + (r.html ? ". " + r.html : ""); return; }
-        put("ncVipTok", r.tok); cargar();
+        put("ncVipTok", r.tok);
+        if (r.bienvenida) bienvenida(r.regalo, cargar); else cargar();
       }).catch(function () { listo(b); $("er").textContent = "No pudimos conectar."; });
     };
+    if (porWa) return;
     $("re").onclick = function () {
       var b = this; b.disabled = true; b.textContent = "Enviando…";
       call({ action: "vip_inicio", tel: TEL, olvide: true }).then(function (r) { b.disabled = false; b.textContent = "No me llegó: enviar otro código"; $("er").innerHTML = r.ok ? '<span style="color:#05603A">Listo, revisa tu correo.</span>' : esc(r.title); })
@@ -216,6 +246,46 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
     };
   }
 
+  // la imagen que ve al crear su usuario por primera vez: bienvenida a la familia + su regalo
+  function bienvenida(R, despues) {
+    R = R || { fotos: 3, descuento: 15 };
+    nav.hidden = true; saldoEl.style.display = "none"; app.innerHTML = "";
+    var w = document.createElement("div"); w.className = "bien"; w.setAttribute("role", "dialog"); w.setAttribute("aria-modal", "true"); w.setAttribute("aria-label", "Bienvenido a la familia de NC Studio");
+    w.innerHTML = '<div><div class="img"><img src="logo.png" alt="NC Studio">' +
+      '<h2>¡Bienvenido a la familia<em>NC Studio! 🧡</em></h2>' +
+      '<div class="der"><span>Por crear tu usuario tienes derecho a</span><b>' + R.descuento + ' % de descuento</b><span>en una sesión de fotos futura</span><span class="o">— o —</span><b>' + R.fotos + ' fotos extra gratis</b><span>en tu próxima carrera a la que asistamos</span></div>' +
+      '<p class="pie">PROFESIONAL · CERCANO · CREATIVO</p></div>' +
+      '<button class="btn" id="bienOk">¡Gracias! Entrar a mi Zona VIP</button></div>';
+    var img = w.querySelector(".img"), em = ["🎉", "✨", "🧡", "📸", "🎊"];
+    for (var i = 0; i < 18; i++) { var c = document.createElement("span"); c.className = "conf"; c.setAttribute("aria-hidden", "true"); c.textContent = em[i % em.length]; c.style.left = (4 + Math.random() * 90) + "%"; c.style.top = "0"; c.style.animationDelay = (Math.random() * 1.2) + "s"; img.appendChild(c); }
+    document.body.appendChild(w); $("bienOk").focus();
+    $("bienOk").onclick = function () { w.remove(); despues(); };
+  }
+  // tarjeta del regalo dentro de la Zona VIP (mientras no lo use)
+  function regaloHtml() {
+    var R = D.regalo || { fotos: 3, descuento: 15 };
+    return '<section class="regalo"><h2>🎁 Tu regalo de <em>bienvenida</em></h2><p>Elige uno de los dos. Cuando uses uno, el otro se cierra.</p><div class="opc">' +
+      '<div><b>' + R.descuento + ' %</b><span>de descuento en una sesión de fotos futura</span><small>Apártalo y se lo avisamos a Nelson para tu próxima reserva.</small></div>' +
+      '<div><b>' + R.fotos + '</b><span>fotos extra gratis en tu próxima carrera a la que asistamos</span><small>Vale para carreras después de hoy' + (D.regaloDesde ? ' (' + esc(fechaHora(D.regaloDesde)) + ')' : '') + ', no para la que ya pediste. Al pedir tus fotos marca «Usar mi regalo».</small></div></div>' +
+      '<button class="btn" id="usarSes">Apartar mi ' + R.descuento + ' % para una sesión</button></section>';
+  }
+  function regaloBind() {
+    var b = $("usarSes"); if (!b) return;
+    b.onclick = function () {
+      if (!confirm("¿Apartar tu " + (D.regalo || {}).descuento + " % para tu próxima sesión? Ya no podrás usar las fotos gratis en una carrera.")) return;
+      cargando(b, "Apartando…");
+      call({ action: "vip_regalo", tok: get("ncVipTok") }).then(function (r) {
+        if (!r.ok) { listo(b); if (r.salir) { put("ncVipTok", ""); telefono("Tu sesión venció. Entra de nuevo."); return; } modal('<h2>' + esc(r.title) + '</h2>'); return; }
+        D.bienvenida = r.bienvenida; put("ncVipCache", "");
+        modal('<div class="big" aria-hidden="true">🎁</div><h2>¡Listo! Tu ' + (D.regalo || {}).descuento + ' % está apartado</h2><p>Ya le avisamos a Nelson. Cuando reserves tu próxima sesión te aplicamos el descuento.</p>');
+        pintar();
+      }).catch(function () { listo(b); modal('<h2>No pudimos conectar</h2><p>Revisa tu internet e inténtalo otra vez.</p>'); });
+    };
+  }
+  function carrerasHtml() {
+    return '<a class="btn dk" href="mis-fotos.html" style="min-height:64px">🏃 Mis fotos de carreras <small style="font-weight:normal;opacity:.8">(' + D.carreras + (D.carreras === 1 ? ' pedido' : ' pedidos') + ')</small></a>';
+  }
+
   /* ---------------- mi zona ---------------- */
   function cargar() {
     var tok = get("ncVipTok"); if (!tok) { quien(); return; }
@@ -226,6 +296,7 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
     call({ action: "vip_datos", tok: tok }).then(function (r) {
       if (!r.ok) { put("ncVipCache", ""); if (r.salir) put("ncVipTok", ""); TEL = ""; telefono(r.salir ? "Tu sesión venció. Entra de nuevo." : r.title); return; }
       if (r.cambiar) { put("ncVipCache", ""); cambiarClave(); return; }
+      if (q.get("volver") === "mis-fotos" && r.carreras) { location.replace("mis-fotos.html"); return; }   // venía de Mis fotos de carreras
       var j = JSON.stringify(r); put("ncVipCache", JSON.stringify({ tok: tok, j: j }));
       if (j !== previo) mostrar(r, !!previo);
     }).catch(function () { if (!previo) app.innerHTML = '<div class="msg">No pudimos cargar tu Zona VIP. Revisa tu internet y recarga.</div>'; });
@@ -264,12 +335,14 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
     inicio();
   }
   function inicio() {
-    var x = D.reservas[SEL], n = sinLeer();
-    var h = '<section class="hello"><h1>Hola, <em>' + esc(D.primer) + '</em> 👑</h1><p>' + (x ? (x.dateIso >= new Date().toISOString().slice(0, 10) ? 'Ya falta poco para tu ' + (x.evento ? 'evento' : 'sesión') + '. Aquí tienes todo en un solo lugar.' : 'Aquí tienes todo sobre tu ' + (x.evento ? 'evento' : 'sesión') + '.') : 'Todavía no tienes una reserva activa.') + '</p>' +
+    var x = D.reservas[SEL], n = sinLeer(), car = D.carreras || 0, rg = D.bienvenida === "disponible";
+    var h = '<section class="hello"><h1>Hola, <em>' + esc(D.primer) + '</em> 👑</h1><p>' + (x ? (x.dateIso >= new Date().toISOString().slice(0, 10) ? 'Ya falta poco para tu ' + (x.evento ? 'evento' : 'sesión') + '. Aquí tienes todo en un solo lugar.' : 'Aquí tienes todo sobre tu ' + (x.evento ? 'evento' : 'sesión') + '.') : car ? 'Aquí ves tu turno y descargas tus fotos editadas de las carreras.' : 'Todavía no tienes una reserva activa.') + '</p>' +
       (n ? '<button class="btn" id="vn" style="margin-top:6px">🔔 Tienes ' + n + (n === 1 ? ' aviso nuevo' : ' avisos nuevos') + '</button>' : '') + '</section>';
+    if (car) h += carrerasHtml();
+    if (rg) h += regaloHtml();
     if (!x) {
-      h += '<section class="card"><p>Cuando reserves con nosotros, aquí vas a ver el proceso de tu sesión, tus pagos y tus fotos.</p><a class="btn" href="index.html#portafolio">Ver experiencias</a></section>';
-      app.innerHTML = h; if ($("vn")) $("vn").onclick = function () { ir("avisos"); }; return;
+      h += '<section class="card"><p>' + (car ? '¿Quieres fotos tuyas de verdad, con calma y bien dirigidas? Cuando reserves una sesión, aquí vas a ver todo el proceso, tus pagos y tus fotos.' : 'Cuando reserves con nosotros, aquí vas a ver el proceso de tu sesión, tus pagos y tus fotos.') + '</p><a class="btn" href="index.html#portafolio">Ver experiencias</a></section>';
+      app.innerHTML = h; if ($("vn")) $("vn").onclick = function () { ir("avisos"); }; regaloBind(); return;
     }
     if (D.reservas.length > 1) h += '<div class="chips" role="group" aria-label="Tus reservas">' + D.reservas.map(function (r, i) { return '<button data-r="' + i + '" aria-pressed="' + (i === SEL) + '">' + esc(r.service) + ' · ' + esc(fechaHora(r.dateIso)) + '</button>'; }).join("") + '</div>';
     h += '<section class="card"><span class="est' + (x.abonado ? ' ok' : '') + '">' + esc(x.estado) + '</span><h2>' + esc(x.service) + '</h2>' +
@@ -305,6 +378,7 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
     Array.prototype.forEach.call(app.querySelectorAll("[data-r]"), function (b) { b.onclick = function () { SEL = +b.getAttribute("data-r"); pintar(); }; });
     Array.prototype.forEach.call(app.querySelectorAll("[data-gal]"), function (b) { b.onclick = function () { abrirGal(b.getAttribute("data-gal"), x); }; });
     if (x.prep) cuentaBind(x);
+    regaloBind();
   }
   function diasPara(iso) { var h = new Date(); h.setHours(0, 0, 0, 0); return Math.round((new Date(iso + "T00:00:00") - h) / 864e5); }
   function cuentaHtml(x) {
@@ -369,6 +443,8 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
       '<p class="hint">¿Algo cambió? Escríbenos y lo actualizamos.</p></section>' +
       (K.length ? '<section class="card"><h2>Lo que nos contaste de ti 💛</h2><dl class="pf" style="margin:0">' + K.map(function (k) { return '<dt>' + esc(nom[k] || k.charAt(0).toUpperCase() + k.slice(1)) + '</dt><dd>' + esc(G[k]) + '</dd>'; }).join("") + '</dl></section>' : '') +
       '<section class="card"><h2>Tus sesiones con nosotros</h2>' + (D.reservas.length ? D.reservas.map(function (r) { return '<div class="not"><b>' + esc(r.service) + '</b><small>' + esc(r.fecha) + ' · ' + esc(r.pagado ? "Pagada" : r.estado) + '</small></div>'; }).join("") : '<p class="hint">Todavía no tienes sesiones.</p>') + '</section>' +
+      (D.carreras ? carrerasHtml() : '') +
+      (D.bienvenida ? '<section class="card"><h2>Tu regalo de bienvenida 🎁</h2><p class="hint">' + (D.bienvenida === "disponible" ? 'Disponible: ' + (D.regalo || {}).descuento + ' % en una sesión o ' + (D.regalo || {}).fotos + ' fotos gratis en tu próxima carrera.' : /sesi/.test(D.bienvenida) ? 'Apartado para tu próxima sesión (' + (D.regalo || {}).descuento + ' %).' : 'Ya lo usaste en una carrera. ¡Gracias por ser parte de la familia!') + '</p></section>' : '') +
       '<button class="btn ol" id="out">Cerrar sesión</button>';
     $("out").onclick = function () { put("ncVipTok", ""); put("ncVipCache", ""); D = null; TEL = ""; quien(); };
   }
@@ -376,7 +452,9 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
   Array.prototype.forEach.call(nav.querySelectorAll("button"), function (b) { b.onclick = function () { ir(b.getAttribute("data-s")); }; });
   var q = new URLSearchParams(location.search);
   if (q.get("s")) SEC = q.get("s");
-  if (get("ncVipTok")) cargar(); else if (q.get("cliente")) telefono(); else quien();
+  // el link del WhatsApp trae su número (?tel=): entra directo a escribir su código
+  if (q.get("tel")) TEL = q.get("tel").replace(/\D/g, "").slice(-8);
+  if (get("ncVipTok")) cargar(); else if (q.get("cliente") || TEL) telefono(); else quien();
 })();
 </script>
 </body>

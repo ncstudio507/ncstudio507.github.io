@@ -21,7 +21,7 @@
 <body class="protegida">
 <header class="hd">
   <a href="index.html" aria-label="NC Studio, página principal"><img src="logo.png" alt="NC Studio"></a>
-  <nav aria-label="Menú principal"><a href="index.html">🏠 Inicio</a><a href="news.html" class="on" aria-current="page">📰 News</a><a href="mis-fotos.html">📷 Mis fotos</a><a href="vip.html">👑 Zona VIP</a></nav>
+  <nav aria-label="Menú principal"><a href="index.html">🏠 Inicio</a><a href="news.html" class="on" aria-current="page">📰 News</a><a href="vip.html">👑 Zona VIP</a></nav>
 </header>
 <main class="wrap">
   <a href="news.html" class="nota" style="text-decoration:none">← Todos los eventos</a>
@@ -106,7 +106,9 @@
   // elegir fotos de una preventa / reclamar: vienen de Mis fotos con el celular (&tel=)
   var telQ = qs.get('tel') || (function () { try { return localStorage.getItem('nc-mi-tel') || ''; } catch (e) { return ''; } })();
   var necesitaMios = qs.get('elegir') || qs.get('reclamo');
-  Promise.all([A.cargarEvento(id), necesitaMios && telQ ? A.gal('misPedidos', [telQ]) : null]).then(function (r) { iniciar(r[1]); })
+  // solo ESE pedido (ticket + celular): la lista completa de pedidos se ve en la Zona VIP, con contraseña
+  var misUno = necesitaMios && telQ ? A.gal('estadoPedido', [necesitaMios, telQ]).then(function (r) { return { ok: true, pedidos: r && r.pedido ? [r.pedido] : [] }; }) : null;
+  Promise.all([A.cargarEvento(id), misUno]).then(function (r) { iniciar(r[1]); })
     .catch(function () { document.querySelector('main').innerHTML = '<h1>No se pudo abrir el álbum</h1><p class="nota">Revisa tu conexión e inténtalo otra vez.</p>'; });
   function iniciar(MIS) {
   var E = (window.NC_EVENTOS || []).filter(function (e) { return e.id === id; })[0];
@@ -394,8 +396,8 @@
       if (!r.ok) { aviso(r.title); return; }
       var p = r.pedido; sel = []; guardar();
       mostrar('<div class="ticket"><p class="nota">¡Listo, ' + p.nombre.replace(/[<>&]/g, '') + '!</p><div class="num">Turno ' + p.turno + '</div><p class="res">NC va por el ' + r.vaPor + '</p>' +
-        '<p class="nota">Tus ' + p.fotos.length + ' fotos entraron a la fila de edición. Te avisamos por WhatsApp; las ves en <a href="mis-fotos.html?tel=' + p.tel + '">Mis fotos</a>.</p>' +
-        '<div class="fila" style="justify-content:center"><a class="btn" href="mis-fotos.html?tel=' + p.tel + '" style="text-decoration:none;display:inline-flex;align-items:center">Ver Mis fotos</a></div></div>');
+        '<p class="nota">Tus ' + p.fotos.length + ' fotos entraron a la fila de edición. Te avisamos por WhatsApp; las ves en tu <a href="vip.html?tel=' + p.tel + '">Zona VIP</a>.</p>' +
+        '<div class="fila" style="justify-content:center"><a class="btn" href="vip.html?tel=' + p.tel + '" style="text-decoration:none;display:inline-flex;align-items:center">Ir a mi Zona VIP</a></div></div>');
     }, function (e) { aviso((e && e.title) || 'No se pudo guardar. Inténtalo otra vez.'); });
   }
 
@@ -436,18 +438,36 @@
       '<label class="campo">Celular (WhatsApp)<input type="tel" id="fTel" placeholder="6xxx-xxxx" autocomplete="tel"></label>' +
       '<label class="campo">Correo (opcional)<input type="email" id="fMail" autocomplete="email"></label>' +
       '<label class="campo">Número de dorsal (si lo tienes)<input type="text" id="fDor" inputmode="numeric"></label>' +
-      '<p class="nota" style="margin:0 0 12px;font-size:12px">Con tu número entras a <b>Mis fotos</b> para ver y descargar tus fotos editadas. NC Studio guarda tus datos para entregarte las fotos y avisarte de próximas carreras.</p>' +
+      '<div id="fRegalo"></div>' +
+      '<p class="nota" style="margin:0 0 12px;font-size:12px">Tu número es tu usuario en la <b>Zona VIP</b>: ahí ves tu turno y descargas tus fotos editadas. Te mandamos por WhatsApp el código para crear tu contraseña. NC Studio guarda tus datos para entregarte las fotos y avisarte de próximas carreras.</p>' +
       (t && !captura && !LIB ? '<p class="nota" style="margin:0 0 10px">⭐ Recuerda: con la captura de que sigues a NC ' + promoTexto(pagadas().length) + '. <a href="#" id="volverCap">Subir captura</a></p>' : '') +
       '<p class="nota" id="fErr" style="color:#ffb4a8"></p>' +
       '<div class="fila"><button class="btn sec" id="p2b">Atrás</button><button class="btn" id="p2ok">' + (t ? 'Pagar ' + $(t) + ' con Yappy' : 'Pedir mis fotos gratis') + '</button></div>');
     document.getElementById('p2b').onclick = paso1;
     var vc = document.getElementById('volverCap'); if (vc) vc.onclick = function (ev) { ev.preventDefault(); paso1(); };
+    // regalo de bienvenida de la Zona VIP: si ese número lo tiene sin usar, se ofrece (el servidor lo vuelve a revisar)
+    var REG = T.REGALO || { fotos: 3 }, conRegalo = false, telVisto = '';
+    function botonPagar() {
+      var n = pagadas().length, x = conRegalo ? precio(Math.max(0, n - REG.fotos), !!captura) : t;
+      document.getElementById('p2ok').textContent = x ? 'Pagar ' + $(x) + ' con Yappy' : 'Pedir mis fotos gratis';
+    }
+    document.getElementById('fTel').addEventListener('blur', function () {
+      var tel = this.value.replace(/\D/g, ''), caja = document.getElementById('fRegalo');
+      if (tel.length < 7 || tel === telVisto || LIB || !pagadas().length) return; telVisto = tel;
+      A.gal('regaloPublico', [tel, E.id]).then(function (r) {
+        if (!r || !r.regalo) { caja.innerHTML = ''; conRegalo = false; botonPagar(); return; }
+        conRegalo = true;
+        caja.innerHTML = '<label class="promo" style="margin:0 0 12px;cursor:pointer;align-items:center"><input type="checkbox" id="fReg" checked style="width:22px;height:22px;accent-color:#F99824;flex:none"> <div><b>🎁 Usar mi regalo de bienvenida:</b> ' + REG.fotos + ' fotos gratis en este pedido. Si lo usas aquí, ya no tienes el 15 % para una sesión.</div></label>';
+        document.getElementById('fReg').onchange = function () { conRegalo = this.checked; botonPagar(); };
+        botonPagar();
+      }, function () {});
+    });
     document.getElementById('p2ok').onclick = function () {
       var nom = document.getElementById('fNom').value.trim(), tel = document.getElementById('fTel').value.replace(/\D/g, ''), mail = document.getElementById('fMail').value.trim();
       var err = !nom ? 'Falta tu nombre.' : tel.length < 7 ? 'Revisa tu número de celular.' : mail && !/^\S+@\S+\.\S+$/.test(mail) ? 'Revisa tu correo (o déjalo vacío).' : '';
       document.getElementById('fErr').textContent = err;
       if (err) return;
-      confirmar({ nombre: nom, tel: tel, correo: mail, dorsal: document.getElementById('fDor').value.replace(/\D/g, '') });
+      confirmar({ nombre: nom, tel: tel, correo: mail, dorsal: document.getElementById('fDor').value.replace(/\D/g, ''), regalo: conRegalo && tel === telVisto });
     };
   }
   function adivinarCorredor(dorsal) {
@@ -465,7 +485,7 @@
     var subir = capFile && !LIB ? A.subirFoto('captura', capFile, { tel: datos.tel }).catch(function () { return null; }) : Promise.resolve(null);
     subir.then(function (c) {
       return A.gal('pedidoCarrera', [E.id, { nombre: datos.nombre, tel: datos.tel, correo: datos.correo, dorsal: datos.dorsal, fotos: sel.slice(),
-        captura: LIB ? null : captura, capturaArchivo: c && c.archivo, finisher: finisher || null }]);
+        captura: LIB ? null : captura, capturaArchivo: c && c.archivo, finisher: finisher || null, regalo: !!datos.regalo }]);
     }).then(function (r) {
       if (!r || !r.ok) { var e = document.getElementById('fErr'); if (e) e.textContent = (r && r.title) || 'No se pudo guardar.'; if (b) { b.disabled = false; b.textContent = 'Intentar otra vez'; } return; }
       if (r.pedido.estado === 'esperando') esperarYappy(r.pedido); else ticketListo(r.pedido, r.vaPor);
@@ -479,13 +499,14 @@
         '<div class="fila" style="justify-content:center"><button class="btn" id="p3ok">Ya pagué: revisar</button></div><p class="nota" id="p3est"></p>'
         : '<p class="nota"><span class="sim">SIMULACIÓN</span> Aquí va el botón de Yappy con el código de Nelson.</p>' +
         '<div class="fila" style="justify-content:center"><button class="btn" id="p3ok">Simular: llegó el Yappy</button></div>') +
-      '<p class="nota">Cuando llegue tu pago recibes tu turno en la fila de edición. Puedes revisarlo en <a href="mis-fotos.html?tel=' + p.tel + '">Mis fotos</a>.</p>' +
+      ((p.regaloFotos || []).length ? '<p class="nota">🎁 Usaste tu regalo de bienvenida: ' + p.regaloFotos.length + ' fotos gratis en este pedido.</p>' : '') +
+      '<p class="nota">Cuando llegue tu pago recibes tu turno en la fila de edición y te mandamos por WhatsApp cómo entrar a tu <b>Zona VIP</b>.</p>' +
       '<div class="fila" style="justify-content:center"><button class="btn sec" id="fin">Cerrar</button></div></div>');
     document.getElementById('p3ok').onclick = function () {
       if (!A.real) T.registrarYappy({ nombre: p.nombre, tel: p.tel, monto: p.monto });
-      A.gal('misPedidos', [p.tel]).then(function (r) {
-        var q = r.pedidos.filter(function (x) { return x.ticket === p.ticket; })[0];
-        if (q && q.estado !== 'esperando') ticketListo(q, r.vaPor[E.id]);
+      A.gal('estadoPedido', [p.ticket, p.tel]).then(function (r) {
+        var q = r && r.pedido;
+        if (q && q.estado !== 'esperando') ticketListo(q, r.vaPor);
         else { var s = document.getElementById('p3est'); if (s) s.textContent = 'Todavía no nos llega. El Yappy tarda unos minutos en aparecer; te avisamos por WhatsApp.'; }
       });
     };
@@ -495,7 +516,8 @@
     mostrar('<div class="ticket"><p class="nota">¡Gracias, ' + p.nombre.replace(/[<>&]/g, '') + '! ' + (Number(p.monto) ? '✅ Tu Yappy llegó.' : 'Tu pedido quedó hecho.') + '</p>' +
       '<div class="num">Turno ' + p.turno + '</div><p class="res">NC va por el ' + (vaPor || T.vaPor(E.id)) + '</p>' +
       '<p class="nota">Ticket ' + p.ticket + '. Tus fotos están sin editar; Nelson edita en orden de turno y te avisa por WhatsApp. ' +
-      'Las ves y las descargas en <a href="mis-fotos.html?tel=' + p.tel + '">Mis fotos</a> con tu número de celular.</p>' +
+      ((p.regaloFotos || []).length ? '🎁 Usaste tu regalo: ' + p.regaloFotos.length + ' fotos gratis. ' : '') +
+      'Las ves y las descargas en tu <a href="vip.html?tel=' + p.tel + '">Zona VIP</a>: tu número es tu usuario y te mandamos por WhatsApp el código para crear tu contraseña.</p>' +
       '<div class="fila" style="justify-content:center"><button class="btn" id="fin">Listo</button></div></div>');
     document.getElementById('fin').onclick = fin;
   }

@@ -463,7 +463,7 @@ function panel() {
   // ---------------- entregas
   function mensaje(p, url) {
     return '¡Hola ' + p.nombre.split(' ')[0] + '! 📸 Tus fotos editadas de ' + p.eventoNombre + ' ya están listas (ticket ' + p.ticket + ').\n\n' +
-      'Velas y descárgalas en buena calidad aquí, con tu número de celular: ' + new URL('mis-fotos.html?tel=' + p.tel, location.href).href + '\n' +
+      'Velas y descárgalas en buena calidad en tu Zona VIP (entras con tu número y tu contraseña): ' + new URL('vip.html?tel=' + p.tel, location.href).href + '\n' +
       'Quedan disponibles 90 días.' + (p.finisher ? ' Ahí también está tu imagen de Finisher para historias ⭐' : '') + '\n\n' +
       '¡Gracias por confiar en nosotros! Si te gustaron, etiquétanos en Instagram @ncstudio507 🧡';
   }
@@ -639,6 +639,7 @@ function panel() {
           '<div class="nota">' + c.pedidos + (c.pedidos === 1 ? ' pedido' : ' pedidos') + ' · ' + c.fotos + (c.fotos === 1 ? ' foto · ' : ' fotos · ') + $(c.gastado) + ' pagado</div>' +
           (c.contacto ? '<div class="nota ok">📇 En tus contactos como «' + esc(c.contacto.nombre) + '»</div>' : nContactos ? '<div class="nota">🆕 No está en tus contactos</div>' : '') +
           '<div class="acciones" style="margin-top:6px"><select class="sel" data-cgrupo="' + esc(c.tel) + '" style="max-width:200px;min-height:34px"><option value="">Sin grupo</option>' + Object.keys(G).map(function (g) { return '<option' + (c.grupo === g ? ' selected' : '') + '>' + esc(g) + '</option>'; }).join('') + '</select>' +
+          '<button class="mini-btn na" data-cvip="' + esc(c.tel) + '" data-cnom="' + esc(c.nombre) + '">🔐 Código Zona VIP</button>' +
           '<button class="mini-btn" data-cborrar="' + esc(c.tel) + '">Borrar cliente</button></div></div></div>';
       }).join('') : '<p class="vacio">Todavía no hay corredores.</p>') +
       titulo('👥 Grupos (clubes, equipos)') +
@@ -650,6 +651,18 @@ function panel() {
       (P.length ? P.map(function (x) { return '<div class="tarjeta ped"><div><b>' + esc(x.nombre) + '</b> · <a href="https://wa.me/507' + esc(x.tel) + '" target="_blank">' + esc(x.tel) + '</a><div class="nota">' + esc(x.origenes.join(' · ')) + '</div></div><div class="acciones"><button class="mini-btn" data-pbor="' + esc(x.tel) + '">Borrar</button></div></div>'; }).join('') : '<p class="vacio">Todavía no hay posibles clientes.</p>');
     box.querySelectorAll('[data-cgrupo]').forEach(function (s) { s.onchange = function () { T.ponerGrupo(s.dataset.cgrupo, s.value); }; });
     box.querySelectorAll('[data-cborrar]').forEach(function (b) { b.onclick = function () { borrarCon('cliente', b.dataset.cborrar, 'los datos de este cliente (nombre, celular, correo y cara)', clientes); }; });
+    // código nuevo para crear su usuario (o cambiar su contraseña) en la Zona VIP: abre tu WhatsApp con el mensaje listo
+    box.querySelectorAll('[data-cvip]').forEach(function (b) {
+      b.onclick = function () {
+        if (!window.NC_API.real) { alert('El código de la Zona VIP solo funciona en la página real.'); return; }
+        var w = window.open('', '_blank'); b.disabled = true; b.textContent = 'Creando…';
+        window.NC_API.admin('codigoVip', [b.dataset.cvip, b.dataset.cnom]).then(function (r) {
+          b.disabled = false; b.textContent = '🔐 Código Zona VIP';
+          if (!r || !r.ok) { if (w) w.close(); alert((r && r.title) || 'No se pudo crear el código.'); return; }
+          if (w) w.location.href = r.wa; else location.href = r.wa;
+        }, function (e) { b.disabled = false; b.textContent = '🔐 Código Zona VIP'; if (w) w.close(); alert((e && e.title) || 'Sin conexión.'); });
+      };
+    });
     box.querySelectorAll('[data-gfrase]').forEach(function (i) { i.onchange = function () { T.guardarGrupo(i.dataset.gfrase, { frase: i.value.trim() }); }; });
     box.querySelectorAll('[data-gborrar]').forEach(function (b) { b.onclick = function () { T.guardarGrupo(b.dataset.gborrar, null); clientes(); }; });
     box.querySelector('#gCrear').onclick = function () { var n = box.querySelector('#gNuevo').value.trim(); if (!n) return; T.guardarGrupo(n, { frase: box.querySelector('#gFrase').value.trim() }); clientes(); };

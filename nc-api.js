@@ -85,6 +85,14 @@
       }
       return h;   // solo el botón (si alguien no sabe usarlo, Nelson le da el link o su número de boca)
     },
+    // una función del panel que solo existe en el servidor (ej. codigoVip): se pide con el PIN y se devuelve su resultado
+    admin: function (fn, args) {
+      return post({ action: 'gal_admin', pin: pin(), fn: fn, args: args || [] }).then(function (r) { if (!r.ok) throw r; return r.r; });
+    },
+    // Mis fotos de carreras: con la sesión de la Zona VIP (el número es el usuario y la contraseña lo protege)
+    mis: function (tok) {
+      return post({ action: 'gal_mis', tok: tok }).then(function (r) { if (!r.ok) throw r; return r.r; });
+    },
     // link «Escríbele» de los avisos
     ir: function (id) {
       if (!real) { var a = T.avisos().filter(function (x) { return x.id === id; })[0]; if (!a) return Promise.resolve(null); T.marcarAbierto(id); return Promise.resolve(T.linkWa(a)); }

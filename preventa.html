@@ -19,7 +19,7 @@
 <body>
 <header class="hd">
   <a href="index.html" aria-label="NC Studio, página principal"><img src="logo.png" alt="NC Studio"></a>
-  <nav aria-label="Menú principal"><a href="index.html">🏠 Inicio</a><a href="news.html" class="on" aria-current="page">📰 News</a><a href="mis-fotos.html">📷 Mis fotos</a><a href="vip.html">👑 Zona VIP</a></nav>
+  <nav aria-label="Menú principal"><a href="index.html">🏠 Inicio</a><a href="news.html" class="on" aria-current="page">📰 News</a><a href="vip.html">👑 Zona VIP</a></nav>
 </header>
 <main class="wrap" style="max-width:620px" id="main"></main>
 <div class="modal" id="modal" hidden><div class="caja" id="caja"></div></div>
@@ -67,7 +67,7 @@
     modal.hidden = false;
     document.getElementById('pago').onclick = function () {
       if (!A.real) T.registrarYappy({ nombre: p.nombre, tel: p.tel, monto: p.monto });
-      caja.innerHTML = '<div class="ticket"><p class="nota">¡Listo, ' + esc(p.nombre) + '!</p><div class="num">🎟 ' + esc(p.paquete.nombre) + '</div><p class="nota">Tu preventa está pagada. Cuando salgan las fotos te avisamos por WhatsApp; las verás en <a href="mis-fotos.html?tel=' + p.tel + '">Mis fotos</a>.</p></div>';
+      caja.innerHTML = '<div class="ticket"><p class="nota">¡Listo, ' + esc(p.nombre) + '!</p><div class="num">🎟 ' + esc(p.paquete.nombre) + '</div><p class="nota">Tu preventa está pagada. Cuando salgan las fotos te avisamos por WhatsApp; las verás en tu <a href="vip.html?tel=' + p.tel + '">Zona VIP</a>.</p></div>';
     };
   }
   }

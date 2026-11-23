@@ -30,8 +30,14 @@
   function primero(n) { return String(n || '').trim().split(/\s+/)[0] || ''; }
   var ACTIVOS = { pagado: 1, edicion: 1 };
 
+  // dirección de la página (en el servidor la pone galeria.gs con CFG.SITE)
+  function sitio() { return raiz.NC_SITIO || 'https://ncstudio507.github.io/'; }
+  // Zona VIP (solo en el servidor): código para crear el usuario y regalo de bienvenida. En el prototipo no existe.
+  function vip() { return raiz.NC_VIP || null; }
+
   var T = raiz.NC_TIENDA = {
     DIA: DIA, dinero: dinero,
+    REGALO: { fotos: 3, descuento: 15 },   // regalo por crear su usuario: 3 fotos gratis en una carrera O 15 % en una sesión
     // ================================================================ precios por carrera (editables en el panel)
     PRECIOS_BASE: { tabla: [3.5, 5, 8, 10], captura: [2.5, 5], patrocinio: { gratis: 3, extra: 5 } },
     precios: function (eventoId) {
@@ -126,7 +132,7 @@
       var p = this.pedido(ticket); if (!p) return;
       if (ok) { this.actualizar(ticket, { capturaEstado: 'ok' }); return; }
       // falsa: se cobra la diferencia y el pedido se pausa (no avanza en la fila) hasta que pague
-      var lleno = this.calcular(p.evento, p.fotos.length - (p.gratis || []).length, false, false), dif = Math.max(0, lleno - Number(p.monto));
+      var lleno = this.calcular(p.evento, p.fotos.length - (p.gratis || []).length - (p.regaloFotos || []).length, false, false), dif = Math.max(0, lleno - Number(p.monto));
       this.actualizar(ticket, { capturaEstado: 'falsa', estado: dif ? 'pausado' : p.estado });
       if (dif) {
         var d = this.crear({ tipo: 'diferencia', de: ticket, evento: p.evento, eventoNombre: p.eventoNombre, nombre: p.nombre, tel: p.tel, correo: p.correo, fotos: [], gratis: [], monto: dif });
@@ -143,7 +149,11 @@
       leer().forEach(function (p) {
         var c = new Date(p.creado).getTime();
         if (p.estado === 'esperando') {
-          if (t - c >= 7 * DIA) { yo.actualizar(p.ticket, { estado: 'vencido', vencido: iso() }); cambios++; yo._aviso({ tipo: 'vencido', tel: p.tel, texto: '⌛ Se venció el pedido ' + p.ticket + ' de ' + p.nombre + ' (no pagó en 7 días). El contacto queda guardado.' }); }
+          if (t - c >= 7 * DIA) {
+            yo.actualizar(p.ticket, { estado: 'vencido', vencido: iso() }); cambios++;
+            if ((p.regaloFotos || []).length && vip()) try { vip().devolverRegalo(p.tel, p.ticket); } catch (e) {}   // su regalo vuelve a estar disponible
+            yo._aviso({ tipo: 'vencido', tel: p.tel, texto: '⌛ Se venció el pedido ' + p.ticket + ' de ' + p.nombre + ' (no pagó en 7 días). El contacto queda guardado.' });
+          }
           else if (t - c >= 6 * DIA && !p.recordado) { yo.actualizar(p.ticket, { recordado: iso() }); cambios++; yo._mensajeCliente(p, 'Hola ' + primero(p.nombre) + ' 👋 tu pedido ' + p.ticket + ' de ' + p.eventoNombre + ' vence mañana. Si lo quieres, paga ' + dinero(p.monto) + ' por Yappy y entra a la fila de edición. ¡Gracias por confiar en nosotros!'); }
         }
         if (p.estado === 'entregado' && p.entregado && p.tipo !== 'diferencia') {
@@ -151,7 +161,7 @@
           if (t - e >= 90 * DIA && !p.expirado) { yo.actualizar(p.ticket, { expirado: iso() }); cambios++; yo._aviso({ tipo: 'vencido', tel: p.tel, texto: '🗂 Se vencieron las fotos de ' + p.nombre + ' (' + p.ticket + ', ' + p.eventoNombre + '): ya no se ven en Mis fotos. Siguen en tu Drive.' }); }
           else if (t - e >= 83 * DIA && !p.avisado90) {
             yo.actualizar(p.ticket, { avisado90: iso() }); cambios++;
-            yo._mensajeCliente(p, 'Hola ' + primero(p.nombre) + ' 📸 tus fotos de ' + p.eventoNombre + ' se vencen en 7 días. Descárgalas aquí con tu número: mis-fotos.html');
+            yo._mensajeCliente(p, 'Hola ' + primero(p.nombre) + ' 📸 tus fotos de ' + p.eventoNombre + ' se vencen en 7 días. Descárgalas en tu Zona VIP: ' + sitio() + 'vip.html');
             yo._aviso({ tipo: 'vence', tel: p.tel, texto: '⏳ A ' + p.nombre + ' se le vencen las fotos en 7 días (' + p.ticket + ', ' + p.eventoNombre + ').', wa: 'https://wa.me/507' + p.tel });
           }
         }
@@ -177,19 +187,37 @@
         .sort(function (x, y) { return ((x.p && x.p.turno) || 999) - ((y.p && y.p.turno) || 999); });
     },
     // saludo que el corredor recibe: SIEMPRE con el nombre que puso en la página (nunca el del contacto)
-    saludo: function (p) {
+    // inv: la invitación a la Zona VIP (con el código para crear su usuario) que se agrega al final
+    saludo: function (p, inv) {
       var n = p.fotos.length, g = this.grupoDe(p.tel), frase = g ? this.fraseGrupo(g) : '';
       return '¡Hola ' + primero(p.nombre) + '! 👋 Soy Nelson de NC Studio 📸 Ya me llegó tu pedido de ' + n + (n === 1 ? ' foto' : ' fotos') + ' de la ' + p.eventoNombre +
-        ' (ticket ' + p.ticket + '). ' + (this.vaPor(p.evento) >= p.turno ? '¡Ya voy con tu pedido!' : 'Tu turno es el ' + p.turno + ' y voy por el ' + this.vaPor(p.evento) + '; te aviso apenas estén listas.') + ' ' + (frase ? frase + ' ' : '') + '¡Gracias por confiar en nosotros! 🧡';
+        ' (ticket ' + p.ticket + '). ' + (this.vaPor(p.evento) >= p.turno ? '¡Ya voy con tu pedido!' : 'Tu turno es el ' + p.turno + ' y voy por el ' + this.vaPor(p.evento) + '; te aviso apenas estén listas.') + ' ' + (frase ? frase + ' ' : '') + '¡Gracias por confiar en nosotros! 🧡' +
+        (inv && inv.codigo ? '\n\n🔐 Crea tu usuario en la Zona VIP de NC Studio: ahí ves tu turno y descargas tus fotos editadas.\n👉 ' + inv.link + '\nTu código: ' + inv.codigo + ' (vale ' + inv.dias + ' días)\n🎁 Al crearlo te ganas un regalo de bienvenida para la próxima vez.'
+          : inv && inv.cuenta ? '\n\nTus fotos te llegan a tu Zona VIP 👑 ' + inv.link + ' (entras con tu número y tu contraseña).' : '');
+    },
+    // si no tiene usuario en la Zona VIP, el servidor crea un código y va en el WhatsApp del pedido
+    invitarVip: function (p, forzar) {
+      if (!vip() || !p.tel) return null;
+      try { return vip().invitar(p.tel, p.nombre, p.correo, !!forzar); } catch (e) { return null; }
     },
     _avisarPedido: function (p) {
       var k = this.contactoDe(p.tel), n = p.fotos.length;
       var quien = k ? k.nombre + (k.nombre.toLowerCase() !== p.nombre.toLowerCase() ? ' (en la página puso «' + p.nombre + '»)' : '') : p.nombre + ' (' + p.tel + ')';
-      var g = this.grupoDe(p.tel);
-      return this._aviso({ tipo: 'pedido', ticket: p.ticket, tel: p.tel, contacto: !!k, saludo: this.saludo(p),
+      var g = this.grupoDe(p.tel), inv = this.invitarVip(p);
+      return this._aviso({ tipo: 'pedido', ticket: p.ticket, tel: p.tel, contacto: !!k, saludo: this.saludo(p, inv),
         texto: (Number(p.monto) ? '💰 ' : '🎁 ') + quien + (g ? ' · ' + g : '') + ' escogió ' + n + (n === 1 ? ' foto' : ' fotos') + ' de ' + p.eventoNombre +
           (Number(p.monto) ? ' y pagó ' + dinero(p.monto) + ' por Yappy' : p.patrocinio ? ' (gratis por patrocinio' + (p.patrocinio !== 'sí' ? ' de ' + p.patrocinio : '') + ')' : ' (gratis)') +
-          (p.captura ? ' · 📸 con captura' : '') + '\n🎟 Turno ' + p.turno + ' · vas por el ' + this.vaPor(p.evento) + (k ? '' : '\n🆕 No lo tienes en tus contactos') });
+          ((p.regaloFotos || []).length ? ' · 🎁 usó su regalo (' + p.regaloFotos.length + ' gratis)' : '') +
+          (p.captura ? ' · 📸 con captura' : '') + '\n🎟 Turno ' + p.turno + ' · vas por el ' + this.vaPor(p.evento) + (k ? '' : '\n🆕 No lo tienes en tus contactos') +
+          (inv && inv.codigo ? '\n🔐 El mensaje lleva su código para crear su usuario' : '') });
+    },
+    // panel de Nelson: código nuevo para alguien que lo perdió o se le venció (te devuelve el mensaje listo para WhatsApp)
+    codigoVip: function (tel, nombre) {
+      var t = soloDigitos(tel); if (t.length < 7) return { ok: false, title: 'Ese número no está completo' };
+      var inv = this.invitarVip({ tel: t, nombre: nombre || '' }, true);
+      if (!inv || !inv.codigo) return { ok: false, title: 'La Zona VIP solo funciona en la página real' };
+      var texto = '¡Hola ' + primero(nombre) + '! 👋 Este es tu código para ' + (inv.cuenta ? 'crear una contraseña nueva' : 'crear tu usuario') + ' en la Zona VIP de NC Studio:\n👉 ' + inv.link + '\nTu código: ' + inv.codigo + ' (vale ' + inv.dias + ' días)' + (inv.cuenta ? '' : '\n🎁 Al crearlo te ganas un regalo de bienvenida.');
+      return { ok: true, codigo: inv.codigo, texto: texto, wa: 'https://wa.me/507' + t + '?text=' + encodeURIComponent(texto) };
     },
     // link para WhatsApp con el saludo ya escrito (lo usa ir.html)
     linkWa: function (a) { return 'https://wa.me/507' + a.tel + (a.saludo ? '?text=' + encodeURIComponent(a.saludo) : ''); },
@@ -223,7 +251,7 @@
     entregar: function (ticket, link, archivos) {
       this.actualizar(ticket, { estado: 'entregado', entrega: link, editadas: archivos, entregado: iso() });
       var p = this.pedido(ticket);
-      this._mensajeCliente(p, '¡Hola ' + primero(p.nombre) + '! 📸 Tus fotos editadas de ' + p.eventoNombre + ' ya están listas (ticket ' + p.ticket + '). Velas y descárgalas en buena calidad en Mis fotos con tu número. Quedan disponibles 90 días. ¡Gracias por confiar en nosotros! 🧡');
+      this._mensajeCliente(p, '¡Hola ' + primero(p.nombre) + '! 📸 Tus fotos editadas de ' + p.eventoNombre + ' ya están listas (ticket ' + p.ticket + '). Velas y descárgalas en buena calidad en tu Zona VIP: ' + sitio() + 'vip.html (Mis fotos de carreras). Quedan disponibles 90 días. ¡Gracias por confiar en nosotros! 🧡');
     },
 
     // ================================================================ grupales y álbumes de grupo
@@ -432,13 +460,20 @@
       var gratis = fotos.filter(function (n) { return yo.esGrupal(E.id, n, !!porNombre[n].grupal); }), pag = fotos.filter(function (n) { return gratis.indexOf(n) < 0; });
       var lib = this.liberado(E.id), P = this.precios(E.id), yaUso = lib ? this.gratisUsadas(E.id, tel) : 0;
       var cap = lib ? null : (d.captura || null);
-      var monto = this.calcular(E.id, pag.length, !!cap, !!lib, yaUso);
+      // regalo de bienvenida de la Zona VIP: las primeras 3 fotos pagables salen gratis (no aplica con patrocinio).
+      // Solo en carreras DESPUÉS del día en que creó su usuario: no en la carrera de la que pidió fotos al crearlo.
+      var regalo = [];
+      if (d.regalo && !lib && pag.length && vip()) { var est = ''; try { est = vip().regalo(tel, E.fecha); } catch (e) {} if (est === 'disponible') regalo = pag.slice(0, this.REGALO.fotos); }
+      var monto = this.calcular(E.id, pag.length - regalo.length, !!cap, !!lib, yaUso);
       // a qué corredor pertenece: el dorsal que escribió, o la cara que más sale en sus fotos
       var c = null, dor = String(d.dorsal || '').replace(/\D/g, '');
       if (dor) c = E.corredores.filter(function (x) { return x.dorsal && +x.dorsal === +dor; })[0] || null;
       if (!c) { var cu = {}; pag.forEach(function (n) { (porNombre[n].corredores || []).forEach(function (x) { cu[x] = (cu[x] || 0) + 1; }); }); var m = Object.keys(cu).sort(function (a, b) { return cu[b] - cu[a]; })[0]; c = E.corredores.filter(function (x) { return x.id === m; })[0] || null; }
+      // el regalo se marca usado ANTES de crear el pedido (si el pedido entra gratis, el aviso ya sale con él)
+      var ticketNuevo = 'C-' + String(leer().length + 1).padStart(4, '0');
+      if (regalo.length) { var okR = false; try { okR = vip().usarRegalo(tel, ticketNuevo); } catch (e) {} if (!okR) { regalo = []; monto = this.calcular(E.id, pag.length, !!cap, !!lib, yaUso); } }
       var p = this.crear({ evento: E.id, eventoNombre: E.nombre, nombre: String(d.nombre).trim().slice(0, 80), tel: tel, correo: String(d.correo || '').trim().slice(0, 120),
-        dorsal: dor || (c && c.dorsal) || '', fotos: fotos, gratis: gratis, monto: monto, captura: cap, capturaArchivo: d.capturaArchivo || null,
+        dorsal: dor || (c && c.dorsal) || '', fotos: fotos, gratis: gratis, regaloFotos: regalo, monto: monto, captura: cap, capturaArchivo: d.capturaArchivo || null,
         finisher: fotos.indexOf(d.finisher) >= 0 ? d.finisher : null, patrocinio: lib ? (lib.patrocinador || 'sí') : null,
         gratisPatrocinio: lib ? Math.min(pag.length, Math.max(0, P.patrocinio.gratis - yaUso)) : 0, yaUsoGratis: yaUso, corredor: c ? c.id : null, cara: c ? c.cara : null });
       return { ok: true, pedido: p, vaPor: this.vaPor(E.id) };
@@ -467,7 +502,18 @@
       return { ok: true, precios: eventoId ? this.precios(eventoId) : null, liberado: eventoId ? this.liberado(eventoId) : null, albumes: eventoId ? this.albumes(eventoId) : [],
         grupales: m, vaPor: vp, preventas: pv, ocultos: leerK('nc-galeria-eventos-ocultos', []) };
     },
-    // Mis fotos: solo los pedidos de ESE celular (decisión de Nelson: se entra solo con el celular)
+    // ¿ese celular puede usar su regalo de bienvenida en ESTA carrera? (solo dice sí o no; nada más de la persona)
+    regaloPublico: function (tel, eventoId) {
+      var t = soloDigitos(tel), est = '', E = eventoId ? this.evento(eventoId) : null;
+      if (t.length >= 7 && vip()) try { est = vip().regalo(t, E ? E.fecha : ''); } catch (e) {}
+      return { regalo: est === 'disponible', fotos: this.REGALO.fotos };
+    },
+    // «Ya pagué: revisar» en el álbum: solo ESE pedido, y solo si el celular coincide
+    estadoPedido: function (ticket, tel) {
+      var p = this.pedido(ticket); if (!p || p.tel !== soloDigitos(tel)) return null;
+      return { pedido: p, vaPor: this.vaPor(p.evento) };
+    },
+    // Mis fotos de carreras: solo los pedidos de ESE celular. En la página real se ve dentro de la Zona VIP (con contraseña).
     misPedidos: function (tel) {
       var t = soloDigitos(tel); if (t.length < 7) return { ok: false, title: 'Escribe tu número completo' };
       this.revisarVencimientos();
