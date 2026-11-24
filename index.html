@@ -19,6 +19,7 @@
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
 <style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<script src="nc-carga.js?v=20261124"></script>
 </head>
 <body>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -2227,7 +2228,8 @@ class Component extends DCLogic {
     fromHash();
     window.addEventListener("hashchange", fromHash);
     // disponibilidad en vivo desde el calendario (solo fechas); si falla, queda la lista publicada
-    if (NC_SCRIPT && window.fetch) fetch(NC_SCRIPT, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "ocupado" }) })
+    // (por detrás, sin pantalla de carga: nc-carga.js la deja pasar en silencio)
+    if (NC_SCRIPT && window.fetch) (window.NC_CARGA ? NC_CARGA.silencio(function () { return fetch(NC_SCRIPT, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "ocupado" }) }); }) : fetch(NC_SCRIPT, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "ocupado" }) }))
       .then(function (r) { return r.json(); }).then(function (j) {
         if (!j || !j.ok || !Array.isArray(j.busy)) return;
         BUSY.length = 0; j.busy.forEach(function (k) { if (/^\d{4}-\d{2}-\d{2}$/.test(k)) BUSY.push(k); });

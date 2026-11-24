@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="galeria.css?v=20261124e">
 <link rel="preconnect" href="https://script.google.com">
 <link rel="preconnect" href="https://script.googleusercontent.com">
+<script src="nc-carga.js?v=20261124"></script>
 </head>
 <body>
 <header class="hd">
@@ -139,7 +140,9 @@
   function sinCarga() { barra.classList.add('listo'); setTimeout(function () { carga.hidden = true; }, 280); }
   // si ya hay lista guardada en el celular, se ve al instante y la camarita no hace falta
   try { var c = JSON.parse(localStorage.getItem(CLAVE) || 'null'); if (c && c.length) { EV = c; pintar(); carga.hidden = true; } } catch (e) {}
-  window.NC_API.gal('listaEventos', []).then(function (l) {
+  // con la lista guardada ya en pantalla, la actualización va por detrás, sin tapar nada
+  var pedir = function () { return window.NC_API.gal('listaEventos', []); };
+  (EV.length && window.NC_CARGA ? NC_CARGA.silencio(pedir) : pedir()).then(function (l) {
     EV = l || []; pintar(); sinCarga();
     try { localStorage.setItem(CLAVE, JSON.stringify(EV)); } catch (e) {}
   }, function () {
