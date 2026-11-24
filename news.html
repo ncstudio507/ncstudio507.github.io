@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#222020">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Tenor+Sans&display=swap">
-<link rel="stylesheet" href="galeria.css?v=20261124b">
+<link rel="stylesheet" href="galeria.css?v=20261124c">
 <link rel="preconnect" href="https://script.google.com">
 <link rel="preconnect" href="https://script.googleusercontent.com">
 </head>
@@ -24,13 +24,35 @@
     <div id="tipos" class="fila" style="margin:0"></div>
     <div id="anios" class="fila" style="margin:0"></div>
   </div>
+  <div class="cargando" id="carga" role="status" style="padding:10px 16px 26px">
+    <svg class="camarita" viewBox="0 0 132 112" aria-hidden="true">
+      <ellipse class="sombra" cx="66" cy="106" rx="34" ry="5" fill="#000"/>
+      <g class="cam">
+        <rect class="boton" x="84" y="22" width="20" height="9" rx="3" fill="#F99824"/>
+        <rect x="42" y="22" width="36" height="16" rx="5" fill="#F2E4D2"/>
+        <rect x="14" y="32" width="104" height="64" rx="14" fill="#F2E4D2"/>
+        <rect x="14" y="50" width="104" height="10" fill="#d9c8b2"/>
+        <rect x="22" y="39" width="14" height="9" rx="3" fill="#FEFEFE" stroke="#bfae98"/>
+        <circle cx="66" cy="64" r="27" fill="#222020" stroke="#F99824" stroke-width="5"/>
+        <g class="iris">
+          <circle cx="66" cy="64" r="16" fill="#3D3B3E"/>
+          <path d="M66 48 L72 60 M80 56 L70 66 M78 74 L64 70 M62 80 L60 66 M50 70 L62 62 M54 54 L66 60" stroke="#222020" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="66" cy="64" r="6" fill="#111"/>
+        </g>
+        <circle cx="58" cy="55" r="4" fill="#fff" opacity=".55"/>
+        <defs><radialGradient id="ncFlash"><stop offset="0" stop-color="#fff"/><stop offset=".35" stop-color="#fff8e6" stop-opacity=".95"/><stop offset="1" stop-color="#F99824" stop-opacity="0"/></radialGradient></defs><circle class="flash" cx="29" cy="44" r="30" fill="url(#ncFlash)"/><path class="flash" d="M29 14v12M29 62v12M-1 44h12M47 44h12M8 23l8 8M42 57l8 8M50 23l-8 8M16 57l-8 8" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+      </g>
+    </svg>
+    <div class="clic">¡CLIC!</div>
+    <b>Cargando las galerías…</b>
+    <div class="llenar" id="cargaBarra"><i></i></div>
+  </div>
   <div id="lista" class="eventos">
     <!-- se ve al instante mientras llega la lista (24-11-2026) -->
     <div class="ev esq" aria-hidden="true"><div class="por"></div><div class="tx"><div class="l c"></div><div class="l m"></div><div class="l c"></div></div></div>
     <div class="ev esq" aria-hidden="true"><div class="por"></div><div class="tx"><div class="l c"></div><div class="l m"></div><div class="l c"></div></div></div>
     <div class="ev esq" aria-hidden="true"><div class="por"></div><div class="tx"><div class="l c"></div><div class="l m"></div><div class="l c"></div></div></div>
   </div>
-  <p id="cargandoTxt" class="nota" style="text-align:center" role="status">Cargando las galerías…</p>
   <p id="vacio" class="vacio" hidden>No hay eventos con ese filtro.</p>
 </main>
 <script src="nc-config.js"></script>
@@ -86,13 +108,16 @@
   document.getElementById('q').addEventListener('input', function () { filtro.q = this.value; pintar(); });
   // la lista de eventos la da el servidor (en el prototipo, la tienda de este navegador)
   // 24-11-2026: la última lista se guarda en el celular y se muestra al instante; luego se actualiza con la del servidor
-  var CLAVE = 'nc-news-cache', txt = document.getElementById('cargandoTxt');
-  try { var c = JSON.parse(localStorage.getItem(CLAVE) || 'null'); if (c && c.length) { EV = c; pintar(); txt.textContent = 'Actualizando…'; } } catch (e) {}
+  var CLAVE = 'nc-news-cache', carga = document.getElementById('carga'), barra = document.getElementById('cargaBarra');
+  requestAnimationFrame(function () { requestAnimationFrame(function () { barra.classList.add('va'); }); });
+  function sinCarga() { barra.classList.add('listo'); setTimeout(function () { carga.hidden = true; }, 280); }
+  // si ya hay lista guardada en el celular, se ve al instante y la camarita no hace falta
+  try { var c = JSON.parse(localStorage.getItem(CLAVE) || 'null'); if (c && c.length) { EV = c; pintar(); carga.hidden = true; } } catch (e) {}
   window.NC_API.gal('listaEventos', []).then(function (l) {
-    EV = l || []; pintar(); txt.hidden = true;
+    EV = l || []; pintar(); sinCarga();
     try { localStorage.setItem(CLAVE, JSON.stringify(EV)); } catch (e) {}
   }, function () {
-    txt.hidden = true;
+    sinCarga();
     if (EV.length) return;   // ya se ve la lista guardada
     document.getElementById('lista').innerHTML = '';
     document.getElementById('vacio').hidden = false; document.getElementById('vacio').textContent = 'Sin conexión. Inténtalo otra vez.';

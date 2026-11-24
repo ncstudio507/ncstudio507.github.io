@@ -162,3 +162,22 @@ html,body{overflow-x:clip}
 @keyframes nc-ir{0%{transform:translateX(-110%)}100%{transform:translateX(260%)}}
 @keyframes nc-brillo{to{background-position:-200% 0}}
 @media (prefers-reduced-motion:reduce){.cargando img,.cargando .barra i,.ev.esq .por,.ev.esq .l{animation:none}}
+/* 24-11-2026 (Nelson): camarita que salta y hace clic mientras carga, con barra que se llena */
+.camarita{width:132px;height:112px;overflow:visible}
+.camarita .cam{transform-origin:66px 100px;animation:nc-salto 1.6s cubic-bezier(.3,.7,.4,1) infinite}
+.camarita .boton{transform-origin:94px 26px;animation:nc-boton 1.6s infinite}
+.camarita .iris{transform-origin:66px 64px;animation:nc-iris 1.6s infinite}
+.camarita .flash{transform-origin:29px 44px;opacity:0;animation:nc-flash 1.6s infinite}
+.camarita .sombra{transform-origin:66px 106px;animation:nc-sombra 1.6s cubic-bezier(.3,.7,.4,1) infinite}
+@keyframes nc-salto{0%,100%{transform:translateY(0) scale(1.06,.94)}12%{transform:translateY(0) scale(1)}40%{transform:translateY(-26px) rotate(-6deg)}55%{transform:translateY(-26px) rotate(5deg)}80%{transform:translateY(0) scale(1)}90%{transform:translateY(0) scale(1.08,.92)}}
+@keyframes nc-sombra{0%,100%,85%{transform:scale(1);opacity:.45}40%,55%{transform:scale(.6);opacity:.2}}
+@keyframes nc-boton{0%,44%,56%,100%{transform:translateY(0)}48%,52%{transform:translateY(4px)}}
+@keyframes nc-iris{0%,44%{transform:rotate(0) scale(1)}50%{transform:rotate(60deg) scale(.55)}62%,100%{transform:rotate(120deg) scale(1)}}
+@keyframes nc-flash{0%,47%{opacity:0;transform:scale(.3)}50%{opacity:.95;transform:scale(1.4)}66%,100%{opacity:0;transform:scale(2.4)}}
+.cargando .llenar{width:min(260px,70%);height:8px;border-radius:99px;background:var(--gris);overflow:hidden}
+.cargando .llenar i{display:block;height:100%;width:4%;border-radius:99px;background:var(--naranja);transition:width 7s cubic-bezier(.15,.7,.3,1)}
+.cargando .llenar.va i{width:92%}
+.cargando .llenar.listo i{width:100%;transition:width .25s ease-out}
+.cargando .clic{font-family:Montserrat,sans-serif;font-weight:700;font-size:12px;letter-spacing:.3em;color:var(--naranja);opacity:0;animation:nc-clic 1.6s infinite;margin-top:-6px}
+@keyframes nc-clic{0%,46%{opacity:0;transform:translateY(4px)}50%,64%{opacity:1;transform:none}80%,100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.camarita *,.cargando .clic{animation:none!important}.cargando .clic{opacity:1}}
