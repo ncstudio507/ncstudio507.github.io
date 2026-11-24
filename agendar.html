@@ -181,6 +181,10 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     if (REPARTO) { var r = REPARTO; REPARTO = null; finanzas(r); } else if (PUBQ) { var q = PUBQ; PUBQ = null; publicar(q); }
     else {
       // si vienes del menú desde la otra página (agendar.html#clientes), abre esa sección
+      // desde «Clientes · Carreras» (galeria-admin.html) se vuelve a la vista pedida: #clientes-base, #clientes-int
+      var hc = (location.hash || "").slice(1);
+      if (hc === "clientes-base") { baseCli(); return; }
+      if (hc === "clientes-int") { interesados(); return; }
       var h = window.NCPanel ? NCPanel.pedido() : "", acciones = { compromisos: compromisos, clientes: clientes, finanzas: function () { FE = null; finanzas(); }, publicar: function () { PV = null; publicar(); }, enviar: enviar,
         codigos: function () { form(); codigos(); NCPanel.marcar("codigos"); }, papelera: function () { form(); papelera(); NCPanel.marcar("papelera"); } };
       (acciones[h] || form)();
@@ -1339,8 +1343,9 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
   }
   /* ===================== BASE DE CLIENTES ===================== */
   var BASE = null, PEOPLE = false;
-  function segCli(act) { return '<div class="seg" role="group" aria-label="Vista de clientes"><button data-cv="res" aria-pressed="' + (act === "res") + '">Reservas</button><button data-cv="base" aria-pressed="' + (act === "base") + '">Base de clientes</button><button data-cv="int" aria-pressed="' + (act === "int") + '">Interesados</button></div>'; }
-  function bindCli() { Array.prototype.forEach.call(app.querySelectorAll("[data-cv]"), function (b) { b.onclick = function () { var v = b.getAttribute("data-cv"); if (v === "base") baseCli(); else if (v === "int") interesados(); else clientes(); }; }); }
+  function segCli(act) { return '<div class="seg" role="group" aria-label="Vista de clientes"><button data-cv="res" aria-pressed="' + (act === "res") + '">Reservas</button><button data-cv="base" aria-pressed="' + (act === "base") + '">Base de clientes</button><button data-cv="int" aria-pressed="' + (act === "int") + '">Interesados</button><button data-cv="car" aria-pressed="false">🏃 Carreras</button></div>'; }
+  // 24-11-2026 (Nelson): los clientes de carreras viven dentro de Clientes (se ven con el panel de galerías)
+  function bindCli() { Array.prototype.forEach.call(app.querySelectorAll("[data-cv]"), function (b) { b.onclick = function () { var v = b.getAttribute("data-cv"); if (v === "car") { location.href = "galeria-admin.html#clientes-carreras"; return; } if (v === "base") baseCli(); else if (v === "int") interesados(); else clientes(); }; }); }
   /* ===================== COMPROMISOS: calendario del mes con cupos y detalles ===================== */
   var AG = null, AGMES = null, AGDIA = null, MESN = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"], DIAN = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
   function isoD(d) { return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
@@ -1515,8 +1520,8 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     cargaBase(function () {
       if (!BASE) { app.innerHTML = segCli("base") + '<div class="msg">No pudimos cargar la base. ¿Ya pegaste el código nuevo en Apps Script?</div>'; bindCli(); return; }
       app.innerHTML = segCli("base") + '<section><div class="row" style="justify-content:space-between"><h2>Base de clientes (' + BASE.length + ')</h2><button class="btn" id="bnew" style="padding:11px 16px">+ Nuevo cliente</button></div>' +
-        '<p class="hint">Todos los que reservan quedan aquí solos y en tu Google Contacts (grupo «Clientes NC Studio»), así WhatsApp te muestra su nombre. Si alguien te escribe por WhatsApp y todavía no reserva, agrégalo con «+ Nuevo cliente».</p>' +
-        (PEOPLE ? '<div class="row"><button class="btn2" id="bsync">Guardar en Google Contacts a los que falten</button><span class="hint" id="bsyncs"></span></div>' : '<p class="hint" style="padding:10px 12px;background:var(--soft);border-radius:6px">Para que se guarden en Google Contacts falta un paso en Apps Script: <b>Servicios +</b> → <b>People API</b> → Agregar, y volver a implementar.</p>') +
+        '<p class="hint">Todos los que reservan quedan aquí solos. Tu PC los guarda en tus contactos de <b>edsuke10</b> (etiqueta «Clientes NC»), así WhatsApp te muestra su nombre; a los que ya tenías no les cambia nada y aquí ves con qué nombre los tienes. Si alguien te escribe por WhatsApp y todavía no reserva, agrégalo con «+ Nuevo cliente».</p>' +
+        (PEOPLE ? '<div class="row"><button class="btn2" id="bsync">Guardar en Google Contacts a los que falten</button><span class="hint" id="bsyncs"></span></div>' : '') +
         '<label for="bqb">Buscar<input id="bqb" placeholder="Nombre, teléfono o Instagram" autocomplete="off"></label></section><div id="lsb" style="display:grid;gap:10px"></div>';
       bindCli();
       $("bqb").value = q || "";
@@ -1527,7 +1532,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
         L.forEach(function (x) {
           var b = document.createElement("button"); b.className = "cl";
           var vp = vipDe(x.phone);
-          b.innerHTML = '<span style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip ' + (x.contacto ? "ok" : "") + '">' + (x.contacto ? "✓ En contactos" : "Sin contacto") + '</span>' + (vp ? '<span class="chip vip">👑 Zona VIP</span>' : '') + '</span><b>' + esc(x.name) + '</b><span>📱 ' + esc(x.phone) + (x.instagram ? " · @" + esc(x.instagram) : "") + '</span><span>' +
+          b.innerHTML = '<span style="display:flex;gap:6px;flex-wrap:wrap"><span class="chip ' + (x.contacto ? "ok" : "") + '">' + (x.contacto ? "📇 " + esc(x.contactoNombre || "En contactos") : "🆕 Aún no en tus contactos") + '</span>' + (vp ? '<span class="chip vip">👑 Zona VIP</span>' : '') + '</span><b>' + esc(x.name) + '</b><span>📱 ' + esc(x.phone) + (x.instagram ? " · @" + esc(x.instagram) : "") + '</span><span>' +
             (x.reservas ? x.reservas + (x.reservas === 1 ? " sesión" : " sesiones") + " · " + money(x.total) : (x.servicios.length ? "Cotizó, sin reservar" : "Contacto nuevo")) + (x.servicios.length ? " · " + esc(x.servicios[x.servicios.length - 1]) : "") + '</span>' + avTag(x.name, x.phone, x.ids);
           b.onclick = function () { fichaCli(x); }; $("lsb").appendChild(b);
         });
@@ -1611,7 +1616,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
       call({ action: "base_save", pin: PIN, c: c }).then(function (r) {
         b.disabled = false; b.textContent = lb;
         if (!r.ok) { $("cer").innerHTML = esc(r.title) + ". " + (r.html || ""); return; }
-        $("cst").innerHTML = '<span class="pos">✓ Guardado' + (r.contacto ? " y en Google Contacts" : (r.people ? "" : " (Google Contacts aún no está activado)")) + '</span>';
+        $("cst").innerHTML = '<span class="pos">✓ Guardado · tu PC lo agrega a tus contactos de edsuke10 en unos minutos</span>';
         BASE = null;
       }).catch(function () { b.disabled = false; b.textContent = lb; $("cer").textContent = "No pudimos conectar."; });
     };

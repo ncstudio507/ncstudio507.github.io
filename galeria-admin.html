@@ -623,12 +623,13 @@ function panel() {
     todos.forEach(function (c) { c.contacto = T.contactoDe(c.tel); });
     var conocidos = todos.filter(function (c) { return c.contacto; }).length;
     var l = todos.filter(function (c) { return (!q || (c.nombre + ' ' + c.tel + ' ' + c.correo + ' ' + c.dorsales.join(' ') + ' ' + c.eventos.join(' ') + ' ' + (c.contacto ? c.contacto.nombre : '')).toLowerCase().indexOf(q) >= 0) && (!clSolo || (clSolo === 'si' ? c.contacto : !c.contacto)); });
-    box.innerHTML = '<p class="nota" style="margin-top:0">Todos los corredores que han pedido fotos, con su cara, celular y carreras. El contacto se guarda solo al hacer el pedido. En la versión real esto va en <b>Clientes → Carreras</b> de tu panel.</p>' +
-      '<div class="tarjeta"><b>📇 Cruzar con mis contactos</b>' +
-      '<p class="nota" style="margin:4px 0 8px">En <b>contacts.google.com</b> (con la cuenta donde tienes a los corredores): Exportar → <b>CSV de Google</b> o vCard, y súbelo aquí. Se cruza por número de celular; tus contactos no salen de tu panel.</p>' +
-      '<div class="acciones"><label class="mini-btn na" style="cursor:pointer">Subir contactos (CSV o VCF)<input type="file" id="clImp" accept=".csv,.vcf,text/csv,text/vcard" hidden></label>' +
-      (nContactos ? '<button class="mini-btn" id="clNuevos">Bajar los que no tengo (para Google Contactos)</button>' : '') + '</div>' +
-      '<p class="res" style="margin:8px 0 0">' + (nContactos ? nContactos + ' contactos cargados · <span class="ok">' + conocidos + ' de ' + todos.length + ' corredores ya los conoces</span>' : 'Todavía no has subido tus contactos.') + '</p></div>' +
+    box.innerHTML = '<p class="nota" style="margin-top:0">Todos los corredores que han pedido fotos, con su cara, celular y carreras. El contacto se guarda solo al hacer el pedido.</p>' +
+      // 24-11-2026 (Nelson): tu PC cruza solos a todos los clientes con tus contactos de edsuke10,
+      // agrega a los que no tienes (etiqueta «Corredores NC») y aquí ves con qué nombre tienes a cada uno
+      '<div class="tarjeta"><b>📇 Tus contactos (edsuke10)</b>' +
+      '<p class="nota" style="margin:4px 0 0">Tu PC guarda solos en tus contactos a los corredores que no tienes (etiqueta «Corredores NC») y aquí ves con qué nombre tienes a cada uno. A los que ya tenías no les cambia nada.</p>' +
+      '<p class="res" style="margin:8px 0 0">' + (nContactos ? '<span class="ok">' + conocidos + ' de ' + todos.length + ' corredores ya están en tus contactos</span>' : 'Todavía no se ha hecho el primer cruce.') + '</p>' +
+      '<input type="file" id="clImp" hidden></div>' +
       '<div class="fila"><input class="buscar" id="clQ" placeholder="Buscar nombre, celular, dorsal o carrera" style="max-width:360px" value="' + esc(clQ) + '">' +
       '<select class="sel" id="clSolo" style="max-width:200px;min-width:170px"><option value="">Todos</option><option value="si">Ya en mis contactos</option><option value="no">Nuevos para mí</option></select>' +
       '<button class="mini-btn na" id="clCsv">Descargar Excel (CSV)</button></div>' +
@@ -711,11 +712,22 @@ function panel() {
   // menú único (fase 1, 23-11-2026): las 14 pestañas se reparten en dos secciones del menú
   var GRUPOS = {
     galerias: { titulo: 'Galerías', tabs: ['sesiones', 'eventos', 'preventas', 'grupales'] },
-    pedidos: { titulo: 'Pedidos de carreras', tabs: ['resumen', 'pedidos', 'cola', 'capturas', 'reclamos', 'yappy', 'entregas', 'lightroom', 'clientes', 'papelera'] }
+    pedidos: { titulo: 'Pedidos de carreras', tabs: ['resumen', 'pedidos', 'cola', 'capturas', 'reclamos', 'yappy', 'entregas', 'lightroom', 'papelera'] },
+    // 24-11-2026 (Nelson): los corredores van DENTRO de Clientes, junto a Reservas, Base e Interesados
+    clientes: { titulo: 'Clientes', tabs: ['clientes'], seg: true }
   };
   function grupo(g) {
     var G = GRUPOS[g] || GRUPOS.pedidos;
     document.getElementById('tituloPanel').textContent = G.titulo;
+    var seg = document.getElementById('segClientes');
+    if (G.seg && !seg) {
+      seg = document.createElement('div'); seg.id = 'segClientes'; seg.className = 'chips'; seg.setAttribute('role', 'group'); seg.setAttribute('aria-label', 'Vista de clientes'); seg.style.margin = '0 0 14px';
+      seg.innerHTML = '<a class="chip" href="agendar.html#clientes">Reservas</a><a class="chip" href="agendar.html#clientes-base">Base de clientes</a><a class="chip" href="agendar.html#clientes-int">Interesados</a><a class="chip on" aria-current="page">🏃 Carreras</a>';
+      [].forEach.call(seg.querySelectorAll('a'), function (a) { a.style.display = 'inline-flex'; a.style.alignItems = 'center'; a.style.textDecoration = 'none'; });
+      document.querySelector('.tabs').before(seg);
+    }
+    if (seg) seg.hidden = !G.seg;
+    document.querySelector('.tabs').hidden = !!G.seg;
     document.querySelectorAll('.tab').forEach(function (b) { b.hidden = G.tabs.indexOf(b.dataset.t) < 0; });
     // el orden de las pestañas sigue el de la lista
     var barra = document.querySelector('.tabs');
@@ -735,7 +747,7 @@ function panel() {
     EV = (window.NC_EVENTOS || []).filter(function (e) { return !T.eventoOculto(e.id); });
     var on = document.querySelector('.tab.on'); if (on && PINTAR[on.dataset.t] && !document.querySelector('[data-p]:not([hidden]) input:focus, [data-p]:not([hidden]) textarea:focus')) PINTAR[on.dataset.t]();
   });
-  grupo(window.NCPanel && NCPanel.pedido() === 'galerias' ? 'galerias' : 'pedidos');
+  grupo(location.hash === '#clientes-carreras' ? 'clientes' : window.NCPanel && NCPanel.pedido() === 'galerias' ? 'galerias' : 'pedidos');
 }
 </script>
 </body>
