@@ -1,0 +1,85 @@
+/* Panel unificado de NC Studio — fase 1 (23-11-2026).
+   Lo cargan agendar.html y galeria-admin.html: mismo menú, mismos colores y letras.
+   Todo va bajo body.nc-panel para no tocar las páginas públicas (galeria.css también lo usan News y los álbumes). */
+:root{--p-fondo:#F2E4D2;--p-tarjeta:#FEFEFE;--p-tinta:#222020;--p-suave:#6b625a;--p-linea:#E3D6C6;--p-naranja:#F99824;--p-naranja-suave:#FDF1E2;--p-barra:#222020;--p-barra-txt:#F2E4D2;--p-ok:#1f7a45;--p-ok-suave:#E3F3E8;--p-mal:#B42318;--p-mal-suave:#FCE8E6;--p-azul:#2f5fd0;--p-azul-suave:#E6EDFB;--p-lado:236px}
+
+/* ---------- menú lateral (computadora) ---------- */
+.nc-lado{display:none}
+body.nc-con-menu .nc-lado{display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;width:var(--p-lado);background:var(--p-barra);color:var(--p-barra-txt);padding:16px 12px;overflow-y:auto;z-index:40;font-family:Montserrat,system-ui,sans-serif}
+.nc-marca{display:flex;align-items:center;gap:10px;padding:2px 8px 16px;border-bottom:1px solid #3D3B3E;margin-bottom:10px;text-decoration:none;color:inherit}
+.nc-marca img{height:30px;width:auto;display:block}
+.nc-marca span{font-size:12px;opacity:.7;line-height:1.2}
+.nc-nav{display:grid;gap:2px}
+.nc-nav a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:inherit;text-decoration:none;font-size:14px;font-weight:600}
+.nc-nav a:hover{background:#2e2c2c}
+.nc-nav a.on{background:var(--p-naranja);color:#222020}
+.nc-nav a .i{width:22px;text-align:center;font-size:16px}
+.nc-grupo{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.5;padding:14px 12px 4px}
+.nc-pie{margin-top:auto;padding-top:14px;display:grid;gap:6px}
+.nc-pie a{display:block;padding:9px 12px;border-radius:10px;border:1px solid #3D3B3E;color:inherit;text-decoration:none;font-size:13px;font-weight:600;text-align:center}
+.nc-pie a:hover{border-color:var(--p-naranja);color:var(--p-naranja)}
+
+/* ---------- barra de abajo + hoja «Más» (celular) ---------- */
+.nc-abajo,.nc-mas{display:none}
+@media (min-width:861px){
+  body.nc-con-menu{padding-left:var(--p-lado)}
+}
+@media (max-width:860px){
+  body.nc-con-menu .nc-lado{display:none}
+  body.nc-con-menu .nc-abajo{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;background:var(--p-barra);padding:6px 4px calc(6px + env(safe-area-inset-bottom));z-index:45;box-shadow:0 -4px 16px rgba(0,0,0,.18)}
+  .nc-abajo a{display:grid;justify-items:center;gap:2px;color:var(--p-barra-txt);text-decoration:none;font:600 10px Montserrat,system-ui,sans-serif;padding:4px 0;border-radius:10px;opacity:.75}
+  .nc-abajo a .i{font-size:20px;line-height:1}
+  .nc-abajo a.on{opacity:1;color:var(--p-naranja)}
+  body.nc-con-menu{padding-bottom:calc(70px + env(safe-area-inset-bottom))}
+  body.nc-mas-abierto .nc-mas{display:block;position:fixed;inset:0;z-index:50;background:rgba(34,32,32,.55)}
+  .nc-mas .hoja{position:absolute;left:0;right:0;bottom:0;background:var(--p-barra);color:var(--p-barra-txt);border-radius:18px 18px 0 0;padding:14px 12px calc(16px + env(safe-area-inset-bottom));max-height:82vh;overflow:auto;font-family:Montserrat,system-ui,sans-serif}
+  .nc-mas .hoja .asa{width:44px;height:5px;border-radius:9px;background:#3D3B3E;margin:0 auto 10px}
+  .nc-mas .nc-nav a{font-size:15px;padding:12px}
+}
+
+/* ---------- panel principal (agendar.html) ---------- */
+body.nc-panel.nc-principal.nc-con-menu .tabs,body.nc-panel.nc-principal.nc-con-menu .bar{display:none!important}
+body.nc-panel.nc-principal h2{font-family:Montserrat,system-ui,sans-serif;font-weight:700;font-size:20px}
+body.nc-panel.nc-principal{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+body.nc-panel.nc-principal section,body.nc-panel.nc-principal .msg{border:1px solid var(--p-linea);border-radius:16px}
+body.nc-panel.nc-principal .btn{font-family:Montserrat,system-ui,sans-serif;border-radius:999px}
+body.nc-panel.nc-principal .top span{font-family:Montserrat,system-ui,sans-serif;font-weight:700;font-size:17px}
+@media (min-width:861px){
+  body.nc-panel.nc-principal.nc-con-menu .top{display:none}
+  body.nc-panel.nc-principal.nc-con-menu main{max-width:860px}
+}
+@media (max-width:860px){
+  /* la barra de total de «Agendar» queda encima del menú de abajo */
+  body.nc-panel.nc-principal.nc-con-menu .foot{bottom:calc(64px + env(safe-area-inset-bottom))}
+  body.nc-panel.nc-principal.nc-con-menu main{padding-bottom:190px}
+}
+
+/* ---------- panel de galerías (galeria-admin.html): pasa al tema claro ---------- */
+body.nc-panel.nc-galerias{--fondo:#F2E4D2;--crema:#222020;--blanco:#222020;--gris:#E3D6C6;color-scheme:light;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--p-fondo);color:var(--p-tinta)}
+body.nc-panel.nc-galerias .hd{background:var(--p-barra);color:var(--p-barra-txt);border-bottom:0}
+body.nc-panel.nc-galerias .hd nav{display:none}
+@media (min-width:861px){body.nc-panel.nc-galerias.nc-con-menu .hd{display:none}}
+body.nc-panel.nc-galerias h1{color:var(--p-tinta)}
+body.nc-panel.nc-galerias .nota,body.nc-panel.nc-galerias .sub,body.nc-panel.nc-galerias .vacio{color:var(--p-suave)}
+body.nc-panel.nc-galerias .cifra,body.nc-panel.nc-galerias .tarjeta{background:var(--p-tarjeta);border-color:var(--p-linea);border-radius:16px}
+body.nc-panel.nc-galerias .cifra b{color:var(--p-tinta)}
+body.nc-panel.nc-galerias .cifra span{color:var(--p-suave)}
+body.nc-panel.nc-galerias .lista,body.nc-panel.nc-galerias .msj{background:var(--p-naranja-suave);color:var(--p-tinta)}
+body.nc-panel.nc-galerias .link input,body.nc-panel.nc-galerias .sel,body.nc-panel.nc-galerias textarea,body.nc-panel.nc-galerias .buscar,body.nc-panel.nc-galerias input[type=text],body.nc-panel.nc-galerias input[type=number],body.nc-panel.nc-galerias input[type=password],body.nc-panel.nc-galerias select{background:#fff;color:var(--p-tinta);border-color:var(--p-linea)}
+body.nc-panel.nc-galerias .mini-btn{color:var(--p-tinta);border-color:var(--p-linea);background:#fff}
+body.nc-panel.nc-galerias .mini-btn.na,body.nc-panel.nc-galerias .btn,body.nc-panel.nc-galerias .chip.on{background:var(--p-naranja);border-color:var(--p-naranja);color:#222020}
+body.nc-panel.nc-galerias .btn.sec{background:#fff;color:var(--p-tinta);border-color:var(--p-linea)}
+body.nc-panel.nc-galerias .tabs{border-bottom-color:var(--p-linea)}
+body.nc-panel.nc-galerias .tab{color:var(--p-suave);font-size:14px}
+body.nc-panel.nc-galerias .tab.on{color:var(--p-tinta);border-bottom-color:var(--p-naranja)}
+body.nc-panel.nc-galerias .tabla td,body.nc-panel.nc-galerias .tabla th{border-color:var(--p-linea)}
+body.nc-panel.nc-galerias .ok{color:var(--p-ok)}
+body.nc-panel.nc-galerias .mal{color:var(--p-mal)}
+body.nc-panel.nc-galerias .ped .tk{color:#b5650a}
+body.nc-panel.nc-galerias .e-esperando{background:var(--p-mal-suave);color:var(--p-mal)}
+body.nc-panel.nc-galerias .e-pagado{background:var(--p-naranja-suave);color:#b5650a}
+body.nc-panel.nc-galerias .e-edicion{background:var(--p-azul-suave);color:var(--p-azul)}
+body.nc-panel.nc-galerias .e-entregado{background:var(--p-ok-suave);color:var(--p-ok)}
+body.nc-panel.nc-galerias .aviso,body.nc-panel.nc-galerias .promo{background:var(--p-naranja-suave);border-color:#f1cfa0;color:var(--p-tinta)}
+body.nc-panel.nc-galerias [style*="#1d1c1c"],body.nc-panel.nc-galerias [style*="#2b2929"]{background:var(--p-tarjeta)!important;color:var(--p-tinta)!important}
+body.nc-panel.nc-galerias h3[style*="--blanco"]{color:var(--p-tinta)!important}

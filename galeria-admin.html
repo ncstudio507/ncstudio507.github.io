@@ -36,14 +36,15 @@ textarea{width:100%;min-height:110px;padding:10px}
 .msj{white-space:pre-wrap;background:#1d1c1c;border-radius:10px;padding:10px;font-size:14px;margin:8px 0}
 .ok{color:#8fe0a8}.mal{color:#ffb4a8}
 </style>
+<link rel="stylesheet" href="panel.css?v=20261124">
 </head>
-<body>
+<body class="nc-galerias">
 <header class="hd">
   <a href="news.html"><img src="logo.png" alt="NC Studio"></a>
   <nav aria-label="Panel"><a href="agendar.html">‹ Panel principal</a><a href="#" class="on">⚙️ Panel galerías</a></nav>
 </header>
 <main class="wrap">
-  <h1>Panel de galerías</h1>
+  <h1 id="tituloPanel">Panel de galerías</h1>
   <div class="tabs" role="tablist">
     <button class="tab on" data-t="resumen">Resumen</button>
     <button class="tab" data-t="eventos">Álbumes y links</button>
@@ -75,6 +76,7 @@ textarea{width:100%;min-height:110px;padding:10px}
   <section data-p="lightroom" hidden></section>
   <section data-p="entregas" hidden></section>
 </main>
+<script src="panel-menu.js?v=20261124"></script>
 <script src="nc-config.js"></script>
 <script>if (!(window.NC_CONFIG || {}).url) document.write('<script src="datos-prueba.js"><\/script><script src="sesiones/indice.js"><\/script>');</script>
 <script src="tienda.js"></script>
@@ -706,12 +708,34 @@ function panel() {
     PINTAR[t]();
   }
   document.querySelectorAll('.tab').forEach(function (b) { b.onclick = function () { ir(b.dataset.t); }; });
+  // menú único (fase 1, 23-11-2026): las 14 pestañas se reparten en dos secciones del menú
+  var GRUPOS = {
+    galerias: { titulo: 'Galerías', tabs: ['sesiones', 'eventos', 'preventas', 'grupales'] },
+    pedidos: { titulo: 'Pedidos de carreras', tabs: ['resumen', 'pedidos', 'cola', 'capturas', 'reclamos', 'yappy', 'entregas', 'lightroom', 'clientes', 'papelera'] }
+  };
+  function grupo(g) {
+    var G = GRUPOS[g] || GRUPOS.pedidos;
+    document.getElementById('tituloPanel').textContent = G.titulo;
+    document.querySelectorAll('.tab').forEach(function (b) { b.hidden = G.tabs.indexOf(b.dataset.t) < 0; });
+    // el orden de las pestañas sigue el de la lista
+    var barra = document.querySelector('.tabs');
+    G.tabs.forEach(function (t) { var b = document.querySelector('.tab[data-t="' + t + '"]'); if (b) barra.appendChild(b); });
+    window.NCPanel && NCPanel.marcar(g in GRUPOS ? g : 'pedidos');
+    ir(G.tabs[0]);
+    barra.scrollLeft = 0;   // la primera pestaña siempre a la vista
+  }
+  if (window.NCPanel) {
+    NCPanel.al('galerias', function () { grupo('galerias'); });
+    NCPanel.al('pedidos', function () { grupo('pedidos'); });
+    NCPanel.al('salir', function () { try { localStorage.removeItem('ncAdmDia'); } catch (e) {} location.href = 'agendar.html'; });
+    NCPanel.mostrar(true);
+  }
   // página real: cuando el servidor confirma un cambio, se vuelve a pintar la pestaña abierta con sus datos
   window.NC_API.envolverAdmin(function () {
     EV = (window.NC_EVENTOS || []).filter(function (e) { return !T.eventoOculto(e.id); });
     var on = document.querySelector('.tab.on'); if (on && PINTAR[on.dataset.t] && !document.querySelector('[data-p]:not([hidden]) input:focus, [data-p]:not([hidden]) textarea:focus')) PINTAR[on.dataset.t]();
   });
-  ir('resumen');
+  grupo(window.NCPanel && NCPanel.pedido() === 'galerias' ? 'galerias' : 'pedidos');
 }
 </script>
 </body>

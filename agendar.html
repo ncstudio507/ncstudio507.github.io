@@ -6,6 +6,8 @@
 <meta name="robots" content="noindex,nofollow">
 <title>Agendar · NC Studio</title>
 <link rel="icon" type="image/png" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&display=swap">
 <style>
 :root{--bg:#F2E4D2;--card:#FEFEFE;--fg:#222020;--muted:#5d5650;--line:#D9CDBE;--accent:#F99824;--soft:#FDF1E2;--err:#B42318}
 *{box-sizing:border-box}
@@ -123,12 +125,14 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 .pst{position:absolute;right:4px;top:4px;width:30px;height:30px;border-radius:50%;border:0;background:rgba(34,32,32,.55);color:#fff;font-size:15px;cursor:pointer;line-height:1}.pst.on{background:var(--accent);color:var(--fg)}
 .chk{display:flex;gap:8px;align-items:center;font-weight:normal;grid-template-columns:none}.chk input{width:20px;height:20px;accent-color:var(--accent)}
 </style>
+<link rel="stylesheet" href="panel.css?v=20261124">
 </head>
-<body>
+<body class="nc-principal">
 <div class="top"><img src="logo.png" alt="NC Studio"><span>Agendar reserva</span><a href="#" id="salir" hidden>Salir</a></div>
 <nav class="tabs" id="tabs" hidden><button id="tA" aria-pressed="true">Agendar</button><button id="tK" aria-pressed="false">Compromisos</button><button id="tC" aria-pressed="false">Clientes</button><button id="tF" aria-pressed="false">Finanzas</button><button id="tP" aria-pressed="false">Publicar</button><button id="tE" aria-pressed="false">Enviar</button><a class="tlink" href="galeria-admin.html" title="Carreras y galerías de la Zona VIP">📸 Galerías</a></nav>
 <div class="bar"></div>
 <main id="app"></main>
+<script src="panel-menu.js?v=20261124"></script>
 <script>
 (function () {
   var SCRIPT = "https://script.google.com/macros/s/AKfycbzaT3OjIAFX5CET8Opyjnehye_XOfdI_kwA0DxEDusXzCzesOtffZUwsvE2-IbEp4yvIQ/exec";
@@ -152,7 +156,20 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
     });
   });
 
-  function tab(w) { $("tabs").hidden = false; ["A", "K", "C", "F", "P", "E"].forEach(function (k) { $("t" + k).setAttribute("aria-pressed", w === k); }); var b = $("t" + w); if (b && b.scrollIntoView) try { b.scrollIntoView({ block: "nearest", inline: "nearest" }); } catch (e) {} }
+  function tab(w) { $("tabs").hidden = false; ["A", "K", "C", "F", "P", "E"].forEach(function (k) { $("t" + k).setAttribute("aria-pressed", w === k); }); var b = $("t" + w); if (b && b.scrollIntoView) try { b.scrollIntoView({ block: "nearest", inline: "nearest" }); } catch (e) {}
+    // menú único del panel (fase 1, 23-11-2026)
+    if (window.NCPanel) { NCPanel.mostrar(true); NCPanel.marcar({ A: "agendar", K: "compromisos", C: "clientes", F: "finanzas", P: "publicar", E: "enviar" }[w] || ""); } }
+  if (window.NCPanel) {
+    NCPanel.al("agendar", function () { form(); });
+    NCPanel.al("compromisos", function () { compromisos(); });
+    NCPanel.al("clientes", function () { clientes(); });
+    NCPanel.al("finanzas", function () { FE = null; finanzas(); });
+    NCPanel.al("publicar", function () { PV = null; publicar(); });
+    NCPanel.al("enviar", function () { enviar(); });
+    NCPanel.al("codigos", function () { form(); codigos(); NCPanel.marcar("codigos"); });
+    NCPanel.al("papelera", function () { form(); papelera(); NCPanel.marcar("papelera"); });
+    NCPanel.al("salir", function () { salir.click(); });
+  }
   $("tA").onclick = function () { form(); };
   $("tC").onclick = function () { clientes(); };
   $("tK").onclick = function () { compromisos(); };
@@ -160,7 +177,15 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
   $("tP").onclick = function () { PV = null; publicar(); };
   $("tE").onclick = function () { enviar(); };
   var QS = new URLSearchParams(location.search), REPARTO = QS.get("reparto"), PUBQ = QS.get("pub");
-  function inicio() { if (REPARTO) { var r = REPARTO; REPARTO = null; finanzas(r); } else if (PUBQ) { var q = PUBQ; PUBQ = null; publicar(q); } else form(); }
+  function inicio() {
+    if (REPARTO) { var r = REPARTO; REPARTO = null; finanzas(r); } else if (PUBQ) { var q = PUBQ; PUBQ = null; publicar(q); }
+    else {
+      // si vienes del menú desde la otra página (agendar.html#clientes), abre esa sección
+      var h = window.NCPanel ? NCPanel.pedido() : "", acciones = { compromisos: compromisos, clientes: clientes, finanzas: function () { FE = null; finanzas(); }, publicar: function () { PV = null; publicar(); }, enviar: enviar,
+        codigos: function () { form(); codigos(); NCPanel.marcar("codigos"); }, papelera: function () { form(); papelera(); NCPanel.marcar("papelera"); } };
+      (acciones[h] || form)();
+    }
+  }
   /* Entrada de administradores: tu teléfono + la pregunta loca del día (la respuesta siempre es «goku»).
      El PIN se pide solo la primera vez en cada teléfono o computadora. En la app, la huella reemplaza la pregunta. */
   function hoyAdm() { var d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
@@ -168,7 +193,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
   function admHoy() { return admLS("ncAdmDia") === hoyAdm(); }
   var HUELLA = !!(window.NCApp && window.NCApp.huella);
   function pinView(msg) {
-    salir.hidden = true; $("tabs").hidden = true;
+    salir.hidden = true; $("tabs").hidden = true; if (window.NCPanel) NCPanel.mostrar(false);
     var sinPin = !PIN, tel = admLS("ncAdmTel");
     app.innerHTML = '<section><h2>Entrar como administrador</h2><p class="hint">Solo para Nelson y Charlie.</p>' +
       '<label for="atel">Tu número<input id="atel" inputmode="tel" autocomplete="tel" value="' + esc(tel) + '" placeholder="6000-0000"></label>' +
