@@ -218,6 +218,22 @@
   var LIB = T.liberado(E.id), GR = P.patrocinio.gratis, EX = P.patrocinio.extra;
   // en Drive cada foto trae su copia limpia (f.limpia); en el prototipo es otra carpeta con clave
   function srcDe(f) { return LIB && f.limpia ? f.limpia : LIB && E.limpiasClave ? f.src.replace('/previas/', '/limpias-' + E.limpiasClave + '/') : f.src; }
+  // 24-11: Drive frena (429) si se le piden muchas fotos grandes. En la cuadrícula va una miniatura liviana
+  // (480 px); la de 1200 px solo en el visor. Si una foto falla, se reintenta sola por otra dirección de Drive.
+  function miniDe(f) { return srcDe(f).replace(/(lh3\.googleusercontent\.com\/d\/[\w-]+)=w\d+$/, '$1=w480'); }
+  function fotoSegura(img, url) {
+    var m = String(url).match(/lh3\.googleusercontent\.com\/d\/([\w-]+)=w(\d+)$/), intento = 0;
+    img.referrerPolicy = 'no-referrer';
+    img.onerror = function () {
+      if (!m || intento >= 3) return;
+      intento++;
+      // cada intento usa una dirección distinta (si no, el navegador no la vuelve a pedir)
+      var n = Number(m[2]) + intento - 1;
+      var alt = intento === 2 ? 'https://lh3.googleusercontent.com/d/' + m[1] + '=w' + n : 'https://drive.google.com/thumbnail?id=' + m[1] + '&sz=w' + n;
+      setTimeout(function () { img.src = alt; }, intento === 1 ? 0 : 2500 * intento);
+    };
+    img.src = url;
+  }
   if (LIB) {
     document.body.classList.add('liberado');
     var av = document.createElement('div'); av.className = 'promo';
@@ -323,7 +339,7 @@
       var d = document.createElement('div'); d.className = 'mini' + (MIAS.indexOf(f.nombre) >= 0 ? ' mia' : ''); d.dataset.n = f.nombre; d.tabIndex = 0; d.setAttribute('role', 'button'); d.setAttribute('aria-label', 'Ver ' + f.nombre);
       d.innerHTML = '<img loading="lazy" alt="">' + (MIAS.indexOf(f.nombre) >= 0 ? '<span class="tag-mia">✓ tuya</span>' : RECL.indexOf(f.nombre) >= 0 ? '<span class="tag-mia" style="color:#F99824;background:#3a3128">⏳ reclamada</span>' : esGrupal(f.nombre) ? '<span class="gratis">GRATIS</span>' : '') +
         (RECLAMO ? '' : '<button class="like" aria-label="Me gusta">♡</button>') + (finisher === f.nombre ? '<span class="estrella">⭐ historia</span>' : '');
-      d.querySelector('img').src = srcDe(f); NCVisor.forma(d, d.querySelector('img'));
+      fotoSegura(d.querySelector('img'), miniDe(f)); NCVisor.forma(d, d.querySelector('img'));
       d.onclick = function () { abrir(i); };
       d.onkeydown = function (ev) { if (ev.key === 'Enter') abrir(i); };
       var lk = d.querySelector('.like'); if (lk) lk.onclick = function (ev) { ev.stopPropagation(); alternar(f.nombre); };
@@ -470,7 +486,7 @@
     vi = (i + visibles.length) % visibles.length; var f = visibles[vi];
     visor.hidden = false; document.body.style.overflow = 'hidden';
     marco.classList.remove('bn'); clearTimeout(reloj);
-    document.getElementById('vFoto').src = srcDe(f);
+    fotoSegura(document.getElementById('vFoto'), srcDe(f));
     document.getElementById('vNombre').textContent = f.nombre;
     document.getElementById('vPos').textContent = (vi + 1) + ' de ' + visibles.length;
     pintarBotones();
