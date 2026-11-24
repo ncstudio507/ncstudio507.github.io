@@ -16,6 +16,19 @@
 .mini .tag-mia{position:absolute;left:6px;top:6px;background:#1f3a2a;color:#8fe0a8;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700}
 .ejemplo{display:block;width:min(220px,70%);border-radius:12px;margin:6px 0 10px;border:1px solid var(--gris)}
 .visor .pie{flex-wrap:wrap;gap:8px}
+/* portada del álbum (23-11-2026): foto grande con el nombre encima, como una galería profesional */
+/* el título va DEBAJO de la foto: nada tapa las caras (regla de Nelson) */
+.portada{margin:10px 0 18px;border-radius:16px;overflow:hidden;background:#2b2929;border:1px solid var(--gris)}
+.portada .foto{aspect-ratio:16/9;background:#1d1c1c center/cover no-repeat}
+.portada .txt{padding:18px 22px 20px;border-top:3px solid #F99824}
+.portada h1{margin:0 0 4px;font-size:clamp(26px,5vw,44px);line-height:1.05;color:#FEFEFE}
+.portada .sub{margin:0 0 12px;color:#F2E4D2}
+.portada .ver{display:inline-flex;align-items:center;min-height:42px;padding:0 18px;border:1.5px solid #FEFEFE;border-radius:999px;color:#FEFEFE;font-family:Montserrat,sans-serif;font-weight:700;font-size:13px;letter-spacing:.08em;text-decoration:none;background:rgba(34,32,32,.25)}
+.portada .ver:hover{background:#F99824;border-color:#F99824;color:#222020}
+@media (max-width:600px){.portada .foto{aspect-ratio:4/3}.portada .txt{padding:14px 16px 16px}}
+/* directorio de rostros: al elegir una cara solo queda esa (23-11-2026) */
+.volver-caras{margin:0 0 12px}
+.cara.elegida{cursor:default}
 </style>
 </head>
 <body class="protegida">
@@ -25,8 +38,7 @@
 </header>
 <main class="wrap">
   <a href="news.html" class="nota" style="text-decoration:none">← Todos los eventos</a>
-  <h1 id="titulo"></h1>
-  <p class="sub" id="meta"></p>
+  <div class="portada"><div class="foto" id="portada" role="img"></div><div class="txt"><h1 id="titulo"></h1><p class="sub" id="meta"></p><a href="#tabs" class="ver" id="verFotos">VER LAS FOTOS</a></div></div>
   <div class="fila"><button class="btn sec" id="compartir">↗ Compartir este álbum</button></div>
   <div id="modo"></div>
   <div class="aviso"><span>📷</span><div><b>Fotos sin editar.</b> Elige con ❤ las que quieras; las tuyas te llegan editadas. <span id="cola"></span></div></div>
@@ -40,7 +52,8 @@
   <div class="promo" id="enGrupo" hidden></div>
 
   <section data-p="caras" hidden>
-    <p class="nota">Toca tu rostro para ver solo tus fotos.</p>
+    <p class="nota" id="notaCaras">Toca tu rostro para ver solo tus fotos.</p>
+    <button class="btn sec volver-caras" id="volverCaras" hidden>← Ver todos los rostros</button>
     <div id="caras" class="caras"></div>
   </section>
   <section data-p="dorsal" hidden>
@@ -119,7 +132,13 @@
   var fe = E.fecha.split('-');
   document.title = E.nombre + ' · NC Studio';
   document.getElementById('titulo').textContent = E.nombre;
-  document.getElementById('meta').textContent = +fe[2] + ' ' + MESES[+fe[1] - 1] + ' ' + fe[0] + ' · ' + E.lugar + ' · ' + E.fotos.length + ' fotos';
+  document.getElementById('meta').textContent = +fe[2] + ' ' + MESES[+fe[1] - 1] + ' ' + fe[0] + (E.lugar ? ' · ' + E.lugar : '') + ' · ' + E.fotos.length + ' fotos';
+  // portada: la que eligió el procesador (o la primera foto si el álbum es viejo)
+  var urlPortada = E.portada || (E.fotos[0] && E.fotos[0].src) || '';
+  var portada = document.getElementById('portada');
+  if (urlPortada) portada.style.backgroundImage = 'url("' + urlPortada.replace(/"/g, '%22') + '")';
+  portada.setAttribute('aria-label', 'Portada de ' + E.nombre);
+  document.getElementById('verFotos').onclick = function (ev) { ev.preventDefault(); document.getElementById('tabs').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
   document.getElementById('compartir').onclick = function () {
     var b = this, url = new URL(E.compartir || ('evento.html?e=' + encodeURIComponent(E.id)), location.href).href;
     if (navigator.share) { navigator.share({ title: E.nombre + ' · NC Studio', text: '📸 Busca tus fotos de ' + E.nombre, url: url }).catch(function () {}); return; }
@@ -301,6 +320,20 @@
   function pintarCaras() {
     var box = document.getElementById('caras'); box.innerHTML = '';
     var cuantasDe = function (c) { return E.fotos.filter(function (f) { return de(f, c.id); }).length; };
+    // con una cara elegida: solo esa cara, sus fotos y el botón para volver al directorio
+    var elegido = vista.corredor ? E.corredores.filter(function (c) { return c.id === vista.corredor; })[0] : null;
+    document.getElementById('volverCaras').hidden = !elegido;
+    document.getElementById('notaCaras').textContent = elegido ? 'Estas son las fotos de este corredor. ¿No eres tú? Vuelve al directorio.' : 'Toca tu rostro para ver solo tus fotos.';
+    if (elegido) {
+      var n = cuantasDe(elegido), b0 = document.createElement('div');
+      b0.className = 'cara on elegida';
+      b0.innerHTML = '<span></span><b></b><small></small>';
+      b0.querySelector('span').style.backgroundImage = 'url("' + elegido.cara + '")';
+      b0.querySelector('b').textContent = elegido.dorsal ? '#' + elegido.dorsal : 'Sin dorsal';
+      b0.querySelector('small').textContent = n + (n === 1 ? ' foto' : ' fotos');
+      box.appendChild(b0);
+      return;
+    }
     E.corredores.slice().sort(function (a, b) {
       if (!!a.dorsal !== !!b.dorsal) return a.dorsal ? -1 : 1;
       if (a.dorsal) return (+a.dorsal - +b.dorsal) || (a.dorsal < b.dorsal ? -1 : 1);
@@ -313,10 +346,17 @@
       b.querySelector('span').style.backgroundImage = 'url("' + c.cara + '")';
       b.querySelector('b').textContent = c.dorsal ? '#' + c.dorsal : 'Sin dorsal';
       b.querySelector('small').textContent = cuantas + (cuantas === 1 ? ' foto' : ' fotos');
-      b.onclick = function () { vista.corredor = vista.corredor === c.id ? null : c.id; pintarCaras(); pintarGrid(); };
+      b.onclick = function () {
+        vista.corredor = c.id; pintarCaras(); pintarGrid();
+        document.querySelector('[data-p=caras]').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      };
       box.appendChild(b);
     });
   }
+  document.getElementById('volverCaras').onclick = function () {
+    vista.corredor = null; pintarCaras(); pintarGrid();
+    document.querySelector('[data-p=caras]').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
   document.getElementById('dorsal').addEventListener('input', function () { vista.dorsal = this.value.replace(/\D/g, ''); pintarGrid(); });
 
   // ---------- selfie: se sube a una carpeta PRIVADA del Drive; la PC la compara y Necty manda el link por WhatsApp ----------
