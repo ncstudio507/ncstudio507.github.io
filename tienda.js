@@ -486,8 +486,12 @@
       return { ok: true, pedido: p, vaPor: this.vaPor(E.id) };
     },
     // el álbum para la página pública: las copias LIMPIAS (sin logo) solo salen si Nelson lo liberó por patrocinio
+    // 24-11-2026 (Nelson): lo que llega de las carpetas «NC Publicar» queda POR PUBLICAR hasta que él lo revisa
+    // y toca «Publicar» en su panel. Un álbum por publicar no sale en News ni se abre por su link.
+    porPublicar: function () { return leerK('nc-por-publicar', []); },
+    esPorPublicar: function (tipo, id) { return this.porPublicar().some(function (x) { return x.tipo === tipo && x.id === id; }); },
     eventoPublico: function (id) {
-      var E = this.evento(id); if (!E || leerK('nc-galeria-eventos-ocultos', []).indexOf(id) >= 0) return null;
+      var E = this.evento(id); if (!E || leerK('nc-galeria-eventos-ocultos', []).indexOf(id) >= 0 || this.esPorPublicar('evento', id)) return null;
       var lib = !!this.liberado(id), x = {};
       Object.keys(E).forEach(function (k) { if (k !== 'limpiasClave' && k !== 'revision') x[k] = E[k]; });
       if (lib) x.limpiasClave = E.limpiasClave;
@@ -497,7 +501,7 @@
     // tarjetas de News: sin la lista de fotos (pesa) y sin los álbumes borrados
     listaEventos: function () {
       var yo = this, oc = leerK('nc-galeria-eventos-ocultos', []);
-      return this.eventos().filter(function (e) { return oc.indexOf(e.id) < 0; }).map(function (e) {
+      return this.eventos().filter(function (e) { return oc.indexOf(e.id) < 0 && !yo.esPorPublicar('evento', e.id); }).map(function (e) {
         return { id: e.id, tipo: e.tipo, nombre: e.nombre, fecha: e.fecha, lugar: e.lugar, portada: e.portada, nfotos: (e.fotos || []).length, liberado: yo.liberado(e.id) };
       });
     },
@@ -582,6 +586,7 @@
       var t = soloDigitos(tel), duena = !!S.tel && t.slice(-8) === String(S.tel).slice(-8), L = this.listasSesion(id);
       var otros = duena ? Object.keys(L).filter(function (k) { return k.slice(-8) !== t.slice(-8) && L[k].fotos.length; }).map(function (k) { return { nombre: L[k].nombre || 'Alguien', fotos: L[k].fotos }; }) : [];
       var pub = {}; Object.keys(S).forEach(function (k) { if (k !== 'tel') pub[k] = S[k]; });
+      this.porPublicar().forEach(function (x) { if (x.tipo === 'sesion' && x.id === id && x.clase) delete pub[x.clase]; });   // aún sin publicar
       return { ok: true, sesion: pub, duena: duena, mia: this.listaSesion(id, t), otros: otros, plazo: this.plazoSesion(S).toISOString() };
     },
     guardarMiLista: function (id, tel, nombre, fotos, notas) {

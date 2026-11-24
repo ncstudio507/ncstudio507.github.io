@@ -46,6 +46,7 @@ textarea{width:100%;min-height:110px;padding:10px}
 <main class="wrap">
   <h1 id="tituloPanel">Panel de galerías</h1>
   <div class="tabs" role="tablist">
+    <button class="tab" data-t="porpublicar">⏳ Por publicar</button>
     <button class="tab on" data-t="resumen">Resumen</button>
     <button class="tab" data-t="eventos">Álbumes y links</button>
     <button class="tab" data-t="cola">Cola de edición</button>
@@ -61,6 +62,7 @@ textarea{width:100%;min-height:110px;padding:10px}
     <button class="tab" data-t="sesiones">Sesiones (VIP)</button>
     <button class="tab" data-t="papelera">🗑 Papelera</button>
   </div>
+  <section data-p="porpublicar" hidden></section>
   <section data-p="capturas" hidden></section>
   <section data-p="reclamos" hidden></section>
   <section data-p="preventas" hidden></section>
@@ -701,7 +703,32 @@ function panel() {
     };
   }
 
-  var PINTAR = { capturas: capturas, reclamos: reclamos, preventas: preventas, papelera: papelera, sesiones: sesiones, cola: cola, yappy: yappy, resumen: resumen, eventos: eventos, pedidos: pedidos, lightroom: lightroom, entregas: entregas, grupales: grupales, clientes: clientes };
+  // ---------------- por publicar (24-11-2026): lo que llegó de tus carpetas «NC Publicar» en Google Drive
+  function porpublicar() {
+    var box = document.querySelector('[data-p=porpublicar]'), L = T.porPublicar ? T.porPublicar() : [];
+    box.innerHTML = '<p class="nota" style="margin-top:0">Lo que pones en <b>G:\\Mi unidad\\NC Publicar</b> (Carreras o Sesiones) tu PC lo procesa solo y queda aquí. ' +
+      'Nada sale en la página ni le llega a nadie hasta que tocas <b>Publicar</b>. Las instrucciones están en el archivo LEEME de esa carpeta.</p>' +
+      (L.length ? L.slice().reverse().map(function (x, i) {
+        var ses = x.tipo === 'sesion', que = ses ? (x.clase === 'finales' ? '🎁 Fotos finales' : '📸 Fotos de prueba') : '🏃 Álbum de carrera';
+        return '<div class="tarjeta ped"><div><b>' + esc(x.nombre) + '</b><div class="nota">' + que + ' · ' + x.fotos + ' fotos' + (x.dudas ? ' · ⚠️ ' + x.dudas + ' cosas para revisar (hoja de revisión en tu PC)' : '') + '</div>' +
+          '<div class="nota">Carpeta «' + esc(x.carpeta || '') + '» · llegó ' + esc(String(x.llego || '').slice(0, 16).replace('T', ' ')) + '</div>' +
+          '<div class="nota">' + (ses ? 'Al publicar, le llega a ella el correo y el aviso en su Zona VIP con el link de su galería.' : 'Al publicar, el álbum sale en News.') + '</div></div>' +
+          '<div class="acciones"><button class="mini-btn na" data-pub="' + i + '">✅ Publicar</button>' +
+          '<button class="mini-btn" data-desc="' + i + '">Descartar</button></div></div>';
+      }).join('') : '<p class="vacio">No hay nada por publicar.</p>');
+    var R = L.slice().reverse();
+    function hacer(fn, x, b) {
+      if (!window.NC_API.real) { alert('Solo funciona en la página real.'); return; }
+      b.disabled = true; b.textContent = '…';
+      window.NC_API.admin(fn, [x.tipo, x.id, x.clase || '']).then(function (r) {
+        alert((r && r.title || 'Listo') + (r && r.html ? '\n' + String(r.html).replace(/<[^>]+>/g, '') : ''));
+        location.hash = 'galerias'; location.reload();
+      }, function (e) { b.disabled = false; alert((e && e.title) || 'Sin conexión.'); porpublicar(); });
+    }
+    box.querySelectorAll('[data-pub]').forEach(function (b) { b.onclick = function () { var x = R[+b.dataset.pub]; if (confirm('¿Publicar «' + x.nombre + '»?' + (x.tipo === 'sesion' ? '\nLe llega el aviso a ella.' : '\nSale en News.'))) hacer('publicarPendiente', x, b); }; });
+    box.querySelectorAll('[data-desc]').forEach(function (b) { b.onclick = function () { var x = R[+b.dataset.desc]; if (confirm('¿Descartar «' + x.nombre + '»? No se publica' + (x.tipo === 'evento' ? ' y el álbum va a la papelera.' : '.'))) hacer('descartarPendiente', x, b); }; });
+  }
+  var PINTAR = { porpublicar: porpublicar, capturas: capturas, reclamos: reclamos, preventas: preventas, papelera: papelera, sesiones: sesiones, cola: cola, yappy: yappy, resumen: resumen, eventos: eventos, pedidos: pedidos, lightroom: lightroom, entregas: entregas, grupales: grupales, clientes: clientes };
   function ir(t) {
     document.querySelectorAll('.tab').forEach(function (b) { b.classList.toggle('on', b.dataset.t === t); });
     document.querySelectorAll('[data-p]').forEach(function (s) { s.hidden = s.dataset.p !== t; });
@@ -711,7 +738,7 @@ function panel() {
   document.querySelectorAll('.tab').forEach(function (b) { b.onclick = function () { ir(b.dataset.t); }; });
   // menú único (fase 1, 23-11-2026): las 14 pestañas se reparten en dos secciones del menú
   var GRUPOS = {
-    galerias: { titulo: 'Galerías', tabs: ['sesiones', 'eventos', 'preventas', 'grupales'] },
+    galerias: { titulo: 'Galerías', tabs: ['porpublicar', 'sesiones', 'eventos', 'preventas', 'grupales'] },
     pedidos: { titulo: 'Pedidos de carreras', tabs: ['resumen', 'pedidos', 'cola', 'capturas', 'reclamos', 'yappy', 'entregas', 'lightroom', 'papelera'] },
     // 24-11-2026 (Nelson): los corredores van DENTRO de Clientes, junto a Reservas, Base e Interesados
     clientes: { titulo: 'Clientes', tabs: ['clientes'], seg: true }
