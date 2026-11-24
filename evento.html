@@ -14,7 +14,6 @@
 .mini .estrella{position:absolute;left:6px;bottom:6px;background:#F99824;color:#222020;border-radius:999px;padding:2px 7px;font-size:12px;font-weight:700}
 .mini.mia{outline:3px solid #8fe0a8;outline-offset:-3px}
 .mini .tag-mia{position:absolute;left:6px;top:6px;background:#1f3a2a;color:#8fe0a8;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700}
-.ejemplo{display:block;width:min(220px,70%);border-radius:12px;margin:6px 0 10px;border:1px solid var(--gris)}
 .visor .pie{flex-wrap:wrap;gap:8px}
 /* portada del álbum (23-11-2026): foto grande con el nombre encima, como una galería profesional */
 /* el título va DEBAJO de la foto: nada tapa las caras (regla de Nelson) */
@@ -458,7 +457,7 @@
       (finisher ? '<p class="nota">⭐ Con la foto ' + finisher + ' te armamos <b>gratis</b> tu imagen de Finisher para historias.</p>' : sel.length ? '<p class="nota">⭐ Tip: abre una de tus fotos y toca «Para mi historia»: te armamos gratis tu imagen de Finisher.</p>' : '') +
       (n && !LIB ? '<div class="promo" style="margin:0 0 10px">⭐ <div><b>¿Sigues a @ncstudio507 en Instagram?</b> Sube la captura de pantalla y ' + promoTexto(n) + '. ' +
         '<a href="https://www.instagram.com/ncstudio507/" target="_blank" rel="noopener">Seguir ahora</a></div></div>' +
-        '<p class="nota" style="margin:0">Tu captura debe verse así: el perfil de <b>@ncstudio507</b> con el botón <b>«Siguiendo»</b>.</p><img class="ejemplo" src="ejemplo-captura.jpg" alt="Ejemplo de captura: perfil de ncstudio507 con el botón Siguiendo">' +
+        '<p class="nota" style="margin:0">Cómo sacar tu captura: desde <b>tu</b> Instagram entra al perfil de <b>@ncstudio507</b> y toma la captura de pantalla donde se vea <b>el nombre ncstudio507</b> y el botón <b>«Siguiendo»</b>. Revisamos cada captura.</p>' +
         '<div class="fila"><label class="btn sec" style="display:inline-flex;align-items:center">📸 Subir captura<input type="file" accept="image/*" id="cap" hidden></label><span class="nota" id="capEst"></span></div>' : '') +
       '<div class="fila"><button class="btn sec" id="p1x">Seguir viendo</button><button class="btn" id="p1ok">Continuar</button></div>');
     function tot() {
