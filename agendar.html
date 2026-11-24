@@ -46,7 +46,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 .tabs::-webkit-scrollbar{display:none}
 .tabs button{flex:1 0 auto;max-width:200px;white-space:nowrap;font:bold 15px Arial,sans-serif;background:transparent;color:var(--bg);border:0;border-bottom:4px solid transparent;padding:12px 8px;cursor:pointer}
 .tabs button[aria-pressed="true"]{border-bottom-color:var(--accent);color:#fff}
-@media (max-width:480px){.tabs{gap:0;padding:0 8px}.tabs button{font-size:13px;padding:12px 6px}}
+.tabs a.tlink{flex:1 0 auto;max-width:200px;white-space:nowrap;font:bold 15px Arial,sans-serif;color:var(--accent);text-decoration:none;border-bottom:4px solid transparent;padding:12px 8px;text-align:center}
+@media (max-width:480px){.tabs{gap:0;padding:0 8px}.tabs button,.tabs a.tlink{font-size:13px;padding:12px 6px}}
 .cl{display:grid;gap:4px;text-align:left;width:100%;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;cursor:pointer;font:inherit;color:var(--fg)}
 .cl b{font-size:17px}.cl span{font-size:14px;color:var(--muted)}
 .chip{display:inline-block;font-size:12px;font-weight:bold;padding:3px 8px;border-radius:99px;background:var(--soft);color:var(--fg);justify-self:start}
@@ -125,7 +126,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 </head>
 <body>
 <div class="top"><img src="logo.png" alt="NC Studio"><span>Agendar reserva</span><a href="#" id="salir" hidden>Salir</a></div>
-<nav class="tabs" id="tabs" hidden><button id="tA" aria-pressed="true">Agendar</button><button id="tK" aria-pressed="false">Compromisos</button><button id="tC" aria-pressed="false">Clientes</button><button id="tF" aria-pressed="false">Finanzas</button><button id="tP" aria-pressed="false">Publicar</button><button id="tE" aria-pressed="false">Enviar</button></nav>
+<nav class="tabs" id="tabs" hidden><button id="tA" aria-pressed="true">Agendar</button><button id="tK" aria-pressed="false">Compromisos</button><button id="tC" aria-pressed="false">Clientes</button><button id="tF" aria-pressed="false">Finanzas</button><button id="tP" aria-pressed="false">Publicar</button><button id="tE" aria-pressed="false">Enviar</button><a class="tlink" href="galeria-admin.html" title="Carreras y galerías de la Zona VIP">📸 Galerías</a></nav>
 <div class="bar"></div>
 <main id="app"></main>
 <script>
