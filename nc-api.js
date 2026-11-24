@@ -113,7 +113,12 @@
       b.addEventListener('eventClick', function () {
         msj('Preparando tu pago…');
         post({ action: 'gal_yappy', ticket: b.getAttribute('data-ticket'), tel: b.getAttribute('data-tel') }).then(function (r) {
-          if (!r.ok) { msj(r.title || 'No se pudo iniciar el pago.'); return; }
+          if (!r.ok) {
+            // 23-11-2026: se muestra el código que dio Yappy para saber por qué rechazó la orden
+            var d = r.detalle || {}, cod = typeof d === 'object' ? [d.code, d.description || d.message].filter(Boolean).join(' · ') : String(d);
+            msj((r.title || 'No se pudo iniciar el pago.') + (cod ? '<br><small style="opacity:.75">Código de Yappy: ' + String(cod).replace(/[<>&]/g, '') + '</small>' : ''));
+            return;
+          }
           b.eventPayment({ transactionId: r.transactionId, documentName: r.documentName, token: r.token });
           msj('Aprueba el pago en tu app de Yappy.');
         }).catch(function () { msj('Sin conexión. Inténtalo otra vez.'); });
