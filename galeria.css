@@ -35,13 +35,17 @@ h1{font-family:Montserrat,sans-serif;font-weight:700;font-size:28px;letter-spaci
 .tabs{display:flex;gap:6px;overflow-x:auto;margin:0 0 14px;border-bottom:1px solid var(--gris)}
 .tab{flex:none;min-height:46px;padding:0 14px;background:none;border:0;border-bottom:3px solid transparent;color:var(--crema);cursor:pointer;font-family:Montserrat,sans-serif;font-size:13px;font-weight:600}
 .tab.on{color:var(--naranja);border-bottom-color:var(--naranja)}
-.caras{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:14px;margin:0 0 18px}
-.cara{background:none;border:0;color:var(--crema);cursor:pointer;text-align:center;padding:4px;border-radius:12px}
+/* directorio de rostros más grande (23-11-2026, Nelson: «las caras y el dorsal se ven demasiado pequeños») */
+.caras{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:16px;margin:0 0 18px}
+.cara{background:none;border:0;color:var(--crema);cursor:pointer;text-align:center;padding:6px;border-radius:14px}
 .cara.on{background:#3a3128}
-.cara span{display:block;width:76px;height:76px;margin:0 auto 6px;border-radius:50%;background-size:cover;background-position:center;border:2px solid var(--gris)}
+.cara span{display:block;width:min(100%,124px);aspect-ratio:1;margin:0 auto 8px;border-radius:50%;background-size:cover;background-position:center;border:3px solid var(--gris)}
 .cara.on span{border-color:var(--naranja)}
-.cara b{font-family:Montserrat,sans-serif;font-size:13px}
-.cara small{display:block;font-size:12px;color:#bdb3a6}
+.cara b{display:block;font-family:Montserrat,sans-serif;font-size:19px;font-weight:700;color:var(--blanco);letter-spacing:.02em}
+.cara small{display:block;font-size:13px;color:#bdb3a6;margin-top:2px}
+.cara.elegida span{width:min(100%,170px)}
+.cara.elegida b{font-size:24px}
+@media (max-width:520px){.caras{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.cara{padding:4px}.cara b{font-size:17px}.cara small{font-size:12px}}
 .fila{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:0 0 16px}
 .btn{min-height:46px;padding:0 20px;border-radius:999px;border:0;background:var(--naranja);color:var(--fondo);font-family:Montserrat,sans-serif;font-weight:700;font-size:14px;cursor:pointer}
 .btn.sec{background:transparent;color:var(--crema);border:1.5px solid var(--gris)}
