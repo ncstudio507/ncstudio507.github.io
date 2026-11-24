@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Guion · NC Studio</title>
+<link rel="icon" href="favicon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@600;800&display=swap">
+<style>
+/* Teleprompter con grabadora (24-11-2026): Nelson lee y graba a la vez; la voz se guarda en Drive con el Apps Script (voz_subir). */
+:root { --bg:#161413; --panel:#221f1d; --fg:#fbf7f2; --dim:#8d847c; --nar:#F99824; --rojo:#e5484d; --verde:#3fae5a;
+  --display:"Bebas Neue",Impact,"Arial Narrow",sans-serif; --text:"Montserrat","Segoe UI",Arial,sans-serif; --tam:38px; color-scheme:dark; }
+* { box-sizing:border-box; }
+[hidden] { display:none !important; }
+html,body { height:100%; margin:0; }
+body { background:var(--bg); color:var(--fg); font-family:var(--text); overflow:hidden; padding:env(safe-area-inset-top,0px) 0 0; }
+.app { height:100%; display:flex; flex-direction:column; }
+header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px)); border-bottom:3px solid var(--nar); }
+header h1 { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:var(--display); font-weight:400; font-size:24px; letter-spacing:.04em; margin:0; line-height:1; }
+header h1 b { color:var(--nar); font-weight:400; }
+.estado { display:flex; align-items:center; gap:10px; font-family:var(--display); font-size:22px; letter-spacing:.06em; white-space:nowrap; }
+#escena { color:var(--nar); }
+#rec { display:none; color:var(--rojo); }
+#rec.si { display:inline; }
+#rec::before { content:"● "; animation:late 1s infinite; }
+@keyframes late { 50% { opacity:.2; } }
+.visor { position:relative; flex:1; min-height:0; overflow:hidden; touch-action:none; }
+.rollo { position:absolute; left:0; right:0; top:0; padding:38vh max(20px,env(safe-area-inset-right,0px)) 70vh max(20px,env(safe-area-inset-left,0px)); will-change:transform; }
+.guia { position:absolute; left:0; right:0; top:36%; border-top:3px solid var(--nar); opacity:.85; pointer-events:none; }
+.guia::before { content:""; position:absolute; left:0; top:-13px; border:11px solid transparent; border-left:16px solid var(--nar); }
+.sa,.sb { position:absolute; left:0; right:0; pointer-events:none; }
+.sa { top:0; height:26%; background:linear-gradient(var(--bg),transparent); }
+.sb { bottom:0; height:30%; background:linear-gradient(transparent,var(--bg)); }
+.bloque { margin:0 0 1.4em; }
+.etq { font-family:var(--display); font-size:calc(var(--tam)*.62); color:var(--nar); letter-spacing:.08em; margin-bottom:.2em; }
+.linea { font-size:var(--tam); line-height:1.32; font-weight:800; margin:0; color:var(--dim); transition:color .3s; }
+.bloque.activo .linea { color:var(--fg); }
+.linea em { font-style:normal; color:var(--nar); }
+.pausa { display:block; font-family:var(--display); font-size:calc(var(--tam)*.5); color:var(--dim); letter-spacing:.1em; margin-top:.5em; }
+.fin { font-family:var(--display); font-size:calc(var(--tam)*1.3); color:var(--nar); text-align:center; }
+#cuenta { position:absolute; inset:0; display:grid; place-items:center; background:rgba(22,20,19,.82); font-family:var(--display); font-size:40vw; color:var(--nar); line-height:1; }
+.mando { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center; gap:10px; background:var(--panel); border-top:1px solid #332e2a; padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px)); }
+button { font:inherit; cursor:pointer; border:0; }
+#play { width:78px; height:78px; border-radius:50%; background:var(--rojo); color:#fff; font-family:var(--display); font-size:20px; letter-spacing:.04em; line-height:1; }
+#play.pausa-btn { background:var(--nar); color:#1a1209; }
+#play:focus-visible,.chico:focus-visible,.grande:focus-visible { outline:3px solid var(--fg); outline-offset:3px; }
+.ajustes { display:grid; gap:8px; min-width:0; }
+.fila { display:flex; align-items:center; gap:8px; }
+.fila span { font-size:12px; color:var(--dim); width:58px; flex:none; font-weight:600; }
+.fila b { font-size:12px; width:24px; text-align:right; font-variant-numeric:tabular-nums; flex:none; }
+input[type=range] { flex:1; min-width:0; accent-color:var(--nar); height:28px; }
+.lado { grid-column:1 / -1; display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.hoja audio { height:54px; }
+.chico { background:#35302c; color:var(--fg); border-radius:12px; padding:9px 10px; font-weight:800; font-size:13px; white-space:nowrap; }
+.chico:disabled { opacity:.4; }
+.ayuda { font-size:13px; color:var(--dim); line-height:1.45; margin:0; padding:0 max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px)); background:var(--panel); }
+.ayuda b { color:var(--fg); }
+/* hoja final: escuchar y enviar */
+.hoja { position:absolute; inset:0; background:rgba(22,20,19,.96); display:flex; flex-direction:column; justify-content:center; gap:16px; padding:24px max(20px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px)); z-index:5; }
+.hoja h2 { font-family:var(--display); font-weight:400; font-size:44px; margin:0; color:var(--nar); letter-spacing:.03em; }
+.hoja p { margin:0; font-size:17px; line-height:1.45; }
+.hoja audio { width:100%; }
+.grande { width:100%; padding:18px; border-radius:16px; font-weight:800; font-size:19px; background:var(--nar); color:#1a1209; }
+.grande.sec { background:#35302c; color:var(--fg); }
+.grande:disabled { opacity:.5; }
+.hoja input { width:100%; padding:14px; border-radius:12px; border:2px solid #3d3733; background:#151312; color:var(--fg); font:800 22px var(--text); letter-spacing:.2em; text-align:center; }
+.msj { min-height:1.4em; font-weight:700; }
+.msj.ok { color:var(--verde); } .msj.mal { color:var(--rojo); }
+a.guardar { color:var(--nar); font-weight:800; text-align:center; }
+@media (prefers-reduced-motion:reduce) { .linea { transition:none; } #rec::before { animation:none; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1 id="titulo">Guion <b>NC</b></h1>
+    <div class="estado"><span id="rec">REC <span id="reloj">0:00</span></span><span id="escena"></span></div>
+  </header>
+
+  <div class="visor" id="visor">
+    <div class="rollo" id="rollo"></div>
+    <div class="sa"></div><div class="sb"></div><div class="guia"></div>
+    <div id="cuenta" hidden>3</div>
+
+    <div class="hoja" id="hoja" hidden>
+      <h2>¿Cómo quedó?</h2>
+      <p>Escúchala. Si te gusta, envíamela; si no, grábala otra vez.</p>
+      <audio id="oir" controls></audio>
+      <div id="cajaPin" hidden>
+        <p style="margin-bottom:8px">Escribe el PIN de tu panel (solo la primera vez):</p>
+        <input id="pin" type="password" inputmode="numeric" autocomplete="off" aria-label="PIN del panel">
+      </div>
+      <button class="grande" id="enviar">📤 Enviar a Claude (Drive)</button>
+      <p class="msj" id="msj" role="status"></p>
+      <a class="guardar" id="guardar" hidden>⬇ Guardar en el celular</a>
+      <button class="grande sec" id="otra">↺ Grabar otra vez</button>
+    </div>
+  </div>
+
+  <div class="mando">
+    <button id="play" aria-label="Grabar y empezar">● GRABAR</button>
+    <div class="ajustes">
+      <label class="fila" for="vel"><span>Velocidad</span><input id="vel" type="range" min="20" max="120" step="2" value="52"><b id="velV">52</b></label>
+      <label class="fila" for="tam"><span>Letra</span><input id="tam" type="range" min="28" max="64" step="1" value="38"><b id="tamV">38</b></label>
+    </div>
+    <div class="lado">
+      <button class="chico" id="terminar" disabled>■ Terminar</button>
+      <button class="chico" id="inicio">↺ Inicio</button>
+    </div>
+  </div>
+  <p class="ayuda" id="ayuda"><b>Toca ● GRABAR:</b> la página te pide el micrófono (dile «Permitir»), cuenta 3-2-1 y empieza a grabar mientras el guion corre. PAUSA detiene las dos cosas. Al final toca <b>■ Terminar</b>, escúchala y envíamela.</p>
+</div>
+
+<script src="nc-config.js"></script>
+<script src="guiones.js"></script>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search), clave = q.get('g') || 'tutorial-galeria';
+  var G = (window.NC_GUIONES || {})[clave];
+  var rollo = document.getElementById('rollo'), visor = document.getElementById('visor');
+  var play = document.getElementById('play'), cuenta = document.getElementById('cuenta'), escena = document.getElementById('escena');
+  var vel = document.getElementById('vel'), tam = document.getElementById('tam');
+  var recEt = document.getElementById('rec'), reloj = document.getElementById('reloj');
+  var terminar = document.getElementById('terminar'), hoja = document.getElementById('hoja');
+  var msj = document.getElementById('msj'), enviar = document.getElementById('enviar'), guardarA = document.getElementById('guardar');
+
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  // el guion viene de guiones.js (lo escribe Claude Code): solo se permite <em> y <b>
+  function marcado(s) { return esc(s).replace(/&lt;(\/?)(em|b)&gt;/g, '<$1$2>'); }
+  if (!G) { rollo.innerHTML = '<p class="linea" style="color:var(--fg)">No encontré ese guion.</p>'; return; }
+  document.getElementById('titulo').innerHTML = marcado(G.titulo);
+  document.title = 'Guion · ' + G.nombre;
+  rollo.innerHTML = G.escenas.map(function (s, i) {
+    return '<div class="bloque" data-n="' + esc(s.n) + '"><div class="etq">' + esc(s.e) + '</div><p class="linea">' + marcado(s.t) + '</p>' +
+      (i < G.escenas.length - 1 ? '<span class="pausa">— pausa —</span>' : '') + '</div>';
+  }).join('') + '<p class="fin">¡LISTO! Toca ■ Terminar</p>';
+  var bloques = [].slice.call(rollo.querySelectorAll('.bloque'));
+
+  function leerLS(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function guardarLS(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  if (leerLS('tpVel')) vel.value = leerLS('tpVel');
+  if (leerLS('tpTam')) tam.value = leerLS('tpTam');
+
+  var y = 0, corriendo = false, ultimo = 0, lock = null, contando = false;
+  var grabador = null, flujo = null, trozos = [], tipo = '', segs = 0, tReloj = null, audioFinal = null;
+
+  function max() { return Math.max(0, rollo.scrollHeight - visor.clientHeight * 0.75); }
+  function pintar() {
+    y = Math.min(Math.max(0, y), max());
+    rollo.style.transform = 'translateY(' + (-y) + 'px)';
+    var g = visor.getBoundingClientRect().top + visor.clientHeight * 0.36, activo = bloques[0];
+    bloques.forEach(function (b) { if (b.getBoundingClientRect().top <= g + 10) activo = b; });
+    bloques.forEach(function (b) { b.classList.toggle('activo', b === activo); });
+    escena.textContent = activo.getAttribute('data-n');
+  }
+  function ajustes() {
+    document.getElementById('velV').textContent = vel.value; document.getElementById('tamV').textContent = tam.value;
+    document.documentElement.style.setProperty('--tam', tam.value + 'px');
+    guardarLS('tpVel', vel.value); guardarLS('tpTam', tam.value); pintar();
+  }
+  vel.oninput = ajustes; tam.oninput = ajustes;
+
+  function paso(t) {
+    if (!corriendo) return;
+    var dt = ultimo ? (t - ultimo) / 1000 : 0; ultimo = t;
+    y += vel.value * dt; pintar();
+    if (y < max()) requestAnimationFrame(paso); else { corriendo = false; }
+  }
+  function luz() { try { navigator.wakeLock && navigator.wakeLock.request('screen').then(function (l) { lock = l; }, function () {}); } catch (e) {} }
+  function mmss(s) { return Math.floor(s / 60) + ':' + ('0' + Math.floor(s % 60)).slice(-2); }
+  function relojOn(on) {
+    clearInterval(tReloj);
+    if (on) tReloj = setInterval(function () { segs++; reloj.textContent = mmss(segs); }, 1000);
+  }
+  function correr() {
+    corriendo = true; ultimo = 0; luz(); requestAnimationFrame(paso);
+    play.textContent = 'PAUSA'; play.classList.add('pausa-btn'); play.setAttribute('aria-label', 'Pausar');
+    if (grabador && grabador.state === 'paused') grabador.resume();
+    recEt.classList.add('si'); relojOn(true); terminar.disabled = false;
+  }
+  function pausar() {
+    corriendo = false; try { lock && lock.release(); } catch (e) {} lock = null;
+    play.textContent = '● SEGUIR'; play.classList.remove('pausa-btn'); play.setAttribute('aria-label', 'Seguir grabando');
+    if (grabador && grabador.state === 'recording') grabador.pause();
+    relojOn(false);
+  }
+  function elegirTipo() {
+    var t = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/webm', 'audio/ogg;codecs=opus'];
+    for (var i = 0; i < t.length; i++) if (window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t[i])) return t[i];
+    return '';
+  }
+  function empezarGrabacion() {
+    if (!navigator.mediaDevices || !window.MediaRecorder) return Promise.reject(new Error('Este navegador no deja grabar. Ábrelo en Chrome.'));
+    return navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: true, channelCount: 1 } }).then(function (s) {
+      flujo = s; trozos = []; segs = 0; reloj.textContent = '0:00'; tipo = elegirTipo();
+      grabador = tipo ? new MediaRecorder(s, { mimeType: tipo, audioBitsPerSecond: 128000 }) : new MediaRecorder(s);
+      tipo = grabador.mimeType || tipo || 'audio/webm';
+      grabador.ondataavailable = function (e) { if (e.data && e.data.size) trozos.push(e.data); };
+      grabador.onstop = mostrarHoja;
+    });
+  }
+  play.onclick = function () {
+    if (contando) return;
+    if (corriendo) { pausar(); return; }
+    if (grabador && grabador.state === 'paused') { correr(); return; }
+    contando = true;
+    empezarGrabacion().then(function () {
+      cuenta.hidden = false; var n = 3; cuenta.textContent = n;
+      var t = setInterval(function () {
+        n--; if (n > 0) { cuenta.textContent = n; return; }
+        clearInterval(t); cuenta.hidden = true; contando = false;
+        grabador.start(1000); correr();
+      }, 1000);
+    }, function (e) {
+      contando = false;
+      alerta('No pude usar el micrófono: ' + (e && e.name === 'NotAllowedError' ? 'toca el candado de arriba y permite el micrófono.' : (e.message || e)));
+    });
+  };
+  function alerta(t) { document.getElementById('ayuda').innerHTML = '<b style="color:var(--rojo)">' + esc(t) + '</b>'; }
+  terminar.onclick = function () {
+    pausar(); recEt.classList.remove('si'); terminar.disabled = true;
+    if (grabador && grabador.state !== 'inactive') grabador.stop();
+    if (flujo) flujo.getTracks().forEach(function (t) { t.stop(); });
+  };
+  function mostrarHoja() {
+    audioFinal = new Blob(trozos, { type: tipo });
+    var url = URL.createObjectURL(audioFinal);
+    document.getElementById('oir').src = url;
+    guardarA.href = url; guardarA.download = 'voz-' + clave + (/mp4/.test(tipo) ? '.m4a' : '.webm');
+    document.getElementById('cajaPin').hidden = !!leerLS('ncPin');
+    msj.textContent = ''; msj.className = 'msj'; enviar.disabled = false; guardarA.hidden = true;
+    hoja.hidden = false; play.textContent = '● GRABAR'; play.classList.remove('pausa-btn');
+  }
+  enviar.onclick = function () {
+    var pin = leerLS('ncPin') || document.getElementById('pin').value.trim();
+    if (!pin) { msj.textContent = 'Escribe el PIN.'; msj.className = 'msj mal'; return; }
+    var url = (window.NC_CONFIG || {}).url;
+    if (!url || url === 'sim') { msj.textContent = 'Esta copia no está conectada al Apps Script.'; msj.className = 'msj mal'; guardarA.hidden = false; return; }
+    enviar.disabled = true; msj.textContent = 'Enviando… (' + Math.round(audioFinal.size / 1024) + ' KB)'; msj.className = 'msj';
+    var fr = new FileReader();
+    fr.onload = function () {
+      var b64 = String(fr.result).split(',')[1];
+      fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'voz_subir', pin: pin, audio: b64, tipo: tipo, guion: G.nombre, seg: segs }) })
+        .then(function (r) { return r.json(); })
+        .then(function (r) {
+          if (!r.ok) throw r;
+          if (!leerLS('ncPin')) guardarLS('ncPin', pin);
+          msj.textContent = '✅ ¡Listo! La voz ya me llegó. Avísame y la trabajo.'; msj.className = 'msj ok';
+        })
+        .catch(function (e) {
+          enviar.disabled = false; guardarA.hidden = false;
+          msj.textContent = '⚠️ No se pudo enviar: ' + ((e && e.title) || 'sin conexión') + '. Prueba otra vez o guárdala en el celular.'; msj.className = 'msj mal';
+        });
+    };
+    fr.readAsDataURL(audioFinal);
+  };
+  document.getElementById('otra').onclick = function () { hoja.hidden = true; y = 0; pintar(); grabador = null; };
+  document.getElementById('inicio').onclick = function () { if (!grabador || grabador.state === 'inactive') { y = 0; pintar(); } else { y = 0; pintar(); } };
+
+  var toque = null;
+  visor.addEventListener('pointerdown', function (e) { if (!hoja.hidden) return; toque = { y0: e.clientY, base: y }; });
+  visor.addEventListener('pointermove', function (e) { if (!toque) return; y = toque.base - (e.clientY - toque.y0); pintar(); });
+  window.addEventListener('pointerup', function () { toque = null; });
+  visor.addEventListener('wheel', function (e) { y += e.deltaY; pintar(); }, { passive: true });
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && corriendo) luz(); });
+  window.addEventListener('beforeunload', function (e) { if (trozos.length && hoja.hidden === false && !/✅/.test(msj.textContent)) { e.preventDefault(); e.returnValue = ''; } });
+  ajustes();
+})();
+</script>
+</body>
+</html>
