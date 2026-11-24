@@ -439,21 +439,22 @@
       '<label class="campo">Correo (opcional)<input type="email" id="fMail" autocomplete="email"></label>' +
       '<label class="campo">Número de dorsal (si lo tienes)<input type="text" id="fDor" inputmode="numeric"></label>' +
       '<div id="fRegalo"></div>' +
+      '<div id="fCod" style="margin:0 0 12px"><a href="#" id="codAbrir" class="nota">🎟 ¿Tienes un código de cortesía?</a></div>' +
       '<p class="nota" style="margin:0 0 12px;font-size:12px">Tu número es tu usuario en la <b>Zona VIP</b>: ahí ves tu turno y descargas tus fotos editadas. Te mandamos por WhatsApp el código para crear tu contraseña. NC Studio guarda tus datos para entregarte las fotos y avisarte de próximas carreras.</p>' +
-      (t && !captura && !LIB ? '<p class="nota" style="margin:0 0 10px">⭐ Recuerda: con la captura de que sigues a NC ' + promoTexto(pagadas().length) + '. <a href="#" id="volverCap">Subir captura</a></p>' : '') +
+      (t && !captura && !LIB ? '<p class="nota" id="fRecCap" style="margin:0 0 10px">⭐ Recuerda: con la captura de que sigues a NC ' + promoTexto(pagadas().length) + '. <a href="#" id="volverCap">Subir captura</a></p>' : '') +
       '<p class="nota" id="fErr" style="color:#ffb4a8"></p>' +
       '<div class="fila"><button class="btn sec" id="p2b">Atrás</button><button class="btn" id="p2ok">' + (t ? 'Pagar ' + $(t) + ' con Yappy' : 'Pedir mis fotos gratis') + '</button></div>');
     document.getElementById('p2b').onclick = paso1;
     var vc = document.getElementById('volverCap'); if (vc) vc.onclick = function (ev) { ev.preventDefault(); paso1(); };
     // regalo de bienvenida de la Zona VIP: si ese número lo tiene sin usar, se ofrece (el servidor lo vuelve a revisar)
-    var REG = T.REGALO || { fotos: 3 }, conRegalo = false, telVisto = '';
+    var REG = T.REGALO || { fotos: 3 }, conRegalo = false, telVisto = '', codigoOk = '';
     function botonPagar() {
-      var n = pagadas().length, x = conRegalo ? precio(Math.max(0, n - REG.fotos), !!captura) : t;
+      var n = pagadas().length, x = codigoOk ? 0 : conRegalo ? precio(Math.max(0, n - REG.fotos), !!captura) : t;
       document.getElementById('p2ok').textContent = x ? 'Pagar ' + $(x) + ' con Yappy' : 'Pedir mis fotos gratis';
     }
     document.getElementById('fTel').addEventListener('blur', function () {
       var tel = this.value.replace(/\D/g, ''), caja = document.getElementById('fRegalo');
-      if (tel.length < 7 || tel === telVisto || LIB || !pagadas().length) return; telVisto = tel;
+      if (tel.length < 7 || tel === telVisto || LIB || codigoOk || !pagadas().length) return; telVisto = tel;
       A.gal('regaloPublico', [tel, E.id]).then(function (r) {
         if (!r || !r.regalo) { caja.innerHTML = ''; conRegalo = false; botonPagar(); return; }
         conRegalo = true;
@@ -462,12 +463,35 @@
         botonPagar();
       }, function () {});
     });
+    // código de cortesía (Nelson lo da a quien quiera): todas las fotos gratis; igual entran a la fila y se entregan editadas
+    function cajaCodigo() {
+      var caja = document.getElementById('fCod'), rc = document.getElementById('fRecCap');
+      if (rc) rc.hidden = !!codigoOk;
+      if (codigoOk) {
+        caja.innerHTML = '<div class="promo" style="margin:0;align-items:center">🎟 <div><b>Código ' + codigoOk + ':</b> todas tus fotos van <b>gratis</b>. Nelson las edita en orden de turno y las descargas editadas en tu Zona VIP. <a href="#" id="codQuitar">Quitar</a></div></div>';
+        document.getElementById('codQuitar').onclick = function (ev) { ev.preventDefault(); codigoOk = ''; telVisto = ''; cajaCodigo(); botonPagar(); };
+        return;
+      }
+      caja.innerHTML = '<label class="campo" style="margin:0">Código de cortesía<input type="text" id="fCodTxt" autocomplete="off" style="text-transform:uppercase"></label>' +
+        '<div class="fila" style="margin-top:6px"><button class="btn sec" id="fCodOk">Aplicar código</button><span class="nota" id="fCodEst"></span></div>';
+      document.getElementById('fCodOk').onclick = function () {
+        var v = document.getElementById('fCodTxt').value.trim(), est = document.getElementById('fCodEst'), b = this;
+        if (!v) { est.textContent = 'Escribe tu código.'; return; }
+        b.disabled = true; est.textContent = 'Revisando…';
+        A.gal('codigoFotosPublico', [v]).then(function (r) {
+          b.disabled = false;
+          if (!r || !r.ok) { est.textContent = (r && r.title) || 'Ese código no es válido.'; return; }
+          codigoOk = r.codigo; conRegalo = false; document.getElementById('fRegalo').innerHTML = ''; cajaCodigo(); botonPagar();
+        }, function () { b.disabled = false; est.textContent = 'Sin conexión: inténtalo otra vez.'; });
+      };
+    }
+    document.getElementById('codAbrir').onclick = function (ev) { ev.preventDefault(); cajaCodigo(); };
     document.getElementById('p2ok').onclick = function () {
       var nom = document.getElementById('fNom').value.trim(), tel = document.getElementById('fTel').value.replace(/\D/g, ''), mail = document.getElementById('fMail').value.trim();
       var err = !nom ? 'Falta tu nombre.' : tel.length < 7 ? 'Revisa tu número de celular.' : mail && !/^\S+@\S+\.\S+$/.test(mail) ? 'Revisa tu correo (o déjalo vacío).' : '';
       document.getElementById('fErr').textContent = err;
       if (err) return;
-      confirmar({ nombre: nom, tel: tel, correo: mail, dorsal: document.getElementById('fDor').value.replace(/\D/g, ''), regalo: conRegalo && tel === telVisto });
+      confirmar({ nombre: nom, tel: tel, correo: mail, dorsal: document.getElementById('fDor').value.replace(/\D/g, ''), regalo: !codigoOk && conRegalo && tel === telVisto, codigo: codigoOk });
     };
   }
   function adivinarCorredor(dorsal) {
@@ -485,7 +509,7 @@
     var subir = capFile && !LIB ? A.subirFoto('captura', capFile, { tel: datos.tel }).catch(function () { return null; }) : Promise.resolve(null);
     subir.then(function (c) {
       return A.gal('pedidoCarrera', [E.id, { nombre: datos.nombre, tel: datos.tel, correo: datos.correo, dorsal: datos.dorsal, fotos: sel.slice(),
-        captura: LIB ? null : captura, capturaArchivo: c && c.archivo, finisher: finisher || null, regalo: !!datos.regalo }]);
+        captura: LIB ? null : captura, capturaArchivo: c && c.archivo, finisher: finisher || null, regalo: !!datos.regalo, codigo: datos.codigo || '' }]);
     }).then(function (r) {
       if (!r || !r.ok) { var e = document.getElementById('fErr'); if (e) e.textContent = (r && r.title) || 'No se pudo guardar.'; if (b) { b.disabled = false; b.textContent = 'Intentar otra vez'; } return; }
       if (r.pedido.estado === 'esperando') esperarYappy(r.pedido); else ticketListo(r.pedido, r.vaPor);
@@ -517,6 +541,7 @@
       '<div class="num">Turno ' + p.turno + '</div><p class="res">NC va por el ' + (vaPor || T.vaPor(E.id)) + '</p>' +
       '<p class="nota">Ticket ' + p.ticket + '. Tus fotos están sin editar; Nelson edita en orden de turno y te avisa por WhatsApp. ' +
       ((p.regaloFotos || []).length ? '🎁 Usaste tu regalo: ' + p.regaloFotos.length + ' fotos gratis. ' : '') +
+      (p.cortesia ? '🎟 Tus fotos son gratis con el código ' + p.cortesia + '. ' : '') +
       'Las ves y las descargas en tu <a href="vip.html?tel=' + p.tel + '">Zona VIP</a>: tu número es tu usuario y te mandamos por WhatsApp el código para crear tu contraseña.</p>' +
       '<div class="fila" style="justify-content:center"><button class="btn" id="fin">Listo</button></div></div>');
     document.getElementById('fin').onclick = fin;

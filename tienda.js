@@ -192,7 +192,8 @@
       var n = p.fotos.length, g = this.grupoDe(p.tel), frase = g ? this.fraseGrupo(g) : '';
       return '¡Hola ' + primero(p.nombre) + '! 👋 Soy Nelson de NC Studio 📸 Ya me llegó tu pedido de ' + n + (n === 1 ? ' foto' : ' fotos') + ' de la ' + p.eventoNombre +
         ' (ticket ' + p.ticket + '). ' + (this.vaPor(p.evento) >= p.turno ? '¡Ya voy con tu pedido!' : 'Tu turno es el ' + p.turno + ' y voy por el ' + this.vaPor(p.evento) + '; te aviso apenas estén listas.') + ' ' + (frase ? frase + ' ' : '') + '¡Gracias por confiar en nosotros! 🧡' +
-        (inv && inv.codigo ? '\n\n🔐 Crea tu usuario en la Zona VIP de NC Studio: ahí ves tu turno y descargas tus fotos editadas.\n👉 ' + inv.link + '\nTu código: ' + inv.codigo + ' (vale ' + inv.dias + ' días)\n🎁 Al crearlo te ganas un regalo de bienvenida para la próxima vez.'
+        (inv && inv.codigo ? '\n\n🔐 Crea tu usuario en la Zona VIP de NC Studio: ahí ves tu turno y descargas tus fotos editadas.\n👉 ' + inv.link + (p.cortesia ? '&r=0' : '') + '\nTu código: ' + inv.codigo + ' (vale ' + inv.dias + ' días)' +
+          (p.cortesia ? '' : '\n🎁 Al crearlo te ganas un regalo de bienvenida para la próxima vez.')   // con código de cortesía no hay regalo (Nelson 23-11)
           : inv && inv.cuenta ? '\n\nTus fotos te llegan a tu Zona VIP 👑 ' + inv.link + ' (entras con tu número y tu contraseña).' : '');
     },
     // si no tiene usuario en la Zona VIP, el servidor crea un código y va en el WhatsApp del pedido
@@ -205,8 +206,8 @@
       var quien = k ? k.nombre + (k.nombre.toLowerCase() !== p.nombre.toLowerCase() ? ' (en la página puso «' + p.nombre + '»)' : '') : p.nombre + ' (' + p.tel + ')';
       var g = this.grupoDe(p.tel), inv = this.invitarVip(p);
       return this._aviso({ tipo: 'pedido', ticket: p.ticket, tel: p.tel, contacto: !!k, saludo: this.saludo(p, inv),
-        texto: (Number(p.monto) ? '💰 ' : '🎁 ') + quien + (g ? ' · ' + g : '') + ' escogió ' + n + (n === 1 ? ' foto' : ' fotos') + ' de ' + p.eventoNombre +
-          (Number(p.monto) ? ' y pagó ' + dinero(p.monto) + ' por Yappy' : p.patrocinio ? ' (gratis por patrocinio' + (p.patrocinio !== 'sí' ? ' de ' + p.patrocinio : '') + ')' : ' (gratis)') +
+        texto: (Number(p.monto) ? '💰 ' : p.cortesia ? '🎟 ' : '🎁 ') + quien + (g ? ' · ' + g : '') + ' escogió ' + n + (n === 1 ? ' foto' : ' fotos') + ' de ' + p.eventoNombre +
+          (Number(p.monto) ? ' y pagó ' + dinero(p.monto) + ' por Yappy' : p.cortesia ? ' · 🎟 GRATIS con tu código ' + p.cortesia : p.patrocinio ? ' (gratis por patrocinio' + (p.patrocinio !== 'sí' ? ' de ' + p.patrocinio : '') + ')' : ' (gratis)') +
           ((p.regaloFotos || []).length ? ' · 🎁 usó su regalo (' + p.regaloFotos.length + ' gratis)' : '') +
           (p.captura ? ' · 📸 con captura' : '') + '\n🎟 Turno ' + p.turno + ' · vas por el ' + this.vaPor(p.evento) + (k ? '' : '\n🆕 No lo tienes en tus contactos') +
           (inv && inv.codigo ? '\n🔐 El mensaje lleva su código para crear su usuario' : '') });
@@ -462,9 +463,13 @@
       var cap = lib ? null : (d.captura || null);
       // regalo de bienvenida de la Zona VIP: las primeras 3 fotos pagables salen gratis (no aplica con patrocinio).
       // Solo en carreras DESPUÉS del día en que creó su usuario: no en la carrera de la que pidió fotos al crearlo.
+      // código de cortesía (Nelson, 23-11-2026): con un código «Fotos gratis» activo, TODAS las fotos salen gratis.
+      // Igual entran a la fila de edición y se descargan editadas (nada sin editar se descarga). No gasta el regalo VIP.
+      var cort = null;
+      if (String(d.codigo || '').trim()) { cort = this.codigoFotos(d.codigo); if (!cort.ok) return { ok: false, title: cort.title }; cap = null; }
       var regalo = [];
-      if (d.regalo && !lib && pag.length && vip()) { var est = ''; try { est = vip().regalo(tel, E.fecha); } catch (e) {} if (est === 'disponible') regalo = pag.slice(0, this.REGALO.fotos); }
-      var monto = this.calcular(E.id, pag.length - regalo.length, !!cap, !!lib, yaUso);
+      if (d.regalo && !cort && !lib && pag.length && vip()) { var est = ''; try { est = vip().regalo(tel, E.fecha); } catch (e) {} if (est === 'disponible') regalo = pag.slice(0, this.REGALO.fotos); }
+      var monto = cort ? 0 : this.calcular(E.id, pag.length - regalo.length, !!cap, !!lib, yaUso);
       // a qué corredor pertenece: el dorsal que escribió, o la cara que más sale en sus fotos
       var c = null, dor = String(d.dorsal || '').replace(/\D/g, '');
       if (dor) c = E.corredores.filter(function (x) { return x.dorsal && +x.dorsal === +dor; })[0] || null;
@@ -472,10 +477,12 @@
       // el regalo se marca usado ANTES de crear el pedido (si el pedido entra gratis, el aviso ya sale con él)
       var ticketNuevo = 'C-' + String(leer().length + 1).padStart(4, '0');
       if (regalo.length) { var okR = false; try { okR = vip().usarRegalo(tel, ticketNuevo); } catch (e) {} if (!okR) { regalo = []; monto = this.calcular(E.id, pag.length, !!cap, !!lib, yaUso); } }
+      // el uso del código se cuenta al pedir (el aviso a Nelson sale al crearlo, porque entra gratis a la fila)
+      if (cort) this.usarCodigoFotos(cort.codigo);
       var p = this.crear({ evento: E.id, eventoNombre: E.nombre, nombre: String(d.nombre).trim().slice(0, 80), tel: tel, correo: String(d.correo || '').trim().slice(0, 120),
         dorsal: dor || (c && c.dorsal) || '', fotos: fotos, gratis: gratis, regaloFotos: regalo, monto: monto, captura: cap, capturaArchivo: d.capturaArchivo || null,
-        finisher: fotos.indexOf(d.finisher) >= 0 ? d.finisher : null, patrocinio: lib ? (lib.patrocinador || 'sí') : null,
-        gratisPatrocinio: lib ? Math.min(pag.length, Math.max(0, P.patrocinio.gratis - yaUso)) : 0, yaUsoGratis: yaUso, corredor: c ? c.id : null, cara: c ? c.cara : null });
+        finisher: fotos.indexOf(d.finisher) >= 0 ? d.finisher : null, patrocinio: lib && !cort ? (lib.patrocinador || 'sí') : null, cortesia: cort ? cort.codigo : null,
+        gratisPatrocinio: lib && !cort ? Math.min(pag.length, Math.max(0, P.patrocinio.gratis - yaUso)) : 0, yaUsoGratis: cort ? 0 : yaUso, corredor: c ? c.id : null, cara: c ? c.cara : null });
       return { ok: true, pedido: p, vaPor: this.vaPor(E.id) };
     },
     // el álbum para la página pública: las copias LIMPIAS (sin logo) solo salen si Nelson lo liberó por patrocinio
@@ -502,6 +509,30 @@
       return { ok: true, precios: eventoId ? this.precios(eventoId) : null, liberado: eventoId ? this.liberado(eventoId) : null, albumes: eventoId ? this.albumes(eventoId) : [],
         grupales: m, vaPor: vp, preventas: pv, ocultos: leerK('nc-galeria-eventos-ocultos', []) };
     },
+    // ================================================================ código de cortesía «Fotos gratis»
+    // En la página real los códigos viven en la hoja «Códigos» del panel (tipo F; se crean, activan y desactivan en
+    // agendar.html → Códigos de descuento). En el prototipo se guardan en este navegador: nc-codigos-fotos.
+    codigoFotos: function (code) {
+      if (raiz.NC_CODIGOS_FOTOS) { try { return raiz.NC_CODIGOS_FOTOS.ver(code); } catch (e) { return { ok: false, title: 'No pudimos revisar el código. Inténtalo otra vez.' }; } }
+      var k = String(code || '').toUpperCase().replace(/\s+/g, '');
+      if (!k) return { ok: false, title: 'Escribe tu código.' };
+      var o = leerK('nc-codigos-fotos', []).filter(function (x) { return x.codigo === k; })[0];
+      return o && o.activo ? { ok: true, codigo: o.codigo } : { ok: false, title: 'Ese código no es válido o ya no está activo.' };
+    },
+    usarCodigoFotos: function (code) {
+      if (raiz.NC_CODIGOS_FOTOS) { try { raiz.NC_CODIGOS_FOTOS.usar(code); } catch (e) {} return; }
+      var l = leerK('nc-codigos-fotos', []); l.forEach(function (x) { if (x.codigo === code) x.usos = (x.usos || 0) + 1; }); guardarK('nc-codigos-fotos', l);
+    },
+    // prototipo: lo que en la página real hace el panel (crear / activar / desactivar)
+    guardarCodigoFotos: function (code, activo) {
+      var k = String(code || '').toUpperCase().replace(/\s+/g, ''), l = leerK('nc-codigos-fotos', []), o = l.filter(function (x) { return x.codigo === k; })[0];
+      if (!/^[A-Z0-9ÁÉÍÓÚÑ_-]{3,20}$/.test(k)) return { ok: false, title: 'El código debe tener de 3 a 20 letras o números, sin espacios.' };
+      if (o) o.activo = !!activo; else l.push({ codigo: k, activo: activo !== false, usos: 0, creado: iso() });
+      guardarK('nc-codigos-fotos', l); return { ok: true, list: l };
+    },
+    // la página pública solo pregunta si el código sirve (no cuenta el uso: eso pasa al pedir)
+    codigoFotosPublico: function (code) { var v = this.codigoFotos(code); return v.ok ? { ok: true, codigo: v.codigo } : { ok: false, title: v.title }; },
+
     // ¿ese celular puede usar su regalo de bienvenida en ESTA carrera? (solo dice sí o no; nada más de la persona)
     regaloPublico: function (tel, eventoId) {
       var t = soloDigitos(tel), est = '', E = eventoId ? this.evento(eventoId) : null;

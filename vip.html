@@ -196,7 +196,7 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
   function codigo(nombre, correo, olvido, wa) {
     var porWa = wa != null;
     app.innerHTML = '<section class="card"><h2>' + (olvido ? 'Crea una contraseña nueva' : '¡Hola, ' + esc(nombre) + '! Crea tu contraseña') + '</h2>' +
-      (porWa ? '<p>Escribe el <b>código de 6 números</b> que te mandamos por WhatsApp con tu pedido de fotos y elige tu contraseña.' + (olvido ? '' : ' 🎁 Al crear tu usuario te ganas un regalo de bienvenida.') + '</p>'
+      (porWa ? '<p>Escribe el <b>código de 6 números</b> que te mandamos por WhatsApp con tu pedido de fotos y elige tu contraseña.' + (olvido || /[?&]r=0\b/.test(location.search) ? '' : ' 🎁 Al crear tu usuario te ganas un regalo de bienvenida.') + '</p>'
         : '<p>Para proteger tu información te enviamos un código de 6 números a <b>' + esc(correo) + '</b>. Revisa también la carpeta de spam o promociones.</p>') +
       '<label for="co">' + (porWa ? 'Código de WhatsApp' : 'Código del correo') + '<input id="co" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000"></label>' +
       '<label for="c1">Tu contraseña <small style="font-weight:normal">(mínimo 6 caracteres)</small><input id="c1" type="password" autocomplete="new-password"></label>' +
@@ -444,7 +444,7 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
       (K.length ? '<section class="card"><h2>Lo que nos contaste de ti 💛</h2><dl class="pf" style="margin:0">' + K.map(function (k) { return '<dt>' + esc(nom[k] || k.charAt(0).toUpperCase() + k.slice(1)) + '</dt><dd>' + esc(G[k]) + '</dd>'; }).join("") + '</dl></section>' : '') +
       '<section class="card"><h2>Tus sesiones con nosotros</h2>' + (D.reservas.length ? D.reservas.map(function (r) { return '<div class="not"><b>' + esc(r.service) + '</b><small>' + esc(r.fecha) + ' · ' + esc(r.pagado ? "Pagada" : r.estado) + '</small></div>'; }).join("") : '<p class="hint">Todavía no tienes sesiones.</p>') + '</section>' +
       (D.carreras ? carrerasHtml() : '') +
-      (D.bienvenida ? '<section class="card"><h2>Tu regalo de bienvenida 🎁</h2><p class="hint">' + (D.bienvenida === "disponible" ? 'Disponible: ' + (D.regalo || {}).descuento + ' % en una sesión o ' + (D.regalo || {}).fotos + ' fotos gratis en tu próxima carrera.' : /sesi/.test(D.bienvenida) ? 'Apartado para tu próxima sesión (' + (D.regalo || {}).descuento + ' %).' : 'Ya lo usaste en una carrera. ¡Gracias por ser parte de la familia!') + '</p></section>' : '') +
+      (D.bienvenida && !/^sin regalo/.test(D.bienvenida) ? '<section class="card"><h2>Tu regalo de bienvenida 🎁</h2><p class="hint">' + (D.bienvenida === "disponible" ? 'Disponible: ' + (D.regalo || {}).descuento + ' % en una sesión o ' + (D.regalo || {}).fotos + ' fotos gratis en tu próxima carrera.' : /sesi/.test(D.bienvenida) ? 'Apartado para tu próxima sesión (' + (D.regalo || {}).descuento + ' %).' : 'Ya lo usaste en una carrera. ¡Gracias por ser parte de la familia!') + '</p></section>' : '') +
       '<button class="btn ol" id="out">Cerrar sesión</button>';
     $("out").onclick = function () { put("ncVipTok", ""); put("ncVipCache", ""); D = null; TEL = ""; quien(); };
   }
