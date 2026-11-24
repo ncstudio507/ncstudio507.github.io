@@ -7,7 +7,9 @@
 <meta name="theme-color" content="#222020">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Tenor+Sans&display=swap">
-<link rel="stylesheet" href="galeria.css?v=20261124">
+<link rel="stylesheet" href="galeria.css?v=20261124b">
+<link rel="preconnect" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com">
 <style>
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
 .chip .pt{display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:6px;vertical-align:-2px;border:1px solid rgba(255,255,255,.4)}
@@ -35,7 +37,14 @@
   <a href="index.html" aria-label="NC Studio, página principal"><img src="logo.png" alt="NC Studio"></a>
   <nav aria-label="Menú principal"><a href="index.html">🏠 Inicio</a><a href="news.html" class="on" aria-current="page">📰 News</a><a href="vip.html">👑 Zona VIP</a></nav>
 </header>
-<main class="wrap">
+<!-- 24-11-2026: se ve al instante mientras el servidor manda el álbum (tarda 4-6 s) -->
+<div class="cargando" id="carga" role="status">
+  <img src="logo.png" alt="">
+  <b>Abriendo el álbum…</b>
+  <div class="barra"><i></i></div>
+  <small id="cargaTxt">Estamos trayendo las fotos de la carrera.</small>
+</div>
+<main class="wrap" id="principal" hidden>
   <a href="news.html" class="nota" style="text-decoration:none">← Todos los eventos</a>
   <div class="portada"><div class="foto" id="portada" role="img"></div><div class="txt"><h1 id="titulo"></h1><p class="sub" id="meta"></p><a href="#tabs" class="ver" id="verFotos">VER LAS FOTOS</a></div></div>
   <div class="fila"><button class="btn sec" id="compartir">↗ Compartir este álbum</button></div>
@@ -123,8 +132,12 @@
   var necesitaMios = qs.get('elegir') || qs.get('reclamo');
   // solo ESE pedido (ticket + celular): la lista completa de pedidos se ve en la Zona VIP, con contraseña
   var misUno = necesitaMios && telQ ? A.gal('estadoPedido', [necesitaMios, telQ]).then(function (r) { return { ok: true, pedidos: r && r.pedido ? [r.pedido] : [] }; }) : null;
-  Promise.all([A.cargarEvento(id), misUno]).then(function (r) { iniciar(r[1]); })
-    .catch(function () { document.querySelector('main').innerHTML = '<h1>No se pudo abrir el álbum</h1><p class="nota">Revisa tu conexión e inténtalo otra vez.</p>'; });
+  // pantalla de carga: mensajes que cambian para que se note que sigue trabajando
+  var cargaMsjs = ['Estamos trayendo las fotos de la carrera.', 'Son muchas fotos: ya casi…', 'Preparando el directorio de rostros…', 'Un momentito más…'], cargaN = 0;
+  var cargaT = setInterval(function () { cargaN = (cargaN + 1) % cargaMsjs.length; document.getElementById('cargaTxt').textContent = cargaMsjs[cargaN]; }, 3000);
+  function quitarCarga() { clearInterval(cargaT); document.getElementById('carga').hidden = true; document.getElementById('principal').hidden = false; }
+  Promise.all([A.cargarEvento(id), misUno]).then(function (r) { quitarCarga(); iniciar(r[1]); })
+    .catch(function () { quitarCarga(); document.querySelector('main').innerHTML = '<h1>No se pudo abrir el álbum</h1><p class="nota">Revisa tu conexión e inténtalo otra vez.</p>'; });
   function iniciar(MIS) {
   var E = (window.NC_EVENTOS || []).filter(function (e) { return e.id === id; })[0];
   if (!E) { document.querySelector('main').innerHTML = '<h1>Álbum no encontrado</h1><p class="nota"><a href="news.html">Ver todos los eventos</a></p>'; return; }
