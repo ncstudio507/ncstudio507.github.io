@@ -19,8 +19,9 @@
 .imp img{width:56px;height:56px;object-fit:cover;border-radius:8px}
 .imp select,.imp input{min-height:38px;border-radius:10px;border:1.5px solid var(--gris);background:#1d1c1c;color:var(--blanco);font:inherit;font-size:14px;padding:0 8px}
 </style>
+<link rel="stylesheet" href="panel.css?v=20261124b">
 </head>
-<body>
+<body class="nc-galerias">
 <header class="hd">
   <a href="index.html" aria-label="NC Studio, página principal"><img src="logo.png" alt="NC Studio"></a>
   <nav aria-label="Menú principal"><a href="index.html">🏠 Inicio</a><a href="news.html">📰 News</a><a href="vip.html" class="on" aria-current="page">👑 Zona VIP</a></nav>
@@ -61,6 +62,8 @@
 <script>if (!(window.NC_CONFIG || {}).url) document.write('<script src="sesiones/indice.js"><\/script>');</script>
 <script src="tienda.js"></script>
 <script src="nc-api.js?v=20261123"></script>
+<script src="vip-menu.js?v=20261124"></script>
+<script>/* Zona VIP unificada (24-11-2026): mismo menú si la clienta entró a su VIP en este celular */ window.NCVip && NCVip.usar("galerias");</script>
 <script>
 (function () {
   var T = window.NC_TIENDA, qs = new URLSearchParams(location.search), $ = T.dinero, A = window.NC_API;
@@ -84,29 +87,55 @@
       delete modal.dataset.fijo; modal.hidden = true; cargar(true);
     };
   }
-  if (!YO) entrar(); else cargar(false);
+  // 24-11-2026 (Nelson): la dueña (el número de la reserva) elige SOLO con su usuario de la Zona VIP.
+  // Si en este celular ya entró a su VIP, se usa esa sesión; si no, ve las fotos y se le pide entrar o crear su usuario.
+  var VIP = false;
+  function api(fn, args) { return VIP ? A.duena(fn, args) : A.gal(fn, args); }
+  function sinVip() { if (!YO) entrar(); else cargar(false); }
+  (function () {
+    var tok = ''; try { tok = localStorage.getItem('ncVipTok') || ''; } catch (e) {}
+    if (!tok || !A.real) return sinVip();
+    A.duena('sesionPublica', [sid, '']).then(function (r) {
+      if (!r || !r.ok || !r.duena) return sinVip();
+      VIP = true; var yo = r.yo || {};
+      YO = { nombre: yo.nombre || (YO && YO.nombre) || r.sesion.cliente, tel: yo.tel || '' };
+      try { localStorage.setItem('nc-sesion-yo', JSON.stringify(YO)); } catch (e) {}
+      listo(r, false);
+    }, sinVip);   // no es su galería o venció su sesión VIP: sigue como cualquiera
+  })();
 
   // el servidor manda la galería, MI lista y los ♡ de los demás por nombre (nunca su celular)
   function cargar(recien) {
-    A.gal('sesionPublica', [sid, YO.tel]).then(function (r) {
-      if (!r || !r.ok) { main.innerHTML = '<h1>Galería no encontrada</h1><p class="nota">Revisa el link o entra desde tu Zona VIP.</p>'; return; }
-      R = r; S = r.sesion;
-      v = qs.get('v') || (S.finales ? 'finales' : 'pruebas'); if (!S[v]) v = S.finales ? 'finales' : 'pruebas';
-      PRU = v === 'pruebas'; fotos = S[v] || []; inc = S.incluidas || 0;
-      if (recien && !r.duena) A.gal('registrarPosible', [YO.nombre, YO.tel, 'vio la sesión de ' + S.cliente]);
-      arrancar();
-    }, function () { main.innerHTML = '<h1>Sin conexión</h1><p class="nota">Inténtalo otra vez.</p>'; });
+    A.gal('sesionPublica', [sid, YO.tel]).then(function (r) { listo(r, recien); }, function () { main.innerHTML = '<h1>Sin conexión</h1><p class="nota">Inténtalo otra vez.</p>'; });
+  }
+  function listo(r, recien) {
+    if (!r || !r.ok) { main.innerHTML = '<h1>Galería no encontrada</h1><p class="nota">Revisa el link o entra desde tu Zona VIP.</p>'; return; }
+    R = r; S = r.sesion;
+    v = qs.get('v') || (S.finales ? 'finales' : 'pruebas'); if (!S[v]) v = S.finales ? 'finales' : 'pruebas';
+    PRU = v === 'pruebas'; fotos = S[v] || []; inc = S.incluidas || 0;
+    if (recien && !r.duena) A.gal('registrarPosible', [YO.nombre, YO.tel, 'vio la sesión de ' + S.cliente]);
+    arrancar();
+  }
+  // a la Zona VIP con su número puesto; al entrar (o crear su usuario) vuelve aquí mismo
+  function irVip() { location.href = 'vip.html?tel=' + encodeURIComponent((YO && YO.tel) || '') + '&volver=' + encodeURIComponent('sesion.html' + location.search); }
+  function pedirVip() {
+    caja.innerHTML = '<h3>Entra a tu Zona VIP para elegir 👑</h3><p class="nota" style="margin-top:0">Este es el número de tu reserva, así que esta galería es tuya. Para elegir y enviar tus fotos entra a tu <b>Zona VIP</b> con tu número. ' +
+      'Si todavía no tienes usuario, lo creas ahí mismo en un minuto. Así todo tu proceso queda en un solo lugar y nadie más puede elegir por ti.</p>' +
+      '<div class="fila"><button class="btn sec" id="pvX">Solo ver las fotos</button><button class="btn" id="pvOk">Entrar a mi Zona VIP</button></div>';
+    modal.hidden = false;
+    document.getElementById('pvX').onclick = function () { modal.hidden = true; };
+    document.getElementById('pvOk').onclick = irVip;
   }
 
   function arrancar() {
-    var DUENA = R.duena;
+    var PIDEVIP = !!R.necesitaVip, DUENA = R.duena && !PIDEVIP;
     document.title = (PRU ? 'Fotos de prueba' : 'Fotos finales') + ' · ' + S.cliente.split(' ')[0] + ' · NC Studio';
     document.body.classList.toggle('protegida', PRU);
     if (PRU) {
       document.addEventListener('contextmenu', function (ev) { if (ev.target.closest('.grid, .visor')) ev.preventDefault(); });
       document.addEventListener('dragstart', function (ev) { if (ev.target.tagName === 'IMG') ev.preventDefault(); });
     }
-    document.getElementById('cliente').textContent = 'Hola, ' + YO.nombre.split(' ')[0] + ' 💛' + (DUENA ? '' : ' · galería de ' + S.cliente.split(' ')[0]);
+    document.getElementById('cliente').textContent = 'Hola, ' + YO.nombre.split(' ')[0] + ' 💛' + (DUENA || PIDEVIP ? '' : ' · galería de ' + S.cliente.split(' ')[0]);
     document.getElementById('titulo').textContent = S.sesion;
     document.getElementById('tabs').innerHTML = ['pruebas', 'finales'].filter(function (t) { return S[t]; }).map(function (t) {
       return '<a class="tab' + (t === v ? ' on' : '') + '" style="text-decoration:none" href="?s=' + encodeURIComponent(S.id) + '&v=' + t + '">' + (t === 'pruebas' ? '📸 Fotos de prueba' : '🎁 Fotos finales') + '</a>';
@@ -116,10 +145,11 @@
     var L = R.mia || { fotos: [], notas: {} }; L.nombre = YO.nombre; L.notas = L.notas || {};
     var fav = L.fotos, soloFav = false, verDe = '', espera = null;
     // cada ♡ o nota se guarda en el servidor (agrupado: medio segundo después del último toque)
-    function guardar() { clearTimeout(espera); espera = setTimeout(function () { A.gal('guardarMiLista', [S.id, YO.tel, YO.nombre, fav, L.notas]); }, 500); }
-    function guardarYa() { clearTimeout(espera); return A.gal('guardarMiLista', [S.id, YO.tel, YO.nombre, fav, L.notas]); }
+    function falloVip(e) { if (e && (e.vip || e.salir)) { VIP = false; pedirVip(); return true; } }
+    function guardar() { clearTimeout(espera); espera = setTimeout(function () { api('guardarMiLista', [S.id, YO.tel, YO.nombre, fav, L.notas]).catch(falloVip); }, 500); }
+    function guardarYa() { clearTimeout(espera); return api('guardarMiLista', [S.id, YO.tel, YO.nombre, fav, L.notas]); }
     function es(n) { return fav.indexOf(n) >= 0; }
-    function alternar(n) { if (es(n)) fav.splice(fav.indexOf(n), 1); else fav.push(n); guardar(); pintarCuenta(); marcar(); }
+    function alternar(n) { if (PIDEVIP) { pedirVip(); return; } if (es(n)) fav.splice(fav.indexOf(n), 1); else fav.push(n); guardar(); pintarCuenta(); marcar(); }
     var OTROS = R.otros || [], listas = {}; OTROS.forEach(function (o, i) { listas['o' + i] = o; });
     function deOtros(n) { return OTROS.filter(function (o) { return o.fotos.indexOf(n) >= 0; }).map(function (o) { return o.nombre; }); }
     var otros = Object.keys(listas);
@@ -134,7 +164,9 @@
       document.body.style.paddingBottom = c.hidden ? '' : '84px';
     }
 
-    document.getElementById('intro').innerHTML = PRU ?
+    document.getElementById('intro').innerHTML = PRU && PIDEVIP ?
+      '<div class="aviso"><span>👑</span><div><b>¡Hola, ' + esc(S.cliente.split(' ')[0]) + '! Esta es tu galería.</b> Para elegir tus fotos con el ♡ entra a tu <b>Zona VIP</b> con tu número. Si aún no tienes usuario, lo creas ahí mismo en un minuto.</div></div>' +
+      '<div class="fila"><button class="btn" id="irVip">👑 Entrar a mi Zona VIP para elegir</button></div>' : PRU ?
       '<div class="aviso"><span>📸</span><div><b>Fotos sin editar.</b> Toca el ♡ en tus favoritas' + (DUENA && inc ? ': tu paquete incluye <b>' + inc + ' fotos</b> y cada extra cuesta $10' : '') + '. ' +
       (DUENA ? 'Cuando termines, toca <b>Enviar a Nelson</b>.' : 'Tus ♡ le llegan a ' + esc(S.cliente.split(' ')[0]) + ' como sugerencias.') + '</div></div>' +
       '<div class="promo">📝 <div><b>¿Algún pedido especial?</b> Abre la foto, toca <b>«Nota»</b> y escríbelo ahí (ej. «quítame el granito», «esta para imprimir»).</div></div>' +
@@ -144,6 +176,7 @@
       '<div class="aviso"><span>🎁</span><div><b>¡Tus fotos finales están listas!</b> Tócalas para verlas en grande y descargarlas, una por una o todas juntas. Guárdalas en dos lugares.</div></div>' +
       '<div class="fila"><button class="btn" id="zip">⬇ Descargar todas en un ZIP (' + fotos.length + ')</button><span class="nota" id="zipEst"></span></div>' +
       '<div class="fila"><button class="btn sec" id="imprimir">🖼️ Pedir impresiones o álbum</button></div>';
+    if (document.getElementById('irVip')) document.getElementById('irVip').onclick = irVip;
     document.querySelectorAll('[data-de]').forEach(function (b) { b.onclick = function () { verDe = verDe === b.dataset.de ? '' : b.dataset.de; document.querySelectorAll('[data-de]').forEach(function (x) { x.classList.toggle('on', x.dataset.de === verDe); }); pintar(); }; });
 
     // ---------- cuadrícula ----------
@@ -196,6 +229,7 @@
     document.getElementById('vNext').onclick = function () { abrir(vi + 1); };
     document.getElementById('vAccion').onclick = function () { var f = visibles[vi]; if (PRU) { alternar(f.nombre); pintarAccion(); } else bajar(f); };
     document.getElementById('vNotaBtn').onclick = function () {
+      if (PIDEVIP) { pedirVip(); return; }
       var f = visibles[vi], t = prompt('Nota para Nelson sobre ' + f.nombre + ' (pedido especial):', L.notas[f.nombre] || '');
       if (t === null) return; t = t.trim(); if (t) L.notas[f.nombre] = t; else delete L.notas[f.nombre];
       if (t && !es(f.nombre)) fav.push(f.nombre);
@@ -218,10 +252,10 @@
       document.getElementById('mX').onclick = function () { modal.hidden = true; };
       document.getElementById('mOk').onclick = function () {
         this.disabled = true; this.textContent = 'Enviando…';
-        guardarYa().then(function () { return A.gal('enviarMiSeleccion', [S.id, YO.tel]); }).then(function (r) {
+        guardarYa().then(function () { return api('enviarMiSeleccion', [S.id, YO.tel]); }).then(function (r) {
           if (!r.ok) { caja.innerHTML = '<p class="nota">' + esc(r.title) + '</p>'; return; }
           enviada();
-        });
+        }).catch(function (e) { if (!falloVip(e)) caja.innerHTML = '<p class="nota">' + esc((e && e.title) || 'No se pudo enviar. Revisa tu internet e inténtalo otra vez.') + '</p>'; });
       };
       function enviada() {
         caja.innerHTML = '<div class="ticket"><p class="nota">¡Listo, ' + esc(S.cliente.split(' ')[0]) + '!</p><div class="num">❤ ' + fav.length + '</div>' +

@@ -30,8 +30,9 @@
 .imp img{width:56px;height:56px;object-fit:cover;border-radius:8px}
 .imp select,.imp input{min-height:38px;border-radius:10px;border:1.5px solid var(--gris);background:#1d1c1c;color:var(--blanco);font:inherit;font-size:14px;padding:0 8px}
 </style>
+<link rel="stylesheet" href="panel.css?v=20261124b">
 </head>
-<body>
+<body class="nc-galerias">
 <header class="hd">
   <a href="index.html" aria-label="NC Studio, página principal"><img src="logo.png" alt="NC Studio"></a>
   <nav aria-label="Menú principal"><a href="index.html">🏠 Inicio</a><a href="news.html">📰 News</a><a href="vip.html" class="on" aria-current="page">👑 Zona VIP</a></nav>
@@ -57,6 +58,8 @@
 <script>if (!(window.NC_CONFIG || {}).url) document.write('<script src="datos-prueba.js"><\/script><script src="sesiones/indice.js"><\/script>');</script>
 <script src="tienda.js"></script>
 <script src="nc-api.js?v=20261123"></script>
+<script src="vip-menu.js?v=20261124"></script>
+<script>/* Zona VIP unificada (24-11-2026): mismo menú si la clienta entró a su VIP en este celular */ window.NCVip && NCVip.usar("carreras");</script>
 <script>
 (function () {
   var T = window.NC_TIENDA, $ = T.dinero, A = window.NC_API, VAPOR = {};

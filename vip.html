@@ -7,6 +7,8 @@
 <meta name="theme-color" content="#222020">
 <title>Zona VIP · NC Studio</title>
 <link rel="icon" type="image/png" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&display=swap">
 <style>
 :root{--dark:#222020;--org:#F99824;--beige:#F2E4D2;--white:#FEFEFE;--muted:#6B6466;--line:#E8DCCB}
 *{box-sizing:border-box}
@@ -113,6 +115,7 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
 @media (prefers-reduced-motion:reduce){.bien .conf{display:none}}
 @media (max-width:440px){.top{gap:8px}.top .home span{display:none}.top .home{font-size:18px;padding:8px 2px}}
 </style>
+<link rel="stylesheet" href="panel.css?v=20261124b">
 </head>
 <body>
 <div class="top"><a href="index.html" aria-label="NC Studio, página principal"><img src="logo.png" alt="NC Studio"></a><span class="t">Zona VIP</span><span class="saldo" id="saldo" role="status"></span><a class="home" href="index.html" aria-label="Inicio">🏠<span> Inicio</span></a><a class="home" href="news.html" aria-label="News">📰<span> News</span></a></div>
@@ -124,6 +127,7 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
   <button data-s="consejos"><i aria-hidden="true">✨</i>Consejos</button>
   <button data-s="perfil"><i aria-hidden="true">👤</i>Mi perfil</button>
 </nav>
+<script src="vip-menu.js?v=20261124"></script>
 <script src="guia.js"></script>
 <script>
 (function () {
@@ -148,7 +152,7 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
 
   /* ---------------- entrar ---------------- */
   function quien() {
-    nav.hidden = true; saldoEl.style.display = "none";
+    nav.hidden = true; saldoEl.style.display = "none"; if (window.NCVip) NCVip.olvidar();
     app.innerHTML = '<section class="card"><h1>Bienvenido a tu Zona VIP 👑</h1><p class="hint">Tu espacio en NC Studio: el proceso de tu sesión, tus pagos, tus fotos de sesiones y de carreras, y nuestros consejos.</p></section>' +
       '<div class="who"><button id="wc"><i aria-hidden="true">📸</i><span><b>Soy cliente</b><span>Sesiones y carreras · entro con mi número de WhatsApp</span></span></button>' +
       '<button id="wa"><i aria-hidden="true">🔑</i><span><b>Soy administrador</b><span>Solo para Nelson y Charlie</span></span></button></div>';
@@ -156,7 +160,9 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
     $("wa").onclick = function () { location.href = "agendar.html"; };
   }
   function telefono(msg) {
-    app.innerHTML = '<section class="card"><h2>Entra con tu número</h2><p class="hint">El mismo número de WhatsApp con el que reservaste tu sesión o pediste tus fotos de la carrera. Tu número es tu usuario.</p>' +
+    nav.hidden = true; if (window.NCVip) NCVip.olvidar();
+    app.innerHTML = (VOLVER ? '<section class="card"><h2>Para elegir tus fotos 📸</h2><p class="hint">Entra con tu número. Si todavía no tienes usuario, lo creas aquí mismo en un minuto. Al terminar te regresamos a tu galería.</p></section>' : '') +
+      '<section class="card"><h2>Entra con tu número</h2><p class="hint">El mismo número de WhatsApp con el que reservaste tu sesión o pediste tus fotos de la carrera. Tu número es tu usuario.</p>' +
       '<label for="tel">Número de WhatsApp<input id="tel" inputmode="tel" autocomplete="tel" placeholder="6000-0000" value="' + esc(TEL) + '"></label>' +
       '<p class="err" id="er">' + esc(msg || "") + '</p><button class="btn" id="go">Continuar</button><button class="lnk" id="bk">‹ Volver</button></section>';
     $("bk").onclick = quien;
@@ -297,6 +303,7 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
       if (!r.ok) { put("ncVipCache", ""); if (r.salir) put("ncVipTok", ""); TEL = ""; telefono(r.salir ? "Tu sesión venció. Entra de nuevo." : r.title); return; }
       if (r.cambiar) { put("ncVipCache", ""); cambiarClave(); return; }
       if (q.get("volver") === "mis-fotos" && r.carreras) { location.replace("mis-fotos.html"); return; }   // venía de Mis fotos de carreras
+      if (VOLVER) { location.replace(VOLVER); return; }                                                    // venía de su galería de sesión a elegir
       var j = JSON.stringify(r); put("ncVipCache", JSON.stringify({ tok: tok, j: j }));
       if (j !== previo) mostrar(r, !!previo);
     }).catch(function () { if (!previo) app.innerHTML = '<div class="msg">No pudimos cargar tu Zona VIP. Revisa tu internet y recarga.</div>'; });
@@ -328,7 +335,15 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
     // los consejos (la guía en PDF) se activan según su experiencia
     var bc = nav.querySelector('[data-s="consejos"]'); if (bc) bc.hidden = !D.consejos;
     if (SEC === "consejos" && !D.consejos) SEC = "inicio";
+    if (SEC === "galerias" && !D.reservas.length) SEC = "inicio";
     pintaSaldo(); pintaNav(); window.scrollTo(0, 0);
+    // menú único (24-11-2026): solo lo que la clienta compró (sesión, carreras o las dos)
+    if (window.NCVip) {
+      NCVip.guardar({ sesion: D.reservas.length > 0, carreras: (D.carreras || 0) > 0, consejos: !!D.consejos, avisos: sinLeer(), nombre: D.primer || "",
+        saldo: saldoEl.style.display === "none" ? "" : saldoEl.textContent, pagado: saldoEl.classList.contains("pag") });
+      NCVip.marcar(SEC);
+    }
+    if (SEC === "galerias") return galerias();
     if (SEC === "avisos") return avisos();
     if (SEC === "consejos") return consejos();
     if (SEC === "perfil") return perfil();
@@ -404,7 +419,19 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
     });
     function contar() { var n = x.prep.items.filter(function (i) { return x.prep.hechos[i.k]; }).length; $("ckn").textContent = n + " de " + x.prep.items.length; $("ckb").style.width = Math.round(n / x.prep.items.length * 100) + "%"; }
   }
-  function galBtn(k, ic, t, g) { return '<button class="gal ' + (g ? 'si' : 'no') + '" data-gal="' + k + '"><span class="ic" aria-hidden="true">' + ic + '</span>' + t + '<small>' + (g ? '¡Ya están listas!' : 'Todavía no') + '</small></button>'; }
+  // Mis galerías (24-11-2026): las fotos de prueba y finales de TODAS sus sesiones en un solo lugar
+  function galerias() {
+    var h = '<section class="hello"><h1>Mis <em>galerías</em> 📸</h1><p>Tus fotos de prueba para elegir y tus fotos finales para descargar, de cada sesión.</p></section>';
+    h += D.reservas.map(function (x, i) {
+      return '<section class="card"><span class="est' + (x.finales ? ' ok' : '') + '">' + (x.finales ? '🎁 Fotos finales listas' : x.pruebas ? '📸 Pruebas listas para elegir' : '⏳ En proceso') + '</span><h2>' + esc(x.service) + '</h2>' +
+        '<p class="hint">' + esc(x.fecha) + (x.lugar ? ' · ' + esc(x.lugar) : '') + '</p>' +
+        '<div class="gals">' + (x.sinPruebas ? '' : galBtn("pru", "📸", "Fotos de prueba", x.pruebas, i)) + galBtn("fin", "🎁", "Fotos finales", x.finales, i) + '</div></section>';
+    }).join("");
+    app.innerHTML = h;
+    Array.prototype.forEach.call(app.querySelectorAll("[data-gal]"), function (b) { b.onclick = function () { abrirGal(b.getAttribute("data-gal"), D.reservas[+b.getAttribute("data-ri")]); }; });
+  }
+  function galBtn(k, ic, t, g, ri) { if (ri != null) return galBtn(k, ic, t, g).replace('<button ', '<button data-ri="' + ri + '" '); return galBtnBase(k, ic, t, g); }
+  function galBtnBase(k, ic, t, g) { return '<button class="gal ' + (g ? 'si' : 'no') + '" data-gal="' + k + '"><span class="ic" aria-hidden="true">' + ic + '</span>' + t + '<small>' + (g ? '¡Ya están listas!' : 'Todavía no') + '</small></button>'; }
   function abrirGal(k, x) {
     var g = k === "pru" ? x.pruebas : x.finales, pru = k === "pru";
     if (!g) {
@@ -446,14 +473,19 @@ input:focus{outline:2px solid var(--org);border-color:var(--org)}
       (D.carreras ? carrerasHtml() : '') +
       (D.bienvenida && !/^sin regalo/.test(D.bienvenida) ? '<section class="card"><h2>Tu regalo de bienvenida 🎁</h2><p class="hint">' + (D.bienvenida === "disponible" ? 'Disponible: ' + (D.regalo || {}).descuento + ' % en una sesión o ' + (D.regalo || {}).fotos + ' fotos gratis en tu próxima carrera.' : /sesi/.test(D.bienvenida) ? 'Apartado para tu próxima sesión (' + (D.regalo || {}).descuento + ' %).' : 'Ya lo usaste en una carrera. ¡Gracias por ser parte de la familia!') + '</p></section>' : '') +
       '<button class="btn ol" id="out">Cerrar sesión</button>';
-    $("out").onclick = function () { put("ncVipTok", ""); put("ncVipCache", ""); D = null; TEL = ""; quien(); };
+    $("out").onclick = function () { put("ncVipTok", ""); put("ncVipCache", ""); D = null; TEL = ""; if (window.NCVip) NCVip.olvidar(); quien(); };
   }
   function ir(s) { SEC = s; pintar(); }
   Array.prototype.forEach.call(nav.querySelectorAll("button"), function (b) { b.onclick = function () { ir(b.getAttribute("data-s")); }; });
+  if (window.NCVip) ["inicio", "galerias", "avisos", "consejos", "perfil"].forEach(function (k) { NCVip.al(k, function () { if (D) ir(k); }); });
   var q = new URLSearchParams(location.search);
   if (q.get("s")) SEC = q.get("s");
+  // ?volver=sesion.html?s=…: al entrar (o crear su usuario) regresa a su galería. Solo se acepta esa página (nada de links de afuera)
+  var VOLVER = /^sesion\.html\?[\w=&%.\-]*$/.test(q.get("volver") || "") ? q.get("volver") : "";
   // el link del WhatsApp trae su número (?tel=): entra directo a escribir su código
   if (q.get("tel")) TEL = q.get("tel").replace(/\D/g, "").slice(-8);
+  // 24-11-2026: viene de su galería de sesión para elegir; si en este celular está abierta la VIP de OTRO número, se cierra
+  if (VOLVER && TEL && get("ncVipTok") && String(get("ncVipTok")).split(".")[0].slice(-8) !== TEL) { put("ncVipTok", ""); put("ncVipCache", ""); }
   if (get("ncVipTok")) cargar(); else if (q.get("cliente") || TEL) telefono(); else quien();
 })();
 </script>

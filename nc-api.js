@@ -90,6 +90,13 @@
       return post({ action: 'gal_admin', pin: pin(), fn: fn, args: args || [] }).then(function (r) { if (!r.ok) throw r; return r.r; });
     },
     // Mis fotos de carreras: con la sesión de la Zona VIP (el número es el usuario y la contraseña lo protege)
+    // la dueña de una sesión elige con su usuario de la Zona VIP (24-11-2026): el servidor saca su número de la cuenta
+    duena: function (fn, args) {
+      if (!real) return window.NC_API.gal(fn, args);   // prototipo sin servidor
+      var tok = ''; try { tok = localStorage.getItem('ncVipTok') || ''; } catch (e) {}
+      if (!tok) return Promise.reject({ salir: true, title: 'Entra a tu Zona VIP' });
+      return post({ action: 'gal_duena', tok: tok, fn: fn, args: args || [] }).then(function (r) { if (!r.ok) throw r; return r.r; });
+    },
     mis: function (tok) {
       return post({ action: 'gal_mis', tok: tok }).then(function (r) { if (!r.ok) throw r; return r.r; });
     },

@@ -46,7 +46,9 @@ body.nc-panel.nc-principal .btn{font-family:Montserrat,system-ui,sans-serif;bord
 body.nc-panel.nc-principal .top span{font-family:Montserrat,system-ui,sans-serif;font-weight:700;font-size:17px}
 @media (min-width:861px){
   body.nc-panel.nc-principal.nc-con-menu .top{display:none}
-  body.nc-panel.nc-principal.nc-con-menu main{max-width:860px}
+  body.nc-panel.nc-principal.nc-con-menu main{max-width:1080px;padding-top:24px}
+  body.nc-panel.nc-principal .btn{min-height:52px}
+  body.nc-panel.nc-principal .act{padding:16px 18px;font-size:16px}
 }
 @media (max-width:860px){
   /* la barra de total de «Agendar» queda encima del menú de abajo */
@@ -57,7 +59,7 @@ body.nc-panel.nc-principal .top span{font-family:Montserrat,system-ui,sans-serif
 /* ---------- panel de galerías (galeria-admin.html): pasa al tema claro ---------- */
 body.nc-panel.nc-galerias{--fondo:#F2E4D2;--crema:#222020;--blanco:#222020;--gris:#E3D6C6;color-scheme:light;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--p-fondo);color:var(--p-tinta)}
 body.nc-panel.nc-galerias .hd{background:var(--p-barra);color:var(--p-barra-txt);border-bottom:0}
-body.nc-panel.nc-galerias .hd nav{display:none}
+body.nc-panel.nc-galerias.nc-con-menu .hd nav{display:none}
 @media (min-width:861px){body.nc-panel.nc-galerias.nc-con-menu .hd{display:none}}
 body.nc-panel.nc-galerias h1{color:var(--p-tinta)}
 body.nc-panel.nc-galerias .nota,body.nc-panel.nc-galerias .sub,body.nc-panel.nc-galerias .vacio{color:var(--p-suave)}
@@ -65,7 +67,7 @@ body.nc-panel.nc-galerias .cifra,body.nc-panel.nc-galerias .tarjeta{background:v
 body.nc-panel.nc-galerias .cifra b{color:var(--p-tinta)}
 body.nc-panel.nc-galerias .cifra span{color:var(--p-suave)}
 body.nc-panel.nc-galerias .lista,body.nc-panel.nc-galerias .msj{background:var(--p-naranja-suave);color:var(--p-tinta)}
-body.nc-panel.nc-galerias .link input,body.nc-panel.nc-galerias .sel,body.nc-panel.nc-galerias textarea,body.nc-panel.nc-galerias .buscar,body.nc-panel.nc-galerias input[type=text],body.nc-panel.nc-galerias input[type=number],body.nc-panel.nc-galerias input[type=password],body.nc-panel.nc-galerias select{background:#fff;color:var(--p-tinta);border-color:var(--p-linea)}
+body.nc-panel.nc-galerias input[type=tel],body.nc-panel.nc-galerias input[type=email],body.nc-panel.nc-galerias .link input,body.nc-panel.nc-galerias .sel,body.nc-panel.nc-galerias textarea,body.nc-panel.nc-galerias .buscar,body.nc-panel.nc-galerias input[type=text],body.nc-panel.nc-galerias input[type=number],body.nc-panel.nc-galerias input[type=password],body.nc-panel.nc-galerias select{background:#fff;color:var(--p-tinta);border-color:var(--p-linea)}
 body.nc-panel.nc-galerias .mini-btn{color:var(--p-tinta);border-color:var(--p-linea);background:#fff}
 body.nc-panel.nc-galerias .mini-btn.na,body.nc-panel.nc-galerias .btn,body.nc-panel.nc-galerias .chip.on{background:var(--p-naranja);border-color:var(--p-naranja);color:#222020}
 body.nc-panel.nc-galerias .btn.sec{background:#fff;color:var(--p-tinta);border-color:var(--p-linea)}
@@ -83,3 +85,39 @@ body.nc-panel.nc-galerias .e-entregado{background:var(--p-ok-suave);color:var(--
 body.nc-panel.nc-galerias .aviso,body.nc-panel.nc-galerias .promo{background:var(--p-naranja-suave);border-color:#f1cfa0;color:var(--p-tinta)}
 body.nc-panel.nc-galerias [style*="#1d1c1c"],body.nc-panel.nc-galerias [style*="#2b2929"]{background:var(--p-tarjeta)!important;color:var(--p-tinta)!important}
 body.nc-panel.nc-galerias h3[style*="--blanco"]{color:var(--p-tinta)!important}
+/* lo que se queda oscuro a propósito (visor de fotos a pantalla completa y barra de «Enviar a Nelson»): sus colores vuelven a los claros sobre negro */
+body.nc-panel.nc-galerias .visor,body.nc-panel.nc-galerias .grande,body.nc-panel.nc-galerias .carro{--crema:#F2E4D2;--blanco:#FEFEFE;--gris:#3D3B3E;--fondo:#222020;color:#F2E4D2}
+body.nc-panel.nc-galerias .carro{background:var(--p-barra)}
+body.nc-panel.nc-galerias .carro .det{color:#d9cdbe}
+body.nc-panel.nc-galerias .carro .btn.sec,body.nc-panel.nc-galerias .visor .btn.sec{background:transparent;color:#F2E4D2;border-color:#5a5656}
+body.nc-panel.nc-galerias .res{color:var(--p-tinta)}
+body.nc-panel.nc-galerias .mini{background:#e9dccb}
+@media (max-width:860px){body.nc-panel.nc-con-menu .carro{bottom:calc(64px + env(safe-area-inset-bottom))}}
+
+/* ---------- Zona VIP (vip.html y sus páginas) ---------- */
+.nc-dot{margin-left:auto;min-width:20px;height:20px;border-radius:10px;background:#E5484D;color:#fff;font:700 11px/20px Montserrat,sans-serif;text-align:center;padding:0 6px}
+.nc-abajo a{position:relative}
+.nc-abajo .nc-dot{position:absolute;top:0;left:calc(50% + 6px);margin:0}
+.nc-saldo{margin:0 6px 10px;padding:8px 12px;border-radius:999px;background:var(--p-naranja);color:#222020;font:700 13px Montserrat,sans-serif;text-align:center}
+.nc-saldo.pag{background:#D1FADF;color:#05603A}
+body.nc-vip.nc-con-menu .nav,body.nc-vip.nc-con-menu .bar{display:none!important}
+body.nc-vip h1,body.nc-vip h2{font-family:Montserrat,system-ui,sans-serif;font-weight:700}
+body.nc-vip .btn,body.nc-vip .gal,body.nc-vip .chips button{font-family:Montserrat,system-ui,sans-serif}
+body.nc-vip .card,body.nc-vip .msg{border:1px solid var(--p-linea);border-radius:16px}
+body.nc-vip .top .t{font-family:Montserrat,system-ui,sans-serif;font-weight:700}
+@media (min-width:861px){body.nc-vip.nc-con-menu:not(.nc-galerias) .top{display:none}}
+/* computadora: se aprovecha el ancho (Nelson, 24-11: «el crema que sobra a los lados») — dos columnas de tarjetas y botones más grandes */
+@media (min-width:1100px){
+  body.nc-vip.nc-con-menu:not(.nc-galerias) .wrap{display:block;max-width:1120px;columns:2;column-gap:20px;padding-top:24px}
+  body.nc-vip.nc-con-menu:not(.nc-galerias) .wrap>*{break-inside:avoid;margin:0 0 18px;width:100%}
+  body.nc-vip.nc-con-menu:not(.nc-galerias) .wrap>.hello,body.nc-vip.nc-con-menu:not(.nc-galerias) .wrap>.chips,body.nc-vip.nc-con-menu:not(.nc-galerias) .wrap>.msg{column-span:all}
+  body.nc-vip.nc-con-menu:not(.nc-galerias) .wrap>a.btn,body.nc-vip.nc-con-menu:not(.nc-galerias) .wrap>button.btn{display:flex}
+  body.nc-vip .hello{padding:28px 30px}
+  body.nc-vip .hello h1{font-size:36px}
+  body.nc-vip .card{padding:24px}
+  body.nc-vip .gal{min-height:132px;font-size:18px;border-radius:16px}
+  body.nc-vip .gal .ic{font-size:34px}
+  body.nc-vip .btn{min-height:60px;font-size:17px;border-radius:14px}
+  body.nc-vip .todo a{padding:18px}
+  body.nc-vip .todo a i{font-size:28px}
+}
