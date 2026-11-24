@@ -105,5 +105,45 @@ body.protegida .mini,body.protegida .visor .marco{-webkit-touch-callout:none;-we
 /* álbum liberado por patrocinio (lo decide Nelson en su panel): sin marca de agua */
 body.liberado .visor .marca{display:none}
 
+/* ---------- 24-11-2026 (Nelson): como Pixieset ----------
+   cuadrícula de canto a canto con las fotos grandes y en su forma (sin recortarlas a la fuerza) */
+html,body{overflow-x:clip}
+/* --ocupado: lo que ocupa el menú lateral de la Zona VIP (en la compu); el canto a canto empieza después de él */
+:root{--ocupado:0px}
+@media (min-width:861px){body.nc-con-menu{--ocupado:var(--p-lado,0px)}}
+.grid.pix{display:flex;flex-wrap:wrap;gap:6px;width:calc(100vw - var(--ocupado) - 12px);margin-left:calc(50% - (100vw - var(--ocupado)) / 2 + 6px);--alto:320px}
+.grid.pix::after{content:"";flex:999 1 0}
+.grid.pix .mini{aspect-ratio:auto;height:var(--alto);flex:var(--r,.667) 1 calc(var(--r,.667) * var(--alto));border-radius:3px}
+.grid.pix .mini .like{width:46px;height:46px;right:8px;bottom:8px;font-size:23px}
+@media (max-width:900px){.grid.pix{--alto:250px}}
+@media (max-width:520px){.grid.pix{--alto:210px;gap:4px;width:calc(100vw - 8px);margin-left:calc(50% - 50vw + 4px)}.grid.pix .mini .like{width:44px;height:44px}}
+/* portada de canto a canto; el nombre va DEBAJO (nada tapa las caras) */
+.pix-portada{width:calc(100vw - var(--ocupado));margin:-20px 0 0 calc(50% - (100vw - var(--ocupado)) / 2);height:min(72vh,720px);background:#1d1c1c center 30%/cover no-repeat}
+@media (max-width:600px){.pix-portada{height:56vh}}
+.pix-barra{display:flex;align-items:center;gap:12px;padding:16px 2px 14px;margin:0 0 14px;border-bottom:1px solid var(--gris)}
+.pix-barra b{display:block;font-family:Montserrat,sans-serif;font-size:18px;letter-spacing:.12em;text-transform:uppercase;color:var(--blanco)}
+.pix-barra small{display:block;font-family:Montserrat,sans-serif;font-size:10px;letter-spacing:.2em;color:#bdb3a6}
+.pix-barra .acc{margin-left:auto;display:flex;gap:6px}
+.ico{width:46px;height:46px;border-radius:50%;border:1.5px solid var(--gris);background:transparent;color:var(--blanco);font-size:20px;cursor:pointer;display:grid;place-items:center}
+.ico.on{background:var(--naranja);border-color:var(--naranja);color:var(--fondo)}
+/* visor: la foto lo más grande posible; el ♡ y compartir AL LADO de la foto, del tamaño del dedo */
+.visor .cuadro{position:relative;display:inline-flex;transition:transform .25s ease,opacity .25s ease;touch-action:pan-y}
+.visor .marco{touch-action:pan-y;cursor:grab}
+.visor .marco.arrastrando{cursor:grabbing}
+.visor .marco.arrastrando .cuadro{transition:none}
+.visor .marco img.foto{max-width:calc(100vw - 250px);max-height:calc(100dvh - 130px)}
+.visor .acciones{position:absolute;left:calc(100% + 14px);bottom:0;display:flex;flex-direction:column;gap:12px;z-index:3}
+.visor .acciones button{width:60px;height:60px;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:28px;line-height:1;cursor:pointer;display:grid;place-items:center;box-shadow:0 2px 10px rgba(0,0,0,.4)}
+.visor .acciones button.on{background:var(--naranja);color:var(--fondo)}
+.visor .acciones button:active{transform:scale(.92)}
+@media (max-width:700px){
+  .visor .marco{padding:0}
+  .visor .marco img.foto{max-width:100vw;max-height:calc(100dvh - 120px)}
+  .visor .acciones{left:auto;right:10px;bottom:10px}
+  .visor .acciones button{width:58px;height:58px;background:rgba(0,0,0,.55)}
+  .visor .nav{display:none}
+}
+.aviso-copiado{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:70;background:var(--blanco);color:var(--fondo);padding:10px 18px;border-radius:999px;font-family:Montserrat,sans-serif;font-weight:700;font-size:14px;box-shadow:0 4px 18px rgba(0,0,0,.4)}
+
 /* sello en la tarjeta de News cuando la carrera tiene patrocinio */
 .sello-patrocinio{display:inline-block;margin-top:6px;padding:3px 10px;border-radius:999px;background:var(--naranja);color:var(--fondo);font-family:Montserrat,sans-serif;font-size:12px;font-weight:700}

@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#222020">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Tenor+Sans&display=swap">
-<link rel="stylesheet" href="galeria.css">
+<link rel="stylesheet" href="galeria.css?v=20261124">
 <style>
 .cuenta.pasado b{color:#ffb4a8}
 .mini .nota-ic{position:absolute;left:6px;bottom:6px;background:#22324a;color:#cfe0ff;border-radius:999px;padding:2px 7px;font-size:12px}
@@ -27,13 +27,17 @@
   <nav aria-label="Menú principal"><a href="index.html">🏠 Inicio</a><a href="news.html">📰 News</a><a href="vip.html" class="on" aria-current="page">👑 Zona VIP</a></nav>
 </header>
 <main class="wrap" id="main">
-  <p class="nota" style="margin:0"><span id="cliente"></span></p>
-  <h1 id="titulo"></h1>
+  <!-- 24-11-2026 (Nelson): como Pixieset. Portada de canto a canto y el nombre DEBAJO (nada tapa las caras) -->
+  <div class="pix-portada" id="portada" role="img" hidden></div>
+  <div class="pix-barra"><div><b id="titulo"></b><small>NC STUDIO</small></div>
+    <span class="acc"><button class="ico" id="icoFav" aria-label="Ver mis ♡" hidden>♡</button><button class="ico" id="compartir" aria-label="Compartir esta galería">↗</button></span></div>
+  <p class="nota" style="margin:0 0 10px"><span id="cliente"></span></p>
   <div class="tabs" role="tablist" id="tabs"></div>
   <div id="intro"></div>
-  <div class="fila"><button class="btn sec" id="compartir">↗ Compartir esta galería</button><span class="nota" id="compEst"></span></div>
+  <div class="fila" id="filaComp" hidden><button class="btn" id="compVista"></button></div>
+  <span class="nota" id="compEst"></span>
   <p class="res" id="res"></p>
-  <div id="grid" class="grid"></div>
+  <div id="grid" class="grid pix"></div>
   <p class="vacio" id="vacio" hidden>No hay fotos aquí.</p>
 </main>
 
@@ -48,12 +52,13 @@
 <div class="visor" id="visor" hidden>
   <div class="top"><span id="vNombre"></span><span class="nota" id="vPos"></span><button class="btn sec x" id="vCerrar" aria-label="Cerrar">✕</button></div>
   <div class="marco" id="vMarco" oncontextmenu="return false">
-    <img class="foto" id="vFoto" alt="">
+    <div class="cuadro" id="vCuadro"><img class="foto" id="vFoto" alt="">
+      <div class="acciones"><button id="vAccion" aria-label="Me gusta">♡</button><button id="vComp" aria-label="Compartir esta foto">↗</button></div></div>
     <div class="marca"><img src="logo.png" alt=""></div>
     <button class="nav prev" id="vPrev" aria-label="Anterior">‹</button>
     <button class="nav next" id="vNext" aria-label="Siguiente">›</button>
   </div>
-  <div class="pie"><span class="nota" id="vNota"></span><button class="btn sec" id="vNotaBtn" hidden>📝 Nota</button><button class="btn" id="vAccion"></button></div>
+  <div class="pie"><span class="nota" id="vNota"></span><button class="btn sec" id="vNotaBtn" hidden>📝 Nota</button></div>
 </div>
 <div class="modal" id="modal" hidden><div class="caja" id="caja"></div></div>
 
@@ -62,6 +67,7 @@
 <script>if (!(window.NC_CONFIG || {}).url) document.write('<script src="sesiones/indice.js"><\/script>');</script>
 <script src="tienda.js"></script>
 <script src="nc-api.js?v=20261124"></script>
+<script src="galeria-visor.js?v=20261124"></script>
 <script src="vip-menu.js?v=20261124"></script>
 <script>/* Zona VIP unificada (24-11-2026): mismo menú si la clienta entró a su VIP en este celular */ window.NCVip && NCVip.usar("galerias");</script>
 <script>
@@ -136,7 +142,10 @@
       document.addEventListener('dragstart', function (ev) { if (ev.target.tagName === 'IMG') ev.preventDefault(); });
     }
     document.getElementById('cliente').textContent = 'Hola, ' + YO.nombre.split(' ')[0] + ' 💛' + (DUENA || PIDEVIP ? '' : ' · galería de ' + S.cliente.split(' ')[0]);
-    document.getElementById('titulo').textContent = S.sesion;
+    document.getElementById('titulo').textContent = S.cliente.split(' ')[0];
+    document.getElementById('cliente').textContent += ' · ' + S.sesion;
+    var por = document.getElementById('portada'), fp = S.portada || ((S.finales || S.pruebas || [])[0] || {}).src;
+    if (fp) { por.style.backgroundImage = 'url("' + String(fp).replace(/"/g, '%22') + '")'; por.setAttribute('aria-label', 'Portada de la sesión de ' + S.cliente.split(' ')[0]); por.hidden = false; }
     document.getElementById('tabs').innerHTML = ['pruebas', 'finales'].filter(function (t) { return S[t]; }).map(function (t) {
       return '<a class="tab' + (t === v ? ' on' : '') + '" style="text-decoration:none" href="?s=' + encodeURIComponent(S.id) + '&v=' + t + '">' + (t === 'pruebas' ? '📸 Fotos de prueba' : '🎁 Fotos finales') + '</a>';
     }).join('');
@@ -144,6 +153,10 @@
     // ---------- mi lista de ♡ (la de la dueña es la oficial) ----------
     var L = R.mia || { fotos: [], notas: {} }; L.nombre = YO.nombre; L.notas = L.notas || {};
     var fav = L.fotos, soloFav = false, verDe = '', espera = null;
+    // ♡ que alguien compartió (…#ver=foto1,foto2): se ven aparte
+    var VER = ((location.hash.match(/ver=([^&]+)/) || [])[1] || ''), verComp = false;
+    VER = VER ? decodeURIComponent(VER).split(',').filter(function (n) { return fotos.some(function (f) { return f.nombre === n; }); }) : [];
+    if (VER.length) verComp = true;
     // cada ♡ o nota se guarda en el servidor (agrupado: medio segundo después del último toque)
     function falloVip(e) { if (e && (e.vip || e.salir)) { VIP = false; pedirVip(); return true; } }
     function guardar() { clearTimeout(espera); espera = setTimeout(function () { api('guardarMiLista', [S.id, YO.tel, YO.nombre, fav, L.notas]).catch(falloVip); }, 500); }
@@ -162,7 +175,18 @@
       document.getElementById('cuenta').classList.toggle('pasado', !!extra);
       document.getElementById('enviar').hidden = !DUENA;
       document.body.style.paddingBottom = c.hidden ? '' : '84px';
+      var ic = document.getElementById('icoFav'); ic.hidden = !PRU || !fav.length; ic.classList.toggle('on', soloFav);
+      pintarComp();
     }
+    // compartir mis ♡ (24-11-2026, Nelson)
+    function pintarComp() {
+      var fila = document.getElementById('filaComp'), b = document.getElementById('compVista');
+      fila.hidden = !(PRU && soloFav && fav.length) && !verComp;
+      if (verComp) { b.textContent = '← Ver todas las fotos'; b.className = 'btn sec'; b.onclick = function () { verComp = false; history.replaceState(null, '', location.pathname + location.search); pintar(); pintarComp(); }; return; }
+      b.className = 'btn'; b.textContent = '↗ Compartir mis ♡ (' + fav.length + ')';
+      b.onclick = function () { NCVisor.compartir('sesion.html' + location.search + '#ver=' + encodeURIComponent(fav.join(',')), S.sesion + ' · NC Studio', '💛 Mis favoritas de la sesión de ' + S.cliente.split(' ')[0]); };
+    }
+    document.getElementById('icoFav').onclick = function () { document.getElementById('soloFav').click(); };
 
     document.getElementById('intro').innerHTML = PRU && PIDEVIP ?
       '<div class="aviso"><span>👑</span><div><b>¡Hola, ' + esc(S.cliente.split(' ')[0]) + '! Esta es tu galería.</b> Para elegir tus fotos con el ♡ entra a tu <b>Zona VIP</b> con tu número. Si aún no tienes usuario, lo creas ahí mismo en un minuto.</div></div>' +
@@ -182,21 +206,21 @@
     // ---------- cuadrícula ----------
     var visibles = [];
     function pintar() {
-      visibles = fotos.filter(function (f) { return (!soloFav || es(f.nombre)) && (!verDe || listas[verDe].fotos.indexOf(f.nombre) >= 0); });
+      visibles = fotos.filter(function (f) { return (!verComp || VER.indexOf(f.nombre) >= 0) && (!soloFav || es(f.nombre)) && (!verDe || listas[verDe].fotos.indexOf(f.nombre) >= 0); });
       var g = document.getElementById('grid'); g.innerHTML = '';
       visibles.forEach(function (f, i) {
         var d = document.createElement('div'); d.className = 'mini'; d.dataset.n = f.nombre; d.tabIndex = 0; d.setAttribute('role', 'button'); d.setAttribute('aria-label', 'Ver ' + f.nombre);
         var o = DUENA ? deOtros(f.nombre) : [];
         d.innerHTML = '<img loading="lazy" alt="">' + (PRU ? '<button class="like" aria-label="Me gusta">♡</button>' : '<button class="like" aria-label="Descargar" style="font-size:16px">⬇</button>') +
           (PRU && L.notas[f.nombre] ? '<span class="nota-ic">📝</span>' : '') + (o.length ? '<span class="otros">♡ ' + o.length + '</span>' : '');
-        d.querySelector('img').src = f.src;
+        d.querySelector('img').src = f.src; NCVisor.forma(d, d.querySelector('img'));
         d.onclick = function () { abrir(i); };
         d.onkeydown = function (ev) { if (ev.key === 'Enter') abrir(i); };
         d.querySelector('.like').onclick = function (ev) { ev.stopPropagation(); if (PRU) alternar(f.nombre); else bajar(f); };
         g.appendChild(d);
       });
       marcar();
-      document.getElementById('res').textContent = verDe ? 'Favoritas de ' + (listas[verDe].nombre || verDe) + ': ' + visibles.length : soloFav ? 'Tus favoritas: ' + visibles.length : fotos.length + (fotos.length === 1 ? ' foto' : ' fotos');
+      document.getElementById('res').textContent = verComp ? 'Te compartieron ' + visibles.length + (visibles.length === 1 ? ' foto' : ' fotos') : verDe ? 'Favoritas de ' + (listas[verDe].nombre || verDe) + ': ' + visibles.length : soloFav ? 'Tus favoritas: ' + visibles.length : fotos.length + (fotos.length === 1 ? ' foto' : ' fotos');
       document.getElementById('vacio').hidden = visibles.length > 0;
     }
     function marcar() {
@@ -222,7 +246,15 @@
       pintarAccion();
       if (PRU) reloj = setTimeout(function () { marco.classList.add('bn'); }, 5000);
     }
-    function pintarAccion() { document.getElementById('vAccion').textContent = PRU ? (es(visibles[vi].nombre) ? '❤ Elegida' : '♡ Me gusta') : '⬇ Descargar'; }
+    // el ♡ grande va al lado de la foto (en finales es ⬇ descargar)
+    function pintarAccion() {
+      var b = document.getElementById('vAccion'), on = PRU && es(visibles[vi].nombre);
+      b.textContent = PRU ? (on ? '❤' : '♡') : '⬇'; b.classList.toggle('on', on);
+      b.setAttribute('aria-label', PRU ? (on ? 'Quitar de mis ♡' : 'Me gusta') : 'Descargar');
+    }
+    document.getElementById('vComp').onclick = function () {
+      NCVisor.compartir('sesion.html' + location.search + '#foto=' + encodeURIComponent(visibles[vi].nombre), S.sesion + ' · NC Studio', PRU ? '¿Qué te parece esta? 💛' : '¡Mira esta foto! 📸');
+    };
     function cerrar() { visor.hidden = true; document.body.style.overflow = ''; clearTimeout(reloj); }
     document.getElementById('vCerrar').onclick = cerrar;
     document.getElementById('vPrev').onclick = function () { abrir(vi - 1); };
@@ -236,12 +268,11 @@
       guardar(); abrir(vi); pintar(); pintarCuenta();
     };
     document.addEventListener('keydown', function (ev) { if (visor.hidden) return; if (ev.key === 'Escape') cerrar(); if (ev.key === 'ArrowLeft') abrir(vi - 1); if (ev.key === 'ArrowRight') abrir(vi + 1); });
-    var x0 = null;
-    marco.addEventListener('touchstart', function (ev) { x0 = ev.touches[0].clientX; }, { passive: true });
-    marco.addEventListener('touchend', function (ev) { if (x0 === null) return; var dx = ev.changedTouches[0].clientX - x0; if (Math.abs(dx) > 50) abrir(vi + (dx < 0 ? 1 : -1)); x0 = null; });
+    // deslizar con el dedo o arrastrar con el mouse para pasar de foto
+    NCVisor.gestos(marco, document.getElementById('vCuadro'), function (d) { abrir(vi + d); });
 
     // ---------- enviar (solo la dueña) ----------
-    document.getElementById('soloFav').onclick = function () { soloFav = !soloFav; this.textContent = soloFav ? 'Ver todas' : 'Ver mis ♡'; pintar(); window.scrollTo(0, 0); };
+    document.getElementById('soloFav').onclick = function () { soloFav = !soloFav; this.textContent = soloFav ? 'Ver todas' : 'Ver mis ♡'; pintar(); pintarCuenta(); window.scrollTo(0, 0); };
     document.getElementById('enviar').onclick = function () {
       var extra = inc ? Math.max(0, fav.length - inc) : 0, falta = inc ? inc - fav.length : 0, nn = Object.keys(L.notas).length;
       caja.innerHTML = '<h3>¿Enviar tu selección?</h3><p class="res">' + fav.length + (fav.length === 1 ? ' foto elegida' : ' fotos elegidas') + (nn ? ' · ' + nn + ' con nota' : '') + '</p>' +
@@ -306,6 +337,8 @@
     };
 
     pintarCuenta(); pintar();
+    var hf = (location.hash.match(/foto=([^&]+)/) || [])[1];
+    if (hf) { hf = decodeURIComponent(hf); var ix = visibles.map(function (f) { return f.nombre; }).indexOf(hf); if (ix >= 0) abrir(ix); }
   }
 })();
 </script>

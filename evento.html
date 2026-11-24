@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#222020">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Tenor+Sans&display=swap">
-<link rel="stylesheet" href="galeria.css?v=20261123">
+<link rel="stylesheet" href="galeria.css?v=20261124">
 <style>
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
 .chip .pt{display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:6px;vertical-align:-2px;border:1px solid rgba(255,255,255,.4)}
@@ -81,8 +81,9 @@
     </div>
   </section>
 
+  <div class="fila" id="filaComp" hidden><button class="btn" id="compVista"></button></div>
   <p class="res" id="res"></p>
-  <div id="grid" class="grid"></div>
+  <div id="grid" class="grid pix"></div>
   <p class="vacio" id="vacio" hidden>No encontramos fotos con ese filtro.</p>
 </main>
 
@@ -97,12 +98,13 @@
 <div class="visor" id="visor" hidden>
   <div class="top"><span id="vNombre"></span><span class="nota" id="vPos"></span><button class="btn sec x" id="vCerrar" aria-label="Cerrar">✕</button></div>
   <div class="marco" id="vMarco" oncontextmenu="return false">
-    <img class="foto" id="vFoto" alt="">
+    <div class="cuadro" id="vCuadro"><img class="foto" id="vFoto" alt="">
+      <div class="acciones"><button id="vCor" aria-label="Me gusta">♡</button><button id="vComp" aria-label="Compartir esta foto">↗</button></div></div>
     <div class="marca"><img src="logo.png" alt=""></div>
     <button class="nav prev" id="vPrev" aria-label="Anterior">‹</button>
     <button class="nav next" id="vNext" aria-label="Siguiente">›</button>
   </div>
-  <div class="pie"><span class="nota" id="vNota">Sin editar · vista previa</span><button class="btn sec" id="vEstrella" hidden>☆ Para mi historia</button><button class="btn" id="vLike">♡ Me gusta</button></div>
+  <div class="pie"><span class="nota" id="vNota">Sin editar · vista previa</span><button class="btn sec" id="vEstrella" hidden>☆ Para mi historia</button><button class="btn" id="vLike" hidden>♡ Me gusta</button></div>
 </div>
 
 <div class="modal" id="modal" hidden><div class="caja" id="caja"></div></div>
@@ -111,6 +113,7 @@
 <script>if (!(window.NC_CONFIG || {}).url) document.write('<script src="datos-prueba.js"><\/script>');</script>
 <script src="tienda.js"></script>
 <script src="nc-api.js?v=20261124"></script>
+<script src="galeria-visor.js?v=20261124"></script>
 <script>
 (function () {
   var T = window.NC_TIENDA, qs = new URLSearchParams(location.search), A = window.NC_API;
@@ -182,7 +185,7 @@
   function alternar(n) {
     if (elegida(n)) { sel.splice(sel.indexOf(n), 1); if (finisher === n) finisher = ''; }
     else { if (ELEGIR && sel.length >= ELEGIR.porElegir) { aviso('Tu paquete es de ' + ELEGIR.porElegir + ' fotos. Quita una para elegir otra.'); return; } sel.push(n); }
-    guardar(); pintarCarro(); marcarGrid();
+    guardar(); pintarCarro(); marcarGrid(); pintarComp();
   }
   function aviso(t) { var d = document.getElementById('det'); if (d) d.textContent = t; }
 
@@ -218,10 +221,13 @@
   // ---------- pestañas y filtros ----------
   var COLORES = {}, PUNTOS = {};
   E.fotos.forEach(function (f) { (f.colores || []).forEach(function (c) { COLORES[c] = (COLORES[c] || 0) + 1; }); if (f.punto) PUNTOS[f.punto] = (PUNTOS[f.punto] || 0) + 1; });
-  var TABS = [['todas', 'Todas las fotos'], ['caras', 'Directorio de rostros'], ['dorsal', 'Buscar por dorsal']]
+  // fotos que alguien compartió con sus ❤ (…#ver=foto1,foto2): se ven aparte y cada quien elige las suyas
+  var VER = ((location.hash.match(/ver=([^&]+)/) || [])[1] || '');
+  VER = VER ? decodeURIComponent(VER).split(',').filter(function (n) { return porNombre[n]; }) : [];
+  var TABS = (VER.length ? [['compartidas', '💛 Te compartieron']] : []).concat([['todas', 'Todas las fotos'], ['caras', 'Directorio de rostros'], ['dorsal', 'Buscar por dorsal']]
     .concat(Object.keys(COLORES).length ? [['color', 'Color de camiseta']] : [])
     .concat(Object.keys(PUNTOS).length > 1 ? [['punto', 'Punto del recorrido']] : [])
-    .concat([['selfie', 'Sube una selfie'], ['grupales', 'Grupales · gratis']]);
+    .concat([['selfie', 'Sube una selfie'], ['grupales', 'Grupales · gratis']]));
   document.getElementById('tabs').innerHTML = TABS.map(function (t) { return '<button class="tab" data-t="' + t[0] + '">' + t[1] + '</button>'; }).join('');
   var vista = { tab: 'todas', corredor: null, dorsal: '', color: '', punto: '', grupo: qs.get('g') || null, linkGrupo: qs.get('g') || null }, visibles = [];
   function de(f, cid) { return (f.corredores || []).indexOf(cid) >= 0; }
@@ -241,6 +247,7 @@
       if (vista.tab === 'color') return !vista.color || (f.colores || []).indexOf(vista.color) >= 0;
       if (vista.tab === 'punto') return !vista.punto || f.punto === vista.punto;
       if (vista.tab === 'mias') return elegida(f.nombre);
+      if (vista.tab === 'compartidas') return VER.indexOf(f.nombre) >= 0;
       if (vista.tab === 'grupales') return esGrupal(f.nombre);
       return true;
     });
@@ -252,7 +259,7 @@
       var d = document.createElement('div'); d.className = 'mini' + (MIAS.indexOf(f.nombre) >= 0 ? ' mia' : ''); d.dataset.n = f.nombre; d.tabIndex = 0; d.setAttribute('role', 'button'); d.setAttribute('aria-label', 'Ver ' + f.nombre);
       d.innerHTML = '<img loading="lazy" alt="">' + (MIAS.indexOf(f.nombre) >= 0 ? '<span class="tag-mia">✓ tuya</span>' : RECL.indexOf(f.nombre) >= 0 ? '<span class="tag-mia" style="color:#F99824;background:#3a3128">⏳ reclamada</span>' : esGrupal(f.nombre) ? '<span class="gratis">GRATIS</span>' : '') +
         (RECLAMO ? '' : '<button class="like" aria-label="Me gusta">♡</button>') + (finisher === f.nombre ? '<span class="estrella">⭐ historia</span>' : '');
-      d.querySelector('img').src = srcDe(f);
+      d.querySelector('img').src = srcDe(f); NCVisor.forma(d, d.querySelector('img'));
       d.onclick = function () { abrir(i); };
       d.onkeydown = function (ev) { if (ev.key === 'Enter') abrir(i); };
       var lk = d.querySelector('.like'); if (lk) lk.onclick = function (ev) { ev.stopPropagation(); alternar(f.nombre); };
@@ -263,11 +270,26 @@
     var esperaDorsal = vista.tab === 'dorsal' && !vista.dorsal;
     res.textContent = esperaDorsal ? 'Escribe tu número de dorsal.' : vista.tab === 'selfie' ? '' :
       vista.tab === 'mias' ? 'Tus fotos elegidas: ' + visibles.length :
+      vista.tab === 'compartidas' ? 'Te compartieron ' + plural(visibles.length, 'foto', 'fotos') + '. Toca ♡ en las que quieras para ti.' :
       vista.tab === 'grupales' ? (grupoActual() ? grupoActual().nombre + ': ' : vista.grupo === '_sueltas' ? 'Otras grupales: ' : '') + plural(visibles.length, 'foto grupal', 'fotos grupales') :
       vista.tab === 'color' && vista.color ? 'Camiseta ' + vista.color + ': ' + plural(visibles.length, 'foto', 'fotos') :
       vista.tab === 'punto' && vista.punto ? vista.punto + ': ' + plural(visibles.length, 'foto', 'fotos') :
       (vista.corredor ? (vista.corredor.indexOf('sin-dorsal') === 0 ? 'Corredor sin dorsal visible' : 'Dorsal ' + vista.corredor) + ': ' : '') + plural(visibles.length, 'foto', 'fotos');
     document.getElementById('vacio').hidden = visibles.length > 0 || esperaDorsal || vista.tab === 'selfie';
+    pintarComp();
+  }
+  // compartir lo que se está viendo (24-11-2026, Nelson): mis ❤, las fotos de una cara o de un grupo
+  function linkBase() { return 'evento.html?e=' + encodeURIComponent(E.id); }
+  function pintarComp() {
+    var fila = document.getElementById('filaComp'), b = document.getElementById('compVista'), c = null, que = null;
+    if (vista.tab === 'mias' && sel.length) que = { t: '↗ Compartir mis ❤ (' + sel.length + ')', url: linkBase() + '#ver=' + encodeURIComponent(sel.join(',')), x: '❤ Mis fotos favoritas de ' + E.nombre };
+    else if (vista.tab === 'caras' && vista.corredor && (c = E.corredores.filter(function (k) { return k.id === vista.corredor; })[0])) {
+      var quien = c.dorsal ? 'del #' + c.dorsal : 'de este corredor';
+      que = { t: '↗ Compartir las fotos ' + quien, url: linkBase() + '#corredor=' + encodeURIComponent(c.id), x: '📸 Mira las fotos ' + quien + ' en ' + E.nombre };
+    }
+    else if (vista.tab === 'grupales' && grupoActual()) que = { t: '↗ Compartir el álbum de ' + grupoActual().nombre, url: linkBase() + '&g=' + encodeURIComponent(vista.grupo), x: '📸 Fotos de ' + grupoActual().nombre + ' en ' + E.nombre };
+    fila.hidden = !que; if (!que) return;
+    b.textContent = que.t; b.onclick = function () { NCVisor.compartir(que.url, E.nombre + ' · NC Studio', que.x); };
   }
   function marcarGrid() {
     document.querySelectorAll('.mini').forEach(function (d) {
@@ -396,12 +418,14 @@
   }
   function cerrar() { visor.hidden = true; document.body.style.overflow = ''; clearTimeout(reloj); }
   function pintarBotones() {
-    var n = visibles[vi].nombre, lk = document.getElementById('vLike'), st = document.getElementById('vEstrella');
+    var n = visibles[vi].nombre, lk = document.getElementById('vLike'), st = document.getElementById('vEstrella'), cor = document.getElementById('vCor');
+    // reclamar usa el botón de abajo (texto largo); elegir usa el ♡ grande al lado de la foto
+    lk.hidden = !RECLAMO; cor.hidden = !!RECLAMO;
     if (RECLAMO) {
       var mia = MIAS.indexOf(n) >= 0, rec = RECL.indexOf(n) >= 0;
       lk.textContent = mia ? '✓ Ya es tuya' : rec ? '⏳ Reclamada' : '🙋 Esta también es mía'; lk.disabled = mia || rec; st.hidden = true; return;
     }
-    lk.disabled = false; lk.textContent = elegida(n) ? '❤ Elegida' : '♡ Me gusta';
+    cor.textContent = elegida(n) ? '❤' : '♡'; cor.classList.toggle('on', elegida(n)); cor.setAttribute('aria-label', elegida(n) ? 'Quitar de mis ❤' : 'Me gusta');
     st.hidden = !elegida(n) || !!ELEGIR; st.textContent = finisher === n ? '⭐ Mi historia' : '☆ Para mi historia';
   }
   document.getElementById('vCerrar').onclick = cerrar;
@@ -412,15 +436,19 @@
     if (RECLAMO) { A.gal('reclamarPublico', [RECLAMO.ticket, RECLAMO.tel, n]).then(function () { RECL.push(n); pintarBotones(); pintarGrid(); }); return; }
     alternar(n); pintarBotones();
   };
+  document.getElementById('vCor').onclick = function () { alternar(visibles[vi].nombre); pintarBotones(); };
+  document.getElementById('vComp').onclick = function () {
+    var f = visibles[vi];
+    NCVisor.compartir(linkBase() + '#foto=' + encodeURIComponent(f.nombre), E.nombre + ' · NC Studio', '📸 Mira esta foto de ' + E.nombre);
+  };
   // ⭐ la foto que va en su imagen de Finisher para historias (gratis)
   document.getElementById('vEstrella').onclick = function () { var n = visibles[vi].nombre; finisher = finisher === n ? '' : n; guardar(); pintarBotones(); pintarGrid(); pintarCarro(); };
   document.addEventListener('keydown', function (ev) {
     if (visor.hidden) return;
     if (ev.key === 'Escape') cerrar(); if (ev.key === 'ArrowLeft') abrir(vi - 1); if (ev.key === 'ArrowRight') abrir(vi + 1);
   });
-  var x0 = null;
-  marco.addEventListener('touchstart', function (ev) { x0 = ev.touches[0].clientX; }, { passive: true });
-  marco.addEventListener('touchend', function (ev) { if (x0 === null) return; var dx = ev.changedTouches[0].clientX - x0; if (Math.abs(dx) > 50) abrir(vi + (dx < 0 ? 1 : -1)); x0 = null; });
+  // deslizar con el dedo o arrastrar con el mouse para pasar de foto
+  NCVisor.gestos(marco, document.getElementById('vCuadro'), function (d) { abrir(vi + d); });
 
   // ---------- pedido ----------
   var modal = document.getElementById('modal'), caja = document.getElementById('caja');
@@ -589,9 +617,13 @@
   pintarCarro();
   // link de la selfie (lo manda Necty): evento.html?e=…#corredor=<id> abre directo sus fotos
   var hc = (location.hash.match(/corredor=([\w-]+)/) || [])[1];
-  if (hc && E.corredores.some(function (c) { return c.id === hc; })) { irTab('caras'); vista.corredor = hc; pintarCaras(); pintarGrid(); }
+  var hf = (location.hash.match(/foto=([^&]+)/) || [])[1];
+  if (VER.length) { irTab('compartidas'); }
+  else if (hc && E.corredores.some(function (c) { return c.id === hc; })) { irTab('caras'); vista.corredor = hc; pintarCaras(); pintarGrid(); }
   else if (grupoActual()) { var g0 = vista.grupo; irTab('grupales'); vista.grupo = g0; pintarGrupos(); pintarGrid(); document.title = grupoActual().nombre + ' · ' + E.nombre + ' · NC Studio'; }
   else irTab('todas');
+  // link de UNA foto (…#foto=<nombre>): abre el visor en esa foto
+  if (hf) { hf = decodeURIComponent(hf); var ix = visibles.map(function (f) { return f.nombre; }).indexOf(hf); if (ix < 0 && porNombre[hf]) { irTab('todas'); ix = visibles.map(function (f) { return f.nombre; }).indexOf(hf); } if (ix >= 0) abrir(ix); }
   }
 })();
 </script>
