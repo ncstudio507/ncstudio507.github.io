@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#222020">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Tenor+Sans&display=swap">
-<link rel="stylesheet" href="galeria.css?v=20261124c">
+<link rel="stylesheet" href="galeria.css?v=20261124e">
 <link rel="preconnect" href="https://script.google.com">
 <link rel="preconnect" href="https://script.googleusercontent.com">
 <style>
@@ -40,23 +40,49 @@
 <!-- 24-11-2026: se ve al instante mientras el servidor manda el álbum (tarda 4-6 s) -->
 <div class="cargando" id="carga" role="status">
   <svg class="camarita" viewBox="0 0 132 112" aria-hidden="true">
-    <ellipse class="sombra" cx="66" cy="106" rx="34" ry="5" fill="#000"/>
-    <g class="cam">
-      <rect class="boton" x="84" y="22" width="20" height="9" rx="3" fill="#F99824"/>
-      <rect x="42" y="22" width="36" height="16" rx="5" fill="#F2E4D2"/>
-      <rect x="14" y="32" width="104" height="64" rx="14" fill="#F2E4D2"/>
-      <rect x="14" y="50" width="104" height="10" fill="#d9c8b2"/>
-      <rect x="22" y="39" width="14" height="9" rx="3" fill="#FEFEFE" stroke="#bfae98"/>
-      <circle cx="66" cy="64" r="27" fill="#222020" stroke="#F99824" stroke-width="5"/>
-      <g class="iris">
-        <circle cx="66" cy="64" r="16" fill="#3D3B3E"/>
-        <path d="M66 48 L72 60 M80 56 L70 66 M78 74 L64 70 M62 80 L60 66 M50 70 L62 62 M54 54 L66 60" stroke="#222020" stroke-width="3" stroke-linecap="round"/>
-        <circle cx="66" cy="64" r="6" fill="#111"/>
+      <defs>
+        <linearGradient id="ncPlata" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6f6f4"/><stop offset=".5" stop-color="#c4c4c1"/><stop offset="1" stop-color="#e4e4e1"/></linearGradient>
+        <pattern id="ncCuero" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="#1c1c1e"/><circle cx="1" cy="1" r=".8" fill="#2b2b2e"/><circle cx="3" cy="3" r=".7" fill="#121214"/></pattern>
+        <pattern id="ncEstria" width="3" height="10" patternUnits="userSpaceOnUse"><rect width="3" height="10" fill="#b9b9b6"/><rect width="1.4" height="10" fill="#7d7d7a"/></pattern>
+        <radialGradient id="ncVidrio" cx=".35" cy=".3"><stop offset="0" stop-color="#7d6aa8"/><stop offset=".35" stop-color="#2b3550"/><stop offset=".75" stop-color="#10141d"/><stop offset="1" stop-color="#07080b"/></radialGradient>
+        <radialGradient id="ncFlash"><stop offset="0" stop-color="#fff"/><stop offset=".35" stop-color="#fff8e6" stop-opacity=".95"/><stop offset="1" stop-color="#F99824" stop-opacity="0"/></radialGradient>
+      </defs>
+      <ellipse class="sombra" cx="66" cy="106" rx="42" ry="5" fill="#000"/>
+      <g class="cam">
+        <!-- ruedas estriadas arriba a la izquierda (la del frente es el disparador) y rueda de modos -->
+        <rect x="16" y="17" width="20" height="10" rx="3" fill="url(#ncEstria)" stroke="#6f6f6c" stroke-width=".8"/>
+        <rect class="boton" x="20" y="12" width="12" height="6" rx="3" fill="url(#ncPlata)" stroke="#7d7d7a" stroke-width=".8"/>
+        <rect x="40" y="20" width="18" height="8" rx="3" fill="url(#ncEstria)" stroke="#6f6f6c" stroke-width=".8"/>
+        <!-- zapata del flash -->
+        <path d="M70 28 V22 H90 V28" fill="url(#ncPlata)" stroke="#7d7d7a" stroke-width=".8"/>
+        <rect x="72" y="20" width="16" height="3" fill="#9a9a97"/>
+        <!-- placa plateada de arriba -->
+        <path d="M8 46 Q8 34 16 28 H116 Q124 28 124 36 V48 H8 Z" fill="url(#ncPlata)" stroke="#9a9a97" stroke-width="1"/>
+        <circle cx="113" cy="38" r="3.4" fill="#F99824"/>
+        <!-- cuerpo negro con empuñadura a la izquierda -->
+        <path d="M8 48 H124 V88 H8 Z" fill="url(#ncCuero)" stroke="#000" stroke-width="1"/>
+        <path d="M8 48 H30 Q36 68 30 88 H8 Z" fill="#141416" stroke="#000" stroke-width="1"/>
+        <path d="M10 50 H28 Q33 68 28 86 H10 Z" fill="url(#ncCuero)" opacity=".9"/>
+        <circle cx="38" cy="56" r="2.6" fill="#2b2b2e" stroke="#555" stroke-width=".8"/>
+        <!-- franja plateada de abajo -->
+        <path d="M8 88 H124 V91 Q124 96 118 96 H14 Q8 96 8 91 Z" fill="url(#ncPlata)" stroke="#9a9a97" stroke-width="1"/>
+        <rect x="123" y="40" width="4" height="10" rx="2" fill="url(#ncPlata)"/>
+        <!-- lente zoom grande, corrido a la derecha -->
+        <circle cx="76" cy="66" r="31" fill="#121214" stroke="#2a2a2d" stroke-width="2"/>
+        <circle cx="76" cy="66" r="27" fill="none" stroke="#3a3a3e" stroke-width="5" stroke-dasharray="1.4 1.6"/>
+        <circle cx="76" cy="66" r="22" fill="#0d0d0f" stroke="#4a4a4f" stroke-width="1.2"/>
+        <circle cx="76" cy="66" r="16.5" fill="url(#ncVidrio)" stroke="#2a2a2d" stroke-width="1.4"/>
+        <g class="iris">
+          <path d="M76 52 L81 63 M89 59 L80 68 M87 75 L74 71 M71 80 L71 67 M62 72 L72 64 M65 57 L76 62" stroke="#07080b" stroke-width="2.4" stroke-linecap="round"/>
+          <circle cx="76" cy="66" r="4.6" fill="#040506"/>
+        </g>
+        <ellipse cx="69" cy="58" rx="5" ry="3" fill="#fff" opacity=".5" transform="rotate(-30 69 58)"/>
+        <circle cx="84" cy="74" r="2" fill="#c9b8ff" opacity=".55"/>
+        <!-- destello del flash desde la zapata -->
+        <circle class="flash" cx="80" cy="18" r="30" fill="url(#ncFlash)"/>
+        <path class="flash" d="M80 -10v12M80 32v6M52 18h12M96 18h12M60 -2l8 8M92 30l8 8M100 -2l-8 8M68 30l-8 8" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
       </g>
-      <circle cx="58" cy="55" r="4" fill="#fff" opacity=".55"/>
-      <defs><radialGradient id="ncFlash"><stop offset="0" stop-color="#fff"/><stop offset=".35" stop-color="#fff8e6" stop-opacity=".95"/><stop offset="1" stop-color="#F99824" stop-opacity="0"/></radialGradient></defs><circle class="flash" cx="29" cy="44" r="30" fill="url(#ncFlash)"/><path class="flash" d="M29 14v12M29 62v12M-1 44h12M47 44h12M8 23l8 8M42 57l8 8M50 23l-8 8M16 57l-8 8" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
-    </g>
-  </svg>
+    </svg>
   <div class="clic">¡CLIC!</div>
   <b>Abriendo el álbum…</b>
   <div class="llenar" id="cargaBarra"><i></i></div>
