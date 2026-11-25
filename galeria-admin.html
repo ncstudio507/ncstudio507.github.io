@@ -422,9 +422,26 @@ function panel() {
 
   // ---------------- pedidos
   // cara del corredor (25-11-2026): la que guardó el pedido → la de su corredor/dorsal en el álbum → quien más sale en sus fotos → su primera foto
+  // 25-11-2026 (Nelson: a Evelyn y Milagros les salía otra persona): un dorsal puede juntar a varias personas.
+  // El procesador deja personas.json (una cara por persona, con sus fotos) junto a las caras en GitHub, y aquí se
+  // elige la persona que sale en LAS FOTOS DE ESE PEDIDO.
+  var PERS = {};
+  function baseFotos(e) { var u = ((e.corredores || []).filter(function (c) { return /github\.io\/fotos-[^/]+\/c\//.test(c.cara || ''); })[0] || {}).cara; return u ? u.replace(/c\/[^/]+$/, '') : ''; }
+  function cargarPersonas(e, listo) {
+    if (!e || PERS[e.id] !== undefined) return; var b = baseFotos(e); PERS[e.id] = null; if (!b) return;
+    fetch(b + 'personas.json?v=' + Date.now()).then(function (r) { return r.ok ? r.json() : {}; }).then(function (j) { PERS[e.id] = { base: b, mapa: j || {} }; listo(); }, function () {});
+  }
+  function caraPorFotos(p, e) {
+    var P = PERS[e.id]; if (!P) return null;
+    var mias = {}; (p.fotos || []).forEach(function (n) { mias[n] = 1; });
+    var ids = p.corredor != null ? [String(p.corredor)] : Object.keys(P.mapa), mejor = null, tope = 0;
+    ids.forEach(function (id) { (P.mapa[id] || []).forEach(function (v) { var n = v.fotos.filter(function (f) { return mias[f]; }).length; if (n > tope) { tope = n; mejor = v; } }); });
+    return mejor ? { src: P.base + 'c/' + mejor.cara } : null;
+  }
   function caraPedido(p) {
+    var e = ev(p.evento), x = e && caraPorFotos(p, e); if (x) return x;
     if (p.cara) return { src: p.cara };
-    var e = ev(p.evento); if (!e) return null;
+    if (!e) return null;
     var C = e.corredores || [], porId = {}; C.forEach(function (c) { porId[String(c.id)] = c; });
     var c = (p.corredor != null && porId[String(p.corredor)]) || (p.dorsal && C.filter(function (x) { return String(x.dorsal) === String(p.dorsal); })[0]);
     if (c && (c.cara || c.caraDrive)) return { src: c.cara || c.caraDrive };
@@ -449,6 +466,7 @@ function panel() {
   function pedidos() {
     var box = document.querySelector('[data-p=pedidos]');
     var l = T.pedidos().filter(function (p) { return !p.borrado && (!fPed.ev || p.evento === fPed.ev) && (!fPed.estado || p.estado === fPed.estado); }).reverse();
+    l.forEach(function (p) { cargarPersonas(ev(p.evento), pedidos); });
     box.innerHTML = '<div class="fila"><select class="sel" id="fEv" style="max-width:280px">' + opcionesEventos(true) + '</select>' +
       '<select class="sel" id="fEs" style="max-width:200px"><option value="">Todos los estados</option>' + Object.keys(ESTADOS).map(function (k) { return '<option value="' + k + '">' + ESTADOS[k] + '</option>'; }).join('') + '</select></div>' +
       (l.length ? l.map(function (p) {
