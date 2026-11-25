@@ -20,7 +20,7 @@ window.NC_GUIONES = {
     nombre: "Leones por que carrera",
     escenas: [
       { n: "GANCHO", e: "1 · GANCHO", t: "El nueve de octubre tembló la tierra… y por eso, <em>esta carrera ya no es una carrera más.</em> Te explico." },
-      { n: "ESCENA 2", e: "2 · CARPAS", t: "Ese día, a muchas familias se les cayeron las paredes… y terminaron <em>durmiendo en carpas.</em>" },
+      { n: "ESCENA 2", e: "2 · CARPAS", t: "Ese día, a muchas familias se les cayeron las paredes… y algunas terminaron <em>durmiendo en carpas.</em>" },
       { n: "ESCENA 3", e: "3 · MIENTRAS TANTO", t: "Y mientras todos veíamos las noticias, los Leones de Las Tablas ya estaban <em>pasando agua de mano en mano.</em>" },
       { n: "ESCENA 4", e: "4 · CASA POR CASA", t: "<em>Casa por casa:</em> comida, agua… hasta una silla de ruedas." },
       { n: "ESCENA 5", e: "5 · PERO", t: "Pero la ayuda se acaba rápido. Y a muchas de esas familias <em>todavía les falta para levantarse.</em>" },
@@ -28,7 +28,7 @@ window.NC_GUIONES = {
       { n: "ESCENA 7", e: "7 · LA OTRA RAZÓN", t: "Y ojo, que la otra razón también pesa: <em>la diabetes.</em> Moverte, aunque sea caminando, ayuda a prevenirla." },
       { n: "ESCENA 8", e: "8 · O SEA", t: "O sea: caminas cinco kilómetros, te cuidas tú… y ayudas a que <em>una familia vuelva a su casa.</em>" },
       { n: "ESCENA 9", e: "9 · ¿Y TÚ?", t: "La última vez, la salida se veía así. Este año, <em>¿vas a estar ahí… o te lo van a contar?</em>" },
-      { n: "CIERRE", e: "10 · CIERRE", t: "Domingo trece de diciembre, siete de la mañana. Inscríbete en soylamarca punto com… <em>y esta medalla te espera en la meta.</em>" }
+      { n: "CIERRE", e: "10 · CIERRE", t: "Domingo trece de diciembre, siete de la mañana. Inscríbete en soylamarca punto com… <em>y ve por esta medalla.</em>" }
     ]
   }
 };
