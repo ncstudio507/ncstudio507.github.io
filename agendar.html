@@ -108,6 +108,14 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 .fe .fei{font-size:30px;line-height:1;width:48px;flex:none;display:flex;justify-content:center}.fe .fei img{width:48px;height:48px;object-fit:contain}.fe span{display:grid;gap:3px}.fe b{font-size:18px;font-family:Georgia,serif;font-weight:400}.fe small{font-size:13px;color:var(--muted)}
 .seg.sub button{font-size:13px;padding:7px 12px;border-width:1px}
 .pfotos{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}@media (min-width:560px){.pfotos{grid-template-columns:repeat(4,1fr)}}
+.pacc{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.pacc-b{display:grid;gap:2px;justify-items:start;text-align:left;padding:12px 14px;border-radius:10px;background:var(--accent);color:var(--fg);text-decoration:none;border:0;font:inherit;cursor:pointer}
+.pacc-b span{font-size:22px}.pacc-b b{font-size:16px}.pacc-b small{font-size:12px}
+.pacc-b.falta{background:var(--soft);border:1px dashed var(--line)}
+.pvid{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;align-items:center;padding:14px 16px;border-radius:10px;background:var(--fg);color:var(--bg);text-decoration:none}
+.pvid span{grid-row:span 2;font-size:28px;width:48px;height:48px;border-radius:50%;background:var(--accent);color:var(--fg);display:grid;place-items:center}.pvid small{opacity:.8}
+.pent-ic{position:absolute;inset:6px 6px auto auto;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;display:grid;place-items:center;font-size:13px}
+.pf .pent-n{position:absolute;left:0;right:0;bottom:0;padding:3px 6px;font-size:11px;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.65));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pf{position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;background:var(--fg)}.pf a,.pf img,.pf .xall{display:block;width:100%;height:100%;object-fit:cover}
 .pf .xall{display:flex;align-items:center;justify-content:center;color:var(--bg);font-size:11px}
 .pfv{display:block;width:100%;height:100%;padding:0;border:0;background:none;cursor:zoom-in}.pfv img,.pfv .xall{display:block;width:100%;height:100%;object-fit:cover}
@@ -1688,15 +1696,50 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
   }
   function pubDet(x) {
     DET = x.id; PUB_OPEN[x.id] = 1; FSOLO = ""; ELEG = []; tab("P"); window.scrollTo(0, 0);
+    // 25-11-2026 (Nelson): todo en orden y a la vista: arriba los tres accesos (fotos, videos de Google Fotos, entregables);
+    // abajo las fotos en miniatura, el álbum de videos y los entregables en miniatura; al final el plan de Instagram.
+    var ve = "videos" in x;
     app.innerHTML = '<button class="back" id="pbk">‹ ' + (x.estado === "Por publicar" ? "Por publicar" : "Publicadas") + '</button>' +
-      '<section><div class="row" style="justify-content:space-between"><h2>Fotos</h2><span class="row" id="pfl"></span></div><div id="pfb"><div class="msg" style="padding:12px"><span class="spin"></span>Buscando las fotos…</div></div></section>' +
-      ("videos" in x ? '<section><h2>Videos y entregables</h2><div id="pveBox"></div></section>' : '') +
+      '<section><h2 style="margin-bottom:4px">' + esc(x.cliente) + '</h2><p class="hint" style="margin:0 0 10px">' + esc(x.servicio || "") + (x.fecha ? ' · ' + esc(fechaBonita(x.fecha)) : '') + '</p><div class="pacc" id="pacc"></div></section>' +
+      '<section id="secF"><div class="row" style="justify-content:space-between"><h2>📸 Fotos</h2><span class="row" id="pfl"></span></div><div id="pfb"><div class="msg" style="padding:12px"><span class="spin"></span>Buscando las fotos…</div></div></section>' +
+      (ve ? '<section id="secV"><h2>🎬 Videos</h2><div id="pvBox"></div></section><section id="secE"><div class="row" style="justify-content:space-between"><h2>📦 Entregables</h2><span class="row" id="pel"></span></div><div id="peBox"></div></section>' : '') +
       tarjetaPub(x, "d0");
     if ($("d0tg")) $("d0tg").hidden = true;
     bindPub(x, "d0");
-    if ("videos" in x) pintaVE(x);
+    pintaAccesos(x);
+    if (ve) { pintaVE(x); entregables(x); }
     $("pbk").onclick = function () { DET = null; pintaPub(); };
     fotosDet(x, 0);
+  }
+  function pintaAccesos(x) {
+    var box = $("pacc"); if (!box) return;
+    var fotos = x.carpeta || (/drive\.google\.com/.test(x.link || "") ? x.link : "");
+    var A = [["secF", "📸", "Fotos", fotos, "Abrir carpeta"], ["secV", "🎬", "Videos", x.videos, "Abrir álbum"], ["secE", "📦", "Entregables", x.entregables, "Abrir carpeta"]];
+    if (!("videos" in x)) A = A.slice(0, 1);
+    box.innerHTML = A.map(function (a) {
+      return a[3] ? '<a class="pacc-b" href="' + esc(a[3]) + '" target="_blank" rel="noopener"><span>' + a[1] + '</span><b>' + a[2] + '</b><small>' + a[4] + ' ↗</small></a>'
+        : '<button class="pacc-b falta" data-ir="' + a[0] + '"><span>' + a[1] + '</span><b>' + a[2] + '</b><small>Falta el link</small></button>';
+    }).join("") + (x.link && !/drive\.google\.com/.test(x.link) ? '<a class="pacc-b" href="' + esc(x.link) + '" target="_blank" rel="noopener"><span>🖼️</span><b>Galería</b><small>Abrir en la página ↗</small></a>' : '');
+    Array.prototype.forEach.call(box.querySelectorAll("[data-ir]"), function (b) { b.onclick = function () { var s = $(b.getAttribute("data-ir")); if (s) s.scrollIntoView({ behavior: "smooth" }); }; });
+  }
+  // entregables: lo que hay en su carpeta de Drive, en miniatura (los videos con ▶, los documentos con su nombre)
+  function entregables(x) {
+    var box = $("peBox"); if (!box) return;
+    if (!x.entregables) { $("pel").innerHTML = ""; box.innerHTML = '<p class="hint">Pega abajo la carpeta de Drive con el reel, la miniatura, el caption y las historias, y aquí te salen en miniatura.</p>' + campoVE(x, VE_CAMPOS[1]); bindVE(x, VE_CAMPOS[1]); return; }
+    $("pel").innerHTML = '<a class="btn2" href="' + esc(x.entregables) + '" target="_blank" rel="noopener" style="text-decoration:none">Abrir carpeta ↗</a><button class="btn2" id="pecm">Cambiar</button>';
+    $("pecm").onclick = function () { box.innerHTML = campoVE(x, VE_CAMPOS[1]); bindVE(x, VE_CAMPOS[1]); };
+    box.innerHTML = '<div class="msg" style="padding:12px"><span class="spin"></span>Buscando los entregables…</div>';
+    call({ action: "pub_ent", pin: PIN, id: x.id }).then(function (r) {
+      if (DET !== x.id) return;
+      if (!r.ok) { box.innerHTML = '<p class="hint">' + esc(r.title || "No se pudo abrir la carpeta.") + " " + esc(r.html || "") + '</p>'; return; }
+      if (!(r.archivos || []).length) { box.innerHTML = '<p class="hint">La carpeta de entregables está vacía todavía.</p>'; return; }
+      box.innerHTML = '<div class="pfotos">' + r.archivos.map(function (f) {
+        var ic = f.tipo === "video" ? "▶" : f.tipo === "foto" ? "" : "📄";
+        return '<div class="pf"><a class="pfv" href="' + esc(f.url) + '" target="_blank" rel="noopener" title="' + esc(f.name) + '" style="display:block;position:relative">' +
+          (f.thumb ? '<img src="' + f.thumb + '" alt="' + esc(f.name) + '" loading="lazy">' : '<span class="xall" style="font-size:12px;padding:6px;text-align:center">' + esc(f.name.slice(0, 28)) + '</span>') +
+          (ic ? '<span class="pent-ic">' + ic + '</span>' : '') + '</a><small class="pent-n">' + esc(f.name) + '</small></div>';
+      }).join("") + '</div>';
+    }).catch(function () { if (DET === x.id) box.innerHTML = '<p class="hint">No pudimos cargar los entregables. Revisa tu internet.</p>'; });
   }
   /* Videos (álbum de Google Fotos) y entregables (carpeta de Drive), 16-11-2026.
      Solo aparece si el Apps Script ya devuelve estos campos (columnas Videos y Entregables). */
@@ -1704,16 +1747,20 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     { k: "videos", id: "pvv", txt: "Link del álbum de Google Fotos con los videos", ph: "https://photos.app.goo.gl/…", abrir: "Abrir álbum", ok: /^https:\/\/(photos\.app\.goo\.gl|photos\.google\.com)\//, err: "Pega el link de un álbum compartido de Google Fotos." },
     { k: "entregables", id: "pve", txt: "Link de la carpeta de entregables en Drive (reel, miniatura, caption, storyboard e historias)", ph: "https://drive.google.com/drive/folders/…", abrir: "Abrir entregables", ok: /^https:\/\/drive\.google\.com\//, err: "Pega el link de una carpeta de Google Drive." }
   ];
+  function campoVE(x, c) {
+    return '<label for="' + c.id + '">' + c.txt + '<input id="' + c.id + '" type="url" placeholder="' + c.ph + '" autocomplete="off"></label>' +
+      '<div class="row"><button class="btn2" id="' + c.id + 'ok">Guardar</button><span class="err" id="' + c.id + 'e"></span></div>';
+  }
+  // videos: el álbum de Google Fotos (Google no deja verlo en miniatura desde aquí: se abre con el botón grande)
   function pintaVE(x) {
-    var box = $("pveBox"); if (!box) return;
-    box.innerHTML = VE_CAMPOS.map(function (c) {
-      var v = x[c.k] || "";
-      return '<label for="' + c.id + '">' + c.txt + '<input id="' + c.id + '" type="url" placeholder="' + c.ph + '" autocomplete="off"></label>' +
-        '<div class="row"><button class="btn2" id="' + c.id + 'ok">Guardar</button>' +
-        (v ? '<a class="btn2" href="' + esc(v) + '" target="_blank" rel="noopener">' + c.abrir + '</a>' : '') +
-        '<span class="err" id="' + c.id + 'e"></span></div>';
-    }).join("");
-    VE_CAMPOS.forEach(function (c) {
+    var box = $("pvBox"), c = VE_CAMPOS[0]; if (!box) return;
+    if (!x.videos) { box.innerHTML = '<p class="hint">Cuando tu PC arma el álbum de videos de la sesión, sale aquí solo. También puedes pegarlo tú.</p>' + campoVE(x, c); bindVE(x, c); return; }
+    box.innerHTML = '<a class="pvid" href="' + esc(x.videos) + '" target="_blank" rel="noopener"><span>▶</span><b>Ver los videos de la sesión</b><small>Se abre el álbum en Google Fotos ↗</small></a>' +
+      '<div class="row" style="margin-top:8px"><button class="btn2" id="pvcm">Cambiar link</button></div>';
+    $("pvcm").onclick = function () { box.innerHTML = campoVE(x, c); bindVE(x, c); };
+  }
+  function bindVE(x, c0) {
+    [c0].forEach(function (c) {
       $(c.id).value = x[c.k] || "";
       $(c.id + "ok").onclick = function () {
         var v = $(c.id).value.trim();
@@ -1724,7 +1771,8 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
           if (!r.ok) { b.disabled = false; b.textContent = "Guardar"; $(c.id + "e").textContent = r.title || "No se pudo guardar."; return; }
           x[c.k] = v;
           PUB = PUB.map(function (y) { if (y.id !== x.id) return y; var z = Object.assign({}, y); z[c.k] = v; return z; });
-          pintaVE(x);
+          if (c.k === "videos") pintaVE(x); else entregables(x);
+          pintaAccesos(x);
         }).catch(function () { b.disabled = false; b.textContent = "Guardar"; $(c.id + "e").textContent = "No pudimos conectar."; });
       };
     });
@@ -1739,7 +1787,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
         if (!r.ok) { $("pfok").disabled = false; $("pfok").textContent = "Guardar carpeta"; $("pfe").textContent = r.title; return; }
         x.carpeta = v; x.portada = ""; if (PORTADAS) delete PORTADAS[x.id]; PORTADAS = null;
         PUB = PUB.map(function (y) { return y.id === x.id ? Object.assign({}, y, { carpeta: v, portada: "" }) : y; });
-        fotosDet(x, 0);
+        fotosDet(x, 0); pintaAccesos(x);
       }).catch(function () { $("pfok").disabled = false; $("pfok").textContent = "Guardar carpeta"; $("pfe").textContent = "No pudimos conectar."; });
     };
   }
@@ -1751,6 +1799,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
       if (!r.ok) { formCarpeta(x, esc(r.title) + ". " + (r.html || "")); return; }
       if (r.sinCarpeta) { $("pfl").innerHTML = ""; formCarpeta(x, x.link ? "El link de entrega no es de Drive, así que no puedo ver las fotos. Pega aquí la carpeta de Drive donde están las editadas." : "Pega la carpeta de Drive donde están las fotos editadas y aquí te salen en miniatura."); return; }
       ELEG = r.elegidas || [];
+      if (r.carpeta && !x.carpeta) { x.carpeta = r.carpeta; pintaAccesos(x); }
       $("pfl").innerHTML = '<a class="btn2" href="' + esc(r.carpeta) + '" target="_blank" rel="noopener" style="text-decoration:none">Abrir carpeta ↗</a><button class="btn2" id="pfcm">Cambiar</button>';
       $("pfcm").onclick = function () { formCarpeta(x); };
       if (!r.todas) { $("pfb").innerHTML = '<p class="hint">La carpeta no tiene fotos todavía.</p>'; return; }

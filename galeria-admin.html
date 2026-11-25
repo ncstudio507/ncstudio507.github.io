@@ -835,7 +835,8 @@ function panel() {
   document.querySelectorAll('.tab').forEach(function (b) { b.onclick = function () { ir(b.dataset.t); }; });
   // menú único (fase 1, 23-11-2026): las 14 pestañas se reparten en dos secciones del menú
   var GRUPOS = {
-    galerias: { titulo: 'Galerías', tabs: ['sindueno', 'porpublicar', 'sesiones', 'eventos', 'preventas', 'grupales'] },
+    // 25-11-2026 (Nelson): un solo «Por publicar», el de Agendar (para Instagram). La pestaña vieja de aquí ya no sale.
+    galerias: { titulo: 'Galerías', tabs: ['sindueno', 'sesiones', 'eventos', 'preventas', 'grupales'] },
     pedidos: { titulo: 'Pedidos de carreras', tabs: ['resumen', 'pedidos', 'cola', 'capturas', 'reclamos', 'yappy', 'entregas', 'lightroom', 'papelera'] },
     // 24-11-2026 (Nelson): los corredores van DENTRO de Clientes, junto a Reservas, Base e Interesados
     clientes: { titulo: 'Clientes', tabs: ['clientes'], seg: true }
