@@ -107,6 +107,13 @@ function panel() {
     if (navigator.clipboard) navigator.clipboard.writeText(txt).then(hecho, function () { prompt('Copia:', txt); });
     else prompt('Copia:', txt);
   }
+  // 25-11-2026 (Nelson): al copiar las fotos de un pedido para Lightroom, ese pedido pasa solo a «✏️ En edición»
+  // (solo los que estaban «⏳ En la fila»: no toca los que esperan pago ni los entregados)
+  function aEdicion(lista) {
+    var n = 0;
+    (lista || []).forEach(function (p) { if (p && p.estado === 'pagado') { T.actualizar(p.ticket, { estado: 'edicion' }); n++; } });
+    return n;
+  }
   function opcionesEventos(conTodos) {
     return (conTodos ? '<option value="">Todos los álbumes</option>' : '') + EV.filter(function (e) { return e.fotos.length; })
       .map(function (e) { return '<option value="' + esc(e.id) + '">' + esc(e.nombre) + '</option>'; }).join('');
@@ -287,7 +294,7 @@ function panel() {
           '<a class="mini-btn" target="_blank" rel="noopener" href="https://wa.me/507' + esc(p.tel) + '">💬 WhatsApp</a></div></div>';
       }).join('') + '<p class="nota">Cuando termines, súbelas a Drive y entrégalas en <b>Entregar editadas</b>: el siguiente sube solo.</p>'
         : '<p class="vacio">La cola está vacía. 🎉</p>');
-    box.querySelectorAll('[data-ccop]').forEach(function (b) { b.onclick = function () { var p = T.pedidos().filter(function (x) { return x.ticket === b.dataset.ccop; })[0]; copiar(p.fotos.join(', '), b); }; });
+    box.querySelectorAll('[data-ccop]').forEach(function (b) { b.onclick = function () { var p = T.pedidos().filter(function (x) { return x.ticket === b.dataset.ccop; })[0]; copiar(p.fotos.join(', '), b); if (aEdicion([p])) setTimeout(cola, 1600); }; });
     box.querySelectorAll('[data-cedit]').forEach(function (b) { b.onclick = function () { T.actualizar(b.dataset.cedit, { estado: 'edicion' }); cola(); }; });
     var cs = box.querySelector('#coEv'); if (cs) { cs.value = coEv; cs.onchange = function () { coEv = cs.value; cola(); }; }
   }
@@ -431,7 +438,7 @@ function panel() {
     fe.value = fPed.ev; fs.value = fPed.estado;
     fe.onchange = function () { fPed.ev = fe.value; pedidos(); };
     fs.onchange = function () { fPed.estado = fs.value; pedidos(); };
-    box.querySelectorAll('[data-cop]').forEach(function (b) { b.onclick = function () { var p = T.pedidos().filter(function (x) { return x.ticket === b.dataset.cop; })[0]; copiar(p.fotos.join(', '), b); }; });
+    box.querySelectorAll('[data-cop]').forEach(function (b) { b.onclick = function () { var p = T.pedidos().filter(function (x) { return x.ticket === b.dataset.cop; })[0]; copiar(p.fotos.join(', '), b); if (aEdicion([p])) setTimeout(pedidos, 1600); }; });
     box.querySelectorAll('[data-pborrar]').forEach(function (b) { b.onclick = function () { borrarCon('pedido', b.dataset.pborrar, 'el pedido ' + b.dataset.pborrar, pedidos); }; });
     box.querySelectorAll('[data-est]').forEach(function (s) {
       s.onchange = function () {
@@ -464,7 +471,7 @@ function panel() {
     var s = box.querySelector('#lrEv'); s.value = lrEv;
     s.onchange = function () { lrEv = s.value; lightroom(); };
     box.querySelector('#lrT').onchange = function () { lrTodas = this.checked; lightroom(); };
-    box.querySelector('#lrC').onclick = function () { copiar(nombres.join(', '), this); };
+    box.querySelector('#lrC').onclick = function () { copiar(nombres.join(', '), this); if (aEdicion(l)) setTimeout(lightroom, 1600); };
   }
 
   // ---------------- entregas
