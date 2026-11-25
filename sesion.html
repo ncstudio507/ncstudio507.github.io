@@ -64,7 +64,7 @@
 </div>
 <div class="modal" id="modal" hidden><div class="caja" id="caja"></div></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="nc-guardar.js?v=20261125"></script>
 <script src="nc-config.js"></script>
 <script>if (!(window.NC_CONFIG || {}).url) document.write('<script src="sesiones/indice.js"><\/script>');</script>
 <script src="tienda.js"></script>
@@ -201,7 +201,8 @@
       (DUENA && L.enviada ? '<div class="promo">✅ <div>Ya enviaste tu selección (' + fav.length + ' fotos). Si cambias algo, vuelve a enviarla.</div></div>' : '') +
       (DUENA && otros.length ? '<div class="fila"><span class="nota">💬 Favoritas de:</span>' + otros.map(function (t) { return '<button class="chip" data-de="' + esc(t) + '">' + esc(listas[t].nombre || t) + ' · ' + listas[t].fotos.length + '</button>'; }).join('') + '</div>' : '') :
       '<div class="aviso"><span>🎁</span><div><b>¡Tus fotos finales están listas!</b> Tócalas para verlas en grande y descargarlas, una por una o todas juntas. Guárdalas en dos lugares.</div></div>' +
-      '<div class="fila"><button class="btn" id="zip">⬇ Descargar todas en un ZIP (' + fotos.length + ')</button><span class="nota" id="zipEst"></span></div>' +
+      '<div class="fila"><button class="btn" id="zip">📲 Guardar todas en mi galería (' + fotos.length + ')</button></div>' +
+      '<p class="nota" style="margin-top:0">Sin ZIP y en calidad completa: van directo a la galería de tu celular.</p>' +
       '<div class="fila"><button class="btn sec" id="imprimir">🖼️ Pedir impresiones o álbum</button></div>';
     if (document.getElementById('irVip')) document.getElementById('irVip').onclick = irVip;
     document.querySelectorAll('[data-de]').forEach(function (b) { b.onclick = function () { verDe = verDe === b.dataset.de ? '' : b.dataset.de; document.querySelectorAll('[data-de]').forEach(function (x) { x.classList.toggle('on', x.dataset.de === verDe); }); pintar(); }; });
@@ -230,8 +231,15 @@
       if (!PRU) return;
       document.querySelectorAll('.mini').forEach(function (d) { var on = es(d.dataset.n); d.classList.toggle('sel', on); d.querySelector('.like').textContent = on ? '❤' : '♡'; });
     }
-    function nombreArchivo(f) { return f.src.split('/').pop(); }
-    function bajar(f) { var a = document.createElement('a'); a.href = f.bajar || f.src; a.download = nombreArchivo(f); document.body.appendChild(a); a.click(); a.remove(); }
+    // 25-11-2026 (Nelson): sin ZIP, en calidad completa y directo a la galería (nc-guardar.js). Al completarlas, le avisa a Nelson.
+    function paraGuardar(f) { return { nombre: f.nombre || String(f.src).split('/').pop(), url: f.bajar || f.src }; }
+    function avisarDescarga(n) { var p = function () { return A.gal('avisarDescarga', ['sesion', S.id, n]); }; (window.NC_CARGA && NC_CARGA.silencio ? NC_CARGA.silencio(p) : p()).catch(function () {}); }
+    function guardarFotos(l) {
+      NCGuardar.fotos(l.map(paraGuardar), { titulo: S.sesion + ' · NC Studio', listo: function () {
+        if (NCGuardar.marcar('sesion:' + S.id, l.map(function (f) { return f.nombre; }), fotos.length) || l.length === fotos.length) avisarDescarga(fotos.length);
+      } });
+    }
+    function bajar(f) { guardarFotos([f]); }
 
     // ---------- visor: pruebas como carreras pero 5 s a color (cada vez); finales a color ----------
     var vi = 0, reloj = null, visor = document.getElementById('visor'), marco = document.getElementById('vMarco');
@@ -306,15 +314,7 @@
       if (navigator.clipboard) navigator.clipboard.writeText(url).then(function () { est.textContent = '✓ Link copiado'; });
     };
     var zb = document.getElementById('zip');
-    if (zb) zb.onclick = function () {
-      var est = document.getElementById('zipEst');
-      if (!window.JSZip) { fotos.forEach(function (f, i) { setTimeout(function () { bajar(f); }, i * 600); }); return; }
-      var zip = new JSZip(), n = 0; zb.disabled = true;
-      Promise.all(fotos.map(function (f) { return fetch(f.src).then(function (r) { return r.blob(); }).then(function (b) { zip.file(nombreArchivo(f), b); est.textContent = 'Preparando ' + (++n) + ' de ' + fotos.length + '…'; }); }))
-        .then(function () { return zip.generateAsync({ type: 'blob' }); })
-        .then(function (b) { var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'NC-Studio-' + S.cliente.replace(/[^\w]+/g, '-') + '.zip'; document.body.appendChild(a); a.click(); a.remove(); est.textContent = '✓ Listo'; zb.disabled = false; })
-        .catch(function () { est.textContent = 'No se pudo armar el ZIP; bájalas una por una.'; zb.disabled = false; });
-    };
+    if (zb) zb.onclick = function () { guardarFotos(fotos); };
     var ib = document.getElementById('imprimir');
     if (ib) ib.onclick = function () {
       var opts = T.CATALOGO.map(function (c) { return '<option value="' + c.id + '">' + esc(c.nombre) + ' · ' + $(c.precio) + '</option>'; }).join('');

@@ -601,6 +601,26 @@
       if (!S || !S.tel || soloDigitos(tel).slice(-8) !== String(S.tel).slice(-8)) return { ok: false, title: 'Solo la dueña de la sesión puede enviar la selección' };
       return { ok: true, lista: this.enviarSelSesion(S, S.tel) };
     },
+    // 25-11-2026 (Nelson): la persona guardó TODAS sus fotos finales (sesión o carrera) → aviso a Nelson por Necty.
+    // Es pública: solo vale con una sesión con finales o un pedido ya entregado, y avisa como mucho una vez cada 6 h por galería.
+    avisarDescarga: function (tipo, ref, n) {
+      var nombre, que, tel = '', total;
+      if (tipo === 'sesion') {
+        var S = (raiz.NC_SESIONES || []).filter(function (x) { return x.id === ref; })[0];
+        if (!S || !(S.finales || []).length) return { ok: false };
+        nombre = S.cliente || 'Una clienta'; total = S.finales.length; tel = S.tel || ''; que = 'fotos finales de ' + (S.sesion || 'su sesión');
+      } else if (tipo === 'carrera') {
+        var p = this.pedido(ref);
+        if (!p || p.estado !== 'entregado') return { ok: false };
+        nombre = p.nombre; total = (p.editadas || p.fotos || []).length; tel = p.tel; que = 'fotos de ' + p.eventoNombre + ' (' + p.ticket + ')';
+      } else return { ok: false };
+      var m = leerK('nc-descargas', {}), k = tipo + ':' + ref, antes = m[k], t = ahora().getTime();
+      m[k] = { veces: ((antes && antes.veces) || 0) + 1, ultima: iso(), primera: (antes && antes.primera) || iso() }; guardarK('nc-descargas', m);
+      if (antes && t - new Date(antes.ultima).getTime() < 6 * 3600 * 1000) return { ok: true, avisado: false };
+      n = Math.max(1, Math.min(total || 1, Math.round(+n) || total || 1));
+      this._aviso({ tipo: 'descarga', tel: tel, texto: '📥 ' + nombre + ' ya guardó ' + (n === 1 ? 'su foto' : 'sus ' + n + ' ' + que) + (antes ? ' (otra vez)' : '') + '.' });
+      return { ok: true, avisado: true };
+    },
 
     borrarTodo: function () { escribir([]); }
   };

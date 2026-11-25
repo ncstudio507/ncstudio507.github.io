@@ -52,10 +52,10 @@
 <div class="grande" id="grande" hidden>
   <div class="top"><span id="gNom"></span><span class="nota" id="gPos"></span><button class="btn sec" id="gX" aria-label="Cerrar">✕</button></div>
   <img id="gImg" alt="">
-  <div class="pie"><button class="btn sec" id="gAnt" aria-label="Anterior">‹</button><button class="btn" id="gBajar">⬇ Descargar</button><button class="btn sec" id="gSig" aria-label="Siguiente">›</button></div>
+  <div class="pie"><button class="btn sec" id="gAnt" aria-label="Anterior">‹</button><button class="btn" id="gBajar">📲 Guardar</button><button class="btn sec" id="gSig" aria-label="Siguiente">›</button></div>
 </div>
 <div class="modal" id="modal" hidden><div class="caja" id="caja"></div></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="nc-guardar.js?v=20261125"></script>
 <script src="nc-config.js"></script>
 <script>if (!(window.NC_CONFIG || {}).url) document.write('<script src="datos-prueba.js"><\/script><script src="sesiones/indice.js"><\/script>');</script>
 <script src="tienda.js"></script>
@@ -109,7 +109,17 @@
     });
   }
   function bajarUrl(url, nombre) { var a = document.createElement('a'); a.href = url; a.download = nombre; document.body.appendChild(a); a.click(); a.remove(); }
-  function bajar(x) { conPatrocinio(x).then(function (u) { bajarUrl(u, x.nombre); }); }
+  // 25-11-2026 (Nelson): sin ZIP, en calidad completa y directo a la galería (nc-guardar.js). Al completarlas, le avisa a Nelson.
+  function avisarDescarga(p, n) { var f = function () { return A.gal('avisarDescarga', ['carrera', p.ticket, n]); }; (window.NC_CARGA && NC_CARGA.silencio ? NC_CARGA.silencio(f) : f()).catch(function () {}); }
+  function guardarFotos(p, l) {
+    var total = editadas(p).length;
+    Promise.all(l.map(function (x) { return conPatrocinio(x).then(function (u) { return { nombre: x.nombre, url: u }; }); })).then(function (lista) {
+      NCGuardar.fotos(lista, { titulo: p.eventoNombre + ' · NC Studio', listo: function () {
+        if (NCGuardar.marcar('carrera:' + p.ticket, l.map(function (x) { return x.nombre; }), total) || l.length === total) avisarDescarga(p, total);
+      } });
+    });
+  }
+  function bajar(x, p) { if (p) guardarFotos(p, [x]); }
 
   // ---------- tarjetas ----------
   var lista = [];
@@ -138,7 +148,8 @@
     return cab('✅ Editadas y entregadas', 'entregado') +
       '<p class="nota">¡Tus fotos están listas! Disponibles hasta el <b>' + fecha(hasta) + '</b> (90 días): descárgalas y guárdalas.</p>' +
       '<div class="ed">' + ed.map(function (x, i) { return '<button data-ver="' + esc(p.ticket) + '" data-i="' + i + '" aria-label="Ver ' + esc(x.nombre) + '"><img loading="lazy" src="' + esc(x.src) + '" alt="">' + (x.logo ? '<span class="tag">gratis · patrocinio</span>' : '') + '</button>'; }).join('') + '</div>' +
-      '<div class="fila"><button class="btn" data-todas="' + esc(p.ticket) + '">⬇ Descargar todas en un ZIP (' + ed.length + ')</button><span class="nota" data-zipest="' + esc(p.ticket) + '"></span></div>' +
+      '<div class="fila"><button class="btn" data-todas="' + esc(p.ticket) + '">📲 Guardar todas en mi galería (' + ed.length + ')</button></div>' +
+      '<p class="nota" style="margin-top:0">Sin ZIP y en calidad completa: van directo a la galería de tu celular.</p>' +
       (p.finisher ? '<p class="nota" style="margin-bottom:0"><b>⭐ Tu imagen de Finisher</b> para historias (gratis):</p><img class="fin-prev" data-fin="' + esc(p.ticket) + '" alt="Imagen de Finisher"><div class="fila"><button class="btn sec" data-finbajar="' + esc(p.ticket) + '">⬇ Descargar mi historia</button></div>' : '') +
       '<div class="fila"><button class="btn sec" data-imprimir="' + esc(p.ticket) + '">🖼️ Pedir impresiones o álbum</button></div>' +
       (A.real ? '' : '<p class="nota"><span class="sim">SIMULACIÓN</span> Aquí se ve la vista previa; en la versión real se descarga el archivo editado en calidad completa desde Drive.</p>') + '</div>';
@@ -183,14 +194,7 @@
     res.querySelectorAll('[data-imprimir]').forEach(function (b) { b.onclick = function () { imprimir(porTicket(b.dataset.imprimir)); }; });
     res.querySelectorAll('[data-todas]').forEach(function (b) {
       b.onclick = function () {
-        var p = porTicket(b.dataset.todas), l = editadas(p), est = res.querySelector('[data-zipest="' + p.ticket + '"]');
-        if (A.real) { if (p.entrega) window.open(p.entrega, '_blank'); else l.forEach(function (x, i) { setTimeout(function () { bajar(x); }, i * 600); }); return; }   // Drive: su carpeta trae «Descargar todo»
-        if (!window.JSZip) { l.forEach(function (x, i) { setTimeout(function () { bajar(x); }, i * 600); }); return; }
-        var zip = new JSZip(), n = 0; b.disabled = true;
-        Promise.all(l.map(function (x) { return conPatrocinio(x).then(function (u) { return fetch(u); }).then(function (r) { return r.blob(); }).then(function (bl) { zip.file(x.nombre, bl); est.textContent = 'Preparando ' + (++n) + ' de ' + l.length + '…'; }); }))
-          .then(function () { return zip.generateAsync({ type: 'blob' }); })
-          .then(function (bl) { bajarUrl(URL.createObjectURL(bl), 'NC-Studio-' + p.eventoNombre.replace(/[^\w]+/g, '-') + '-' + p.ticket + '.zip'); est.textContent = '✓ Listo'; b.disabled = false; })
-          .catch(function () { est.textContent = 'No se pudo armar el ZIP; bájalas una por una.'; b.disabled = false; });
+        var p = porTicket(b.dataset.todas); guardarFotos(p, editadas(p));
       };
     });
   }
@@ -221,13 +225,13 @@
 
   // ---------- visor grande ----------
   var G = { l: [], i: 0 }, gr = document.getElementById('grande');
-  function abrir(p, i) { G.l = editadas(p); mostrarG(i); gr.hidden = false; document.body.style.overflow = 'hidden'; }
+  function abrir(p, i) { G.p = p; G.l = editadas(p); mostrarG(i); gr.hidden = false; document.body.style.overflow = 'hidden'; }
   function mostrarG(i) {
     G.i = (i + G.l.length) % G.l.length; var x = G.l[G.i];
     conPatrocinio(x).then(function (u) { document.getElementById('gImg').src = u; });
     document.getElementById('gNom').textContent = x.nombre; document.getElementById('gPos').textContent = (G.i + 1) + ' de ' + G.l.length;
   }
-  document.getElementById('gBajar').onclick = function () { bajar(G.l[G.i]); };
+  document.getElementById('gBajar').onclick = function () { bajar(G.l[G.i], G.p); };
   document.getElementById('gX').onclick = function () { gr.hidden = true; document.body.style.overflow = ''; };
   document.getElementById('gAnt').onclick = function () { mostrarG(G.i - 1); };
   document.getElementById('gSig').onclick = function () { mostrarG(G.i + 1); };
