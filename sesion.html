@@ -160,8 +160,9 @@
     VER = VER ? decodeURIComponent(VER).split(',').filter(function (n) { return fotos.some(function (f) { return f.nombre === n; }); }) : [];
     if (VER.length) verComp = true;
     // cada ♡ o nota se guarda en el servidor (agrupado: medio segundo después del último toque)
+    // por detrás y SIN la pantalla «Cargando…»: al elegir era tedioso (Nelson, 25-11-2026). Al enviar sí sale.
     function falloVip(e) { if (e && (e.vip || e.salir)) { VIP = false; pedirVip(); return true; } }
-    function guardar() { clearTimeout(espera); espera = setTimeout(function () { api('guardarMiLista', [S.id, YO.tel, YO.nombre, fav, L.notas]).catch(falloVip); }, 500); }
+    function guardar() { clearTimeout(espera); espera = setTimeout(function () { NC_CARGA.silencio(function () { return api('guardarMiLista', [S.id, YO.tel, YO.nombre, fav, L.notas]); }).catch(falloVip); }, 500); }
     function guardarYa() { clearTimeout(espera); return api('guardarMiLista', [S.id, YO.tel, YO.nombre, fav, L.notas]); }
     function es(n) { return fav.indexOf(n) >= 0; }
     function alternar(n) { if (PIDEVIP) { pedirVip(); return; } if (es(n)) fav.splice(fav.indexOf(n), 1); else fav.push(n); guardar(); pintarCuenta(); marcar(); }
