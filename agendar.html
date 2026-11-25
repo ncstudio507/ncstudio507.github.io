@@ -115,6 +115,10 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-c
 .pvid{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;align-items:center;padding:14px 16px;border-radius:10px;background:var(--fg);color:var(--bg);text-decoration:none}
 .pvid span{grid-row:span 2;font-size:28px;width:48px;height:48px;border-radius:50%;background:var(--accent);color:var(--fg);display:grid;place-items:center}.pvid small{opacity:.8}
 .pent-ic{position:absolute;inset:6px 6px auto auto;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;display:grid;place-items:center;font-size:13px}
+.pz{border:1px solid var(--line);border-radius:10px;padding:12px;display:grid;gap:8px}.pz summary{cursor:pointer}
+.pzt{white-space:pre-wrap;font-size:14px;line-height:1.5}
+.pzp{font-size:12px;padding:2px 10px;border-radius:999px;background:var(--soft)}
+.pzc{border-radius:8px;padding:10px;background:var(--soft);display:grid;gap:8px}.pzc.on{outline:2px solid var(--accent)}
 .pf .pent-n{position:absolute;left:0;right:0;bottom:0;padding:3px 6px;font-size:11px;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.65));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pf{position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;background:var(--fg)}.pf a,.pf img,.pf .xall{display:block;width:100%;height:100%;object-fit:cover}
 .pf .xall{display:flex;align-items:center;justify-content:center;color:var(--bg);font-size:11px}
@@ -1701,12 +1705,14 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     var ve = "videos" in x;
     app.innerHTML = '<button class="back" id="pbk">‹ ' + (x.estado === "Por publicar" ? "Por publicar" : "Publicadas") + '</button>' +
       '<section><h2 style="margin-bottom:4px">' + esc(x.cliente) + '</h2><p class="hint" style="margin:0 0 10px">' + esc(x.servicio || "") + (x.fecha ? ' · ' + esc(fechaBonita(x.fecha)) : '') + '</p><div class="pacc" id="pacc"></div></section>' +
+      ("produccion" in x ? '<section id="secP"><h2>🎬 En producción</h2><div id="pprod"></div></section>' : '') +
       '<section id="secF"><div class="row" style="justify-content:space-between"><h2>📸 Fotos</h2><span class="row" id="pfl"></span></div><div id="pfb"><div class="msg" style="padding:12px"><span class="spin"></span>Buscando las fotos…</div></div></section>' +
       (ve ? '<section id="secV"><h2>🎬 Videos</h2><div id="pvBox"></div></section><section id="secE"><div class="row" style="justify-content:space-between"><h2>📦 Entregables</h2><span class="row" id="pel"></span></div><div id="peBox"></div></section>' : '') +
       tarjetaPub(x, "d0");
     if ($("d0tg")) $("d0tg").hidden = true;
     bindPub(x, "d0");
     pintaAccesos(x);
+    if ("produccion" in x) pintaProd(x);
     if (ve) { pintaVE(x); entregables(x); }
     $("pbk").onclick = function () { DET = null; pintaPub(); };
     fotosDet(x, 0);
@@ -1722,7 +1728,94 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     }).join("") + (x.link && !/drive\.google\.com/.test(x.link) ? '<a class="pacc-b" href="' + esc(x.link) + '" target="_blank" rel="noopener"><span>🖼️</span><b>Galería</b><small>Abrir en la página ↗</small></a>' : '');
     Array.prototype.forEach.call(box.querySelectorAll("[data-ir]"), function (b) { b.onclick = function () { var s = $(b.getAttribute("data-ir")); if (s) s.scrollIntoView({ behavior: "smooth" }); }; });
   }
-  // entregables: lo que hay en su carpeta de Drive, en miniatura (los videos con ▶, los documentos con su nombre)
+  /* «En producción» (25-11-2026, Nelson): lo que le contaste a Necty de la sesión y lo que Claude escribe con eso,
+     con su pilar y pensando en FOMO: reel 3-2-1, storytelling, venta suave (2 captions cada una) e historias con fotos. */
+  var PZ = { reel: "Reel «Resultados en 3, 2, 1»", storytelling: "Storytelling", venta: "Venta suave" }, ABIERTA = {};
+  function prodCall(x, fn, extra, luego) {
+    var b = Object.assign({ action: "pub_prod", pin: PIN, fn: fn, id: x.id }, extra || {});
+    return call(b).then(function (r) {
+      if (!r.ok) { alert(r.title || "No se pudo guardar."); return; }
+      x.produccion = r.produccion; PUB = PUB.map(function (y) { return y.id === x.id ? Object.assign({}, y, { produccion: r.produccion }) : y; });
+      if (luego) luego();
+      pintaProd(x);
+    }).catch(function () { alert("No pudimos conectar."); pintaProd(x); });
+  }
+  function prodEstado(p) {
+    if (!p || (!p.preguntada && !p.historia && !p.piezas)) return "";
+    if (p.estado === "escribiendo") return "✍️ Claude escribiendo";
+    if (p.estado === "error") return "⚠️ No se pudo escribir";
+    if (!p.historia) return "⏳ Esperando que cuentes qué pasó";
+    var P = p.piezas || {}, ks = Object.keys(PZ).filter(function (k) { return P[k] && P[k].idea; });
+    var el = ks.filter(function (k) { return P[k].elegido !== null && P[k].elegido !== undefined; }).length;
+    return ks.length ? el + " de " + ks.length + " captions elegidos" : "Ideas por llegar";
+  }
+  function pintaProd(x) {
+    var box = $("pprod"); if (!box) return;
+    var p = x.produccion || {}, P = p.piezas || {}, h = p.historia, html = "";
+    if (!h) html += '<p class="hint" style="margin:0">' + (p.preguntada ? "⏳ Necty te preguntó por WhatsApp qué pasó en esta sesión. Contéstale a ella o escríbelo aquí:" : "Cuéntame qué pasó en esta sesión y Claude te arma el reel 3-2-1, el storytelling, la venta suave y las historias con fotos:") + '</p>' +
+      '<textarea id="phist" placeholder="Cómo llegó, qué le daba pena, qué dijo al ver las fotos, algo gracioso, qué cambió…"></textarea><div class="row"><button class="btn2" id="phok">Guardar y pedir las ideas</button><span class="err" id="phe"></span></div>';
+    else html += '<details class="pz"><summary><b>Lo que contaste</b> <small class="hint">(' + (h.de === "whatsapp" ? "por WhatsApp" : "aquí") + ')</small></summary><p class="pzt">' + esc(h.texto) + '</p><button class="btn2" id="phed">Cambiar y volver a pedir</button></details>';
+    if (p.estado === "escribiendo") html += '<div class="msg" style="padding:10px"><span class="spin"></span>Claude está escribiendo las ideas. Tarda unos minutos y te llega el aviso por WhatsApp.</div>';
+    if (p.estado === "error") html += '<p class="err" style="margin:0">No se pudieron escribir: ' + esc(p.error || "") + ' <button class="btn2" id="preint">Intentar otra vez</button></p>';
+    Object.keys(PZ).forEach(function (k, n) {
+      var z = P[k]; if (!z || !z.idea) return;
+      var eleg = z.elegido !== null && z.elegido !== undefined;
+      html += '<details class="pz"' + (ABIERTA[x.id + k] ? ' open' : '') + ' data-pk="' + k + '"><summary><b>' + (n + 1) + ' · ' + PZ[k] + '</b> ' + (z.pilar ? '<span class="pzp">' + esc(z.pilar) + '</span> ' : '') +
+        '<small class="hint">' + (z.pedirOtra ? "✍️ otra idea en camino" : eleg ? "✓ caption elegido" : "elige caption") + '</small>' + (z.titulo ? '<div style="margin-top:4px">' + esc(z.titulo) + '</div>' : '') + '</summary>' +
+        (z.gancho ? '<div class="pzt"><b>Gancho:</b> ' + esc(z.gancho) + '</div>' : '') +
+        '<div class="pzt"><b>Idea:</b> ' + esc(z.idea) + '</div>' +
+        (z.fomo ? '<div class="pzt"><b>FOMO:</b> ' + esc(z.fomo) + '</div>' : '') +
+        (k === "reel" && z.storyboard ? '<a class="btn2" href="' + esc(z.storyboard) + '" target="_blank" rel="noopener" style="text-decoration:none;justify-self:start">Ver storyboard ↗</a>' : '') +
+        (z.pedirOtra ? '<p class="hint" style="margin:0">✍️ Pediste otra idea: llega en unos minutos.</p>' : '') +
+        (z.captions || []).map(function (c, i) {
+          var on = z.elegido === i;
+          return '<div class="pzc' + (on ? ' on' : '') + '"><div class="pzt">' + esc(c) + '</div><div class="row"><button class="btn2" data-pel="' + k + ':' + i + '">' + (on ? "✓ Elegido" : "Elegir este") + '</button><button class="btn2" data-pcp="' + k + ':' + i + '">Copiar</button></div></div>';
+        }).join("") +
+        '<div class="row"><button class="btn2" data-potra="' + k + '">Otra idea</button></div></details>';
+    });
+    if (P.historias && (P.historias.lista || []).length) {
+      html += '<details class="pz"' + (ABIERTA[x.id + "historias"] ? ' open' : '') + ' data-pk="historias"><summary><b>4 · Historias con fotos</b> <small class="hint">' + P.historias.lista.length + ' historias' + (P.historias.pedirOtra ? " · ✍️ otras en camino" : "") + '</small>' + (P.historias.titulo ? '<div style="margin-top:4px">' + esc(P.historias.titulo) + '</div>' : '') + '</summary>' + (P.historias.idea ? '<div class="pzt">' + esc(P.historias.idea) + '</div>' : '') +
+        P.historias.lista.map(function (s, i) {
+          return '<div class="pzc"><div class="pzt"><b>Historia ' + (i + 1) + (s.pilar ? ' · ' + esc(s.pilar) : '') + '</b>\n📷 ' + esc(s.foto || "") + '\n💬 «' + esc(s.texto || "") + '»' + (s.sticker ? '\n🔘 ' + esc(s.sticker) : '') + (s.fomo ? '\n⏳ ' + esc(s.fomo) : '') + '</div></div>';
+        }).join("") + (P.historias.pedirOtra ? '<p class="hint" style="margin:0">✍️ Pediste otras: llegan en unos minutos.</p>' : '') +
+        '<div class="row"><button class="btn2" data-potra="historias">Otras historias</button></div></details>';
+    }
+    box.innerHTML = html;
+    Array.prototype.forEach.call(box.querySelectorAll("details[data-pk]"), function (d) { d.ontoggle = function () { ABIERTA[x.id + d.getAttribute("data-pk")] = d.open; }; });
+    if ($("phok")) $("phok").onclick = function () {
+      var t = $("phist").value.trim(); if (t.length < 10) { $("phe").textContent = "Cuéntame un poquito más."; return; }
+      this.disabled = true; this.innerHTML = '<span class="spin"></span>Guardando…'; prodCall(x, "historia", { texto: t, de: "panel" });
+    };
+    if ($("phed")) $("phed").onclick = function () {
+      var t = prompt("Cambia lo que pasó en la sesión (Claude vuelve a escribir todo):", h.texto); if (t && t.trim()) prodCall(x, "historia", { texto: t.trim(), de: "panel" });
+    };
+    if ($("preint")) $("preint").onclick = function () { prodCall(x, "historia", { texto: h ? h.texto : "", de: h ? h.de : "panel" }); };
+    Array.prototype.forEach.call(box.querySelectorAll("[data-pel]"), function (b) {
+      b.onclick = function () { var a = b.getAttribute("data-pel").split(":"), z = P[a[0]], i = +a[1]; prodCall(x, "elegir", { pieza: a[0], idx: z.elegido === i ? null : i }); };
+    });
+    Array.prototype.forEach.call(box.querySelectorAll("[data-pcp]"), function (b) {
+      b.onclick = function () {
+        var a = b.getAttribute("data-pcp").split(":"), t = P[a[0]].captions[+a[1]];
+        var ok = function () { b.textContent = "✓ Copiado"; setTimeout(function () { b.textContent = "Copiar"; }, 1500); };
+        if (navigator.clipboard) navigator.clipboard.writeText(t).then(ok, function () { prompt("Copia:", t); }); else prompt("Copia:", t);
+      };
+    });
+    Array.prototype.forEach.call(box.querySelectorAll("[data-potra]"), function (b) {
+      b.onclick = function () { var k = b.getAttribute("data-potra"), n = prompt("¿Qué quieres distinto? (puedes dejarlo vacío)", ""); if (n === null) return; prodCall(x, "otra", { pieza: k, nota: n.trim() }); };
+    });
+  }
+  // entregables: SOLO el producto final (reel, historias graciosas, «Hola, soy… y esta es mi sesión», historias con fotos), en miniatura.
+  // Las ideas, captions y storyboard viven en «En producción» (no se repiten aquí).
+  var GRUPOS_ENT = [["reel", "🎬 Reel", /reel/i], ["soy", "👋 «Hola, soy… y esta es mi sesión con NC Studio»", /(^|[^a-z])soy|presentaci|hola/i], ["gracio", "😂 Historias graciosas", /gracios|histori|story/i], ["foto", "📸 Historias con fotos", /histori|story/i], ["otro", "🖼️ Portada y otros", /./]];
+  function grupoEnt(f) {
+    for (var i = 0; i < GRUPOS_ENT.length; i++) {
+      var g = GRUPOS_ENT[i];
+      if (g[0] === "gracio" && f.tipo !== "video") continue;
+      if (g[0] === "foto" && f.tipo !== "foto") continue;
+      if (g[2].test(f.name)) return g[0];
+    }
+    return "otro";
+  }
   function entregables(x) {
     var box = $("peBox"); if (!box) return;
     if (!x.entregables) { $("pel").innerHTML = ""; box.innerHTML = '<p class="hint">Pega abajo la carpeta de Drive con el reel, la miniatura, el caption y las historias, y aquí te salen en miniatura.</p>' + campoVE(x, VE_CAMPOS[1]); bindVE(x, VE_CAMPOS[1]); return; }
@@ -1732,13 +1825,16 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     call({ action: "pub_ent", pin: PIN, id: x.id }).then(function (r) {
       if (DET !== x.id) return;
       if (!r.ok) { box.innerHTML = '<p class="hint">' + esc(r.title || "No se pudo abrir la carpeta.") + " " + esc(r.html || "") + '</p>'; return; }
-      if (!(r.archivos || []).length) { box.innerHTML = '<p class="hint">La carpeta de entregables está vacía todavía.</p>'; return; }
-      box.innerHTML = '<div class="pfotos">' + r.archivos.map(function (f) {
-        var ic = f.tipo === "video" ? "▶" : f.tipo === "foto" ? "" : "📄";
-        return '<div class="pf"><a class="pfv" href="' + esc(f.url) + '" target="_blank" rel="noopener" title="' + esc(f.name) + '" style="display:block;position:relative">' +
-          (f.thumb ? '<img src="' + f.thumb + '" alt="' + esc(f.name) + '" loading="lazy">' : '<span class="xall" style="font-size:12px;padding:6px;text-align:center">' + esc(f.name.slice(0, 28)) + '</span>') +
-          (ic ? '<span class="pent-ic">' + ic + '</span>' : '') + '</a><small class="pent-n">' + esc(f.name) + '</small></div>';
-      }).join("") + '</div>';
+      var A = (r.archivos || []).filter(function (f) { return f.tipo !== "doc" && !/storyboard|caption|guion|gui[oó]n/i.test(f.name); });
+      if (!A.length) { box.innerHTML = '<p class="hint">Todavía no hay producto final en la carpeta (reel, historias graciosas, «Hola, soy…» o historias con fotos).</p>'; return; }
+      var porG = {}; A.forEach(function (f) { (porG[grupoEnt(f)] = porG[grupoEnt(f)] || []).push(f); });
+      box.innerHTML = GRUPOS_ENT.filter(function (g) { return porG[g[0]]; }).map(function (g) {
+        return '<div class="hint" style="margin:4px 0 2px;font-weight:bold">' + g[1] + ' (' + porG[g[0]].length + ')</div><div class="pfotos">' + porG[g[0]].map(function (f) {
+          return '<div class="pf"><a class="pfv" href="' + esc(f.url) + '" target="_blank" rel="noopener" title="' + esc(f.name) + '" style="display:block;position:relative">' +
+            (f.thumb ? '<img src="' + f.thumb + '" alt="' + esc(f.name) + '" loading="lazy">' : '<span class="xall" style="font-size:12px;padding:6px;text-align:center">' + esc(f.name.slice(0, 28)) + '</span>') +
+            (f.tipo === "video" ? '<span class="pent-ic">▶</span>' : '') + '</a><small class="pent-n">' + esc(f.name) + '</small></div>';
+        }).join("") + '</div>';
+      }).join("");
     }).catch(function () { if (DET === x.id) box.innerHTML = '<p class="hint">No pudimos cargar los entregables. Revisa tu internet.</p>'; });
   }
   /* Videos (álbum de Google Fotos) y entregables (carpeta de Drive), 16-11-2026.
@@ -1947,10 +2043,15 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     PUB.forEach(function (x) { Object.keys(TIPOS).forEach(function (k) { var it = x.plan[k]; if (it.estado === "programado" && it.fecha) prox.push({ x: x, k: k, f: it.fecha }); }); });
     prox.sort(function (a, b) { return a.f < b.f ? -1 : 1; });
     if (foco) { var fx = PUB.filter(function (y) { return y.id === foco; })[0]; if (fx && fx.estado !== "Por publicar") PV = "hechas"; }
-    var op = [["pend", "📸", "Por publicar", pend.length ? pend.length + " sesi" + (pend.length === 1 ? "ón" : "ones") + " con fotos por subir" : "Todo al día ✓"], ["cal", "🗓️", "Calendario", prox.length ? prox.length + " publicaci" + (prox.length === 1 ? "ón programada" : "ones programadas") : "Nada programado todavía"], ["hechas", "✅", "Publicadas", listas.length + " sesi" + (listas.length === 1 ? "ón" : "ones") + " ya publicadas o que no van"], ["nueva", "➕", "Agregar otra sesión", "Para sesiones que no pasaron por el sistema"]];
+    var prod = pend.filter(function (x) { return prodEstado(x.produccion); });
+    var op = [["pend", "📸", "Por publicar", pend.length ? pend.length + " sesi" + (pend.length === 1 ? "ón" : "ones") + " con fotos por subir" : "Todo al día ✓"],
+      ["prod", "🎬", "En producción", prod.length ? prod.length + " con ideas, storyboard o captions en camino" : "Cuando cuentes qué pasó en una sesión, sale aquí"], ["cal", "🗓️", "Calendario", prox.length ? prox.length + " publicaci" + (prox.length === 1 ? "ón programada" : "ones programadas") : "Nada programado todavía"], ["hechas", "✅", "Publicadas", listas.length + " sesi" + (listas.length === 1 ? "ón" : "ones") + " ya publicadas o que no van"], ["nueva", "➕", "Agregar otra sesión", "Para sesiones que no pasaron por el sistema"]];
     var h = !PV ? '<section style="gap:6px"><h2>Publicar</h2><p class="hint">¿Qué quieres ver?</p></section><div class="fes">' + op.map(function (o) { return '<button class="fe" data-pv="' + o[0] + '"><span class="fei">' + o[1] + '</span><span><b>' + o[2] + '</b><small>' + o[3] + '</small></span></button>'; }).join("") + '</div>'
       : '<button class="back" data-pv="">‹ Atrás</button>' + (PV === "pend" || PV === "hechas" ? '<h2 style="margin:-4px 2px 0;font-family:Georgia,serif;font-weight:400">' + (PV === "pend" ? "Por publicar" : "Publicadas") + '</h2>' : '');
     if (PV === "pend") h += pend.length ? '<p class="hint" style="margin:0 2px">Toca una sesión para ver sus fotos y ponerle fecha al reel, al carrusel y a las historias (se guardan en tu calendario «NC Studio · Publicaciones» con aviso 1 hora antes).</p><div class="xg">' + pend.map(tilePub).join("") + '</div>' : '<div class="msg">✓ No tienes sesiones por publicar.</div>';
+    if (PV === "prod") h += '<h2 style="margin:-4px 2px 0;font-family:Georgia,serif;font-weight:400">En producción</h2>' + (prod.length ? '<p class="hint" style="margin:0 2px">Lo que le contaste a Necty de cada sesión y lo que Claude escribió con eso: reel 3-2-1, storytelling, venta suave e historias con fotos. Toca una para elegir los captions.</p><section style="gap:0">' + prod.map(function (x) {
+      return '<button class="mv" data-pb="' + esc(x.id) + '" style="width:100%;text-align:left;background:none;border:0;font:inherit;cursor:pointer;color:inherit"><span><b>' + esc(x.cliente) + '</b> · ' + esc(x.servicio || "") + '</span><span class="m">' + esc(prodEstado(x.produccion)) + '</span></button>';
+    }).join("") + '</section>' : '<div class="msg">Todavía no hay nada en producción. Cuando Necty te pregunte qué pasó en una sesión y le cuentes, sale aquí con sus ideas.</div>');
     if (PV === "cal") h += '<section><h2>Calendario de publicaciones</h2>' + (prox.length ? prox.map(function (p) {
       return '<div class="mv"><span><b>' + esc(TIPOS[p.k]) + '</b> · ' + esc(p.x.cliente) + '</span><span class="m' + (p.f.slice(0, 10) < hoy ? ' neg' : '') + '">' + esc(fechaBonita(p.f)) + '</span><small>' + esc(p.x.servicio || "") + (p.f.slice(0, 10) < hoy ? " · ya pasó la fecha, ¿lo publicaste?" : "") + '</small></div>';
     }).join("") : '<p class="hint">Todavía no tienes publicaciones programadas. En «Por publicar», abre una sesión, toca «Sugerir fechas» y guarda.</p>') + '</section>';
