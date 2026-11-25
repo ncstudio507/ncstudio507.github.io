@@ -1688,7 +1688,8 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     var c = PORTADAS && PORTADAS[x.id];
     var res = Object.keys(TIPOS).map(function (k) { var it = x.plan[k]; return TIPOS[k] + ": " + (it.estado === "publicado" ? "✓" : it.estado === "programado" && it.fecha ? fechaBonita(it.fecha).replace(/ ·.*/, "") : it.estado === "no" ? "no va" : "pendiente"); }).join(" · ");
     return '<button class="xc" data-pb="' + esc(x.id) + '">' + (c ? '<img src="' + c + '" alt="">' : '<div class="xall" data-pi="' + esc(x.id) + '">' + esc(iniciales(x.cliente)) + '</div>') +
-      '<span><b>' + esc(x.cliente) + '</b><small>' + esc(x.servicio || "") + (x.elegidas ? ' · <span style="color:#C0392B">♥ ' + x.elegidas + '</span>' : '') + '</small><small>' + esc(res) + '</small></span></button>';
+      '<span><b>' + esc(x.cliente) + '</b><small>' + esc(x.servicio || "") + (x.elegidas ? ' · <span style="color:#C0392B">♥ ' + x.elegidas + '</span>' : '') + '</small><small>' + esc(res) + '</small>' +
+      (prodEstado(x.produccion) ? '<small>🎬 ' + esc(prodEstado(x.produccion)) + '</small>' : '') + '</span></button>';
   }
   function portadas() {
     if (PORTADAS) return;
@@ -1702,15 +1703,26 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     DET = x.id; PUB_OPEN[x.id] = 1; FSOLO = ""; ELEG = []; tab("P"); window.scrollTo(0, 0);
     // 25-11-2026 (Nelson): todo en orden y a la vista: arriba los tres accesos (fotos, videos de Google Fotos, entregables);
     // abajo las fotos en miniatura, el álbum de videos y los entregables en miniatura; al final el plan de Instagram.
-    var ve = "videos" in x;
+    // dentro de la sesión, dos partes (25-11-2026, Nelson): ✅ Listo (fotos, videos, entregables y el plan) · 🎬 En producción (historia, ideas, captions, storyboard)
+    var ve = "videos" in x, hayProd = "produccion" in x, vista = VISTA[x.id] || "listo", pe = hayProd ? prodEstado(x.produccion) : "";
     app.innerHTML = '<button class="back" id="pbk">‹ ' + (x.estado === "Por publicar" ? "Por publicar" : "Publicadas") + '</button>' +
-      '<section><h2 style="margin-bottom:4px">' + esc(x.cliente) + '</h2><p class="hint" style="margin:0 0 10px">' + esc(x.servicio || "") + (x.fecha ? ' · ' + esc(fechaBonita(x.fecha)) : '') + '</p><div class="pacc" id="pacc"></div></section>' +
-      ("produccion" in x ? '<section id="secP"><h2>🎬 En producción</h2><div id="pprod"></div></section>' : '') +
+      '<section><h2 style="margin-bottom:4px">' + esc(x.cliente) + '</h2><p class="hint" style="margin:0">' + esc(x.servicio || "") + (x.fecha ? ' · ' + esc(fechaBonita(x.fecha)) : '') + '</p>' +
+      (hayProd ? '<div class="seg" role="group" aria-label="Partes de la sesión" style="margin-top:10px"><button data-vs="listo" aria-pressed="' + (vista === "listo") + '">✅ Listo</button><button data-vs="prod" aria-pressed="' + (vista === "prod") + '">🎬 En producción</button></div>' +
+        (pe ? '<p class="hint" style="margin:4px 0 0">En producción: ' + esc(pe) + '</p>' : '') : '') + '</section>' +
+      (hayProd ? '<section id="secP"' + (vista === "prod" ? '' : ' hidden') + '><div id="pprod"></div></section>' : '') +
+      '<div id="parteListo" style="display:grid;gap:16px"' + (vista === "listo" ? '' : ' hidden') + '><section><div class="pacc" id="pacc"></div></section>' +
       '<section id="secF"><div class="row" style="justify-content:space-between"><h2>📸 Fotos</h2><span class="row" id="pfl"></span></div><div id="pfb"><div class="msg" style="padding:12px"><span class="spin"></span>Buscando las fotos…</div></div></section>' +
       (ve ? '<section id="secV"><h2>🎬 Videos</h2><div id="pvBox"></div></section><section id="secE"><div class="row" style="justify-content:space-between"><h2>📦 Entregables</h2><span class="row" id="pel"></span></div><div id="peBox"></div></section>' : '') +
-      tarjetaPub(x, "d0");
+      tarjetaPub(x, "d0") + '</div>';
     if ($("d0tg")) $("d0tg").hidden = true;
     bindPub(x, "d0");
+    Array.prototype.forEach.call(app.querySelectorAll("[data-vs]"), function (b) {
+      b.onclick = function () {
+        var v = b.getAttribute("data-vs"); VISTA[x.id] = v;
+        Array.prototype.forEach.call(app.querySelectorAll("[data-vs]"), function (z) { z.setAttribute("aria-pressed", z === b); });
+        $("parteListo").hidden = v !== "listo"; if ($("secP")) $("secP").hidden = v !== "prod";
+      };
+    });
     pintaAccesos(x);
     if ("produccion" in x) pintaProd(x);
     if (ve) { pintaVE(x); entregables(x); }
@@ -1730,7 +1742,7 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
   }
   /* «En producción» (25-11-2026, Nelson): lo que le contaste a Necty de la sesión y lo que Claude escribe con eso,
      con su pilar y pensando en FOMO: reel 3-2-1, storytelling, venta suave (2 captions cada una) e historias con fotos. */
-  var PZ = { reel: "Reel «Resultados en 3, 2, 1»", storytelling: "Storytelling", venta: "Venta suave" }, ABIERTA = {};
+  var PZ = { reel: "Reel «Resultados en 3, 2, 1»", storytelling: "Storytelling", venta: "Venta suave" }, ABIERTA = {}, VISTA = {};
   function prodCall(x, fn, extra, luego) {
     var b = Object.assign({ action: "pub_prod", pin: PIN, fn: fn, id: x.id }, extra || {});
     return call(b).then(function (r) {
@@ -2043,15 +2055,14 @@ var EXP_CUMPLE = ["levelup", "estudio", "suenos", "bebe"];
     PUB.forEach(function (x) { Object.keys(TIPOS).forEach(function (k) { var it = x.plan[k]; if (it.estado === "programado" && it.fecha) prox.push({ x: x, k: k, f: it.fecha }); }); });
     prox.sort(function (a, b) { return a.f < b.f ? -1 : 1; });
     if (foco) { var fx = PUB.filter(function (y) { return y.id === foco; })[0]; if (fx && fx.estado !== "Por publicar") PV = "hechas"; }
-    var prod = pend.filter(function (x) { return prodEstado(x.produccion); });
-    var op = [["pend", "📸", "Por publicar", pend.length ? pend.length + " sesi" + (pend.length === 1 ? "ón" : "ones") + " con fotos por subir" : "Todo al día ✓"],
-      ["prod", "🎬", "En producción", prod.length ? prod.length + " con ideas, storyboard o captions en camino" : "Cuando cuentes qué pasó en una sesión, sale aquí"], ["cal", "🗓️", "Calendario", prox.length ? prox.length + " publicaci" + (prox.length === 1 ? "ón programada" : "ones programadas") : "Nada programado todavía"], ["hechas", "✅", "Publicadas", listas.length + " sesi" + (listas.length === 1 ? "ón" : "ones") + " ya publicadas o que no van"], ["nueva", "➕", "Agregar otra sesión", "Para sesiones que no pasaron por el sistema"]];
-    var h = !PV ? '<section style="gap:6px"><h2>Publicar</h2><p class="hint">¿Qué quieres ver?</p></section><div class="fes">' + op.map(function (o) { return '<button class="fe" data-pv="' + o[0] + '"><span class="fei">' + o[1] + '</span><span><b>' + o[2] + '</b><small>' + o[3] + '</small></span></button>'; }).join("") + '</div>'
-      : '<button class="back" data-pv="">‹ Atrás</button>' + (PV === "pend" || PV === "hechas" ? '<h2 style="margin:-4px 2px 0;font-family:Georgia,serif;font-weight:400">' + (PV === "pend" ? "Por publicar" : "Publicadas") + '</h2>' : '');
-    if (PV === "pend") h += pend.length ? '<p class="hint" style="margin:0 2px">Toca una sesión para ver sus fotos y ponerle fecha al reel, al carrusel y a las historias (se guardan en tu calendario «NC Studio · Publicaciones» con aviso 1 hora antes).</p><div class="xg">' + pend.map(tilePub).join("") + '</div>' : '<div class="msg">✓ No tienes sesiones por publicar.</div>';
-    if (PV === "prod") h += '<h2 style="margin:-4px 2px 0;font-family:Georgia,serif;font-weight:400">En producción</h2>' + (prod.length ? '<p class="hint" style="margin:0 2px">Lo que le contaste a Necty de cada sesión y lo que Claude escribió con eso: reel 3-2-1, storytelling, venta suave e historias con fotos. Toca una para elegir los captions.</p><section style="gap:0">' + prod.map(function (x) {
-      return '<button class="mv" data-pb="' + esc(x.id) + '" style="width:100%;text-align:left;background:none;border:0;font:inherit;cursor:pointer;color:inherit"><span><b>' + esc(x.cliente) + '</b> · ' + esc(x.servicio || "") + '</span><span class="m">' + esc(prodEstado(x.produccion)) + '</span></button>';
-    }).join("") + '</section>' : '<div class="msg">Todavía no hay nada en producción. Cuando Necty te pregunte qué pasó en una sesión y le cuentes, sale aquí con sus ideas.</div>');
+    // 25-11-2026 (Nelson): «Por publicar» es la pantalla principal: todas las sesiones de una vez; dentro de cada una, lo que ya
+    // está (✅ Listo) y lo que se está haciendo (🎬 En producción). Calendario, Publicadas y Agregar quedan como botones arriba.
+    if (!PV) PV = "pend";
+    var chips = [["cal", "🗓️ Calendario" + (prox.length ? " (" + prox.length + ")" : "")], ["hechas", "✅ Publicadas (" + listas.length + ")"], ["nueva", "➕ Agregar otra sesión"]];
+    var h = PV === "pend" ? '<section style="gap:8px"><h2>Por publicar</h2><p class="hint" style="margin:0">' + (pend.length ? pend.length + " sesi" + (pend.length === 1 ? "ón" : "ones") + ". Toca una para ver lo que ya está listo y lo que está en producción." : "Todo al día ✓") + '</p>' +
+        '<div class="row" style="flex-wrap:wrap;gap:6px">' + chips.map(function (c) { return '<button class="btn2" data-pv="' + c[0] + '">' + c[1] + '</button>'; }).join("") + '</div></section>'
+      : '<button class="back" data-pv="pend">‹ Por publicar</button>' + (PV === "hechas" ? '<h2 style="margin:-4px 2px 0;font-family:Georgia,serif;font-weight:400">Publicadas</h2>' : '');
+    if (PV === "pend") h += pend.length ? '<div class="xg">' + pend.map(tilePub).join("") + '</div>' : '<div class="msg">✓ No tienes sesiones por publicar.</div>';
     if (PV === "cal") h += '<section><h2>Calendario de publicaciones</h2>' + (prox.length ? prox.map(function (p) {
       return '<div class="mv"><span><b>' + esc(TIPOS[p.k]) + '</b> · ' + esc(p.x.cliente) + '</span><span class="m' + (p.f.slice(0, 10) < hoy ? ' neg' : '') + '">' + esc(fechaBonita(p.f)) + '</span><small>' + esc(p.x.servicio || "") + (p.f.slice(0, 10) < hoy ? " · ya pasó la fecha, ¿lo publicaste?" : "") + '</small></div>';
     }).join("") : '<p class="hint">Todavía no tienes publicaciones programadas. En «Por publicar», abre una sesión, toca «Sugerir fechas» y guarda.</p>') + '</section>';
