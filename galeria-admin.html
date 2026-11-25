@@ -29,6 +29,11 @@ textarea{width:100%;min-height:110px;padding:10px}
 .acciones{display:flex;flex-wrap:wrap;gap:8px}
 .qr{background:#fff;padding:10px;border-radius:10px;display:inline-block;margin-top:8px}
 .ped{display:grid;grid-template-columns:1fr auto;gap:6px 12px}
+/* 25-11-2026 (Nelson): la cara del corredor a la izquierda de cada pedido, para saber quién es */
+.ped.con-cara{grid-template-columns:60px minmax(0,1fr) auto;align-items:start}
+.cara-ped{width:60px;height:60px;border-radius:50%;object-fit:cover;border:2px solid var(--naranja);background:#3D3B3E;display:grid;place-items:center;font-size:26px;cursor:zoom-in}
+.cara-ped.foto{border-style:dashed}
+@media (max-width:560px){.ped.con-cara{grid-template-columns:52px minmax(0,1fr)}.ped.con-cara>.acciones{grid-column:2}.cara-ped{width:52px;height:52px}}
 .ped .tk{font-family:Montserrat,sans-serif;font-weight:700;color:var(--naranja)}
 .estado{display:inline-block;padding:3px 10px;border-radius:999px;font-family:Montserrat,sans-serif;font-size:12px;font-weight:700}
 .e-esperando{background:#3a2a2a;color:#ffb4a8}.e-pagado{background:#3a3128;color:#F99824}.e-edicion{background:#22324a;color:#9cc0ff}.e-entregado{background:#1f3a2a;color:#8fe0a8}
@@ -416,6 +421,30 @@ function panel() {
   }
 
   // ---------------- pedidos
+  // cara del corredor (25-11-2026): la que guardó el pedido → la de su corredor/dorsal en el álbum → quien más sale en sus fotos → su primera foto
+  function caraPedido(p) {
+    if (p.cara) return { src: p.cara };
+    var e = ev(p.evento); if (!e) return null;
+    var C = e.corredores || [], porId = {}; C.forEach(function (c) { porId[String(c.id)] = c; });
+    var c = (p.corredor != null && porId[String(p.corredor)]) || (p.dorsal && C.filter(function (x) { return String(x.dorsal) === String(p.dorsal); })[0]);
+    if (c && (c.cara || c.caraDrive)) return { src: c.cara || c.caraDrive };
+    var votos = {}, mejor = null, F = {}; (e.fotos || []).forEach(function (f) { F[f.nombre] = f; });
+    (p.fotos || []).forEach(function (n) {
+      var f = F[n]; if (!f || f.grupal) return;
+      String([].concat(f.corredores == null ? [] : f.corredores).join(',')).split(',').forEach(function (id) {
+        id = id.trim(); if (!id || !porId[id] || !(porId[id].cara || porId[id].caraDrive)) return;
+        votos[id] = (votos[id] || 0) + 1; if (!mejor || votos[id] > votos[mejor]) mejor = id;
+      });
+    });
+    if (mejor) return { src: porId[mejor].cara || porId[mejor].caraDrive };
+    var f0 = (p.fotos || []).map(function (n) { return F[n]; }).filter(Boolean)[0];
+    return f0 ? { src: f0.mini || f0.src, foto: true } : null;
+  }
+  function caraHtml(p) {
+    var c = caraPedido(p);
+    return c ? '<img class="cara-ped' + (c.foto ? ' foto' : '') + '" src="' + esc(c.src) + '" alt="Cara de ' + esc(p.nombre) + '" title="' + (c.foto ? 'Su primera foto (no tengo su cara)' : esc(p.nombre)) + '" loading="lazy" data-zoom="' + esc(c.src) + '">'
+      : '<div class="cara-ped" title="Sin foto">👤</div>';
+  }
   var fPed = { ev: '', estado: '' };
   function pedidos() {
     var box = document.querySelector('[data-p=pedidos]');
@@ -424,7 +453,7 @@ function panel() {
       '<select class="sel" id="fEs" style="max-width:200px"><option value="">Todos los estados</option>' + Object.keys(ESTADOS).map(function (k) { return '<option value="' + k + '">' + ESTADOS[k] + '</option>'; }).join('') + '</select></div>' +
       (l.length ? l.map(function (p) {
         var pos = (p.turno ? ' · turno ' + p.turno : '') + (p.tipo && p.tipo !== 'carrera' ? ' · ' + ({ preventa: 'preventa ' + (p.paquete ? p.paquete.nombre : ''), impresion: 'impresiones', diferencia: 'diferencia de ' + p.de, 'extras-sesion': 'extras de sesión' }[p.tipo] || p.tipo) : '');
-        return '<div class="tarjeta ped"><div><span class="tk">' + esc(p.ticket) + '</span> <span class="estado e-' + p.estado + '">' + ESTADOS[p.estado] + '</span>' + esc(pos) +
+        return '<div class="tarjeta ped con-cara">' + caraHtml(p) + '<div><span class="tk">' + esc(p.ticket) + '</span> <span class="estado e-' + p.estado + '">' + ESTADOS[p.estado] + '</span>' + esc(pos) +
           '<div style="margin-top:4px"><b>' + esc(p.nombre) + '</b> · <a href="https://wa.me/507' + esc(p.tel) + '" target="_blank">' + esc(p.tel) + '</a>' + (p.correo ? ' · ' + esc(p.correo) : '') + (p.dorsal ? ' · dorsal ' + esc(p.dorsal) : '') + '</div>' +
           '<div class="nota">' + esc(p.eventoNombre) + ' · ' + new Date(p.creado).toLocaleString('es-PA') + ' · ' + p.fotos.length + (p.fotos.length === 1 ? ' foto' : ' fotos') +
           ((p.gratis || []).length ? ' (' + p.gratis.length + (p.gratis.length === 1 ? ' grupal gratis)' : ' grupales gratis)') : '') + ' · ' + (Number(p.monto) ? $(p.monto) : 'GRATIS') +
@@ -440,6 +469,7 @@ function panel() {
     fs.onchange = function () { fPed.estado = fs.value; pedidos(); };
     box.querySelectorAll('[data-cop]').forEach(function (b) { b.onclick = function () { var p = T.pedidos().filter(function (x) { return x.ticket === b.dataset.cop; })[0]; copiar(p.fotos.join(', '), b); if (aEdicion([p])) setTimeout(pedidos, 1600); }; });
     box.querySelectorAll('[data-pborrar]').forEach(function (b) { b.onclick = function () { borrarCon('pedido', b.dataset.pborrar, 'el pedido ' + b.dataset.pborrar, pedidos); }; });
+    box.querySelectorAll('[data-zoom]').forEach(function (im) { im.onclick = function () { window.open(im.dataset.zoom.replace(/=w\d+$/, '=w800'), '_blank'); }; });
     box.querySelectorAll('[data-est]').forEach(function (s) {
       s.onchange = function () {
         var p = T.pedidos().filter(function (x) { return x.ticket === s.dataset.est; })[0];
