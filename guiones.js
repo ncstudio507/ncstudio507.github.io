@@ -19,16 +19,16 @@ window.NC_GUIONES = {
     titulo: "¿Por qué organizamos <b>esta carrera?</b>",
     nombre: "Leones por que carrera",
     escenas: [
-      { n: "GANCHO", e: "1 · GANCHO", t: "No organizamos una carrera <em>solamente para llegar a la meta.</em>" },
-      { n: "ESCENA 2", e: "2 · TEMBLÓ", t: "El nueve de octubre la tierra tembló… y muchas familias quedaron con sus <em>casas dañadas.</em>" },
-      { n: "ESCENA 3", e: "3 · EN CADENA", t: "Y ahí estuvimos: en cadena, <em>pasando agua de mano en mano.</em>" },
-      { n: "ESCENA 4", e: "4 · CASA POR CASA", t: "Y llevándola <em>casa por casa,</em> a quien más lo necesitaba." },
-      { n: "ESCENA 5", e: "5 · LO QUE LLEVAMOS", t: "Agua, comida… <em>y hasta una silla de ruedas.</em>" },
-      { n: "ESCENA 6", e: "6 · EL CLUB", t: "Somos el Club de Leones de Las Tablas, y <em>así servimos todo el año.</em>" },
-      { n: "ESCENA 7", e: "7 · TU INSCRIPCIÓN", t: "Por eso, <em>parte de lo que se recaude</em> en esta carrera va para esas familias." },
-      { n: "ESCENA 8", e: "8 · DIABETES", t: "Y corremos por la diabetes: moverte, aunque sea caminando, <em>también es cuidarte.</em>" },
-      { n: "ESCENA 9", e: "9 · A TU RITMO", t: "Cinco kilómetros, a tu ritmo, <em>rodeado de gente que te anima.</em>" },
-      { n: "CIERRE", e: "10 · CIERRE", t: "Este trece de diciembre, corre o camina por <em>una causa que nos une.</em> ¡Inscríbete en soylamarca punto com!" }
+      { n: "GANCHO", e: "1 · GANCHO", t: "El nueve de octubre tembló la tierra… y por eso, <em>esta carrera ya no es una carrera más.</em> Te explico." },
+      { n: "ESCENA 2", e: "2 · CARPAS", t: "Ese día, a muchas familias se les cayeron las paredes… y terminaron <em>durmiendo en carpas.</em>" },
+      { n: "ESCENA 3", e: "3 · MIENTRAS TANTO", t: "Y mientras todos veíamos las noticias, los Leones de Las Tablas ya estaban <em>pasando agua de mano en mano.</em>" },
+      { n: "ESCENA 4", e: "4 · CASA POR CASA", t: "<em>Casa por casa:</em> comida, agua… hasta una silla de ruedas." },
+      { n: "ESCENA 5", e: "5 · PERO", t: "Pero la ayuda se acaba rápido. Y a muchas de esas familias <em>todavía les falta para levantarse.</em>" },
+      { n: "ESCENA 6", e: "6 · POR ESO", t: "Por eso, parte de lo que se recaude en la Carrera Caminata por la Diabetes <em>va directo a ellas.</em>" },
+      { n: "ESCENA 7", e: "7 · LA OTRA RAZÓN", t: "Y ojo, que la otra razón también pesa: <em>la diabetes.</em> Moverte, aunque sea caminando, ayuda a prevenirla." },
+      { n: "ESCENA 8", e: "8 · O SEA", t: "O sea: caminas cinco kilómetros, te cuidas tú… y ayudas a que <em>una familia vuelva a su casa.</em>" },
+      { n: "ESCENA 9", e: "9 · ¿Y TÚ?", t: "La última vez, la salida se veía así. Este año, <em>¿vas a estar ahí… o te lo van a contar?</em>" },
+      { n: "CIERRE", e: "10 · CIERRE", t: "Domingo trece de diciembre, siete de la mañana. Inscríbete en soylamarca punto com… <em>y esta medalla te espera en la meta.</em>" }
     ]
   }
 };
