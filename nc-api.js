@@ -89,6 +89,11 @@
     admin: function (fn, args) {
       return post({ action: 'gal_admin', pin: pin(), fn: fn, args: args || [] }).then(function (r) { if (!r.ok) throw r; return r.r; });
     },
+    // «Fotos sin dueño» (25-11-2026): carpetas de sesiones que esperan dueña y el directorio de Nelson (solo con su PIN)
+    sinDueno: function (fn, extra) {
+      var b = { action: 'gal_sindueno', pin: pin(), fn: fn }; Object.keys(extra || {}).forEach(function (k) { b[k] = extra[k]; });
+      return post(b).then(function (r) { if (!r.ok) throw r; return r; });
+    },
     // Mis fotos de carreras: con la sesión de la Zona VIP (el número es el usuario y la contraseña lo protege)
     // la dueña de una sesión elige con su usuario de la Zona VIP (24-11-2026): el servidor saca su número de la cuenta
     duena: function (fn, args) {

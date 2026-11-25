@@ -47,6 +47,7 @@ textarea{width:100%;min-height:110px;padding:10px}
 <main class="wrap">
   <h1 id="tituloPanel">Panel de galerías</h1>
   <div class="tabs" role="tablist">
+    <button class="tab" data-t="sindueno">🔗 Sin dueño</button>
     <button class="tab" data-t="porpublicar">⏳ Por publicar</button>
     <button class="tab on" data-t="resumen">Resumen</button>
     <button class="tab" data-t="eventos">Álbumes y links</button>
@@ -63,6 +64,7 @@ textarea{width:100%;min-height:110px;padding:10px}
     <button class="tab" data-t="sesiones">Sesiones (VIP)</button>
     <button class="tab" data-t="papelera">🗑 Papelera</button>
   </div>
+  <section data-p="sindueno" hidden></section>
   <section data-p="porpublicar" hidden></section>
   <section data-p="capturas" hidden></section>
   <section data-p="reclamos" hidden></section>
@@ -83,7 +85,7 @@ textarea{width:100%;min-height:110px;padding:10px}
 <script src="nc-config.js"></script>
 <script>if (!(window.NC_CONFIG || {}).url) document.write('<script src="datos-prueba.js"><\/script><script src="sesiones/indice.js"><\/script>');</script>
 <script src="tienda.js"></script>
-<script src="nc-api.js?v=20261124"></script>
+<script src="nc-api.js?v=20261125"></script>
 <script>
 // en la página real: entra con el MISMO PIN de agendar.html (se recuerda en este celular)
 (function arrancarPanel() {
@@ -729,7 +731,101 @@ function panel() {
     box.querySelectorAll('[data-pub]').forEach(function (b) { b.onclick = function () { var x = R[+b.dataset.pub]; if (confirm('¿Publicar «' + x.nombre + '»?' + (x.tipo === 'sesion' ? '\nLe llega el aviso a ella.' : '\nSale en News.'))) hacer('publicarPendiente', x, b); }; });
     box.querySelectorAll('[data-desc]').forEach(function (b) { b.onclick = function () { var x = R[+b.dataset.desc]; if (confirm('¿Descartar «' + x.nombre + '»? No se publica' + (x.tipo === 'evento' ? ' y el álbum va a la papelera.' : '.'))) hacer('descartarPendiente', x, b); }; });
   }
-  var PINTAR = { porpublicar: porpublicar, capturas: capturas, reclamos: reclamos, preventas: preventas, papelera: papelera, sesiones: sesiones, cola: cola, yappy: yappy, resumen: resumen, eventos: eventos, pedidos: pedidos, lightroom: lightroom, entregas: entregas, grupales: grupales, clientes: clientes };
+  // ---------------- sin dueño (25-11-2026, Nelson): carpetas de PRUEBAS (y finales con duda) que todavía no sé de quién son.
+  // Tocas una reserva sugerida o buscas el contacto en tu directorio y la enlazas; tu PC la toma en máx. 5 min y le manda sus fotos.
+  var SD = null, DIR = null, SDQ = {};
+  function sdCargar(conDir) {
+    return window.NC_API.sinDueno('ver', { directorio: !!conDir }).then(function (r) { SD = r; if (r.directorio) DIR = r.directorio; sdContar(); return r; });
+  }
+  function sdEsperan() { return SD ? SD.carpetas.filter(function (c) { return c.estado === 'preguntada'; }) : []; }
+  function sdContar() {
+    var b = document.querySelector('.tab[data-t=sindueno]'), n = sdEsperan().filter(function (c) { return !c.enlace; }).length;
+    if (b) b.textContent = '🔗 Sin dueño' + (n ? ' (' + n + ')' : '');
+  }
+  function llano(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); }
+  function fCorta(f) { f = String(f || ''); return f.length >= 10 ? f.slice(8, 10) + '-' + f.slice(5, 7) : f; }
+  function telBonito(t) { t = String(t || ''); return t.length === 8 ? t.slice(0, 4) + '-' + t.slice(4) : t; }
+  function hace(ms) { var m = Math.round((Date.now() - ms) / 60000); return !ms ? 'nunca' : m < 2 ? 'hace un momento' : m < 60 ? 'hace ' + m + ' min' : m < 1440 ? 'hace ' + Math.round(m / 60) + ' h' : 'hace ' + Math.round(m / 1440) + ' días'; }
+  function sdBuscar(q) {
+    var p = llano(q).trim(), dig = q.replace(/\D/g, ''), pal = p.split(/\s+/).filter(Boolean), out = [];
+    if (!p) return out;
+    (DIR || []).some(function (c) {
+      var n = llano(c.n), okN = pal.length && pal.every(function (w) { return n.indexOf(w) >= 0; });
+      c.t.forEach(function (t) { if (okN || (dig.length >= 3 && t.indexOf(dig) >= 0)) out.push({ nombre: c.n, tel: t, correo: c.e || '' }); });
+      return out.length >= 15;
+    });
+    return out;
+  }
+  function sdResultados(cod) {
+    var div = document.querySelector('[data-sdres="' + cod + '"]'); if (!div) return;
+    var q = SDQ[cod] || '', L = sdBuscar(q);
+    div.innerHTML = !q.trim() ? '' : L.length ? L.map(function (c, i) {
+      return '<div class="tarjeta ped" style="margin:6px 0"><div><b>' + esc(c.nombre) + '</b><div class="nota">📞 ' + esc(telBonito(c.tel)) + (c.correo ? ' · ' + esc(c.correo) : '') + '</div></div>' +
+        '<div class="acciones"><button class="mini-btn na" data-sdc="' + esc(cod) + ':' + i + '">Enlazar</button></div></div>';
+    }).join('') : '<p class="nota">No está en tus contactos. Guárdalo en tu celular y en unos 30 min sale aquí.</p>';
+    div._lista = L;
+  }
+  function sindueno() {
+    var box = document.querySelector('[data-p=sindueno]');
+    if (!window.NC_API.real) { box.innerHTML = '<p class="vacio">Solo funciona en la página real.</p>'; return; }
+    if (!SD || !DIR) {
+      box.innerHTML = '<p class="nota">Cargando tus carpetas y tu directorio…</p>';
+      sdCargar(true).then(sindueno, function (e) { box.innerHTML = '<p class="vacio">' + esc((e && e.title) || 'Sin conexión') + '</p>'; });
+      return;
+    }
+    var esp = sdEsperan(), rec = SD.carpetas.filter(function (c) { return c.estado !== 'preguntada'; });
+    var QUE = { pruebas: '📸 Fotos de prueba', finales: '🎁 Fotos finales' }, POR = { panel: 'tú en el panel', whatsapp: 'por WhatsApp', auto: 'sola, con sus pruebas' };
+    var EST = { asociada: '⏳ en la fila de tu PC', procesando: '⚙️ armando la galería', hecha: '✅ fotos enviadas', ignorada: 'sin hacer nada' };
+    box.innerHTML = '<p class="nota" style="margin-top:0">Carpetas de tus sesiones que todavía no sé de quién son. Toca una reserva sugerida o busca a la clienta en tu directorio y tócale <b>Enlazar</b>: ' +
+      'tu PC la toma en máx. 5 minutos, arma la galería y le llega a ella (correo y Zona VIP). Necty ya no te pregunta por esa carpeta. Las <b>finales</b> se enlazan solas con la clienta de sus pruebas; solo salen aquí si tengo duda.</p>' +
+      (esp.length ? esp.map(function (c) {
+        var cab = '<div><b>' + esc(c.carpeta) + '</b><div class="nota">' + (QUE[c.tipo] || '') + ' · ' + c.fotos + ' fotos' + (c.fecha_fotos ? ' · tomadas el ' + fCorta(c.fecha_fotos) : '') + ' · carpeta ' + esc(c.codigo) + '</div></div>';
+        if (c.enlace) return '<div class="tarjeta"><div class="ped" style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">' + cab + '</div>' +
+          '<p class="nota" style="margin:8px 0 0">' + (c.enlace.ignorar ? '🚫 Marcada como «no es de nadie».' : '🔗 Enlazada con <b>' + esc(c.enlace.reserva.nombre) + '</b>' + (c.enlace.creada ? ' (le creé su reserva)' : '') + '. Tu PC la toma en unos minutos.') +
+          ' <button class="mini-btn" data-sdx="' + esc(c.codigo) + '">Deshacer</button></p></div>';
+        return '<div class="tarjeta">' + cab +
+          ((c.opciones || []).length ? '<div class="nota" style="margin:10px 0 4px">Sugeridas por tu agenda</div>' + c.opciones.map(function (o, i) {
+            return '<div class="tarjeta ped" style="margin:6px 0"><div><b>' + esc(o.nombre) + '</b><div class="nota">' + esc(o.servicio || 'Sesión') + ' · ' + esc(fCorta(o.fecha)) + (o.tel ? ' · 📞 ' + esc(telBonito(o.tel)) : '') + '</div></div>' +
+              '<div class="acciones"><button class="mini-btn na" data-sdr="' + esc(c.codigo) + ':' + i + '">Enlazar</button></div></div>';
+          }).join('') : '') +
+          '<div class="nota" style="margin:10px 0 4px">Búscala en tus contactos</div>' +
+          '<input class="buscar" data-sdq="' + esc(c.codigo) + '" placeholder="Nombre o número" value="' + esc(SDQ[c.codigo] || '') + '" autocomplete="off" style="width:100%;max-width:420px">' +
+          '<div data-sdres="' + esc(c.codigo) + '"></div>' +
+          '<div style="margin-top:8px"><button class="mini-btn" data-sdi="' + esc(c.codigo) + '">No es de nadie</button></div></div>';
+      }).join('') : '<p class="vacio">Todo enlazado ✓ No hay carpetas esperando dueña.</p>') +
+      (rec.length ? titulo('Enlazadas en los últimos 3 días') + rec.map(function (c) {
+        return '<div class="tarjeta ped"><div><b>' + esc(c.carpeta) + '</b> → ' + esc(c.de || '') + '<div class="nota">' + (QUE[c.tipo] || '') + ' · enlazada ' + (POR[c.por] || '') + ' · ' + (EST[c.estado] || esc(c.estado)) + '</div></div></div>';
+      }).join('') : '') +
+      '<p class="nota" style="margin-top:16px">📇 Directorio: ' + DIR.length + ' contactos · lo sube tu PC cada 30 min (último: ' + hace(SD.dirTs) + ') · carpetas revisadas ' + hace(SD.ts) + '. ' +
+      '<button class="mini-btn" data-sdupd>Actualizar</button></p>';
+    esp.forEach(function (c) { if (SDQ[c.codigo]) sdResultados(c.codigo); });
+    function enlazar(cod, cuerpo, quien, b) {
+      var c = esp.filter(function (x) { return x.codigo === cod; })[0];
+      if (!confirm('¿Enlazar «' + c.carpeta + '» con ' + quien + '?\nLe llegan sus ' + (c.tipo === 'finales' ? 'fotos finales' : 'fotos de prueba') + ' en unos minutos.')) return;
+      b.disabled = true; b.textContent = '…';
+      cuerpo.codigo = cod;
+      window.NC_API.sinDueno('enlazar', cuerpo).then(function (r) {
+        alert((r.title || 'Listo') + (r.html ? '\n\n' + String(r.html).replace(/<[^>]+>/g, '') : ''));
+        delete SDQ[cod]; return sdCargar(false);
+      }).then(sindueno, function (e) { alert((e && e.title) || 'Sin conexión.'); sindueno(); });
+    }
+    function simple(fn, cod, b, pregunta) {
+      if (pregunta && !confirm(pregunta)) return;
+      b.disabled = true;
+      window.NC_API.sinDueno(fn, { codigo: cod }).then(function () { return sdCargar(false); }).then(sindueno, function (e) { alert((e && e.title) || 'Sin conexión.'); sindueno(); });
+    }
+    box.oninput = function (ev) { var q = ev.target.getAttribute('data-sdq'); if (q) { SDQ[q] = ev.target.value; sdResultados(q); } };
+    box.onclick = function (ev) {
+      var b = ev.target.closest('button'); if (!b) return;
+      var r = b.getAttribute('data-sdr'), k = b.getAttribute('data-sdc');
+      if (r) { var cod = r.split(':')[0], o = esp.filter(function (x) { return x.codigo === cod; })[0].opciones[+r.split(':')[1]]; enlazar(cod, { reserva: o.id }, o.nombre + ' (' + (o.servicio || 'sesión') + ')', b); }
+      else if (k) { var cod2 = k.split(':')[0], ct = document.querySelector('[data-sdres="' + cod2 + '"]')._lista[+k.split(':')[1]]; enlazar(cod2, { contacto: ct }, ct.nombre + ' (' + telBonito(ct.tel) + ')', b); }
+      else if (b.hasAttribute('data-sdx')) simple('deshacer', b.getAttribute('data-sdx'), b);
+      else if (b.hasAttribute('data-sdi')) simple('ignorar', b.getAttribute('data-sdi'), b, '¿Esta carpeta no es de nadie? No le mando nada a nadie.');
+      else if (b.hasAttribute('data-sdupd')) { SD = null; DIR = null; sindueno(); }
+    };
+  }
+  var PINTAR = { sindueno: sindueno, porpublicar: porpublicar, capturas: capturas, reclamos: reclamos, preventas: preventas, papelera: papelera, sesiones: sesiones, cola: cola, yappy: yappy, resumen: resumen, eventos: eventos, pedidos: pedidos, lightroom: lightroom, entregas: entregas, grupales: grupales, clientes: clientes };
   function ir(t) {
     document.querySelectorAll('.tab').forEach(function (b) { b.classList.toggle('on', b.dataset.t === t); });
     document.querySelectorAll('[data-p]').forEach(function (s) { s.hidden = s.dataset.p !== t; });
@@ -739,7 +835,7 @@ function panel() {
   document.querySelectorAll('.tab').forEach(function (b) { b.onclick = function () { ir(b.dataset.t); }; });
   // menú único (fase 1, 23-11-2026): las 14 pestañas se reparten en dos secciones del menú
   var GRUPOS = {
-    galerias: { titulo: 'Galerías', tabs: ['porpublicar', 'sesiones', 'eventos', 'preventas', 'grupales'] },
+    galerias: { titulo: 'Galerías', tabs: ['sindueno', 'porpublicar', 'sesiones', 'eventos', 'preventas', 'grupales'] },
     pedidos: { titulo: 'Pedidos de carreras', tabs: ['resumen', 'pedidos', 'cola', 'capturas', 'reclamos', 'yappy', 'entregas', 'lightroom', 'papelera'] },
     // 24-11-2026 (Nelson): los corredores van DENTRO de Clientes, junto a Reservas, Base e Interesados
     clientes: { titulo: 'Clientes', tabs: ['clientes'], seg: true }
@@ -776,6 +872,8 @@ function panel() {
     var on = document.querySelector('.tab.on'); if (on && PINTAR[on.dataset.t] && !document.querySelector('[data-p]:not([hidden]) input:focus, [data-p]:not([hidden]) textarea:focus')) PINTAR[on.dataset.t]();
   });
   grupo(location.hash === '#clientes-carreras' ? 'clientes' : window.NCPanel && NCPanel.pedido() === 'galerias' ? 'galerias' : 'pedidos');
+  // cuántas carpetas esperan dueña (en la pestaña «🔗 Sin dueño»), sin esperar a que la abras
+  if (window.NC_API.real && !SD) sdCargar(false).catch(function () {});
 }
 </script>
 </body>
