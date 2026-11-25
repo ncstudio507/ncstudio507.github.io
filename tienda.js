@@ -25,6 +25,7 @@
     return comunes >= Math.min(2, x.length, y.length);
   }
   function soloDigitos(t) { return String(t || '').replace(/\D/g, '').replace(/^507(?=\d{8}$)/, ''); }
+  function sinExt(n) { return String(n || '').trim().replace(/\.[a-z0-9]{2,4}$/i, '').toUpperCase(); }
   function base(n) { return String(n).trim().replace(/\.[a-z0-9]{2,4}$/i, '').replace(/[-_ ](editar|edit|edited|editada|final|\d)$/i, '').toUpperCase(); }
   function dinero(x) { return '$' + Number(x || 0).toFixed(2); }
   function primero(n) { return String(n || '').trim().split(/\s+/)[0] || ''; }
@@ -241,13 +242,39 @@
 
     // ================================================================ entrega
     base: base,
+    // 25-11-2026 (Nelson): las COPIAS VIRTUALES también se entregan. Nelson le pega algo al final del nombre
+    // («IMG_2833111», «IMG_2851ss», «…-2», «… (2)», «-Edit»): cada archivo editado va a la foto del álbum cuyo nombre
+    // calza al principio (gana la más larga; igual exacto primero). Devuelve { NOMBRE-SIN-EXTENSIÓN: [archivos] }.
+    repartirEditadas: function (eventoId, nombres) {
+      var E = this.evento(eventoId), cand = {};
+      ((E && E.fotos) || []).forEach(function (f) { cand[sinExt(f.nombre)] = 1; });
+      leer().forEach(function (p) { if (p.evento === eventoId) (p.fotos || []).forEach(function (f) { cand[sinExt(f)] = 1; }); });
+      var lista = Object.keys(cand).filter(Boolean).sort(function (a, b) { return b.length - a.length; }), M = {};
+      nombres.forEach(function (n) {
+        n = String(n || '').trim(); if (!n) return;
+        var k = sinExt(n), c = cand[k] ? k : lista.filter(function (x) { return k.indexOf(x) === 0 && k.length - x.length <= 8; })[0];
+        if (!c) { var b = base(n); c = cand[b] ? b : ''; }   // lo de antes («-editada», «-final»…)
+        if (c) (M[c] = M[c] || []).push(n);
+      });
+      Object.keys(M).forEach(function (c) { M[c].sort(function (a, b) { return (sinExt(a) === c ? 0 : 1) - (sinExt(b) === c ? 0 : 1) || (a < b ? -1 : a > b ? 1 : 0); }); });
+      return M;
+    },
     cruzar: function (eventoId, nombres, link) {
-      var hay = {}; nombres.forEach(function (n) { if (n.trim()) hay[base(n)] = n.trim(); });
+      var M = this.repartirEditadas(eventoId, nombres);
       return leer().filter(function (p) { return p.evento === eventoId && ACTIVOS[p.estado] && p.turno && !p.borrado; }).map(function (p) {
-        var faltan = p.fotos.filter(function (f) { return !hay[base(f)]; });
-        var archivos = p.fotos.filter(function (f) { return hay[base(f)]; }).map(function (f) { return { original: f, editada: hay[base(f)] }; });
+        var faltan = p.fotos.filter(function (f) { return !M[sinExt(f)]; }), archivos = [];
+        p.fotos.forEach(function (f) { (M[sinExt(f)] || []).forEach(function (e) { archivos.push({ original: f, editada: e }); }); });
         return { pedido: p, faltan: faltan, completo: faltan.length === 0 && p.fotos.length > 0, link: link, archivos: archivos };
       });
+    },
+    // copias que llegaron DESPUÉS de entregar (Lightroom las exporta a ratos): se suman a su Zona VIP sin volver a mandar el mensaje
+    copiasNuevas: function (eventoId, nombres) {
+      var M = this.repartirEditadas(eventoId, nombres);
+      return leer().filter(function (p) { return p.evento === eventoId && p.estado === 'entregado' && !p.expirado && !p.borrado; }).map(function (p) {
+        var ya = {}, nuevos = []; (p.editadas || []).forEach(function (e) { ya[e.editada] = 1; });
+        p.fotos.forEach(function (f) { (M[sinExt(f)] || []).forEach(function (e) { if (!ya[e]) nuevos.push({ original: f, editada: e }); }); });
+        return { pedido: p, nuevos: nuevos };
+      }).filter(function (x) { return x.nuevos.length; });
     },
     entregar: function (ticket, link, archivos) {
       this.actualizar(ticket, { estado: 'entregado', entrega: link, editadas: archivos, entregado: iso() });
