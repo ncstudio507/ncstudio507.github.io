@@ -30,5 +30,12 @@ window.NC_GUIONES = {
       { n: "ESCENA 9", e: "9 · ¿Y TÚ?", t: "La última vez, la salida se veía así. Este año, <em>¿vas a estar ahí… o te lo van a contar?</em>" },
       { n: "CIERRE", e: "10 · CIERRE", t: "Domingo trece de diciembre, siete de la mañana. Inscríbete en soylamarca punto com… <em>y ve por esta medalla.</em>" }
     ]
+  },
+  "leones-arreglo": {
+    titulo: "Arreglo: <b>Dr. Belisario Porras</b>",
+    nombre: "Leones arreglo Belisario",
+    escenas: [
+      { n: "FRASE", e: "LÉELA 2 O 3 VECES", t: "Y mientras todos veíamos las noticias, <em>los Leones Doctor Belisario Porras</em> ya estaban pasando agua de mano en mano, de casa en casa." }
+    ]
   }
 };
