@@ -37,5 +37,41 @@ window.NC_GUIONES = {
     escenas: [
       { n: "FRASE", e: "LÉELA 2 O 3 VECES", t: "Y mientras todos veíamos las noticias, <em>los Leones Doctor Belisario Porras</em> ya estaban pasando agua de mano en mano, de casa en casa." }
     ]
+  },
+  "leones-5km-juntos": {
+    "titulo": "5 km por la diabetes <b>· Juntos</b>",
+    "nombre": "Leones 5KM Juntos",
+    "escenas": [
+      {
+        "n": "GANCHO",
+        "e": "1 · GANCHO",
+        "t": "Hay cosas que se disfrutan <em>más juntos</em>. Bueno, estos cinco kilómetros por la diabetes son una de esas."
+      },
+      {
+        "n": "MOVERME MÁS",
+        "e": "2 · MOVERME MÁS",
+        "t": "Así que invita a ese amigo que siempre dice «<em>tengo que moverme más</em>»."
+      },
+      {
+        "n": "SI TÚ VAS",
+        "e": "3 · SI TÚ VAS",
+        "t": "Dile «vamos, aunque sea caminando». Capaz te dice «<em>si tú vas, yo voy</em>»."
+      },
+      {
+        "n": "MÁNDALE EL REEL",
+        "e": "4 · MÁNDALE EL REEL",
+        "t": "¿Ya pensaste en alguien? <em>Mándale este reel.</em>"
+      },
+      {
+        "n": "PROMO 2×25",
+        "e": "5 · PROMO 2×25",
+        "t": "Son dos inscripciones por <em>veinticinco dólares</em>, solo hasta el diez de diciembre."
+      },
+      {
+        "n": "CIERRE",
+        "e": "6 · CIERRE",
+        "t": "Este trece de diciembre, corran o caminen juntos. Inscríbanse en <em>soylamarca.com</em>."
+      }
+    ]
   }
 };
